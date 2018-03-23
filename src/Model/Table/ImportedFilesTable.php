@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\ImportedFile;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -49,10 +50,10 @@ class ImportedFilesTable extends Table
             ->notEmpty('id');
 
         $validator
-            ->scalar('path')
-            ->maxLength('path', 255)
-            ->requirePresence('path', 'create')
-            ->notEmpty('path');
+            ->scalar('file')
+            ->maxLength('file', 255)
+            ->requirePresence('file', 'create')
+            ->notEmpty('file');
 
         return $validator;
     }

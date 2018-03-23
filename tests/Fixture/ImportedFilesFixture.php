@@ -18,7 +18,7 @@ class ImportedFilesFixture extends TestFixture
     // @codingStandardsIgnoreStart
     public $fields = [
         'id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
-        'path' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
+        'file' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'created' => ['type' => 'datetime', 'length' => null, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null],
         '_options' => [
             'engine' => 'InnoDB',
@@ -35,7 +35,7 @@ class ImportedFilesFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
-            'path' => 'Lorem ipsum dolor sit amet',
+            'file' => 'Lorem ipsum dolor sit amet',
             'created' => '2018-03-23 19:30:37'
         ],
     ];
