@@ -57,4 +57,22 @@ class ImportedFilesTable extends Table
 
         return $validator;
     }
+
+    /**
+     * Returns the date that the specified file was last imported, or null if it hasn't been imported yet
+     *
+     * @param string $file File path, starting with $year . DS
+     * @return \Cake\I18n\FrozenTime|null
+     */
+    public function getImportDate($file)
+    {
+        /** @var ImportedFile $result */
+        $result = $this->find()
+            ->select(['created'])
+            ->where(['file' => $file])
+            ->orderDesc('created')
+            ->first();
+
+        return $result ? $result->created : null;
+    }
 }
