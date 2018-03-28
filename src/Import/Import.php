@@ -52,4 +52,19 @@ class Import
     {
         return strlen($string) == 4 && is_numeric($string);
     }
+
+    /**
+     * Returns an array of years corresponding to subdirectories of /data
+     *
+     * @return array
+     */
+    public function getYears()
+    {
+        $dataPath = ROOT . DS . 'data';
+        $dir = new Folder($dataPath);
+        $years = $dir->subdirectories($dir->path, false);
+        sort($years);
+
+        return $years;
+    }
 }
