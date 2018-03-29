@@ -20,6 +20,12 @@ class ImportFile
     private $worksheets;
     public $spreadsheet;
 
+    /**
+     * ImportFile constructor
+     *
+     * @param string $year Year (subdirectory of /data)
+     * @param string $filename Filename of spreadsheet to import
+     */
     public function __construct($year, $filename)
     {
         $type = 'Xlsx';
