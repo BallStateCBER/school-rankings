@@ -141,6 +141,9 @@ class ImportShell extends Shell
             $this->abort($importFile->getError());
         }
 
-        $this->success('File opened');
+        $this->out('Worksheets:');
+        foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+            $this->out(" - $worksheetName ({$worksheetInfo['context']} data)");
+        }
     }
 }
