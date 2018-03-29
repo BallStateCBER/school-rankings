@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class ImportFile
 {
-    private $activeWorksheet;
+    public $activeWorksheet;
     private $error;
     private $worksheets;
     public $spreadsheet;
@@ -33,12 +33,14 @@ class ImportFile
             $this->spreadsheet = $reader->load($path);
 
             // Analyze each worksheet
-            foreach ($reader->listWorksheetNames($path) as $worksheetName) {
-                $this->selectWorksheet($worksheetName);
-                $this->worksheets[$worksheetName] = [
+            foreach ($reader->listWorksheetInfo($path) as $worksheet) {
+                $this->selectWorksheet($worksheet['worksheetName']);
+                $this->worksheets[$worksheet['worksheetName']] = [
                     'context' => $this->getContext(),
                     'firstDataRow' => $this->getFirstDataRow(),
-                    'firstDataCol' => $this->getFirstDataCol()
+                    'firstDataCol' => $this->getFirstDataCol(),
+                    'totalRows' => $worksheet['totalRows'],
+                    'totalCols' => $worksheet['totalColumns']
                 ];
             }
         } catch (\Exception $e) {
