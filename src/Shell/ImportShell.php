@@ -63,6 +63,7 @@ class ImportShell extends Shell
                 $files = [$year => $files[$year]];
             } else {
                 $this->out('No import files found in data' . DS . $year);
+
                 return;
             }
         }
