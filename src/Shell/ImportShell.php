@@ -2,6 +2,7 @@
 namespace App\Shell;
 
 use App\Import\Import;
+use App\Import\ImportFile;
 use Cake\Console\Shell;
 
 /**
@@ -131,6 +132,15 @@ class ImportShell extends Shell
             $fileKey = $this->selectFileKey($year);
         }
 
-        // TODO: Process file
+        $files = $this->import->getFiles();
+        $file = $files[$year][$fileKey - 1];
+        $this->out('Opening ' . $file['filename'] . '...');
+
+        $importFile = new ImportFile($year, $file['filename']);
+        if ($importFile->getError()) {
+            $this->abort($importFile->getError());
+        }
+
+        $this->success('File opened');
     }
 }
