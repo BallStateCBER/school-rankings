@@ -1,9 +1,12 @@
 <?php
 namespace App\Shell;
 
+use App\Import\Datum;
 use App\Import\Import;
 use App\Import\ImportFile;
 use Cake\Console\Shell;
+use Cake\Shell\Helper\ProgressHelper;
+use PhpOffice\PhpSpreadsheet\Exception;
 
 /**
  * Class ImportShell
@@ -124,26 +127,88 @@ class ImportShell extends Shell
      */
     public function run($year = null, $fileKey = null)
     {
+        // Gather parameters
         if (!$year) {
             $year = $this->selectYear();
         }
-
         if (!$fileKey) {
             $fileKey = $this->selectFileKey($year);
         }
 
+        // Open file
         $files = $this->import->getFiles();
         $file = $files[$year][$fileKey - 1];
         $this->out('Opening ' . $file['filename'] . '...');
-
         $importFile = new ImportFile($year, $file['filename']);
         if ($importFile->getError()) {
             $this->abort($importFile->getError());
         }
 
-        $this->out('Worksheets:');
+        // Read in worksheet info and validate data
+        $this->out('Analyzing worksheets...');
         foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-            $this->out(" - $worksheetName ({$worksheetInfo['context']} data)");
+            $this->info("\n" . $worksheetName);
+            $this->out('Context: ' . ucwords($worksheetInfo['context']));
+            $this->validateData($importFile, $worksheetName);
         }
+    }
+
+    /**
+     * Loops through all data cells and aborts script if any are invalid
+     *
+     * @param ImportFile $importFile Current spreadsheet file
+     * @param string $worksheetName Name of current worksheet
+     * @return void
+     */
+    private function validateData($importFile, $worksheetName)
+    {
+        $this->out('Validating data...');
+
+        try {
+            $importFile->selectWorksheet($worksheetName);
+        } catch (Exception $e) {
+            $this->abort('Error selecting worksheet ' . $worksheetName);
+        }
+
+        $ws = $importFile->getWorksheets()[$worksheetName];
+        $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
+        $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
+
+        /** @var ProgressHelper $progress */
+        $progress = $this->helper('Progress');
+        $progress->init([
+            'total' => $dataRowCount * $dataColCount,
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        $datum = new Datum();
+        $invalidData = [];
+        for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
+            for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
+                try {
+                    $value = $importFile->getValue($col, $row);
+                    if (!$datum->isValid($value)) {
+                        $invalidData[] = compact('col', 'row', 'value');
+                    }
+                } catch (Exception $e) {
+                    $value = '(Cannot read value)';
+                    $invalidData[] = compact('col', 'row', 'value');
+                }
+                $progress->increment(1);
+                $progress->draw();
+            }
+        }
+
+        if ($invalidData) {
+            $this->_io->overwrite('Data errors:');
+            array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
+            $this->helper('Table')->output($invalidData);
+            $this->abort('Cannot continue. Invalid data found.');
+
+            return;
+        }
+
+        $this->_io->overwrite('All data valid');
     }
 }
