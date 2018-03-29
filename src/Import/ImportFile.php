@@ -36,7 +36,9 @@ class ImportFile
             foreach ($reader->listWorksheetNames($path) as $worksheetName) {
                 $this->selectWorksheet($worksheetName);
                 $this->worksheets[$worksheetName] = [
-                    'context' => $this->getContext()
+                    'context' => $this->getContext(),
+                    'firstDataRow' => $this->getFirstDataRow(),
+                    'firstDataCol' => $this->getFirstDataCol()
                 ];
             }
         } catch (\Exception $e) {
@@ -88,6 +90,68 @@ class ImportFile
     public function getValue($col, $row)
     {
         return $this->spreadsheet->getActiveSheet()->getCellByColumnAndRow($col, $row)->getValue();
+    }
+
+    /**
+     * Returns the index of the first row on which statistical data will be read
+     *
+     * @return int
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
+     */
+    private function getFirstDataRow()
+    {
+        for ($row = 1; $row <= 3; $row++) {
+            for ($col = 1; $col <= 4; $col++) {
+                if ($this->isLocationHeader($col, $row)) {
+                    return $row + 1;
+                }
+            }
+        }
+
+        throw new \Exception('First data row could not be found');
+    }
+
+    /**
+     * Returns the index of the first column on which statistical data will be read
+     *
+     * Assumed to be the first column after the school/district identifier columns
+     *
+     * @return int
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
+     */
+    private function getFirstDataCol()
+    {
+        for ($row = 1; $row <= 3; $row++) {
+            $isLocationHeaderRow = false;
+            for ($col = 1; $col <= 4; $col++) {
+                $isLocationHeader = $this->isLocationHeader($col, $row);
+                if ($isLocationHeader) {
+                    $isLocationHeaderRow = true;
+                } elseif ($isLocationHeaderRow) {
+                    return $col;
+                }
+            }
+        }
+
+        throw new \Exception('First data row could not be found');
+    }
+
+    /**
+     * Returns true or false, indicating whether or not the given cell is a header for a school/district id/name column
+     *
+     * @param int $col Column index (starting with one)
+     * @param int $row Row index (starting with one)
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @return bool
+     */
+    private function isLocationHeader($col, $row)
+    {
+        return $this->isDistrictIdHeader($col, $row)
+            || $this->isDistrictNameHeader($col, $row)
+            || $this->isSchoolIdHeader($col, $row)
+            || $this->isSchoolNameHeader($col, $row);
     }
 
     /**
