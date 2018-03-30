@@ -9,15 +9,17 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * Class ImportFile
  * @package App\Import
  * @property array $worksheets
+ * @property array|null $groupings
  * @property Spreadsheet $spreadsheet
  * @property string|null $activeWorksheet
  * @property string|null $error
  */
 class ImportFile
 {
-    public $activeWorksheet;
     private $error;
+    private $groupings;
     private $worksheets;
+    public $activeWorksheet;
     public $spreadsheet;
 
     /**
@@ -48,6 +50,7 @@ class ImportFile
                     'totalRows' => $worksheet['totalRows'],
                     'totalCols' => $worksheet['totalColumns']
                 ];
+                $this->groupings = $this->getGroupings();
             }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
@@ -289,5 +292,57 @@ class ImportFile
         $value = str_replace([' ', '_', '.'], '', $value);
 
         return in_array($value, ['schoolname', 'schlname']);
+    }
+
+    /**
+     * Returns an array of information about how columns are grouped in the current worksheet
+     *
+     * e.g. by grade, ethnic group, etc.
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
+     * @return array|null
+     */
+    public function getGroupings()
+    {
+        // Check that the second row is the column header row
+        $col = 1;
+        $row = 2;
+        if (!$this->isLocationHeader($col, $row)) {
+            return null;
+        }
+
+        // Check that the first row contains the same number of blank cells as there are location identifier columns
+        $row = 1;
+        $firstDataCol = $this->worksheets[$this->activeWorksheet]['firstDataCol'];
+        for ($col = 1; $col < $firstDataCol; $col++) {
+            $value = $this->getValue($col, $row);
+            if (!empty($value)) {
+                throw new \Exception('Error: Grouping row contains values in location identifier column(s)');
+            }
+        }
+
+        $lastDataCol = $this->worksheets[$this->activeWorksheet]['totalCols'];
+        $groupings = [];
+        $previousGroup = null;
+        for ($col = $firstDataCol; $col <= $lastDataCol; $col++) {
+            $value = $this->getValue($col, $row);
+            if (empty($value)) {
+                continue;
+            }
+            if ($previousGroup) {
+                $groupings[$previousGroup]['end'] = $col - 1;
+            }
+            $groupings[$value] = ['start' => $col];
+            $previousGroup = $value;
+        }
+
+        if (!$groupings) {
+            throw new \Exception('Error: Groupings row is blank');
+        }
+
+        $groupings[$previousGroup]['end'] = $col - 1;
+
+        return $groupings;
     }
 }
