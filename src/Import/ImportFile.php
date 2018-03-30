@@ -146,7 +146,7 @@ class ImportFile
             }
         }
 
-        throw new \Exception('First data row could not be found');
+        throw new \Exception('First data col could not be found');
     }
 
     /**
