@@ -83,6 +83,7 @@ class ImportFile
      */
     public function selectWorksheet($worksheet)
     {
+        $worksheet = (string)$worksheet;
         $this->spreadsheet->setActiveSheetIndexByName($worksheet);
         $this->activeWorksheet = $worksheet;
     }
