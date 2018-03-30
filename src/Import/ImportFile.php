@@ -97,7 +97,10 @@ class ImportFile
      */
     public function getValue($col, $row)
     {
-        return $this->spreadsheet->getActiveSheet()->getCellByColumnAndRow($col, $row)->getValue();
+        $sheet = $this->spreadsheet->getActiveSheet();
+        $value = $sheet->getCellByColumnAndRow($col, $row)->getValue();
+
+        return is_string($value) ? trim($value) : $value;
     }
 
     /**
