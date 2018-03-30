@@ -168,7 +168,7 @@ class ImportShell extends Shell
         try {
             $importFile->selectWorksheet($worksheetName);
         } catch (Exception $e) {
-            $this->abort('Error selecting worksheet ' . $worksheetName);
+            $this->abort('Error selecting worksheet ' . $worksheetName . ':' . $e->getMessage());
         }
 
         $ws = $importFile->getWorksheets()[$worksheetName];
