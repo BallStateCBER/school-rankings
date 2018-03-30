@@ -206,8 +206,6 @@ class ImportShell extends Shell
             array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
             $this->helper('Table')->output($invalidData);
             $this->abort('Cannot continue. Invalid data found.');
-
-            return;
         }
 
         $this->_io->overwrite('All data valid');
