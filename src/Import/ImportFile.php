@@ -136,7 +136,7 @@ class ImportFile
     {
         for ($row = 1; $row <= 3; $row++) {
             $isLocationHeaderRow = false;
-            for ($col = 1; $col <= 4; $col++) {
+            for ($col = 1; $col <= 5; $col++) {
                 $isLocationHeader = $this->isLocationHeader($col, $row);
                 if ($isLocationHeader) {
                     $isLocationHeaderRow = true;
