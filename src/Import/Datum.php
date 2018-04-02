@@ -1,15 +1,19 @@
 <?php
 namespace App\Import;
 
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+
 class Datum
 {
     /**
      * Returns true if the value is ignorable or conforms to expected formats
      *
      * @param mixed $value Value to check
+     * @param Cell $cell PhpSpreadsheet cell object
      * @return bool
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function isValid($value)
+    public function isValid($value, $cell)
     {
         if ($this->isIgnorable($value)) {
             return true;
@@ -25,6 +29,12 @@ class Datum
 
         if ($this->isGrade($value)) {
             return true;
+        }
+
+        if ($this->isFormula($cell)) {
+            $calculatedValue = $cell->getCalculatedValue();
+
+            return $this->isValid($calculatedValue, $cell);
         }
 
         return false;
@@ -86,5 +96,16 @@ class Datum
         ];
 
         return in_array($value, $ignorableValues);
+    }
+
+    /**
+     * Returns true if the value is a formula, e.g. "=SUM(C25:Q25)"
+     *
+     * @param Cell $cell PhpSpreadsheet cell object
+     * @return bool
+     */
+    public function isFormula($cell)
+    {
+        return $cell->isFormula();
     }
 }

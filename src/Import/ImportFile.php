@@ -101,10 +101,22 @@ class ImportFile
      */
     public function getValue($col, $row)
     {
-        $sheet = $this->spreadsheet->getActiveSheet();
-        $value = $sheet->getCellByColumnAndRow($col, $row)->getValue();
+        $value = $this->getCell($col, $row)->getValue();
 
         return is_string($value) ? trim($value) : $value;
+    }
+
+    /**
+     * Returns a PhpSpreadsheet cell object
+     *
+     * @param int $col Column index (starting at one)
+     * @param int $row Row index (starting at one)
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @return null|\PhpOffice\PhpSpreadsheet\Cell\Cell
+     */
+    public function getCell($col, $row)
+    {
+        return $this->spreadsheet->getActiveSheet()->getCellByColumnAndRow($col, $row);
     }
 
     /**
