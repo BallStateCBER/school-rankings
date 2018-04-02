@@ -157,6 +157,10 @@ class ImportShell extends Shell
                 $this->validateData($importFile, $worksheetName);
             }
             $this->out();
+
+            // Free up memory
+            $importFile->spreadsheet->disconnectWorksheets();
+            unset($importFile);
         }
     }
 
