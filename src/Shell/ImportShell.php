@@ -115,7 +115,7 @@ class ImportShell extends Shell
             }
             array_unshift($tableData, ['Key', 'File', 'Imported']);
             $this->helper('Table')->output($tableData);
-            $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . '):');
+            $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all"":');
         }
 
         return (int)$fileKey;
@@ -138,19 +138,23 @@ class ImportShell extends Shell
 
         // Open file
         $files = $this->import->getFiles();
-        $file = $files[$year][$fileKey - 1];
-        $this->out('Opening ' . $file['filename'] . '...');
-        $importFile = new ImportFile($year, $file['filename']);
-        if ($importFile->getError()) {
-            $this->abort($importFile->getError());
-        }
+        $selectedFiles = $fileKey == 'all' ?
+            $files[$year] :
+            [$files[$year][$fileKey - 1]];
+        foreach ($selectedFiles as $file) {
+            $this->out('Opening ' . $file['filename'] . '...');
+            $importFile = new ImportFile($year, $file['filename']);
+            if ($importFile->getError()) {
+                $this->abort($importFile->getError());
+            }
 
-        // Read in worksheet info and validate data
-        $this->out('Analyzing worksheets...');
-        foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-            $this->info("\n" . $worksheetName);
-            $this->out('Context: ' . ucwords($worksheetInfo['context']));
-            $this->validateData($importFile, $worksheetName);
+            // Read in worksheet info and validate data
+            $this->out('Analyzing worksheets...');
+            foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+                $this->info("\n" . $worksheetName);
+                $this->out('Context: ' . ucwords($worksheetInfo['context']));
+                $this->validateData($importFile, $worksheetName);
+            }
         }
     }
 
