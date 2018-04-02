@@ -115,7 +115,7 @@ class ImportShell extends Shell
             }
             array_unshift($tableData, ['Key', 'File', 'Imported']);
             $this->helper('Table')->output($tableData);
-            $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all"":');
+            $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
         }
 
         return (int)$fileKey;
@@ -155,6 +155,7 @@ class ImportShell extends Shell
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
                 $this->validateData($importFile, $worksheetName);
             }
+            $this->out();
         }
     }
 
