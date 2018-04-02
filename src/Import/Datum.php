@@ -23,6 +23,10 @@ class Datum
             return true;
         }
 
+        if ($this->isGrade($value)) {
+            return true;
+        }
+
         return false;
     }
 
