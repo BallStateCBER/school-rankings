@@ -303,7 +303,7 @@ class ImportFile
         $value = strtolower($value);
         $value = str_replace([' ', '_', '.'], '', $value);
 
-        return in_array($value, ['schoolname', 'schlname']);
+        return in_array($value, ['schoolname', 'schlname', 'schname']);
     }
 
     /**
