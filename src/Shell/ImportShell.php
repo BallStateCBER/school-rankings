@@ -107,7 +107,7 @@ class ImportShell extends Shell
 
         $fileKeys = range(1, count($files[$year]));
         $fileKey = null;
-        while (!is_numeric($fileKey) || !in_array($fileKey - 1, $fileKeys)) {
+        do {
             $this->out('Import files for year ' . $year . ':');
             $tableData = $files[$year];
             foreach ($tableData as $key => &$file) {
@@ -116,7 +116,8 @@ class ImportShell extends Shell
             array_unshift($tableData, ['Key', 'File', 'Imported']);
             $this->helper('Table')->output($tableData);
             $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
-        }
+            $validKey = $fileKey == 'all' || (is_numeric($fileKey) && in_array($fileKey - 1, $fileKeys));
+        } while (!$validKey);
 
         return (int)$fileKey;
     }
@@ -194,7 +195,8 @@ class ImportShell extends Shell
             for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
                 try {
                     $value = $importFile->getValue($col, $row);
-                    if (!$datum->isValid($value)) {
+                    $cell = $importFile->getCell($col, $row);
+                    if (!$datum->isValid($value, $cell)) {
                         $invalidData[] = compact('col', 'row', 'value');
                     }
                 } catch (Exception $e) {
