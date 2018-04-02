@@ -137,8 +137,18 @@ class ImportShell extends Shell
             $fileKey = $this->selectFileKey($year);
         }
 
-        // Open file
+        // Validate parameters
         $files = $this->import->getFiles();
+        if (!isset($files[$year])) {
+            $this->abort('No import files found in data' . DS . $year);
+        }
+        if ($fileKey != 'all') {
+            if (!is_numeric($fileKey) || !isset($files[$year][$fileKey - 1])) {
+                $this->abort('Invalid file key');
+            }
+        }
+
+        // Loop through files
         $selectedFiles = $fileKey == 'all' ?
             $files[$year] :
             [$files[$year][$fileKey - 1]];
