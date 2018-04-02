@@ -206,9 +206,20 @@ class ImportShell extends Shell
         }
 
         if ($invalidData) {
+            $limit = 10;
+            $count = count($invalidData);
+            if ($count > $limit) {
+                $invalidData = array_slice($invalidData, 0, $limit);
+            }
+
             $this->_io->overwrite('Data errors:');
             array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
             $this->helper('Table')->output($invalidData);
+            if (count($invalidData) < $count) {
+                $difference = $count - count($invalidData);
+                $msg = '+ ' . $difference . ' more invalid ' . __n('value', 'values', $difference);
+                $this->out($msg);
+            }
             $this->abort('Cannot continue. Invalid data found.');
         }
 
