@@ -8,6 +8,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 /**
  * Class ImportFile
  * @package App\Import
+ * @property array $dataColumns
  * @property array $worksheets
  * @property array|null $groupings
  * @property Spreadsheet $spreadsheet
@@ -20,6 +21,7 @@ class ImportFile
     private $groupings;
     private $worksheets;
     public $activeWorksheet;
+    public $dataColumns;
     public $spreadsheet;
 
     /**
@@ -51,6 +53,7 @@ class ImportFile
                     'totalCols' => $worksheet['totalColumns']
                 ];
                 $this->groupings = $this->getGroupings();
+                $this->dataColumns = $this->getDataColumns();
             }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
@@ -356,5 +359,57 @@ class ImportFile
         $groupings[$previousGroup]['end'] = $col - 1;
 
         return $groupings;
+    }
+
+    /**
+     * Returns an array of information about the data columns for the selected worksheet
+     *
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
+     */
+    private function getDataColumns()
+    {
+        $row = empty($this->groupings) ? 1 : 2;
+        $col = 1;
+        if (!$this->isLocationHeader($col, $row)) {
+            throw new \Exception('Can\'t find column header row');
+        }
+
+        $dataColumns = [];
+        $lastDataCol = $this->worksheets[$this->activeWorksheet]['totalCols'];
+        for ($col = 2; $col <= $lastDataCol; $col++) {
+            if ($this->isLocationHeader($col, $row)) {
+                continue;
+            }
+            $dataColumns[$col] = [
+                'name' => $this->getValue($col, $row),
+                'group' => $this->getColGroup($col)
+            ];
+        }
+
+        return $dataColumns;
+    }
+
+    /**
+     * Returns the name of the relevant column group, or null if this worksheet has no column groups
+     *
+     * @param int $col Column index (starting at one)
+     * @return null|string
+     * @throws \Exception
+     */
+    private function getColGroup($col)
+    {
+        if (empty($this->groupings)) {
+            return null;
+        }
+
+        foreach ($this->groupings as $groupName => $groupInfo) {
+            if ($col >= $groupInfo['start'] && $col <= $groupInfo['end']) {
+                return $groupName;
+            }
+        }
+
+        throw new \Exception('Error: Column ' . $col . ' not captured by any column group');
     }
 }
