@@ -66,7 +66,8 @@ class MetricsTable extends Table
             ->scalar('type')
             ->maxLength('type', 255)
             ->requirePresence('type', 'create')
-            ->notEmpty('type');
+            ->notEmpty('type')
+            ->inList('type', ['numeric', 'boolean']);
 
         $validator
             ->boolean('selectable')
