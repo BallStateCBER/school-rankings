@@ -60,9 +60,7 @@ class MetricsTable extends Table
             ->notEmpty('name');
 
         $validator
-            ->scalar('description')
-            ->requirePresence('description', 'create')
-            ->notEmpty('description');
+            ->scalar('description');
 
         $validator
             ->scalar('type')
