@@ -1,6 +1,8 @@
 <?php
 namespace App\Import;
 
+use App\Model\Table\SpreadsheetColumnsMetricsTable;
+use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -12,14 +14,18 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * @property array $worksheets
  * @property array|null $groupings
  * @property Spreadsheet $spreadsheet
+ * @property string $filename
+ * @property string $year
  * @property string|null $activeWorksheet
  * @property string|null $error
  */
 class ImportFile
 {
     private $error;
+    private $filename;
     private $groupings;
     private $worksheets;
+    private $year;
     public $activeWorksheet;
     public $dataColumns;
     public $spreadsheet;
@@ -34,6 +40,8 @@ class ImportFile
     {
         $type = 'Xlsx';
         $path = ROOT . DS . 'data' . DS . $year . DS . $filename;
+        $this->year = $year;
+        $this->filename = $filename;
 
         try {
             // Read spreadsheet
@@ -376,15 +384,28 @@ class ImportFile
             throw new \Exception('Can\'t find column header row');
         }
 
+        /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
+        $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
         $dataColumns = [];
         $lastDataCol = $this->worksheets[$this->activeWorksheet]['totalCols'];
         for ($col = 2; $col <= $lastDataCol; $col++) {
             if ($this->isLocationHeader($col, $row)) {
                 continue;
             }
+            $colName = $this->getValue($col, $row);
+            $colGroup = $this->getColGroup($col);
+            $metricId = $ssColsMetricsTable->getMetricId([
+                'year' => $this->year,
+                'filename' => $this->filename,
+                'context' => $this->worksheets[$this->activeWorksheet]['context'],
+                'worksheet' => $this->activeWorksheet,
+                'group_name' => $colGroup,
+                'column_name' => $colName
+            ]);
             $dataColumns[$col] = [
-                'name' => $this->getValue($col, $row),
-                'group' => $this->getColGroup($col)
+                'name' => $colName,
+                'group' => $colGroup,
+                'metricId' => $metricId
             ];
         }
 
