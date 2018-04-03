@@ -3,6 +3,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\SpreadsheetColumnsMetric;
 use Cake\Datasource\EntityInterface;
+use Cake\Network\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -107,5 +108,41 @@ class SpreadsheetColumnsMetricsTable extends Table
         $rules->add($rules->existsIn(['metric_id'], 'Metrics'));
 
         return $rules;
+    }
+
+    /**
+     * Returns the corresponding SchoolMetric ID or SchoolDistrictMetric ID, or NULL if no result is found
+     *
+     * @param array $conditions Array of parameters for find()->where()
+     * @return int|null
+     * @throws InternalErrorException
+     */
+    public function getMetricId($conditions)
+    {
+        $expectedKeys = [
+            'year',
+            'filename',
+            'context',
+            'worksheet',
+            'group_name',
+            'column_name'
+        ];
+        foreach ($expectedKeys as $key) {
+            if (!array_key_exists($key, $conditions)) {
+                throw new InternalErrorException('Cannot find metric. Missing parameter: ' . $key);
+            }
+        }
+        if (count($conditions) != count($expectedKeys)) {
+            throw new InternalErrorException('Cannot find metric. Invalid parameters given.');
+        }
+
+        /** @var SpreadsheetColumnsMetric $result */
+        $result = $this->find()
+            ->select(['metric_id'])
+            ->where(compact($conditions))
+            ->orderDesc('created')
+            ->first();
+
+        return $result ? $result->metric_id : null;
     }
 }
