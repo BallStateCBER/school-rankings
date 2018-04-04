@@ -1,7 +1,7 @@
 <?php
 namespace App\Import;
 
-use App\Model\Entity\Metric;
+use App\Model\Table\MetricsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\ORM\TableRegistry;
 use Exception;
@@ -502,7 +502,7 @@ class ImportFile
         }
 
         $context = $this->getActiveWorksheetProperty('context');
-        if (!Metric::recordExists($context, $metricId)) {
+        if (!MetricsTable::recordExists($context, $metricId)) {
             throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
         }
 

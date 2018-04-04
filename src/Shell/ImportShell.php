@@ -4,7 +4,7 @@ namespace App\Shell;
 use App\Import\Datum;
 use App\Import\Import;
 use App\Import\ImportFile;
-use App\Model\Entity\Metric;
+use App\Model\Table\MetricsTable;
 use Cake\Console\Shell;
 use Cake\Shell\Helper\ProgressHelper;
 use PhpOffice\PhpSpreadsheet\Exception;
@@ -279,7 +279,7 @@ class ImportShell extends Shell
             $suggestedName = $this->import->getSuggestedName($filename, $worksheetName, $unknownMetric);
             $this->out('Suggested metric name: ' . $suggestedName);
             try {
-                $metricId = $this->getMetricId($suggestedName);
+                $metricId = $this->getMetricId($suggestedName, $unknownMetric);
                 $this->importFile->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
                 $this->err('Error: ' . $e->getMessage());
@@ -291,10 +291,11 @@ class ImportShell extends Shell
      * Interacts with the user and returns a metric ID, creating a new metric record if appropriate
      *
      * @param string $suggestedName Default name for this metric
+     * @param array $unknownMetric Array of name and group information for the current column
      * @return int
      * @throws \Exception
      */
-    private function getMetricId($suggestedName)
+    private function getMetricId($suggestedName, $unknownMetric)
     {
         $input = $this->in('Metric ID or name:');
         $context = $this->importFile->getContext();
@@ -302,10 +303,10 @@ class ImportShell extends Shell
         // Existing metric ID entered
         if (is_numeric($input)) {
             $metricId = (int)$input;
-            if (!Metric::recordExists($context, $metricId)) {
+            if (!MetricsTable::recordExists($context, $metricId)) {
                 $this->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
 
-                return $this->getMetricId($suggestedName);
+                return $this->getMetricId($suggestedName, $unknownMetric);
             }
 
             return $metricId;
@@ -314,7 +315,7 @@ class ImportShell extends Shell
         // Name of new metric entered
         try {
             $metricName = $input ?: $suggestedName;
-            $metric = Metric::addRecord($context, $metricName);
+            $metric = MetricsTable::addRecord($context, $metricName);
             if (!$metric) {
                 throw new Exception('Metric could not be saved.');
             }
@@ -324,7 +325,7 @@ class ImportShell extends Shell
         } catch (\Exception $e) {
             $this->err('Error: ' . $e->getMessage());
 
-            return $this->getMetricId($suggestedName);
+            return $this->getMetricId($suggestedName, $unknownMetric);
         }
     }
 }
