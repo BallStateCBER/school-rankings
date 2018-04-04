@@ -261,8 +261,11 @@ class ImportShell extends Shell
      */
     private function identifyMetrics($worksheetName)
     {
+        $this->out('Identifying metrics...');
         $unknownMetrics = $this->importFile->getUnknownMetrics();
         if (! $unknownMetrics) {
+            $this->out('All metrics identified');
+
             return;
         }
 
