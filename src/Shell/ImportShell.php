@@ -4,6 +4,7 @@ namespace App\Shell;
 use App\Import\Datum;
 use App\Import\Import;
 use App\Import\ImportFile;
+use App\Model\Entity\Metric;
 use Cake\Console\Shell;
 use Cake\Shell\Helper\ProgressHelper;
 use PhpOffice\PhpSpreadsheet\Exception;
@@ -116,7 +117,7 @@ class ImportShell extends Shell
             array_unshift($tableData, ['Key', 'File', 'Imported']);
             $this->helper('Table')->output($tableData);
             $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
-            $validKey = $fileKey == 'all' || (is_numeric($fileKey) && in_array($fileKey - 1, $fileKeys));
+            $validKey = $fileKey == 'all' || (is_numeric($fileKey) && in_array($fileKey, $fileKeys));
         } while (!$validKey);
 
         return (int)$fileKey;
@@ -162,9 +163,11 @@ class ImportShell extends Shell
             // Read in worksheet info and validate data
             $this->out('Analyzing worksheets...');
             foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-                $this->info("\n" . $worksheetName);
+                $this->out();
+                $this->info('Worksheet: ' . $worksheetName);
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
                 $this->validateData($importFile, $worksheetName);
+                $this->identifyMetrics($importFile, $worksheetName);
             }
             $this->out();
 
@@ -241,5 +244,88 @@ class ImportShell extends Shell
         }
 
         $this->_io->overwrite('All data valid');
+    }
+
+    /**
+     * Identifies all metrics used in this worksheet
+     *
+     * Checks the database for already-identified metrics and interacts with the user if necessary
+     *
+     * @param ImportFile $importFile Current spreadsheet file
+     * @param string $worksheetName Name of current worksheet
+     * @return void
+     */
+    private function identifyMetrics($importFile, $worksheetName)
+    {
+        $unknownMetrics = $importFile->getUnknownMetrics();
+        if (! $unknownMetrics) {
+            return;
+        }
+
+        $context = $importFile->getWorksheets()[$worksheetName]['context'];
+        $count = count($unknownMetrics);
+        $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n" .
+            "Options for each:\n" .
+            " - Enter an existing $context metric ID\n" .
+            " - Enter the name of a new metric to create \n" .
+            " - Enter nothing to accept the suggested name";
+        $this->out($msg);
+
+        $filename = $importFile->getFilename();
+        $worksheetName = $importFile->activeWorksheet;
+        $import = new Import();
+        foreach ($unknownMetrics as $colNum => $unknownMetric) {
+            $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
+            $this->info("\nColumn: $cleanColName");
+            $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
+            $this->out('Suggested metric name: ' . $suggestedName);
+            try {
+                $metricId = $this->getMetricId($context, $suggestedName);
+                $importFile->setMetricId($colNum, $metricId);
+            } catch (\Exception $e) {
+                $this->err('Error: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Interacts with the user and returns a metric ID, creating a new metric record if appropriate
+     *
+     * @param string $context Either 'school' or 'district'
+     * @param string $suggestedName Default name for this metric
+     * @return int
+     * @throws \Exception
+     */
+    private function getMetricId($context, $suggestedName)
+    {
+        $input = $this->in('Metric ID or name:');
+
+        // Existing metric ID entered
+        if (is_numeric($input)) {
+            $metricId = (int)$input;
+            if (!Metric::recordExists($context, $metricId)) {
+                $this->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
+
+                return $this->getMetricId($context, $suggestedName);
+            }
+
+            return $metricId;
+        }
+
+        // Name of new metric entered
+        try {
+            $metricName = $input ?: $suggestedName;
+            $metric = Metric::addRecord($context, $metricName);
+            if (!$metric) {
+                throw new Exception('Metric could not be saved.');
+            }
+            $this->out('Metric #' . $metric->id . ' added');
+
+            return $metric->id;
+        } catch (\Exception $e) {
+            $this->err('Error: ' . $e->getMessage());
+
+            return $this->getMetricId($context, $suggestedName);
+        }
     }
 }
