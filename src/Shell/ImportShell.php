@@ -5,7 +5,9 @@ use App\Import\Datum;
 use App\Import\Import;
 use App\Import\ImportFile;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\Console\Shell;
+use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use PhpOffice\PhpSpreadsheet\Exception;
 
@@ -320,6 +322,10 @@ class ImportShell extends Shell
                 throw new Exception('Metric could not be saved.');
             }
             $this->out('Metric #' . $metric->id . ' added');
+
+            /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
+            $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
+            $ssColsMetricsTable->add($this->importFile, $unknownMetric, $metric->id);
 
             return $metric->id;
         } catch (\Exception $e) {
