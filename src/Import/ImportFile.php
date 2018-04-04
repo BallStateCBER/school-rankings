@@ -12,9 +12,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 /**
  * Class ImportFile
  * @package App\Import
- * @property array $dataColumns
  * @property array $worksheets
- * @property array|null $groupings
  * @property Spreadsheet $spreadsheet
  * @property string $filename
  * @property string $year
@@ -25,11 +23,9 @@ class ImportFile
 {
     private $error;
     private $filename;
-    private $groupings;
     private $worksheets;
     private $year;
     public $activeWorksheet;
-    public $dataColumns;
     public $spreadsheet;
 
     /**
@@ -54,16 +50,19 @@ class ImportFile
 
             // Analyze each worksheet
             foreach ($reader->listWorksheetInfo($path) as $worksheet) {
-                $this->selectWorksheet($worksheet['worksheetName']);
-                $this->worksheets[$worksheet['worksheetName']] = [
+                $wsName = $worksheet['worksheetName'];
+                $this->selectWorksheet($wsName);
+                $this->worksheets[$wsName] = [
                     'context' => $this->getContext(),
                     'firstDataRow' => $this->getFirstDataRow(),
                     'firstDataCol' => $this->getFirstDataCol(),
                     'totalRows' => $worksheet['totalRows'],
                     'totalCols' => $worksheet['totalColumns']
                 ];
-                $this->groupings = $this->getGroupings();
-                $this->dataColumns = $this->getDataColumns();
+
+                // The following methods depend on the values in the above array and must be handled separately
+                $this->worksheets[$wsName]['groupings'] = $this->getGroupings();
+                $this->worksheets[$wsName]['dataColumns'] = $this->getDataColumns();
             }
         } catch (Exception $e) {
             $this->error = $e->getMessage();
@@ -88,6 +87,17 @@ class ImportFile
     public function getWorksheets()
     {
         return $this->worksheets;
+    }
+
+    /**
+     * Returns specified information about the active worksheet
+     *
+     * @param string $property Array key for $this->worksheets['worksheetName']
+     * @return mixed
+     */
+    public function getActiveWorksheetProperty($property)
+    {
+        return $this->worksheets[$this->activeWorksheet][$property];
     }
 
     /**
@@ -339,7 +349,7 @@ class ImportFile
 
         // Check that the first row contains the same number of blank cells as there are location identifier columns
         $row = 1;
-        $firstDataCol = $this->worksheets[$this->activeWorksheet]['firstDataCol'];
+        $firstDataCol = $this->getActiveWorksheetProperty('firstDataCol');
         for ($col = 1; $col < $firstDataCol; $col++) {
             $value = $this->getValue($col, $row);
             if (!empty($value)) {
@@ -347,7 +357,7 @@ class ImportFile
             }
         }
 
-        $lastDataCol = $this->worksheets[$this->activeWorksheet]['totalCols'];
+        $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         $groupings = [];
         $previousGroup = null;
         for ($col = $firstDataCol; $col <= $lastDataCol; $col++) {
@@ -380,7 +390,7 @@ class ImportFile
      */
     private function getDataColumns()
     {
-        $row = empty($this->groupings) ? 1 : 2;
+        $row = empty($this->getActiveWorksheetProperty('groupings')) ? 1 : 2;
         $col = 1;
         if (!$this->isLocationHeader($col, $row)) {
             throw new Exception('Can\'t find column header row');
@@ -389,7 +399,7 @@ class ImportFile
         /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
         $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
         $dataColumns = [];
-        $lastDataCol = $this->worksheets[$this->activeWorksheet]['totalCols'];
+        $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         for ($col = 2; $col <= $lastDataCol; $col++) {
             if ($this->isLocationHeader($col, $row)) {
                 continue;
@@ -399,7 +409,7 @@ class ImportFile
             $metricId = $ssColsMetricsTable->getMetricId([
                 'year' => $this->year,
                 'filename' => $this->filename,
-                'context' => $this->worksheets[$this->activeWorksheet]['context'],
+                'context' => $this->getActiveWorksheetProperty('context'),
                 'worksheet' => $this->activeWorksheet,
                 'group_name' => $colGroup,
                 'column_name' => $colName
@@ -423,11 +433,11 @@ class ImportFile
      */
     private function getColGroup($col)
     {
-        if (empty($this->groupings)) {
+        if (empty($this->getActiveWorksheetProperty('groupings'))) {
             return null;
         }
 
-        foreach ($this->groupings as $groupName => $groupInfo) {
+        foreach ($this->getActiveWorksheetProperty('groupings') as $groupName => $groupInfo) {
             if ($col >= $groupInfo['start'] && $col <= $groupInfo['end']) {
                 return $groupName;
             }
@@ -444,7 +454,7 @@ class ImportFile
     public function getUnknownMetrics()
     {
         $unknownMetrics = [];
-        foreach ($this->dataColumns as $colNum => $column) {
+        foreach ($this->getActiveWorksheetProperty('dataColumns') as $colNum => $column) {
             if ($column['name'] && !$column['metricId']) {
                 $unknownMetrics[$colNum] = $column;
             }
@@ -483,15 +493,15 @@ class ImportFile
      */
     public function setMetricId($colNum, $metricId)
     {
-        if ($this->dataColumns[$colNum]['metricId']) {
+        if ($this->worksheets[$this->activeWorksheet]['dataColumns'][$colNum]['metricId']) {
             throw new Exception('Cannot set metric ID; metric ID already set');
         }
 
-        $context = $this->worksheets[$this->activeWorksheet]['context'];
+        $context = $this->getActiveWorksheetProperty('context');
         if (!Metric::recordExists($context, $metricId)) {
             throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
         }
 
-        $this->dataColumns[$colNum]['metricId'] = $metricId;
+        $this->worksheets[$this->activeWorksheet]['dataColumns'][$colNum]['metricId'] = $metricId;
     }
 }
