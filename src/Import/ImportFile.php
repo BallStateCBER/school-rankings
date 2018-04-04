@@ -400,8 +400,6 @@ class ImportFile
             throw new Exception('Can\'t find column header row');
         }
 
-        /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
-        $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
         $dataColumns = [];
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         for ($col = 2; $col <= $lastDataCol; $col++) {
@@ -410,22 +408,36 @@ class ImportFile
             }
             $colName = $this->getValue($col, $row);
             $colGroup = $this->getColGroup($col);
-            $metricId = $ssColsMetricsTable->getMetricId([
-                'year' => $this->year,
-                'filename' => $this->filename,
-                'context' => $this->getActiveWorksheetProperty('context'),
-                'worksheet' => $this->activeWorksheet,
-                'group_name' => $colGroup,
-                'column_name' => $colName
-            ]);
             $dataColumns[$col] = [
                 'name' => $colName,
                 'group' => $colGroup,
-                'metricId' => $metricId
+                'metricId' => $this->getMetricId($colGroup, $colName)
             ];
         }
 
         return $dataColumns;
+    }
+
+    /**
+     * Returns the SchoolMetric ID or SchoolDistrictMetric ID associated with the given column, or NULL
+     *
+     * @param string $colGroup The name of the grouping that the current column is part of
+     * @param string $colName The name of the current column
+     * @return int|null
+     */
+    private function getMetricId($colGroup, $colName)
+    {
+        /** @var SpreadsheetColumnsMetricsTable $table */
+        $table = TableRegistry::get('SpreadsheetColumnsMetrics');
+
+        return $table->getMetricId([
+            'year' => $this->year,
+            'filename' => $this->filename,
+            'context' => $this->getActiveWorksheetProperty('context'),
+            'worksheet' => $this->activeWorksheet,
+            'group_name' => $colGroup,
+            'column_name' => $colName
+        ]);
     }
 
     /**
