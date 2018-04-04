@@ -213,6 +213,10 @@ class ImportFile
      */
     public function getContext()
     {
+        if (isset($this->worksheets[$this->activeWorksheet]['context'])) {
+            return $this->worksheets[$this->activeWorksheet]['context'];
+        }
+
         for ($row = 1; $row <= 2; $row++) {
             $isSchoolContext = (
                     $this->isSchoolIdHeader(1, $row)
