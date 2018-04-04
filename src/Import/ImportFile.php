@@ -1,8 +1,10 @@
 <?php
 namespace App\Import;
 
+use App\Model\Entity\Metric;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\ORM\TableRegistry;
+use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -63,7 +65,7 @@ class ImportFile
                 $this->groupings = $this->getGroupings();
                 $this->dataColumns = $this->getDataColumns();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error = $e->getMessage();
         }
     }
@@ -135,7 +137,7 @@ class ImportFile
      *
      * @return int
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     private function getFirstDataRow()
     {
@@ -147,7 +149,7 @@ class ImportFile
             }
         }
 
-        throw new \Exception('First data row could not be found');
+        throw new Exception('First data row could not be found');
     }
 
     /**
@@ -157,7 +159,7 @@ class ImportFile
      *
      * @return int
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     private function getFirstDataCol()
     {
@@ -173,7 +175,7 @@ class ImportFile
             }
         }
 
-        throw new \Exception('First data col could not be found');
+        throw new Exception('First data col could not be found');
     }
 
     /**
@@ -197,20 +199,20 @@ class ImportFile
      *
      * @return string
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function getContext()
     {
         for ($row = 1; $row <= 2; $row++) {
             $isSchoolContext = (
-                $this->isSchoolIdHeader(1, $row)
-                && $this->isSchoolNameHeader(2, $row)
-            ) || (
-                $this->isDistrictIdHeader(1, $row)
-                && $this->isDistrictNameHeader(2, $row)
-                && $this->isSchoolIdHeader(3, $row)
-                && $this->isSchoolNameHeader(4, $row)
-            );
+                    $this->isSchoolIdHeader(1, $row)
+                    && $this->isSchoolNameHeader(2, $row)
+                ) || (
+                    $this->isDistrictIdHeader(1, $row)
+                    && $this->isDistrictNameHeader(2, $row)
+                    && $this->isSchoolIdHeader(3, $row)
+                    && $this->isSchoolNameHeader(4, $row)
+                );
             if ($isSchoolContext) {
                 return 'school';
             }
@@ -224,7 +226,7 @@ class ImportFile
             }
         }
 
-        throw new \Exception('Cannot determine school/district context of worksheet ' . $this->activeWorksheet);
+        throw new Exception('Cannot determine school/district context of worksheet ' . $this->activeWorksheet);
     }
 
     /**
@@ -323,7 +325,7 @@ class ImportFile
      * e.g. by grade, ethnic group, etc.
      *
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
+     * @throws Exception
      * @return array|null
      */
     public function getGroupings()
@@ -341,7 +343,7 @@ class ImportFile
         for ($col = 1; $col < $firstDataCol; $col++) {
             $value = $this->getValue($col, $row);
             if (!empty($value)) {
-                throw new \Exception('Error: Grouping row contains values in location identifier column(s)');
+                throw new Exception('Error: Grouping row contains values in location identifier column(s)');
             }
         }
 
@@ -361,7 +363,7 @@ class ImportFile
         }
 
         if (!$groupings) {
-            throw new \Exception('Error: Groupings row is blank');
+            throw new Exception('Error: Groupings row is blank');
         }
 
         $groupings[$previousGroup]['end'] = $col - 1;
@@ -374,14 +376,14 @@ class ImportFile
      *
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     private function getDataColumns()
     {
         $row = empty($this->groupings) ? 1 : 2;
         $col = 1;
         if (!$this->isLocationHeader($col, $row)) {
-            throw new \Exception('Can\'t find column header row');
+            throw new Exception('Can\'t find column header row');
         }
 
         /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
@@ -417,7 +419,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @return null|string
-     * @throws \Exception
+     * @throws Exception
      */
     private function getColGroup($col)
     {
@@ -431,6 +433,65 @@ class ImportFile
             }
         }
 
-        throw new \Exception('Error: Column ' . $col . ' not captured by any column group');
+        throw new Exception('Error: Column ' . $col . ' not captured by any column group');
+    }
+
+    /**
+     * Returns information about what columns have nonblank titles and no metric ID
+     *
+     * @return array
+     */
+    public function getUnknownMetrics()
+    {
+        $unknownMetrics = [];
+        foreach ($this->dataColumns as $colNum => $column) {
+            if ($column['name'] && !$column['metricId']) {
+                $unknownMetrics[$colNum] = $column;
+            }
+        }
+
+        return $unknownMetrics;
+    }
+
+    /**
+     * Returns the value of $this->year
+     *
+     * @return string
+     */
+    public function getYear()
+    {
+        return $this->year;
+    }
+
+    /**
+     * Returns the value of $this->filename
+     *
+     * @return string
+     */
+    public function getFilename()
+    {
+        return $this->filename;
+    }
+
+    /**
+     * Sets metric ID in $this->dataColumns
+     *
+     * @param int $colNum Column number
+     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @return void
+     * @throws Exception
+     */
+    public function setMetricId($colNum, $metricId)
+    {
+        if ($this->dataColumns[$colNum]['metricId']) {
+            throw new Exception('Cannot set metric ID; metric ID already set');
+        }
+
+        $context = $this->worksheets[$this->activeWorksheet]['context'];
+        if (!Metric::recordExists($context, $metricId)) {
+            throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
+        }
+
+        $this->dataColumns[$colNum]['metricId'] = $metricId;
     }
 }
