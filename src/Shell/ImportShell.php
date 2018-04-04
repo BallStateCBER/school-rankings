@@ -77,7 +77,7 @@ class ImportShell extends Shell
             $this->info($year);
             array_unshift($yearFiles, ['File', 'Imported']);
             $this->helper('Table')->output($yearFiles);
-            $this->out('');
+            $this->out();
         }
     }
 
