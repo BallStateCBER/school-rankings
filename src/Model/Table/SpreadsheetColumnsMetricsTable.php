@@ -155,7 +155,7 @@ class SpreadsheetColumnsMetricsTable extends Table
         /** @var SpreadsheetColumnsMetric $result */
         $result = $this->find()
             ->select(['metric_id'])
-            ->where(compact($conditions))
+            ->where($conditions)
             ->orderDesc('created')
             ->first();
 
