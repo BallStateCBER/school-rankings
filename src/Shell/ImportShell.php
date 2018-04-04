@@ -179,6 +179,8 @@ class ImportShell extends Shell
             $this->importFile->spreadsheet->disconnectWorksheets();
             unset($this->importFile);
         }
+
+        $this->out('Done');
     }
 
     /**
