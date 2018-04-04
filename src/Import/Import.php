@@ -48,7 +48,7 @@ class Import
      * @param string $string String to be tested
      * @return bool
      */
-    private function isYear($string)
+    public function isYear($string)
     {
         return strlen($string) == 4 && is_numeric($string);
     }
@@ -66,5 +66,32 @@ class Import
         sort($years);
 
         return $years;
+    }
+
+    /**
+     * Returns a suggested metric name, given information about an import spreadsheet column
+     *
+     * @param string $filename Import file name
+     * @param string $worksheetName Name of active worksheet in import file
+     * @param array $unknownMetric Array of information about the name and group of a column
+     * @return string
+     */
+    public function getSuggestedName($filename, $worksheetName, $unknownMetric) {
+        $import = new Import();
+        $nameDelimiter = ' - ';
+        $groupName = $unknownMetric['group'];
+        $columnName = $unknownMetric['name'];
+        $suggestedNameParts = [explode('.', $filename)[0]];
+        if (!$import->isYear($worksheetName)) {
+            $suggestedNameParts[] = $worksheetName;
+        }
+        $cleanColumnName = str_replace("\n", $nameDelimiter, $columnName);
+        $cleanColumnName = str_replace('  ', ' ', $cleanColumnName);
+        if ($groupName) {
+            $cleanColumnName .= ' (' . $groupName . ')';
+        }
+        $suggestedNameParts[] = $cleanColumnName;
+
+        return implode($nameDelimiter, $suggestedNameParts);
     }
 }
