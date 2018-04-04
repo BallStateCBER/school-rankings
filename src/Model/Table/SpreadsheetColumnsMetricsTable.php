@@ -7,6 +7,7 @@ use Cake\Network\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Exception;
 
 /**
  * SpreadsheetColumnsMetrics Model
@@ -40,7 +41,12 @@ class SpreadsheetColumnsMetricsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Metrics', [
+        $this->belongsTo('SchoolMetrics', [
+            'foreignKey' => 'metric_id',
+            'joinType' => 'INNER'
+        ]);
+
+        $this->belongsTo('SchoolDistrictMetrics', [
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
@@ -105,7 +111,16 @@ class SpreadsheetColumnsMetricsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['metric_id'], 'Metrics'));
+        $rules->add(function ($entity, $options) use ($rules) {
+            switch ($entity->context) {
+                case 'school':
+                    return $rules->existsIn(['metric_id'], 'SchoolMetrics')($entity, $options);
+                case 'district':
+                    return $rules->existsIn(['metric_id'], 'SchoolDistrictMetrics')($entity, $options);
+                default:
+                    throw new Exception('Unrecognized metric context: ' . $entity->context);
+            }
+        }, 'metricExists');
 
         return $rules;
     }
