@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Import\ImportFile;
 use App\Model\Entity\SpreadsheetColumnsMetric;
 use Cake\Datasource\EntityInterface;
 use Cake\Network\Exception\InternalErrorException;
@@ -159,5 +160,36 @@ class SpreadsheetColumnsMetricsTable extends Table
             ->first();
 
         return $result ? $result->metric_id : null;
+    }
+
+    /**
+     * Adds a record to the database table
+     *
+     * @param ImportFile $importFile Current ImportFile object
+     * @param array $colInfo Array of info about the name and group of the current column
+     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @return bool
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
+     */
+    public function add($importFile, $colInfo, $metricId)
+    {
+        $record = $this->newEntity([
+            'year' => $importFile->getYear(),
+            'filename' => $importFile->getFilename(),
+            'context' => $importFile->getContext(),
+            'worksheet' => $importFile->activeWorksheet,
+            'group_name' => $colInfo['group'],
+            'column_name' => $colInfo['name'],
+            'metric_id' => $metricId
+        ]);
+
+        if ($this->save($record)) {
+            return true;
+        }
+
+        $msg = "Cannot add column->metric shortcut to spreadsheet_columns_metrics.\nDetails: " .
+            print_r($record, true);
+        throw new Exception($msg);
     }
 }
