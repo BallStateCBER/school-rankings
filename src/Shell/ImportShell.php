@@ -279,7 +279,7 @@ class ImportShell extends Shell
             $suggestedName = $this->import->getSuggestedName($filename, $worksheetName, $unknownMetric);
             $this->out('Suggested metric name: ' . $suggestedName);
             try {
-                $metricId = $this->getMetricId($context, $suggestedName);
+                $metricId = $this->getMetricId($suggestedName);
                 $this->importFile->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
                 $this->err('Error: ' . $e->getMessage());
@@ -290,14 +290,14 @@ class ImportShell extends Shell
     /**
      * Interacts with the user and returns a metric ID, creating a new metric record if appropriate
      *
-     * @param string $context Either 'school' or 'district'
      * @param string $suggestedName Default name for this metric
      * @return int
      * @throws \Exception
      */
-    private function getMetricId($context, $suggestedName)
+    private function getMetricId($suggestedName)
     {
         $input = $this->in('Metric ID or name:');
+        $context = $this->importFile->getContext();
 
         // Existing metric ID entered
         if (is_numeric($input)) {
@@ -305,7 +305,7 @@ class ImportShell extends Shell
             if (!Metric::recordExists($context, $metricId)) {
                 $this->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
 
-                return $this->getMetricId($context, $suggestedName);
+                return $this->getMetricId($suggestedName);
             }
 
             return $metricId;
@@ -324,7 +324,7 @@ class ImportShell extends Shell
         } catch (\Exception $e) {
             $this->err('Error: ' . $e->getMessage());
 
-            return $this->getMetricId($context, $suggestedName);
+            return $this->getMetricId($suggestedName);
         }
     }
 }
