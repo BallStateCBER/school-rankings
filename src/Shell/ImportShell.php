@@ -166,14 +166,14 @@ class ImportShell extends Shell
 
             // Read in worksheet info and validate data
             $this->out('Analyzing worksheets...');
+            $this->out();
             foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-                $this->out();
                 $this->info('Worksheet: ' . $worksheetName);
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
                 $this->validateData($worksheetName);
                 $this->identifyMetrics($worksheetName);
+                $this->out();
             }
-            $this->out();
 
             // Free up memory
             $this->importFile->spreadsheet->disconnectWorksheets();
