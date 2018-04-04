@@ -13,10 +13,12 @@ use PhpOffice\PhpSpreadsheet\Exception;
  * Class ImportShell
  * @package App\Shell
  * @property Import $import
+ * @property ImportFile $importFile
  */
 class ImportShell extends Shell
 {
     private $import;
+    private $importFile;
 
     /**
      * Initializes the Shell
@@ -155,46 +157,45 @@ class ImportShell extends Shell
             [$files[$year][$fileKey - 1]];
         foreach ($selectedFiles as $file) {
             $this->out('Opening ' . $file['filename'] . '...');
-            $importFile = new ImportFile($year, $file['filename']);
-            if ($importFile->getError()) {
-                $this->abort($importFile->getError());
+            $this->importFile = new ImportFile($year, $file['filename']);
+            if ($this->importFile->getError()) {
+                $this->abort($this->importFile->getError());
             }
 
             // Read in worksheet info and validate data
             $this->out('Analyzing worksheets...');
-            foreach ($importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+            foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
                 $this->out();
                 $this->info('Worksheet: ' . $worksheetName);
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
-                $this->validateData($importFile, $worksheetName);
-                $this->identifyMetrics($importFile, $worksheetName);
+                $this->validateData($worksheetName);
+                $this->identifyMetrics($worksheetName);
             }
             $this->out();
 
             // Free up memory
-            $importFile->spreadsheet->disconnectWorksheets();
-            unset($importFile);
+            $this->importFile->spreadsheet->disconnectWorksheets();
+            unset($this->importFile);
         }
     }
 
     /**
      * Loops through all data cells and aborts script if any are invalid
      *
-     * @param ImportFile $importFile Current spreadsheet file
      * @param string $worksheetName Name of current worksheet
      * @return void
      */
-    private function validateData($importFile, $worksheetName)
+    private function validateData($worksheetName)
     {
         $this->out('Validating data...');
 
         try {
-            $importFile->selectWorksheet($worksheetName);
+            $this->importFile->selectWorksheet($worksheetName);
         } catch (Exception $e) {
             $this->abort('Error selecting worksheet ' . $worksheetName . ':' . $e->getMessage());
         }
 
-        $ws = $importFile->getWorksheets()[$worksheetName];
+        $ws = $this->importFile->getWorksheets()[$worksheetName];
         $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
         $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
 
@@ -211,8 +212,8 @@ class ImportShell extends Shell
         for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
             for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
                 try {
-                    $value = $importFile->getValue($col, $row);
-                    $cell = $importFile->getCell($col, $row);
+                    $value = $this->importFile->getValue($col, $row);
+                    $cell = $this->importFile->getCell($col, $row);
                     if (!$datum->isValid($value, $cell)) {
                         $invalidData[] = compact('col', 'row', 'value');
                     }
@@ -251,18 +252,17 @@ class ImportShell extends Shell
      *
      * Checks the database for already-identified metrics and interacts with the user if necessary
      *
-     * @param ImportFile $importFile Current spreadsheet file
      * @param string $worksheetName Name of current worksheet
      * @return void
      */
-    private function identifyMetrics($importFile, $worksheetName)
+    private function identifyMetrics($worksheetName)
     {
-        $unknownMetrics = $importFile->getUnknownMetrics();
+        $unknownMetrics = $this->importFile->getUnknownMetrics();
         if (! $unknownMetrics) {
             return;
         }
 
-        $context = $importFile->getWorksheets()[$worksheetName]['context'];
+        $context = $this->importFile->getWorksheets()[$worksheetName]['context'];
         $count = count($unknownMetrics);
         $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n" .
             "Options for each:\n" .
@@ -271,17 +271,16 @@ class ImportShell extends Shell
             " - Enter nothing to accept the suggested name";
         $this->out($msg);
 
-        $filename = $importFile->getFilename();
-        $worksheetName = $importFile->activeWorksheet;
-        $import = new Import();
+        $filename = $this->importFile->getFilename();
+        $worksheetName = $this->importFile->activeWorksheet;
         foreach ($unknownMetrics as $colNum => $unknownMetric) {
             $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
             $this->info("\nColumn: $cleanColName");
-            $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
+            $suggestedName = $this->import->getSuggestedName($filename, $worksheetName, $unknownMetric);
             $this->out('Suggested metric name: ' . $suggestedName);
             try {
                 $metricId = $this->getMetricId($context, $suggestedName);
-                $importFile->setMetricId($colNum, $metricId);
+                $this->importFile->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
                 $this->err('Error: ' . $e->getMessage());
             }
