@@ -63,6 +63,7 @@ class ImportFile
                 // The following methods depend on the values in the above array and must be handled separately
                 $this->worksheets[$wsName]['groupings'] = $this->getGroupings();
                 $this->worksheets[$wsName]['dataColumns'] = $this->getDataColumns();
+                $this->worksheets[$wsName]['locations'] = $this->getLocations();
             }
         } catch (Exception $e) {
             $this->error = $e->getMessage();
@@ -202,6 +203,37 @@ class ImportFile
             || $this->isDistrictNameHeader($col, $row)
             || $this->isSchoolIdHeader($col, $row)
             || $this->isSchoolNameHeader($col, $row);
+    }
+
+    /**
+     * Returns a string indicating if the column is districtId, districtName, schoolId, or schoolName
+     *
+     * @param int $col Column number
+     * @return string
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
+     */
+    private function getLocationColumnType($col)
+    {
+        $headerRow = $this->getActiveWorksheetProperty('firstDataRow') - 1;
+
+        if ($this->isDistrictIdHeader($col, $headerRow)) {
+            return 'districtId';
+        }
+
+        if ($this->isDistrictNameHeader($col, $headerRow)) {
+            return 'districtName';
+        }
+
+        if ($this->isSchoolIdHeader($col, $headerRow)) {
+            return 'schoolId';
+        }
+
+        if ($this->isSchoolNameHeader($col, $headerRow)) {
+            return 'schoolName';
+        }
+
+        throw new Exception('Unrecognized location column type in column ' . $col);
     }
 
     /**
@@ -519,5 +551,30 @@ class ImportFile
         }
 
         $this->worksheets[$this->activeWorksheet]['dataColumns'][$colNum]['metricId'] = $metricId;
+    }
+
+    /**
+     * Returns an array of $row => $location, with $location keys districtId, districtName, schoolId, and schoolName
+     *
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function getLocations()
+    {
+        $locations = [];
+        $firstRow = $this->getActiveWorksheetProperty('firstDataRow');
+        $lastRow = $this->getActiveWorksheetProperty('totalRows');
+        $lastCol = $this->getActiveWorksheetProperty('firstDataCol') - 1;
+        for ($row = $firstRow; $row <= $lastRow; $row++) {
+            $location = [];
+            for ($col = 1; $col <= $lastCol; $col++) {
+                $type = $this->getLocationColumnType($col);
+                $value = $this->getValue($col, $row);
+                $location[$type] = $value;
+            }
+            $locations[$row] = $location;
+        }
+
+        return $locations;
     }
 }
