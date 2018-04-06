@@ -200,14 +200,14 @@ class ImportFile
      */
     private function isLocationHeader($col, $row)
     {
-        return $this->isDistrictIdHeader($col, $row)
+        return $this->isDistrictCodeHeader($col, $row)
             || $this->isDistrictNameHeader($col, $row)
-            || $this->isSchoolIdHeader($col, $row)
+            || $this->isSchoolCodeHeader($col, $row)
             || $this->isSchoolNameHeader($col, $row);
     }
 
     /**
-     * Returns a string indicating if the column is districtId, districtName, schoolId, or schoolName
+     * Returns a string indicating if the column is districtCode, districtName, schoolCode, or schoolName
      *
      * @param int $col Column number
      * @return string
@@ -218,16 +218,16 @@ class ImportFile
     {
         $headerRow = $this->getActiveWorksheetProperty('firstDataRow') - 1;
 
-        if ($this->isDistrictIdHeader($col, $headerRow)) {
-            return 'districtId';
+        if ($this->isDistrictCodeHeader($col, $headerRow)) {
+            return 'districtCode';
         }
 
         if ($this->isDistrictNameHeader($col, $headerRow)) {
             return 'districtName';
         }
 
-        if ($this->isSchoolIdHeader($col, $headerRow)) {
-            return 'schoolId';
+        if ($this->isSchoolCodeHeader($col, $headerRow)) {
+            return 'schoolCode';
         }
 
         if ($this->isSchoolNameHeader($col, $headerRow)) {
@@ -252,21 +252,21 @@ class ImportFile
 
         for ($row = 1; $row <= 2; $row++) {
             $isSchoolContext = (
-                    $this->isSchoolIdHeader(1, $row)
+                    $this->isSchoolCodeHeader(1, $row)
                     && $this->isSchoolNameHeader(2, $row)
                 ) || (
-                    $this->isDistrictIdHeader(1, $row)
+                    $this->isDistrictCodeHeader(1, $row)
                     && $this->isDistrictNameHeader(2, $row)
-                    && $this->isSchoolIdHeader(3, $row)
+                    && $this->isSchoolCodeHeader(3, $row)
                     && $this->isSchoolNameHeader(4, $row)
                 );
             if ($isSchoolContext) {
                 return 'school';
             }
 
-            $isDistrictContext = $this->isDistrictIdHeader(1, $row)
+            $isDistrictContext = $this->isDistrictCodeHeader(1, $row)
                 && $this->isDistrictNameHeader(2, $row)
-                && !$this->isSchoolIdHeader(3, $row)
+                && !$this->isSchoolCodeHeader(3, $row)
                 && !$this->isSchoolNameHeader(4, $row);
             if ($isDistrictContext) {
                 return 'district';
@@ -277,7 +277,7 @@ class ImportFile
     }
 
     /**
-     * Returns true if the given cell contains a header for a district ID column
+     * Returns true if the given cell contains a header for a district code column
      *
      * Known values:
      * Corp / Corp ID / IDOE_CORPORATION_ID / CORP ID / Corporation Id / Corp. Id / Corp. ID
@@ -287,7 +287,7 @@ class ImportFile
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return bool
      */
-    private function isDistrictIdHeader($col, $row)
+    private function isdistrictCodeHeader($col, $row)
     {
         $value = $this->getValue($col, $row);
 
@@ -323,7 +323,7 @@ class ImportFile
     }
 
     /**
-     * Returns true if the given cell contains a header for a school ID column
+     * Returns true if the given cell contains a header for a school code column
      *
      * Known values:
      * School / School ID / Sch ID / IDOE_SCHOOL_ID / SCH ID / Schl. Id
@@ -333,7 +333,7 @@ class ImportFile
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return bool
      */
-    private function isSchoolIdHeader($col, $row)
+    private function isSchoolCodeHeader($col, $row)
     {
         $value = $this->getValue($col, $row);
 
@@ -555,7 +555,7 @@ class ImportFile
     }
 
     /**
-     * Returns an array of $row => $location, with $location keys districtId, districtName, schoolId, and schoolName
+     * Returns an array of $row => $location, with $location keys districtCode, districtName, schoolCode, and schoolName
      *
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
@@ -575,10 +575,10 @@ class ImportFile
                 if ($value == '') {
                     continue;
                 }
-                if ($type == 'districtId' || $type == 'schoolId') {
+                if ($type == 'districtCode' || $type == 'schoolCode') {
                     $value = $this->removeLeadingZeros($value);
                 }
-                if ($type == 'districtId' && SchoolDistrict::isDummyCode($value)) {
+                if ($type == 'districtCode' && SchoolDistrict::isDummyCode($value)) {
                     continue;
                 }
 
