@@ -46,4 +46,20 @@ class SchoolDistrict extends Entity
         'counties' => true,
         'states' => true
     ];
+
+    /**
+     * Returns true or false, indicating whether or not the provided code represents something
+     * other than an actual district (like an "Independent Non-Public Schools" entry)
+     *
+     * @param string $code School district code
+     * @return bool
+     */
+    public static function isDummyCode($code)
+    {
+        return in_array($code, [
+            '-0999',
+            '-999',
+            'N/A'
+        ]);
+    }
 }

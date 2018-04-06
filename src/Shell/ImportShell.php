@@ -366,8 +366,8 @@ class ImportShell extends Shell
             $districtId = null;
             if (isset($location['districtId']) && isset($location['districtName'])) {
                 $districtId = $this->getOrCreateDistrict($location['districtId'], $location['districtName']);
-            } elseif (isset($location['districtId']) || isset($location['districtName'])) {
-                throw new Exception('Incomplete district information in row ' . $rowNum);
+            } elseif (isset($location['districtId'])) {
+                throw new Exception('District name missing in row ' . $rowNum);
             }
 
             $schoolId = null;

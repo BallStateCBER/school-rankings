@@ -1,6 +1,7 @@
 <?php
 namespace App\Import;
 
+use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\ORM\TableRegistry;
@@ -569,10 +570,15 @@ class ImportFile
             $location = [];
             for ($col = 1; $col <= $lastCol; $col++) {
                 $type = $this->getLocationColumnType($col);
+
                 $value = $this->getValue($col, $row);
                 if ($type == 'districtId' || $type == 'schoolId') {
                     $value = $this->removeLeadingZeros($value);
                 }
+                if ($type == 'districtId' && SchoolDistrict::isDummyCode($value)) {
+                    continue;
+                }
+
                 $location[$type] = $value;
             }
             $locations[$row] = $location;
