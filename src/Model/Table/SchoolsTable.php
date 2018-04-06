@@ -102,14 +102,12 @@ class SchoolsTable extends Table
 
         $validator
             ->scalar('address')
-            ->requirePresence('address', 'create')
-            ->notEmpty('address');
+            ->allowEmpty('address');
 
         $validator
             ->scalar('url')
             ->maxLength('url', 255)
-            ->requirePresence('url', 'create')
-            ->notEmpty('url');
+            ->allowEmpty('url');
 
         $validator
             ->scalar('code')
