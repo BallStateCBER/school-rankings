@@ -570,11 +570,25 @@ class ImportFile
             for ($col = 1; $col <= $lastCol; $col++) {
                 $type = $this->getLocationColumnType($col);
                 $value = $this->getValue($col, $row);
+                if ($type == 'districtId' || $type == 'schoolId') {
+                    $value = $this->removeLeadingZeros($value);
+                }
                 $location[$type] = $value;
             }
             $locations[$row] = $location;
         }
 
         return $locations;
+    }
+
+    /**
+     * Strips out leading zeros from a string
+     *
+     * @param string $string String to remove leading zeros from
+     * @return string
+     */
+    private function removeLeadingZeros($string)
+    {
+        return ltrim($string, '0');
     }
 }
