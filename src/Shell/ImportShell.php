@@ -359,8 +359,8 @@ class ImportShell extends Shell
     private function identifyLocations($worksheetName)
     {
         $context = $this->importFile->getWorksheets()[$worksheetName]['context'];
-        $msg = 'Identifying ' . ($context == 'district' ? 'districts' : 'schools/districts') . '...';
-        $this->out($msg);
+        $subject = ($context == 'district' ? 'districts' : 'schools/districts');
+        $this->out("Identifying $subject...");
 
         foreach ($this->importFile->getLocations() as $rowNum => $location) {
             $districtId = null;
@@ -377,6 +377,7 @@ class ImportShell extends Shell
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
         }
+        $this->out("All $subject identified");
     }
 
     /**
