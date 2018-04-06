@@ -187,7 +187,7 @@ class ImportShell extends Shell
             unset($this->importFile);
         }
 
-        $this->out('Done');
+        $this->out('Import complete');
     }
 
     /**
@@ -255,7 +255,7 @@ class ImportShell extends Shell
             $this->abort('Cannot continue. Invalid data found.');
         }
 
-        $this->_io->overwrite('All data valid');
+        $this->_io->overwrite(' - Done');
     }
 
     /**
@@ -271,7 +271,7 @@ class ImportShell extends Shell
         $this->out('Identifying metrics...');
         $unknownMetrics = $this->importFile->getUnknownMetrics();
         if (! $unknownMetrics) {
-            $this->out('All metrics identified');
+            $this->out(' - Done');
 
             return;
         }
@@ -377,7 +377,7 @@ class ImportShell extends Shell
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
         }
-        $this->out("All $subject identified");
+        $this->out(' - Done');
     }
 
     /**
