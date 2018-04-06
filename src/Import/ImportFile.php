@@ -572,6 +572,9 @@ class ImportFile
                 $type = $this->getLocationColumnType($col);
 
                 $value = $this->getValue($col, $row);
+                if ($value == '') {
+                    continue;
+                }
                 if ($type == 'districtId' || $type == 'schoolId') {
                     $value = $this->removeLeadingZeros($value);
                 }
@@ -581,7 +584,10 @@ class ImportFile
 
                 $location[$type] = $value;
             }
-            $locations[$row] = $location;
+
+            if ($location) {
+                $locations[$row] = $location;
+            }
         }
 
         return $locations;
