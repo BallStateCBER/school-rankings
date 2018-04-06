@@ -5,6 +5,8 @@ use App\Import\Datum;
 use App\Import\Import;
 use App\Import\ImportFile;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SchoolDistrictsTable;
+use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\Console\Shell;
 use Cake\ORM\TableRegistry;
@@ -172,6 +174,11 @@ class ImportShell extends Shell
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
                 $this->validateData($worksheetName);
                 $this->identifyMetrics($worksheetName);
+                try {
+                    $this->identifyLocations($worksheetName);
+                } catch (Exception $e) {
+                    $this->abort('Error identifying locations: ' . $e->getMessage());
+                }
                 $this->out();
             }
 
@@ -338,5 +345,103 @@ class ImportShell extends Shell
 
             return $this->getMetricId($suggestedName, $unknownMetric);
         }
+    }
+
+    /**
+     * Identifies all schools/districts used in this worksheet
+     *
+     * Checks the database for already-identified schools/districts and interacts with the user if necessary
+     *
+     * @param $worksheetName
+     * @return void
+     * @throws Exception
+     */
+    private function identifyLocations($worksheetName)
+    {
+        $context = $this->importFile->getWorksheets()[$worksheetName]['context'];
+        $msg = 'Identifying ' . ($context == 'district' ? 'districts' : 'schools/districts') . '...';
+        $this->out($msg);
+
+        foreach ($this->importFile->getLocations() as $rowNum => $location) {
+            $districtId = null;
+            if (isset($location['districtId']) && isset($location['districtName'])) {
+                $districtId = $this->getOrCreateDistrict($location['districtId'], $location['districtName']);
+            } elseif (isset($location['districtId']) || isset($location['districtName'])) {
+                throw new Exception('Incomplete district information in row ' . $rowNum);
+            }
+
+            $schoolId = null;
+            if (isset($location['schoolId']) && isset($location['schoolName'])) {
+                $schoolId = $this->getOrCreateSchool($location['schoolId'], $location['schoolName'], $districtId);
+            } elseif (isset($location['schoolId']) || isset($location['schoolName'])) {
+                throw new Exception('Incomplete school information in row ' . $rowNum);
+            }
+        }
+    }
+
+    /**
+     * Finds a school district with a matching code or creates a new record and returns a record ID
+     *
+     * @param string $code School district code
+     * @param string $name School name
+     *
+     * @return int
+     */
+    public function getOrCreateDistrict($code, $name)
+    {
+        $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
+        $record = $schoolDistrictsTable->find()
+            ->select(['id'])
+            ->where(['code' => $code])
+            ->first();
+
+        if ($record) {
+            return $record->id;
+        }
+
+        $record = $schoolDistrictsTable->newEntity(compact('code', 'name'));
+        $schoolDistrictsTable->saveOrFail($record);
+
+        $msg = " - Added district #$code: $name";
+        $this->out($msg);
+
+        return $record->id;
+    }
+
+
+    /**
+     * Finds a school with a matching code or creates a new record and returns a record ID
+     *
+     * @param string $code School code
+     * @param string $name School name
+     * @param int $districtId SchoolDistrict ID
+     * @return int
+     */
+    public function getOrCreateSchool($code, $name, $districtId = null)
+    {
+        $schoolsTable = TableRegistry::get('Schools');
+        $record = $schoolsTable->find()
+            ->select(['id'])
+            ->where(['code' => $code])
+            ->first();
+
+        if ($record) {
+            return $record->id;
+        }
+
+        $record = $schoolsTable->newEntity([
+            'code' => $code,
+            'name' => $name,
+            'school_district_id' => $districtId
+        ]);
+        $schoolsTable->saveOrFail($record);
+
+        $msg = " - Added school #$code: $name";
+        if (!$districtId) {
+            $msg .= ' (no district)';
+        }
+        $this->out($msg);
+
+        return $record->id;
     }
 }
