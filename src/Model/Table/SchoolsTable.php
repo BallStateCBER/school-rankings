@@ -2,6 +2,7 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\School;
+use App\Shell\ImportShell;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Association\BelongsToMany;
@@ -131,5 +132,43 @@ class SchoolsTable extends Table
         $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
 
         return $rules;
+    }
+
+    /**
+     * Finds a school with a matching code or creates a new record and returns a record ID
+     *
+     * @param string $code School code
+     * @param string $name School name
+     * @param int $districtId SchoolDistrict ID
+     * @param ImportShell|null $shell ImportShell object
+     * @return int
+     */
+    public function getOrCreate($code, $name, $districtId = null, $shell = null)
+    {
+        $record = $this->find()
+            ->select(['id'])
+            ->where(['code' => $code])
+            ->first();
+
+        if ($record) {
+            return $record->id;
+        }
+
+        $record = $this->newEntity([
+            'code' => $code,
+            'name' => $name,
+            'school_district_id' => $districtId
+        ]);
+        $this->saveOrFail($record);
+
+        if ($shell) {
+            $msg = " - Added school #$code: $name";
+            if (!$districtId) {
+                $msg .= ' (no district)';
+            }
+            $shell->out($msg);
+        }
+
+        return $record->id;
     }
 }

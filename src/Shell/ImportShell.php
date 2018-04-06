@@ -358,6 +358,12 @@ class ImportShell extends Shell
      */
     private function identifyLocations($worksheetName)
     {
+        /**
+         * @var SchoolDistrictsTable $schoolDistrictsTable
+         * @var SchoolsTable $schoolsTable
+         */
+        $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
+        $schoolsTable = TableRegistry::get('Schools');
         $context = $this->importFile->getWorksheets()[$worksheetName]['context'];
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
         $this->out("Identifying $subject...");
@@ -365,84 +371,18 @@ class ImportShell extends Shell
         foreach ($this->importFile->getLocations() as $rowNum => $location) {
             $districtId = null;
             if (isset($location['districtId']) && isset($location['districtName'])) {
-                $districtId = $this->getOrCreateDistrict($location['districtId'], $location['districtName']);
+                $districtId = $schoolDistrictsTable->getOrCreate($location['districtId'], $location['districtName'], $this);
             } elseif (isset($location['districtId'])) {
                 throw new Exception('District name missing in row ' . $rowNum);
             }
 
             $schoolId = null;
             if (isset($location['schoolId']) && isset($location['schoolName'])) {
-                $schoolId = $this->getOrCreateSchool($location['schoolId'], $location['schoolName'], $districtId);
+                $schoolId = $schoolsTable->getOrCreate($location['schoolId'], $location['schoolName'], $districtId, $this);
             } elseif (isset($location['schoolId']) || isset($location['schoolName'])) {
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
         }
         $this->out(' - Done');
-    }
-
-    /**
-     * Finds a school district with a matching code or creates a new record and returns a record ID
-     *
-     * @param string $code School district code
-     * @param string $name School name
-     *
-     * @return int
-     */
-    public function getOrCreateDistrict($code, $name)
-    {
-        $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
-        $record = $schoolDistrictsTable->find()
-            ->select(['id'])
-            ->where(['code' => $code])
-            ->first();
-
-        if ($record) {
-            return $record->id;
-        }
-
-        $record = $schoolDistrictsTable->newEntity(compact('code', 'name'));
-        $schoolDistrictsTable->saveOrFail($record);
-
-        $msg = " - Added district #$code: $name";
-        $this->out($msg);
-
-        return $record->id;
-    }
-
-
-    /**
-     * Finds a school with a matching code or creates a new record and returns a record ID
-     *
-     * @param string $code School code
-     * @param string $name School name
-     * @param int $districtId SchoolDistrict ID
-     * @return int
-     */
-    public function getOrCreateSchool($code, $name, $districtId = null)
-    {
-        $schoolsTable = TableRegistry::get('Schools');
-        $record = $schoolsTable->find()
-            ->select(['id'])
-            ->where(['code' => $code])
-            ->first();
-
-        if ($record) {
-            return $record->id;
-        }
-
-        $record = $schoolsTable->newEntity([
-            'code' => $code,
-            'name' => $name,
-            'school_district_id' => $districtId
-        ]);
-        $schoolsTable->saveOrFail($record);
-
-        $msg = " - Added school #$code: $name";
-        if (!$districtId) {
-            $msg .= ' (no district)';
-        }
-        $this->out($msg);
-
-        return $record->id;
     }
 }
