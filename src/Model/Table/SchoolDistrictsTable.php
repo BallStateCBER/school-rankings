@@ -97,8 +97,7 @@ class SchoolDistrictsTable extends Table
         $validator
             ->scalar('url')
             ->maxLength('url', 255)
-            ->requirePresence('url', 'create')
-            ->notEmpty('url');
+            ->allowEmpty('url');
 
         $validator
             ->scalar('code')
