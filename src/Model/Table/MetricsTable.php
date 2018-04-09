@@ -93,7 +93,6 @@ class MetricsTable extends Table
         return $rules;
     }
 
-
     /**
      * Returns TRUE if the metric is found in the database
      *
