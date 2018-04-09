@@ -754,7 +754,7 @@ class ImportFile
                 $districtId = $schoolDistrictsTable->getOrCreate(
                     $location['districtCode'],
                     $location['districtName'],
-                    $this
+                    $this->shell
                 );
                 $this->setLocationInfo($rowNum, 'districtId', $districtId);
             } elseif (isset($location['districtCode'])) {
@@ -767,7 +767,7 @@ class ImportFile
                     $location['schoolCode'],
                     $location['schoolName'],
                     $districtId,
-                    $this
+                    $this->shell
                 );
                 $this->setLocationInfo($rowNum, 'schoolId', $schoolId);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
