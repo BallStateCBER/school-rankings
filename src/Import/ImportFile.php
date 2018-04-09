@@ -3,8 +3,12 @@ namespace App\Import;
 
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SchoolDistrictsTable;
+use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
+use App\Shell\ImportShell;
 use Cake\ORM\TableRegistry;
+use Cake\Shell\Helper\ProgressHelper;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -615,5 +619,170 @@ class ImportFile
     public function setLocationInfo($rowNum, $var, $val)
     {
         $this->worksheets[$this->activeWorksheet]['locations'][$rowNum][$var] = $val;
+    }
+
+    /**
+     * Loops through all data cells and aborts script if any are invalid
+     *
+     * @param string $worksheetName Name of current worksheet
+     * @param ImportShell $shell Shell object
+     * @return void
+     */
+    public function validateData($worksheetName, $shell)
+    {
+        $shell->out('Validating data...');
+
+        try {
+            $this->selectWorksheet($worksheetName);
+        } catch (Exception $e) {
+            $shell->abort('Error selecting worksheet ' . $worksheetName . ':' . $e->getMessage());
+        }
+
+        $ws = $this->getWorksheets()[$worksheetName];
+        $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
+        $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
+
+        /** @var ProgressHelper $progress */
+        $progress = $shell->helper('Progress');
+        $progress->init([
+            'total' => $dataRowCount * $dataColCount,
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        $datum = new Datum();
+        $invalidData = [];
+        for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
+            for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
+                try {
+                    $value = $this->getValue($col, $row);
+                    $cell = $this->getCell($col, $row);
+                    if (!$datum->isValid($value, $cell)) {
+                        $invalidData[] = compact('col', 'row', 'value');
+                    }
+                } catch (Exception $e) {
+                    $value = '(Cannot read value)';
+                    $invalidData[] = compact('col', 'row', 'value');
+                }
+                $progress->increment(1);
+                $progress->draw();
+            }
+        }
+
+        if ($invalidData) {
+            $limit = 10;
+            $count = count($invalidData);
+            if ($count > $limit) {
+                $invalidData = array_slice($invalidData, 0, $limit);
+            }
+
+            $shell->getIo()->overwrite('Data errors:');
+            array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
+            $shell->helper('Table')->output($invalidData);
+            if (count($invalidData) < $count) {
+                $difference = $count - count($invalidData);
+                $msg = '+ ' . $difference . ' more invalid ' . __n('value', 'values', $difference);
+                $shell->out($msg);
+            }
+            $shell->abort('Cannot continue. Invalid data found.');
+        }
+
+        $shell->getIo()->overwrite(' - Done');
+    }
+
+    /**
+     * Identifies all metrics used in this worksheet
+     *
+     * Checks the database for already-identified metrics and interacts with the user if necessary
+     *
+     * @param string $worksheetName Name of current worksheet
+     * @param ImportShell $shell Shell object
+     * @return void
+     */
+    public function identifyMetrics($worksheetName, $shell)
+    {
+        $shell->out('Identifying metrics...');
+        $unknownMetrics = $this->getUnknownMetrics();
+        if (! $unknownMetrics) {
+            $shell->out(' - Done');
+
+            return;
+        }
+
+        $context = $this->getWorksheets()[$worksheetName]['context'];
+        $count = count($unknownMetrics);
+        $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n" .
+            "Options for each:\n" .
+            " - Enter an existing $context metric ID\n" .
+            " - Enter the name of a new metric to create \n" .
+            " - Enter nothing to accept the suggested name";
+        $shell->out($msg);
+
+        $filename = $this->getFilename();
+        $worksheetName = $this->activeWorksheet;
+        $import = new Import();
+        foreach ($unknownMetrics as $colNum => $unknownMetric) {
+            $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
+            $shell->info("\nColumn: $cleanColName");
+            $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
+            $shell->out('Suggested metric name: ' . $suggestedName);
+            try {
+                $metricId = $this->getMetricId($suggestedName, $unknownMetric);
+                $this->setMetricId($colNum, $metricId);
+            } catch (\Exception $e) {
+                $shell->err('Error: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Identifies all schools/districts used in this worksheet
+     *
+     * Checks the database for already-identified schools/districts and interacts with the user if necessary
+     *
+     * @param $worksheetName
+     * @param ImportShell $shell Shell object
+     * @return void
+     * @throws Exception
+     */
+    public function identifyLocations($worksheetName, $shell)
+    {
+        /**
+         * @var SchoolDistrictsTable $schoolDistrictsTable
+         * @var SchoolsTable $schoolsTable
+         */
+        $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
+        $schoolsTable = TableRegistry::get('Schools');
+        $context = $this->getWorksheets()[$worksheetName]['context'];
+        $subject = ($context == 'district' ? 'districts' : 'schools/districts');
+        $shell->out("Identifying $subject...");
+
+        foreach ($this->getLocations() as $rowNum => $location) {
+            $districtId = null;
+            if (isset($location['districtCode']) && isset($location['districtName'])) {
+                $districtId = $schoolDistrictsTable->getOrCreate(
+                    $location['districtCode'],
+                    $location['districtName'],
+                    $this
+                );
+                $this->setLocationInfo($rowNum, 'districtId', $districtId);
+            } elseif (isset($location['districtCode'])) {
+                throw new Exception('District name missing in row ' . $rowNum);
+            }
+
+            $schoolId = null;
+            if (isset($location['schoolCode']) && isset($location['schoolName'])) {
+                $schoolId = $schoolsTable->getOrCreate(
+                    $location['schoolCode'],
+                    $location['schoolName'],
+                    $districtId,
+                    $this
+                );
+                $this->setLocationInfo($rowNum, 'schoolId', $schoolId);
+            } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
+                throw new Exception('Incomplete school information in row ' . $rowNum);
+            }
+        }
+        $shell->out(' - Done');
     }
 }
