@@ -157,7 +157,7 @@ class ImportShell extends Shell
             [$files[$year][$fileKey - 1]];
         foreach ($selectedFiles as $file) {
             $this->out('Opening ' . $file['filename'] . '...');
-            $this->importFile = new ImportFile($year, $file['filename']);
+            $this->importFile = new ImportFile($year, $file['filename'], $this);
             if ($this->importFile->getError()) {
                 $this->abort($this->importFile->getError());
             }
@@ -168,10 +168,15 @@ class ImportShell extends Shell
             foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
                 $this->info('Worksheet: ' . $worksheetName);
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
-                $this->importFile->validateData($worksheetName, $this);
-                $this->importFile->identifyMetrics($worksheetName, $this);
                 try {
-                    $this->importFile->identifyLocations($worksheetName, $this);
+                    $this->importFile->selectWorksheet($worksheetName);
+                } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                    $this->abort('Error selecting worksheet ' . $worksheetName . ': ' . $e->getMessage());
+                }
+                $this->importFile->validateData();
+                $this->importFile->identifyMetrics();
+                try {
+                    $this->importFile->identifyLocations();
                 } catch (Exception $e) {
                     $this->abort('Error identifying locations: ' . $e->getMessage());
                 }

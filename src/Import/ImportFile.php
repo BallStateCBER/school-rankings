@@ -28,6 +28,7 @@ class ImportFile
 {
     private $error;
     private $filename;
+    private $shell;
     private $worksheets;
     private $year;
     public $activeWorksheet;
@@ -38,13 +39,15 @@ class ImportFile
      *
      * @param string $year Year (subdirectory of /data)
      * @param string $filename Filename of spreadsheet to import
+     * @param ImportShell $shell Shell object
      */
-    public function __construct($year, $filename)
+    public function __construct($year, $filename, $shell)
     {
         $type = 'Xlsx';
         $path = ROOT . DS . 'data' . DS . $year . DS . $filename;
         $this->year = $year;
         $this->filename = $filename;
+        $this->shell = $shell;
 
         try {
             // Read spreadsheet
@@ -622,28 +625,20 @@ class ImportFile
     }
 
     /**
-     * Loops through all data cells and aborts script if any are invalid
+     * Loops through all data cells in the active worksheet and aborts script if any are invalid
      *
-     * @param string $worksheetName Name of current worksheet
-     * @param ImportShell $shell Shell object
      * @return void
      */
-    public function validateData($worksheetName, $shell)
+    public function validateData()
     {
-        $shell->out('Validating data...');
+        $this->shell->out('Validating data...');
 
-        try {
-            $this->selectWorksheet($worksheetName);
-        } catch (Exception $e) {
-            $shell->abort('Error selecting worksheet ' . $worksheetName . ':' . $e->getMessage());
-        }
-
-        $ws = $this->getWorksheets()[$worksheetName];
+        $ws = $this->getWorksheets()[$this->activeWorksheet];
         $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
         $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
 
         /** @var ProgressHelper $progress */
-        $progress = $shell->helper('Progress');
+        $progress = $this->shell->helper('Progress');
         $progress->init([
             'total' => $dataRowCount * $dataColCount,
             'width' => 40,
@@ -676,18 +671,18 @@ class ImportFile
                 $invalidData = array_slice($invalidData, 0, $limit);
             }
 
-            $shell->getIo()->overwrite('Data errors:');
+            $this->shell->getIo()->overwrite('Data errors:');
             array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
-            $shell->helper('Table')->output($invalidData);
+            $this->shell->helper('Table')->output($invalidData);
             if (count($invalidData) < $count) {
                 $difference = $count - count($invalidData);
                 $msg = '+ ' . $difference . ' more invalid ' . __n('value', 'values', $difference);
-                $shell->out($msg);
+                $this->shell->out($msg);
             }
-            $shell->abort('Cannot continue. Invalid data found.');
+            $this->shell->abort('Cannot continue. Invalid data found.');
         }
 
-        $shell->getIo()->overwrite(' - Done');
+        $this->shell->getIo()->overwrite(' - Done');
     }
 
     /**
@@ -695,42 +690,40 @@ class ImportFile
      *
      * Checks the database for already-identified metrics and interacts with the user if necessary
      *
-     * @param string $worksheetName Name of current worksheet
-     * @param ImportShell $shell Shell object
      * @return void
      */
-    public function identifyMetrics($worksheetName, $shell)
+    public function identifyMetrics()
     {
-        $shell->out('Identifying metrics...');
+        $this->shell->out('Identifying metrics...');
         $unknownMetrics = $this->getUnknownMetrics();
-        if (! $unknownMetrics) {
-            $shell->out(' - Done');
+        if (!$unknownMetrics) {
+            $this->shell->out(' - Done');
 
             return;
         }
 
-        $context = $this->getWorksheets()[$worksheetName]['context'];
+        $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $count = count($unknownMetrics);
         $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n" .
             "Options for each:\n" .
             " - Enter an existing $context metric ID\n" .
             " - Enter the name of a new metric to create \n" .
             " - Enter nothing to accept the suggested name";
-        $shell->out($msg);
+        $this->shell->out($msg);
 
         $filename = $this->getFilename();
         $worksheetName = $this->activeWorksheet;
         $import = new Import();
         foreach ($unknownMetrics as $colNum => $unknownMetric) {
             $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
-            $shell->info("\nColumn: $cleanColName");
+            $this->shell->info("\nColumn: $cleanColName");
             $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
-            $shell->out('Suggested metric name: ' . $suggestedName);
+            $this->shell->out('Suggested metric name: ' . $suggestedName);
             try {
                 $metricId = $this->getMetricId($suggestedName, $unknownMetric);
                 $this->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
-                $shell->err('Error: ' . $e->getMessage());
+                $this->shell->err('Error: ' . $e->getMessage());
             }
         }
     }
@@ -740,12 +733,10 @@ class ImportFile
      *
      * Checks the database for already-identified schools/districts and interacts with the user if necessary
      *
-     * @param $worksheetName
-     * @param ImportShell $shell Shell object
      * @return void
      * @throws Exception
      */
-    public function identifyLocations($worksheetName, $shell)
+    public function identifyLocations()
     {
         /**
          * @var SchoolDistrictsTable $schoolDistrictsTable
@@ -753,9 +744,9 @@ class ImportFile
          */
         $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
         $schoolsTable = TableRegistry::get('Schools');
-        $context = $this->getWorksheets()[$worksheetName]['context'];
+        $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
-        $shell->out("Identifying $subject...");
+        $this->shell->out("Identifying $subject...");
 
         foreach ($this->getLocations() as $rowNum => $location) {
             $districtId = null;
@@ -783,6 +774,6 @@ class ImportFile
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
         }
-        $shell->out(' - Done');
+        $this->shell->out(' - Done');
     }
 }
