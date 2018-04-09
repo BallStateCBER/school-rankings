@@ -77,12 +77,11 @@ class Import
      * @return string
      */
     public function getSuggestedName($filename, $worksheetName, $unknownMetric) {
-        $import = new Import();
         $nameDelimiter = ' - ';
         $groupName = $unknownMetric['group'];
         $columnName = $unknownMetric['name'];
         $suggestedNameParts = [explode('.', $filename)[0]];
-        if (!$import->isYear($worksheetName)) {
+        if (!$this->isYear($worksheetName)) {
             $suggestedNameParts[] = $worksheetName;
         }
         $cleanColumnName = str_replace("\n", $nameDelimiter, $columnName);
