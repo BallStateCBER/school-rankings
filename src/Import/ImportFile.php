@@ -720,7 +720,7 @@ class ImportFile
             $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
             $this->shell->out('Suggested metric name: ' . $suggestedName);
             try {
-                $metricId = $this->getMetricId($suggestedName, $unknownMetric);
+                $metricId = $this->getMetricId($suggestedName, $unknownMetric['name']);
                 $this->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
                 $this->shell->err('Error: ' . $e->getMessage());
