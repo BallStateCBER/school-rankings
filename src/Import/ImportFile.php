@@ -603,4 +603,17 @@ class ImportFile
     {
         return ltrim($string, '0');
     }
+
+    /**
+     * Sets location information for the specified row
+     *
+     * @param int $rowNum Row number
+     * @param string $var Array key for location information
+     * @param mixed $val Value to write to array
+     * @return void
+     */
+    public function setLocationInfo($rowNum, $var, $val)
+    {
+        $this->worksheets[$this->activeWorksheet]['locations'][$rowNum][$var] = $val;
+    }
 }

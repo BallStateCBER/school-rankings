@@ -371,14 +371,25 @@ class ImportShell extends Shell
         foreach ($this->importFile->getLocations() as $rowNum => $location) {
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
-                $districtId = $schoolDistrictsTable->getOrCreate($location['districtCode'], $location['districtName'], $this);
+                $districtId = $schoolDistrictsTable->getOrCreate(
+                    $location['districtCode'],
+                    $location['districtName'],
+                    $this
+                );
+                $this->importFile->setLocationInfo($rowNum, 'districtId', $districtId);
             } elseif (isset($location['districtCode'])) {
                 throw new Exception('District name missing in row ' . $rowNum);
             }
 
             $schoolId = null;
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
-                $schoolId = $schoolsTable->getOrCreate($location['schoolCode'], $location['schoolName'], $districtId, $this);
+                $schoolId = $schoolsTable->getOrCreate(
+                    $location['schoolCode'],
+                    $location['schoolName'],
+                    $districtId,
+                    $this
+                );
+                $this->importFile->setLocationInfo($rowNum, 'schoolId', $schoolId);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
