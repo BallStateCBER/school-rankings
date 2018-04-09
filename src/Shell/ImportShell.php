@@ -3,10 +3,7 @@ namespace App\Shell;
 
 use App\Import\Import;
 use App\Import\ImportFile;
-use App\Model\Table\MetricsTable;
-use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use Cake\Console\Shell;
-use Cake\ORM\TableRegistry;
 use Exception;
 
 /**
@@ -189,51 +186,5 @@ class ImportShell extends Shell
         }
 
         $this->out('Import complete');
-    }
-
-    /**
-     * Interacts with the user and returns a metric ID, creating a new metric record if appropriate
-     *
-     * @param string $suggestedName Default name for this metric
-     * @param array $unknownMetric Array of name and group information for the current column
-     * @return int
-     * @throws Exception
-     */
-    private function getMetricId($suggestedName, $unknownMetric)
-    {
-        $input = $this->in('Metric ID or name:');
-        $context = $this->importFile->getContext();
-
-        // Existing metric ID entered
-        if (is_numeric($input)) {
-            $metricId = (int)$input;
-            if (!MetricsTable::recordExists($context, $metricId)) {
-                $this->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
-
-                return $this->getMetricId($suggestedName, $unknownMetric);
-            }
-
-            return $metricId;
-        }
-
-        // Name of new metric entered
-        try {
-            $metricName = $input ?: $suggestedName;
-            $metric = MetricsTable::addRecord($context, $metricName);
-            if (!$metric) {
-                throw new Exception('Metric could not be saved.');
-            }
-            $this->out('Metric #' . $metric->id . ' added');
-
-            /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
-            $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
-            $ssColsMetricsTable->add($this->importFile, $unknownMetric, $metric->id);
-
-            return $metric->id;
-        } catch (Exception $e) {
-            $this->err('Error: ' . $e->getMessage());
-
-            return $this->getMetricId($suggestedName, $unknownMetric);
-        }
     }
 }

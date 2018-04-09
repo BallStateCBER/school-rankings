@@ -720,7 +720,7 @@ class ImportFile
             $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
             $this->shell->out('Suggested metric name: ' . $suggestedName);
             try {
-                $metricId = $this->getMetricId($suggestedName, $unknownMetric['name']);
+                $metricId = $this->getMetricInput($suggestedName, $unknownMetric);
                 $this->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
                 $this->shell->err('Error: ' . $e->getMessage());
@@ -775,5 +775,51 @@ class ImportFile
             }
         }
         $this->shell->out(' - Done');
+    }
+
+    /**
+     * Interacts with the user and returns a metric ID, creating a new metric record if appropriate
+     *
+     * @param string $suggestedName Default name for this metric
+     * @param array $unknownMetric Array of name and group information for the current column
+     * @return int
+     * @throws Exception
+     */
+    private function getMetricInput($suggestedName, $unknownMetric)
+    {
+        $input = $this->shell->in('Metric ID or name:');
+        $context = $this->getContext();
+
+        // Existing metric ID entered
+        if (is_numeric($input)) {
+            $metricId = (int)$input;
+            if (!MetricsTable::recordExists($context, $metricId)) {
+                $this->shell->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
+
+                return $this->getMetricInput($suggestedName, $unknownMetric);
+            }
+
+            return $metricId;
+        }
+
+        // Name of new metric entered
+        try {
+            $metricName = $input ?: $suggestedName;
+            $metric = MetricsTable::addRecord($context, $metricName);
+            if (!$metric) {
+                throw new Exception('Metric could not be saved.');
+            }
+            $this->shell->out('Metric #' . $metric->id . ' added');
+
+            /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
+            $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
+            $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
+
+            return $metric->id;
+        } catch (Exception $e) {
+            $this->shell->err('Error: ' . $e->getMessage());
+
+            return $this->getMetricInput($suggestedName, $unknownMetric);
+        }
     }
 }
