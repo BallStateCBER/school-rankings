@@ -6,8 +6,6 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
-use Cake\Validation\Validator;
 
 /**
  * SchoolDistrictStatistics Model
@@ -25,7 +23,7 @@ use Cake\Validation\Validator;
  *
  * @mixin TimestampBehavior
  */
-class SchoolDistrictStatisticsTable extends Table
+class SchoolDistrictStatisticsTable extends StatisticsTable
 {
 
     /**
@@ -39,12 +37,8 @@ class SchoolDistrictStatisticsTable extends Table
         parent::initialize($config);
 
         $this->setTable('school_district_statistics');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
 
-        $this->addBehavior('Timestamp');
-
-        $this->belongsTo('Metrics', [
+        $this->belongsTo('SchoolDistrictMetrics', [
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
@@ -52,43 +46,6 @@ class SchoolDistrictStatisticsTable extends Table
             'foreignKey' => 'school_district_id',
             'joinType' => 'INNER'
         ]);
-    }
-
-    /**
-     * Default validation rules.
-     *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationDefault(Validator $validator)
-    {
-        $validator
-            ->integer('id')
-            ->allowEmpty('id', 'create');
-
-        $validator
-            ->scalar('value')
-            ->maxLength('value', 255)
-            ->requirePresence('value', 'create')
-            ->notEmpty('value');
-
-        $validator
-            ->integer('year')
-            ->requirePresence('year', 'create')
-            ->notEmpty('year');
-
-        $validator
-            ->boolean('contiguous')
-            ->requirePresence('contiguous', 'create')
-            ->notEmpty('contiguous');
-
-        $validator
-            ->scalar('file')
-            ->maxLength('file', 255)
-            ->requirePresence('file', 'create')
-            ->notEmpty('file');
-
-        return $validator;
     }
 
     /**
@@ -100,7 +57,7 @@ class SchoolDistrictStatisticsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['metric_id'], 'Metrics'));
+        $rules->add($rules->existsIn(['metric_id'], 'SchoolDistrictMetrics'));
         $rules->add($rules->existsIn(['school_district_id'], 'SchoolDistricts'));
 
         return $rules;
