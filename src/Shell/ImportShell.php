@@ -167,19 +167,13 @@ class ImportShell extends Shell
                 $this->out('Context: ' . ucwords($worksheetInfo['context']));
                 try {
                     $this->importFile->selectWorksheet($worksheetName);
-                } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
-                    $this->abort('Error selecting worksheet ' . $worksheetName . ': ' . $e->getMessage());
-                }
-                $this->importFile->validateData();
-                $this->importFile->identifyMetrics();
-                try {
+                    $this->importFile->validateData();
+                    $this->importFile->identifyMetrics();
                     $this->importFile->identifyLocations();
-                } catch (Exception $e) {
-                    $this->abort('Error identifying locations: ' . $e->getMessage());
-                }
-                try {
                     $this->importFile->recordData();
                 } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                    $this->abort($e->getMessage());
+                } catch (Exception $e) {
                     $this->abort($e->getMessage());
                 }
                 $this->out();
