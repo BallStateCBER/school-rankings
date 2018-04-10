@@ -72,6 +72,7 @@ class ImportFile
                 $this->worksheets[$wsName]['groupings'] = $this->getGroupings();
                 $this->worksheets[$wsName]['dataColumns'] = $this->getDataColumns();
                 $this->worksheets[$wsName]['locations'] = $this->getLocations();
+                $this->trimTotalRows();
             }
         } catch (Exception $e) {
             $this->error = $e->getMessage();
@@ -820,6 +821,23 @@ class ImportFile
             $this->shell->err('Error: ' . $e->getMessage());
 
             return $this->getMetricInput($suggestedName, $unknownMetric);
+        }
+    }
+
+    /**
+     * Adjusts totalRows to not include rows at the end of the file with blank values in their first column
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @return void
+     */
+    private function trimTotalRows()
+    {
+        for ($row = $this->worksheets[$this->activeWorksheet]['totalRows']; $row >= 1; $row--) {
+            $col = 1;
+            if ($this->getValue($col, $row)) {
+                $this->worksheets[$this->activeWorksheet]['totalRows'] = $row;
+                break;
+            }
         }
     }
 }
