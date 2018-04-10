@@ -82,7 +82,7 @@ class StatisticsTable extends Table
             case 'district':
                 return TableRegistry::get('SchoolDistrictStatistics');
             default:
-                throw new InternalErrorException('Statistics context "' .  $context . '" not recognized');
+                throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
         }
     }
 
@@ -93,10 +93,10 @@ class StatisticsTable extends Table
      * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
      * @param int $locationId School ID or SchoolDistrict ID
      * @param int $year Year to look up data for
-     * @return string|null
+     * @return array|null
      * @throws InternalErrorException
      */
-    public static function getValue($context, $metricId, $locationId, $year)
+    public static function getStatistic($context, $metricId, $locationId, $year)
     {
         $conditions = [
             'metric_id' => $metricId,
@@ -111,16 +111,16 @@ class StatisticsTable extends Table
                 $conditions['school_district_id'] = $locationId;
                 break;
             default:
-                throw new InternalErrorException('Statistics context "' .  $context . '" not recognized');
+                throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
         }
 
-        $result = self::getContextTable($context)->find()
-            ->select(['value'])
+        $statistic = self::getContextTable($context)->find()
+            ->select(['id', 'value'])
             ->where($conditions)
             ->orderDesc('created')
             ->enableHydration(false)
             ->first();
 
-        return $result ? $result['value'] : null;
+        return $statistic;
     }
 }
