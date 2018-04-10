@@ -177,6 +177,11 @@ class ImportShell extends Shell
                 } catch (Exception $e) {
                     $this->abort('Error identifying locations: ' . $e->getMessage());
                 }
+                try {
+                    $this->importFile->recordData();
+                } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                    $this->abort($e->getMessage());
+                }
                 $this->out();
             }
 

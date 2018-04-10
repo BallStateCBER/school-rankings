@@ -6,6 +6,7 @@ use App\Model\Table\MetricsTable;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
+use App\Model\Table\StatisticsTable;
 use App\Shell\ImportShell;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
@@ -18,6 +19,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * Class ImportFile
  * @package App\Import
  * @property array $worksheets
+ * @property bool $overwrite
+ * @property ImportShell $shell
  * @property Spreadsheet $spreadsheet
  * @property string $filename
  * @property string $year
@@ -28,6 +31,7 @@ class ImportFile
 {
     private $error;
     private $filename;
+    private $overwrite;
     private $shell;
     private $worksheets;
     private $year;
@@ -838,6 +842,126 @@ class ImportFile
                 $this->worksheets[$this->activeWorksheet]['totalRows'] = $row;
                 break;
             }
+        }
+    }
+
+    /**
+     * Returns the value of $this->overwrite, indicating whether overwriting is allowed, and prompts input if unset
+     *
+     * @return bool
+     */
+    private function getOverwrite()
+    {
+        if (isset($this->overwrite)) {
+            return $this->overwrite;
+        }
+
+        $input = $this->shell->in("\nOverwrite statistics that have already been recorded?", ['y', 'n']);
+        $this->overwrite = ($input == 'y');
+
+        return $this->overwrite;
+    }
+
+    /**
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @return void
+     */
+    public function recordData()
+    {
+        $this->shell->out('Importing data...');
+
+        $ws = $this->getWorksheets()[$this->activeWorksheet];
+        $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
+        $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
+
+        /** @var ProgressHelper $progress */
+        $progress = $this->shell->helper('Progress');
+        $progress->init([
+            'total' => $dataRowCount * $dataColCount,
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        $datum = new Datum();
+        $context = $this->getContext();
+        $year = $this->year;
+        $counts = [
+            'added' => 0,
+            'updated' => 0,
+            'ignored' => 0
+        ];
+        $table = StatisticsTable::getContextTable($context);
+        for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
+
+            // Skip rows with no location
+            if (!isset($this->worksheets[$this->activeWorksheet]['locations'][$row])) {
+                break;
+            }
+
+            $locationIdKey = ($context == 'school') ? 'schoolId' : 'districtId';
+            $locationId = $this->worksheets[$this->activeWorksheet]['locations'][$row][$locationIdKey];
+            for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
+                $progress->increment(1);
+                $progress->draw();
+
+                $value = $this->getValue($col, $row);
+                if ($datum->isIgnorable($value)) {
+                    continue;
+                }
+
+                $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
+                $existingStat = StatisticsTable::getStatistic($context, $metricId, $locationId, $year);
+
+                // Add
+                if (!$existingStat) {
+                    $locationIdField = ($context == 'school') ? 'school_id' : 'school_district_id';
+                    $statistic = $table->newEntity([
+                        'metric_id' => $metricId,
+                        $locationIdField => $locationId,
+                        'value' => $value,
+                        'year' => $this->year,
+                        'file' => $this->filename,
+                        'contiguous' => true
+                    ]);
+                    if ($statistic->getErrors()) {
+                        $errors = print_r($statistic->getErrors(), true);
+                        $this->shell->abort("Error adding statistic. Details: \n" . $errors);
+
+                        return;
+                    } else {
+                        $table->save($statistic);
+                    }
+                    $counts['added']++;
+                    continue;
+                }
+
+                // Update
+                if ($this->getOverwrite()) {
+                    $statistic = $table->get($existingStat['id']);
+                    $table->patchEntity($statistic, ['value' => $value]);
+                    if ($statistic->getErrors()) {
+                        $errors = print_r($statistic->getErrors(), true);
+                        $this->shell->abort("Error updating statistic. Details: \n" . $errors);
+
+                        return;
+                    } else {
+                        $table->save($statistic);
+                    }
+                    $counts['updated']++;
+                    continue;
+                }
+
+                $counts['ignored']++;
+            }
+        }
+
+        $this->shell->getIo()->overwrite(' - Done');
+        foreach ($counts as $action => $count) {
+            if (!$count) {
+                continue;
+            }
+            $msg = " - $count " . __n('stat ', 'stats ', $count) . $action;
+            $this->shell->out($msg);
         }
     }
 }
