@@ -18,7 +18,10 @@ class MetricsHelper extends Helper
             'core' => [
                 'data' => $this->getJsTreeData($metrics)
             ],
-            'plugins' => ['wholerow']
+            'plugins' => [
+                'state',
+                'wholerow'
+            ]
         ];
 
         return "$('$selector').jstree(" . json_encode($config) . ');';
