@@ -16,9 +16,13 @@ class MetricsHelper extends Helper
     {
         $config = [
             'core' => [
-                'data' => $this->getJsTreeData($metrics)
+                'data' => $this->getJsTreeData($metrics),
+                'check_callback' => true
             ],
             'plugins' => [
+                'contextmenu',
+                'dnd',
+                'sort',
                 'state',
                 'wholerow'
             ]
