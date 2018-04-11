@@ -33,5 +33,10 @@
     </div>
     <footer>
     </footer>
+    <script>
+        $(document).ready(function () {
+            <?= $this->fetch('buffered'); ?>
+        });
+    </script>
 </body>
 </html>
