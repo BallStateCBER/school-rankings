@@ -59,6 +59,20 @@ class MetricsTable extends Table
 
         $table = $this;
         $validator
+            ->integer('parent_id')
+            ->allowEmpty('parent_id')
+            ->add('parent_id', 'unique', [
+                'rule' => function ($value, $context) use ($table) {
+                    $metricId = $context['data']['id'] ?? null;
+                    $parentId = $value;
+                    $name = $context['data']['name'];
+
+                    return !$table->hasNameConflict($metricId, $parentId, $name);
+                },
+                'message' => 'Another metric with the same parent has the same name'
+            ]);
+
+        $validator
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
