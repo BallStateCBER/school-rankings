@@ -2,6 +2,7 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Metric;
+use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
 use Cake\Network\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
@@ -56,11 +57,21 @@ class MetricsTable extends Table
             ->integer('id')
             ->allowEmpty('id', 'create');
 
+        $table = $this;
         $validator
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
-            ->notEmpty('name');
+            ->notEmpty('name')
+            ->add('name', 'unique', [
+                'rule' => function ($value, $context) use ($table) {
+                    $metricId = $context['data']['id'] ?? null;
+                    $parentId = $context['data']['parent_id'];
+
+                    return !$table->hasNameConflict($metricId, $parentId, $value);
+                },
+                'message' => 'Another metric with the same parent has the same name'
+            ]);
 
         $validator
             ->scalar('description')
@@ -154,5 +165,29 @@ class MetricsTable extends Table
             default:
                 throw new InternalErrorException('Metric context "' .  $context . '" not recognized');
         }
+    }
+
+    /**
+     * Returns true if the specified metric does (or would have) the same name as another metric with the same parent_id
+     *
+     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @param int|null $parentId Metric parent_id
+     * @param string $name Metric name being validated
+     * @return bool
+     */
+    private function hasNameConflict($metricId, $parentId, $name)
+    {
+        $conditions = [
+            'name' => $name,
+            'parent_id' => $parentId
+        ];
+        if ($metricId) {
+            $conditions[] = function (QueryExpression $exp) use ($metricId) {
+                return $exp->notEq('id', $metricId);
+            };
+        }
+        return $this->find()
+                ->where($conditions)
+                ->count() > 0;
     }
 }
