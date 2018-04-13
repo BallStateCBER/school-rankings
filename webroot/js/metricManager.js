@@ -88,6 +88,12 @@ metricManager = {
       let liElement = $('#' + obj.id);
       let context = liElement.closest('section').data('context');
       let metricId = obj.data.metricId;
+
+      if (inst.is_parent(obj)) {
+        alert('Cannot delete a metric that has children');
+        return;
+      }
+
       $.ajax({
         method: 'DELETE',
         url: '/admin/metrics/delete.json',
