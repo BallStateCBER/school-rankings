@@ -83,8 +83,45 @@ metricManager = {
     'label': 'Delete',
     'title': 'Delete this metric',
     'action': function(data) {
-      console.log('Delete');
-      console.log(data);
+      let inst = $.jstree.reference(data.reference);
+      let obj = inst.get_node(data.reference);
+      let liElement = $('#' + obj.id);
+      let context = liElement.closest('section').data('context');
+      let metricId = obj.data.metricId;
+      $.ajax({
+        method: 'DELETE',
+        url: '/admin/metrics/delete.json',
+        dataType: 'json',
+        data: {
+          'context': context,
+          'metricId': metricId,
+        },
+        beforeSend: function() {
+          let img = $('<img src="/jstree/themes/default/throbber.gif" />');
+          img.attr('alt', 'Loading...');
+          img.addClass('loading');
+          liElement.find('a.jstree-anchor').append(img);
+          inst.disable_node(obj);
+        },
+        success: function(data) {
+          if (data.hasOwnProperty('result') && data.result) {
+            console.log('Success');
+            inst.delete_node(obj);
+            return;
+          }
+          alert('There was an error deleting that node');
+        },
+        error: function(jqXHR, errorType, exception) {
+          console.log(jqXHR);
+          console.log(errorType);
+          console.log(exception);
+          alert('There was an error deleting that node');
+        },
+        complete: function() {
+          liElement.find('img.loading').remove();
+          inst.enable_node(obj);
+        },
+      });
     },
   },
 };

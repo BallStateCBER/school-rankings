@@ -5,6 +5,9 @@ use App\Controller\AppController;
 use App\Model\Entity\SchoolDistrictMetric;
 use App\Model\Entity\SchoolMetric;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SchoolDistrictMetricsTable;
+use App\Model\Table\SchoolMetricsTable;
+use Cake\Network\Exception\BadRequestException;
 use Cake\Network\Exception\MethodNotAllowedException;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
@@ -66,6 +69,38 @@ class MetricsController extends AppController
             'message' => $metric->getErrors() ?
                 implode("\n", Hash::flatten($metric->getErrors())) :
                 'Success',
+            'result' => $result,
+        ]);
+    }
+
+    /**
+     * Renames a metric
+     *
+     * @return void
+     */
+    public function delete()
+    {
+        if (!$this->request->is('delete')) {
+            throw new MethodNotAllowedException('Request is not DELETE');
+        }
+
+        $metricId = $this->request->getData('metricId');
+        $context = $this->request->getData('context');
+
+        /** @var SchoolMetricsTable|SchoolDistrictMetricsTable $table */
+        $table = MetricsTable::getContextTable($context);
+
+        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        $metric = $table->get($metricId);
+
+        if ($table->childCount($metric, true) > 0) {
+            throw new BadRequestException('Remove all child metrics before removing this metric');
+        }
+
+        $result = $table->delete($metric);
+        $this->set([
+            '_jsonOptions' => JSON_FORCE_OBJECT,
+            '_serialize' => ['result'],
             'result' => $result,
         ]);
     }
