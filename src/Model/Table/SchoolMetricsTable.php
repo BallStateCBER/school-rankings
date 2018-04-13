@@ -46,6 +46,10 @@ class SchoolMetricsTable extends MetricsTable
             'className' => 'SchoolMetrics',
             'foreignKey' => 'parent_id'
         ]);
+        $this->hasMany('SchoolStatistics', [
+            'className' => 'SchoolStatistics',
+            'foreignKey' => 'metric_id'
+        ])->setDependent(true);
     }
 
     /**
