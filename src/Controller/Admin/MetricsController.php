@@ -2,7 +2,12 @@
 namespace App\Controller\Admin;
 
 use App\Controller\AppController;
+use App\Model\Entity\SchoolDistrictMetric;
+use App\Model\Entity\SchoolMetric;
+use App\Model\Table\MetricsTable;
+use Cake\Network\Exception\MethodNotAllowedException;
 use Cake\ORM\TableRegistry;
+use Cake\Utility\Hash;
 
 class MetricsController extends AppController
 {
@@ -31,6 +36,37 @@ class MetricsController extends AppController
                 ]
             ],
             'titleForLayout' => 'Metrics'
+        ]);
+    }
+
+    /**
+     * Renames a metric
+     *
+     * @return void
+     */
+    public function rename()
+    {
+        if (!$this->request->is('patch')) {
+            throw new MethodNotAllowedException('Request is not PATCH');
+        }
+
+        $metricId = $this->request->getData('metricId');
+        $newName = $this->request->getData('newName');
+        $context = $this->request->getData('context');
+        $table = MetricsTable::getContextTable($context);
+
+        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        $metric = $table->get($metricId);
+        $metric = $table->patchEntity($metric, ['name' => $newName]);
+        $result = (bool)$table->save($metric);
+
+        $this->set([
+            '_jsonOptions' => JSON_FORCE_OBJECT,
+            '_serialize' => ['message', 'result'],
+            'message' => $metric->getErrors() ?
+                implode("\n", Hash::flatten($metric->getErrors())) :
+                'Success',
+            'result' => $result,
         ]);
     }
 }
