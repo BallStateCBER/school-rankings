@@ -80,7 +80,7 @@ class MetricsTable extends Table
             ->add('name', 'unique', [
                 'rule' => function ($value, $context) use ($table) {
                     $metricId = $context['data']['id'] ?? null;
-                    $parentId = $context['data']['parent_id'];
+                    $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
 
                     return !$table->hasNameConflict($metricId, $parentId, $value);
                 },
@@ -189,19 +189,23 @@ class MetricsTable extends Table
      * @param string $name Metric name being validated
      * @return bool
      */
-    private function hasNameConflict($metricId, $parentId, $name)
+    public function hasNameConflict($metricId, $parentId, $name)
     {
-        $conditions = [
-            'name' => $name,
-            'parent_id' => $parentId
-        ];
+        $conditions = ['name' => $name];
+        if ($parentId) {
+            $conditions['parent_id'] = $parentId;
+        } else {
+            $conditions[] = function (QueryExpression $exp) {
+                return $exp->isNull('parent_id');
+            };
+        }
         if ($metricId) {
             $conditions[] = function (QueryExpression $exp) use ($metricId) {
                 return $exp->notEq('id', $metricId);
             };
         }
         return $this->find()
-                ->where($conditions)
-                ->count() > 0;
+            ->where($conditions)
+            ->count() > 0;
     }
 }
