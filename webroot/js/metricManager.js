@@ -41,19 +41,15 @@ metricManager = {
             'newName': newName,
           },
           beforeSend: function() {
-            let img = $('<img src="/jstree/themes/default/throbber.gif" />');
-            img.attr('alt', 'Loading...');
-            img.addClass('loading');
-            liElement.find('a.jstree-anchor').append(img);
-            inst.disable_node(obj);
+            metricManager.beforeSend(liElement, inst, obj);
           },
           success: function(data) {
             if (data.hasOwnProperty('result') && data.result) {
-              console.log('Success');
-            } else {
-              alert(data.message);
-              inst.rename_node(obj, originalName);
+              return;
             }
+
+            alert(data.message);
+            inst.rename_node(obj, originalName);
           },
           error: function(jqXHR, errorType, exception) {
             console.log(jqXHR);
@@ -62,8 +58,7 @@ metricManager = {
             inst.rename_node(obj, originalName);
           },
           complete: function() {
-            liElement.find('img.loading').remove();
-            inst.enable_node(obj);
+            metricManager.onComplete(liElement, inst, obj);
           },
         });
       });
@@ -103,15 +98,10 @@ metricManager = {
           'metricId': metricId,
         },
         beforeSend: function() {
-          let img = $('<img src="/jstree/themes/default/throbber.gif" />');
-          img.attr('alt', 'Loading...');
-          img.addClass('loading');
-          liElement.find('a.jstree-anchor').append(img);
-          inst.disable_node(obj);
+          metricManager.beforeSend(liElement, inst, obj);
         },
         success: function(data) {
           if (data.hasOwnProperty('result') && data.result) {
-            console.log('Success');
             inst.delete_node(obj);
             return;
           }
@@ -124,10 +114,22 @@ metricManager = {
           alert('There was an error deleting that node');
         },
         complete: function() {
-          liElement.find('img.loading').remove();
-          inst.enable_node(obj);
+          metricManager.onComplete(liElement, inst, obj);
         },
       });
     },
+  },
+
+  beforeSend: function(liElement, inst, obj) {
+    let img = $('<img src="/jstree/themes/default/throbber.gif" />');
+    img.attr('alt', 'Loading...');
+    img.addClass('loading');
+    liElement.find('a.jstree-anchor').append(img);
+    inst.disable_node(obj);
+  },
+
+  onComplete: function(liElement, inst, obj) {
+    liElement.find('img.loading').remove();
+    inst.enable_node(obj);
   },
 };
