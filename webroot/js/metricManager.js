@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 metricManager = {
   contextMenuConfig: {
     'items': function() {
