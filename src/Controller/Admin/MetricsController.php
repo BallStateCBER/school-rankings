@@ -104,4 +104,46 @@ class MetricsController extends AppController
             'result' => $result,
         ]);
     }
+
+    /**
+     * Adds a metric
+     *
+     * @return void
+     */
+    public function add()
+    {
+        if (!$this->request->is('post')) {
+            throw new MethodNotAllowedException('Request is not POST');
+        }
+
+        $context = $this->request->getData('context');
+        $table = MetricsTable::getContextTable($context);
+
+        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        $selectable = $this->request->getData('selectable');
+        $metric = $table->newEntity([
+            'name' => $this->request->getData('name'),
+            'parent_id' => $this->request->getData('parentId'),
+            'description' => $this->request->getData('description'),
+            'type' => $this->request->getData('type'),
+            'selectable' => $selectable == 'false' ? false : (bool)$selectable
+        ]);
+        $result = (bool)$table->save($metric);
+
+        if (!$result) {
+            $msg = 'There was an error adding that metric.';
+            if ($metric->getErrors()) {
+                $msg .= ' Details: ' . print_r($metric->getErrors(), true);
+            }
+            throw new BadRequestException($msg);
+        }
+
+        $this->set([
+            '_serialize' => ['message', 'result'],
+            'message' => $metric->getErrors() ?
+                implode("\n", Hash::flatten($metric->getErrors())) :
+                'Success',
+            'result' => $result,
+        ]);
+    }
 }
