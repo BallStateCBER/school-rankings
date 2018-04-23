@@ -3,5 +3,7 @@
     "es6": true
   },
   "extends": "google",
-  "sourceType": "module"
+  "parserOptions": {
+    "sourceType": "module"
+  }
 }
