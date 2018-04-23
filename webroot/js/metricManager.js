@@ -67,10 +67,60 @@ metricManager = {
 
   createConfig: {
     'label': 'Create',
-    'title': 'Create a metric in this group',
+    'title': 'Create a metric in the selected group',
     'action': function(data) {
-      console.log('Create');
-      console.log(data);
+      let jstree = $.jstree.reference(data.reference);
+      let parentNode = jstree.get_node(data.reference);
+      let liElement = $('#' + parentNode.id);
+      let context = liElement.closest('section').data('context');
+      let metricId = parentNode.data.metricId;
+      let blankModal = $('#add-modal');
+      const timestamp = (new Date()).getTime();
+      const newId = blankModal.attr('id') + '-' + timestamp;
+      let modal = blankModal.clone().attr('id', newId);
+
+      modal.modal('show');
+      modal.find('form').submit(function(event) {
+        event.preventDefault();
+        let button = modal.find('button[type=submit]');
+        const metricName = modal.find('input[type=text]').val().trim();
+        const description = modal.find('textarea').val().trim();
+        const type = modal.find('input[type=radio]:checked').val();
+        const selectable = modal.find('input[type=checkbox]').is(':checked');
+
+        $.ajax({
+          method: 'POST',
+          url: '/admin/metrics/add.json',
+          dataType: 'json',
+          data: {
+            'context': context,
+            'parentId': metricId,
+            'name': metricName,
+            'description': description,
+            'type': type,
+            'selectable': selectable,
+          },
+          beforeSend: function() {
+            button.prop('disabled', true);
+            let img = $('<img src="/jstree/themes/default/throbber.gif" />');
+            img.attr('alt', 'Loading...');
+            button.append(img);
+          },
+          success: function() {
+            jstree.create_node(parentNode, metricName);
+            modal.modal('hide').data('bs.modal', null);
+          },
+          error: function(jqXHR) {
+            const msg = jqXHR.responseJSON.message;
+            const error = '<p class="text-danger">' + msg + '</p>';
+            let body = modal.find('.modal-body');
+            body.find('.text-danger').remove();
+            body.append(error);
+            button.prop('disabled', false);
+            button.find('img').remove();
+          },
+        });
+      });
     },
   },
 
@@ -105,13 +155,13 @@ metricManager = {
             inst.delete_node(obj);
             return;
           }
-          alert('There was an error deleting that node');
+          alert('There was an error deleting that metric');
         },
         error: function(jqXHR, errorType, exception) {
           console.log(jqXHR);
           console.log(errorType);
           console.log(exception);
-          alert('There was an error deleting that node');
+          alert('There was an error deleting that metric');
         },
         complete: function() {
           metricManager.onComplete(liElement, inst, obj);
