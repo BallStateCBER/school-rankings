@@ -37,7 +37,8 @@
     "url": ""
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
   },
   "author": "Ball State University Center for Business and Economic Research",
   "license": "MIT",
