@@ -21,7 +21,7 @@
     "less-plugin-clean-css": "^1.5.1",
     "lodash": "^4.17.2",
     "lodash.template": "^4.4.0",
-    "node-sass": "^4.8.3",
+    "node-sass": "^4.9.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "sass-loader": "^7.0.1",
