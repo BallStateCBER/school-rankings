@@ -1,26 +1,20 @@
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const extractCss = new ExtractTextPlugin('css/[name].1.css');
-const extractSass = new ExtractTextPlugin('css/[name].2.css');
 
 module.exports = {
-  entry: './webroot/js/index.js',
+  entry: {
+    main: './webroot/js/index.js',
+    metricManager: './webroot/js/metricManager.js',
+  },
   output: {
-    filename: 'bundle.js',
+    filename: 'js/[name].js',
     path: path.resolve(__dirname, 'webroot/dist'),
   },
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: extractCss.extract({
-          fallback: 'style-loader',
-          use: ['css-loader'],
-        }),
-      },
-      {
         test: /\.scss$/,
-        use: extractSass.extract({
+        use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: ['css-loader', 'sass-loader'],
         }),
@@ -28,7 +22,6 @@ module.exports = {
     ],
   },
   plugins: [
-    extractCss,
-    extractSass,
+    new ExtractTextPlugin('css/[name].css'),
   ],
 };
