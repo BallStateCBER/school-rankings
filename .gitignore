@@ -43,3 +43,7 @@ nbproject/*
 # NPM #
 #######
 /node_modules/*
+
+# Files produced by Webpack #
+#############################
+/webroot/dist/*

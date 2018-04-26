@@ -4,7 +4,7 @@ module.exports = {
   entry: './webroot/js/index.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'webroot/js'),
+    path: path.resolve(__dirname, 'webroot/dist'),
   },
   module: {
     rules: [
