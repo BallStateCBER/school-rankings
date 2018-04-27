@@ -22,7 +22,7 @@
     "jshint-stylish": "^2.2.1",
     "jstree": "^3.3.5",
     "less-plugin-clean-css": "^1.5.1",
-    "lodash": "^4.17.2",
+    "lodash": "^4.17.10",
     "lodash.template": "^4.4.0",
     "node-sass": "^4.9.0",
     "popper.js": "^1.14.3",
@@ -34,7 +34,7 @@
     "semver": "^5.3.0",
     "style-loader": "^0.21.0",
     "through2": "^2.0.3",
-    "uglify-js": "^3.3.20",
+    "uglify-js": "^3.3.22",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   },
