@@ -7,6 +7,8 @@
     $this->Html->script('/jstree/jstree.min.js', ['block' => 'script']);
     $this->Html->css('/jstree/themes/default/style.min.css', ['block' => 'css']);
     $metricsHelper = $this->loadHelper('Metrics');
+    $this->Html->css('/dist/css/metricManager.css', ['block' => true]);
+    $this->Html->script('/dist/js/metricManager.js', ['block' => true]);
 ?>
 
 <?php foreach ($metricGroups as $group): ?>
