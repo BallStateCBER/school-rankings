@@ -174,7 +174,7 @@ let deleteConfig = {
   },
 };
 
-export default {
+window.metricManager = {
   contextMenuConfig: {
     'items': function() {
       return {
