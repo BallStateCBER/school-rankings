@@ -9,7 +9,6 @@ use App\Model\Table\SchoolDistrictMetricsTable;
 use App\Model\Table\SchoolMetricsTable;
 use Cake\Network\Exception\BadRequestException;
 use Cake\Network\Exception\MethodNotAllowedException;
-use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 
 class MetricsController extends AppController
@@ -21,21 +20,17 @@ class MetricsController extends AppController
      */
     public function index()
     {
-        $schoolMetricsTable = TableRegistry::get('SchoolMetrics');
-        $districtMetricsTable = TableRegistry::get('SchoolDistrictMetrics');
         $this->set([
             'metricGroups' => [
                 [
                     'header' => 'School Metrics',
                     'context' => 'school',
-                    'containerId' => 'school-metrics-tree',
-                    'metrics' => $schoolMetricsTable->find('threaded')->toArray()
+                    'containerId' => 'school-metrics-tree'
                 ],
                 [
                     'header' => 'School District Metrics',
                     'context' => 'district',
-                    'containerId' => 'district-metrics-tree',
-                    'metrics' => $districtMetricsTable->find('threaded')->toArray()
+                    'containerId' => 'district-metrics-tree'
                 ]
             ],
             'titleForLayout' => 'Metrics'

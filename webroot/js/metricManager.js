@@ -174,14 +174,93 @@ let deleteConfig = {
   },
 };
 
-window.metricManager = {
-  contextMenuConfig: {
-    'items': function() {
-      return {
-        'Create': createConfig,
-        'Rename': renameConfig,
-        'Delete': deleteConfig,
-      };
+/**
+ * Reformats metric data for JsTree
+ *
+ * @param {Object} data
+ * @return {Array}
+ */
+function formatMetricsForJsTree(data) {
+  let retval = [];
+
+  data.forEach(function(metric) {
+    let jTreeData = {
+      text: metric.name,
+      a_attr: {
+        selectable: metric.selectable ? 1 : 0,
+        type: metric.type,
+      },
+      data: {
+        selectable: Boolean(metric.selectable),
+        type: metric.type,
+        metricId: metric.id,
+      },
+    };
+    if (metric.children.length > 0) {
+      jTreeData.children = formatMetricsForJsTree(metric.children);
+    }
+    retval.push(jTreeData);
+  });
+
+  return retval;
+}
+
+/**
+ * Initializes the JsTree for the specified container and context
+ * @param {string} containerSelector
+ * @param {string} context
+ */
+function setupJsTree(containerSelector, context) {
+  let container = $(containerSelector);
+  $.ajax({
+    method: 'GET',
+    url: '/api/metrics/' + context + 's.json',
+    dataType: 'json',
+    beforeSend: function() {
+      let span = $('<span>Loading data...</span>');
+      span.addClass('loading');
+      container.append(span);
+      let img = $('<img src="/jstree/themes/default/throbber.gif" />');
+      img.attr('alt', 'Loading...');
+      img.addClass('loading');
+      container.append(img);
     },
-  },
-};
+    success: function(data) {
+      container.jstree({
+        'core': {
+          'data': formatMetricsForJsTree(data.metrics),
+          'check_callback': true,
+        },
+        'plugins': [
+          'contextmenu',
+          'dnd',
+          'sort',
+          'state',
+          'wholerow',
+        ],
+        'contextmenu': {
+          'items': function() {
+            return {
+              'Create': createConfig,
+              'Rename': renameConfig,
+              'Delete': deleteConfig,
+            };
+          },
+        },
+      });
+    },
+    error: function(jqXHR) {
+      const msg = jqXHR.responseJSON.message;
+      const error = '<p class="text-danger">' + msg + '</p>';
+      container.append(error);
+    },
+    complete: function() {
+      container.find('loading').remove();
+    },
+  });
+}
+
+$(document).ready(function() {
+  setupJsTree('#school-metrics-tree', 'school');
+  setupJsTree('#district-metrics-tree', 'district');
+});

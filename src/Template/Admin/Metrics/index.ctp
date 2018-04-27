@@ -15,26 +15,8 @@
         <h2>
             <?= $group['header'] ?>
         </h2>
-        <div id="<?= $group['containerId'] ?>">
-
-        </div>
+        <div id="<?= $group['containerId'] ?>"></div>
     </section>
-    <?php $this->append('buffered'); ?>
-        $('#<?= $group['containerId'] ?>').jstree({
-            'core': {
-                'data': <?= json_encode($metricsHelper->getJsTreeData($group['metrics'])) ?>,
-                'check_callback': true
-            },
-            'plugins': [
-                'contextmenu',
-                'dnd',
-                'sort',
-                'state',
-                'wholerow'
-            ],
-            'contextmenu': metricManager.contextMenuConfig
-        });
-    <?php $this->end(); ?>
 <?php endforeach; ?>
 
 <div id="add-modal" class="modal" tabindex="-1" role="dialog">
