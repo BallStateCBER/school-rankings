@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import 'jstree';
 
 let beforeSend = function(liElement, jstree, node) {
