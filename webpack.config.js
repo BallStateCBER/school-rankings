@@ -4,7 +4,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: {
-    main: './webroot/js/index.js',
+    main: './webroot/js/main.js',
     metricManager: './webroot/js/metricManager.js',
   },
   output: {
