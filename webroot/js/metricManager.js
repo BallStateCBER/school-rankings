@@ -1,16 +1,16 @@
 import $ from 'jquery';
 
-let beforeSend = function(liElement, inst, obj) {
+let beforeSend = function(liElement, jstree, node) {
   let img = $('<img src="/jstree/themes/default/throbber.gif" />');
   img.attr('alt', 'Loading...');
   img.addClass('loading');
   liElement.find('a.jstree-anchor').append(img);
-  inst.disable_node(obj);
+  jstree.disable_node(node);
 };
 
-let onComplete = function(liElement, inst, obj) {
+let onComplete = function(liElement, jstree, node) {
   liElement.find('img.loading').remove();
-  inst.enable_node(obj);
+  jstree.enable_node(node);
 };
 
 let createConfig = {
@@ -76,21 +76,21 @@ let renameConfig = {
   'label': 'Rename',
   'title': 'Rename this metric',
   'action': function(data) {
-    let inst = $.jstree.reference(data.reference);
-    let obj = inst.get_node(data.reference);
-    let context = $('#' + obj.id).closest('section').data('context');
-    inst.edit(obj, null, function(node, status, cancelled) {
+    let jstree = $.jstree.reference(data.reference);
+    let node = jstree.get_node(data.reference);
+    let context = $('#' + node.id).closest('section').data('context');
+    jstree.edit(node, null, function(node, status, cancelled) {
       let newName = node.text;
       let originalName = node.original.text;
       let metricId = node.data.metricId;
-      let liElement = $('#' + obj.id);
+      let liElement = $('#' + node.id);
 
       if (cancelled) {
         return;
       }
 
       if (!status) {
-        alert('Error renaming metric: ' + inst.last_error());
+        alert('Error renaming metric: ' + jstree.last_error());
         return;
       }
 
@@ -104,7 +104,7 @@ let renameConfig = {
           'newName': newName,
         },
         beforeSend: function() {
-          beforeSend(liElement, inst, obj);
+          beforeSend(liElement, jstree, node);
         },
         success: function(data) {
           if (data.hasOwnProperty('result') && data.result) {
@@ -112,16 +112,16 @@ let renameConfig = {
           }
 
           alert(data.message);
-          inst.rename_node(obj, originalName);
+          jstree.rename_node(node, originalName);
         },
         error: function(jqXHR, errorType, exception) {
           console.log(jqXHR);
           console.log(errorType);
           console.log(exception);
-          inst.rename_node(obj, originalName);
+          jstree.rename_node(node, originalName);
         },
         complete: function() {
-          onComplete(liElement, inst, obj);
+          onComplete(liElement, jstree, node);
         },
       });
     });
@@ -132,13 +132,15 @@ let deleteConfig = {
   'label': 'Delete',
   'title': 'Delete this metric',
   'action': function(data) {
-    let inst = $.jstree.reference(data.reference);
-    let obj = inst.get_node(data.reference);
-    let liElement = $('#' + obj.id);
+    console.log($.jstree);
+    console.log(data);
+    let jstree = $.jstree.reference(data.reference);
+    let node = jstree.get_node(data.reference);
+    let liElement = $('#' + node.id);
     let context = liElement.closest('section').data('context');
-    let metricId = obj.data.metricId;
+    let metricId = node.data.metricId;
 
-    if (inst.is_parent(obj)) {
+    if (jstree.is_parent(node)) {
       alert('Cannot delete a metric that has children');
       return;
     }
@@ -152,11 +154,11 @@ let deleteConfig = {
         'metricId': metricId,
       },
       beforeSend: function() {
-        beforeSend(liElement, inst, obj);
+        beforeSend(liElement, jstree, node);
       },
       success: function(data) {
         if (data.hasOwnProperty('result') && data.result) {
-          inst.delete_node(obj);
+          jstree.delete_node(node);
           return;
         }
         alert('There was an error deleting that metric');
@@ -168,7 +170,7 @@ let deleteConfig = {
         alert('There was an error deleting that metric');
       },
       complete: function() {
-        onComplete(liElement, inst, obj);
+        onComplete(liElement, jstree, node);
       },
     });
   },
