@@ -34,7 +34,7 @@ class MetricsController extends AppController
                 [
                     'header' => 'School District Metrics',
                     'context' => 'district',
-                    'containerId' => 'districts-metrics-tree',
+                    'containerId' => 'district-metrics-tree',
                     'metrics' => $districtMetricsTable->find('threaded')->toArray()
                 ]
             ],
