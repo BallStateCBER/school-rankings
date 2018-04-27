@@ -132,8 +132,6 @@ let deleteConfig = {
   'label': 'Delete',
   'title': 'Delete this metric',
   'action': function(data) {
-    console.log($.jstree);
-    console.log(data);
     let jstree = $.jstree.reference(data.reference);
     let node = jstree.get_node(data.reference);
     let liElement = $('#' + node.id);
