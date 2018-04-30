@@ -1,4 +1,5 @@
 import 'jstree';
+import '../css/metric-manager.scss';
 
 let beforeSend = function(liElement, jstree, node) {
   let img = $('<img src="/jstree/themes/default/throbber.gif" />');
