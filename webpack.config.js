@@ -4,7 +4,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = {
+module.exports = (env, argv) => ({
   entry: {
     main: './webroot/js/main.js',
     metricManager: './webroot/js/metricManager.js',
@@ -64,4 +64,5 @@ module.exports = {
       jquery: 'jquery/src/jquery',
     },
   },
-};
+  devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
+});
