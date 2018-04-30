@@ -55,7 +55,7 @@ module.exports = (env, argv) => ({
     new CopyWebpackPlugin([
       {
         from: 'node_modules/jstree/dist',
-        to: 'webroot/jstree',
+        to: '../jstree',
       },
     ]),
   ],
