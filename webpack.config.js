@@ -3,6 +3,7 @@ const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = (env, argv) => ({
   entry: {
@@ -58,6 +59,11 @@ module.exports = (env, argv) => ({
         to: '../jstree',
       },
     ]),
+    new UglifyJsPlugin({
+      test: /\.js($|\?)/i,
+      cache: argv.mode === 'development',
+      sourceMap: true,
+    }),
   ],
   resolve: {
     alias: {
