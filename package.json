@@ -58,5 +58,9 @@
   },
   "author": "Ball State University Center for Business and Economic Research",
   "license": "MIT",
-  "readme": ""
+  "readme": "",
+  "sideEffects": [
+    "*.css",
+    "*.scss"
+  ]
 }
