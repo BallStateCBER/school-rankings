@@ -178,7 +178,7 @@ class MetricsTable extends Table
             case 'district':
                 return TableRegistry::get('SchoolDistrictMetrics');
             default:
-                throw new InternalErrorException('Metric context "' .  $context . '" not recognized');
+                throw new InternalErrorException('Metric context "' . $context . '" not recognized');
         }
     }
 
@@ -205,6 +205,7 @@ class MetricsTable extends Table
                 return $exp->notEq('id', $metricId);
             };
         }
+
         return $this->find()
             ->where($conditions)
             ->count() > 0;

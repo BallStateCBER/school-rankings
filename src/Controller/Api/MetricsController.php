@@ -27,7 +27,7 @@ class MetricsController extends AppController
      */
     public function districts()
     {
-        $districtMetricsTable = TableRegistry::get('SchoolDistrictMetrics');;
+        $districtMetricsTable = TableRegistry::get('SchoolDistrictMetrics');
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => $districtMetricsTable->find('threaded')->toArray()

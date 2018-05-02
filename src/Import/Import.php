@@ -76,7 +76,8 @@ class Import
      * @param array $unknownMetric Array of information about the name and group of a column
      * @return string
      */
-    public function getSuggestedName($filename, $worksheetName, $unknownMetric) {
+    public function getSuggestedName($filename, $worksheetName, $unknownMetric)
+    {
         $nameDelimiter = ' - ';
         $groupName = $unknownMetric['group'];
         $columnName = $unknownMetric['name'];

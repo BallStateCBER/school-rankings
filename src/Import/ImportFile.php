@@ -892,7 +892,6 @@ class ImportFile
         ];
         $table = StatisticsTable::getContextTable($context);
         for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
-
             // Skip rows with no location
             if (!isset($this->worksheets[$this->activeWorksheet]['locations'][$row])) {
                 break;
