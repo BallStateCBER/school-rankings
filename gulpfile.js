@@ -1,25 +1,9 @@
 let gulp = require('gulp');
 let notify = require('gulp-notify');
-let jshint = require('gulp-jshint');
-let stylish = require('jshint-stylish');
+let eslint = require('gulp-eslint');
 let phpcs = require('gulp-phpcs');
 let phpunit = require('gulp-phpunit');
 let _ = require('lodash');
-
-/**
- * Returns a configured instance of gulp-notify
- *
- * @param {string} message
- * @return {*}
- */
-function customNotify(message) {
-  return notify({
-    title: 'School Rankings',
-    message: function(file) {
-        return message + ': ' + file.relative;
-    },
-  });
-}
 
 gulp.task('default', ['php_cs']);
 
@@ -82,12 +66,16 @@ gulp.task('php_unit', function() {
  * Javascript *
  **************/
 let srcJsFiles = [
-  'webroot/js/script.js',
+  'webroot/js/*.js',
 ];
 
-gulp.task('js_lint', function() {
+gulp.task('js_lint', () => {
   return gulp.src(srcJsFiles)
-    .pipe(jshint())
-    .pipe(jshint.reporter(stylish))
-    .pipe(customNotify('JS linted'));
+    .pipe(eslint({
+      globals: [
+        'jQuery',
+        '$',
+      ],
+    }))
+    .pipe(eslint.format());
 });
