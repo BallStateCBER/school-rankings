@@ -1,7 +1,5 @@
 var gulp = require('gulp');
-var less = require('gulp-less');
 var notify = require("gulp-notify");
-var LessPluginCleanCSS = require('less-plugin-clean-css');
 var jshint = require('gulp-jshint');
 var stylish = require('jshint-stylish');
 var phpcs = require('gulp-phpcs');
@@ -69,21 +67,4 @@ gulp.task('js_lint', function () {
         .pipe(jshint())
         .pipe(jshint.reporter(stylish))
         .pipe(customNotify('JS linted'));
-});
-
-
-
-/**************
- *    LESS    *
- **************/
-var srcLessFiles = [
-    'webroot/css/style.less'
-];
-
-gulp.task('less', function () {
-    var cleanCSSPlugin = new LessPluginCleanCSS({advanced: true});
-    gulp.src(srcLessFiles)
-        .pipe(less({plugins: [cleanCSSPlugin]}))
-        .pipe(gulp.dest('webroot/css'))
-        .pipe(customNotify('LESS compiled'));
 });
