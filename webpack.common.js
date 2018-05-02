@@ -3,9 +3,8 @@ const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-module.exports = (env, argv) => ({
+module.exports = {
   entry: {
     main: './webroot/js/main.js',
     metricManager: './webroot/js/metricManager.js',
@@ -59,16 +58,10 @@ module.exports = (env, argv) => ({
         to: '../jstree',
       },
     ]),
-    new UglifyJsPlugin({
-      test: /\.js($|\?)/i,
-      cache: argv.mode === 'development',
-      sourceMap: true,
-    }),
   ],
   resolve: {
     alias: {
       jquery: 'jquery/src/jquery',
     },
   },
-  devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
-});
+};
