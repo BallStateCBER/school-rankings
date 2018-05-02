@@ -1,9 +1,9 @@
 {
-    "name": "cakephp/app",
-    "description": "CakePHP skeleton app",
-    "homepage": "https://cakephp.org",
+    "name": "ballstatecber/school-rankings",
+    "description": "Indiana School Rankings",
+    "homepage": "https://cberdata.org",
     "type": "project",
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
         "php": ">=7.1",
         "cakephp/cakephp": "3.5.*",
