@@ -25,7 +25,8 @@ class SpreadsheetColumnsMetricsTableTest extends TestCase
      */
     public $fixtures = [
         'app.spreadsheet_columns_metrics',
-        'app.metrics'
+        'app.school_district_metrics',
+        'app.school_metrics'
     ];
 
     /**
