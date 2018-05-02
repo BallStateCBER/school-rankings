@@ -5,8 +5,8 @@
   "main": "",
   "dependencies": {
     "ajv": "^5.5.2",
-    "autoprefixer": "^8.3.0",
-    "bootstrap": "^4.1.0",
+    "autoprefixer": "^8.4.1",
+    "bootstrap": "^4.1.1",
     "clean-webpack-plugin": "^0.1.19",
     "commander": "^2.11.0",
     "copy-webpack-plugin": "^4.5.1",
@@ -38,10 +38,10 @@
     "semver": "^5.3.0",
     "style-loader": "^0.21.0",
     "through2": "^2.0.3",
-    "uglify-js": "^3.3.22",
+    "uglify-js": "^3.3.23",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^4.6.0",
-    "webpack-cli": "^2.0.15",
+    "webpack-cli": "^2.1.2",
     "webpack-merge": "^4.1.2"
   },
   "devDependencies": {
