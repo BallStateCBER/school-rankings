@@ -3,6 +3,7 @@ const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -63,5 +64,10 @@ module.exports = {
     alias: {
       jquery: 'jquery/src/jquery',
     },
+  },
+  optimization: {
+    minimizer: [
+      new OptimizeCSSAssetsPlugin({}),
+    ],
   },
 };
