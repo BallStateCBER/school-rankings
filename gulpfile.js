@@ -10,7 +10,7 @@ var _ = require('lodash');
 
 function customNotify(message) {
 	return notify({
-        title: 'Muncie Events API',
+        title: 'School Rankings',
         message: function(file) {
             return message + ': ' + file.relative;
         }
