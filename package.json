@@ -6,6 +6,10 @@
   "dependencies": {
     "ajv": "^5.5.2",
     "autoprefixer": "^8.4.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "bootstrap": "^4.1.1",
     "clean-webpack-plugin": "^0.1.19",
     "commander": "^2.11.0",
