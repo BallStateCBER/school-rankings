@@ -16,24 +16,19 @@ class MetricsController extends AppController
     /**
      * Displays the metrics manager, used for adding, editing, and removing metrics
      *
+     * @param string $context Either 'school' or 'district'
      * @return void
+     * @throws BadRequestException
      */
-    public function index()
+    public function index($context)
     {
+        if (!in_array($context, ['school', 'district'])) {
+            throw new BadRequestException('Unrecognized metric context: ' . $context);
+        }
+
         $this->set([
-            'metricGroups' => [
-                [
-                    'header' => 'School Metrics',
-                    'context' => 'school',
-                    'containerId' => 'school-metrics-tree'
-                ],
-                [
-                    'header' => 'School District Metrics',
-                    'context' => 'district',
-                    'containerId' => 'district-metrics-tree'
-                ]
-            ],
-            'titleForLayout' => 'Metrics'
+            'context' => $context,
+            'titleForLayout' => $context == 'school' ? 'School Metrics' : 'School District Metrics'
         ]);
     }
 

@@ -10,11 +10,4 @@
     $this->Html->script('/dist/js/metricManager.js', ['block' => true]);
 ?>
 
-<?php foreach ($metricGroups as $group): ?>
-    <section data-context="<?= $group['context'] ?>">
-        <h2>
-            <?= $group['header'] ?>
-        </h2>
-        <div id="<?= $group['containerId'] ?>"></div>
-    </section>
-<?php endforeach; ?>
+<div id="metric-manager" data-context="<?= $context ?>"></div>

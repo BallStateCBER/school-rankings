@@ -79,6 +79,10 @@ Router::scope('/', function (RouteBuilder $routes) {
 
 Router::prefix('admin', function (RouteBuilder $routes) {
     $routes->fallbacks(DashedRoute::class);
+
+    foreach (['school', 'district'] as $context) {
+        $routes->connect('/metrics/' . $context, ['controller' => 'Metrics', 'action' => 'index', $context]);
+    }
 });
 
 Router::prefix('api', function (RouteBuilder $routes) {
