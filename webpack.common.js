@@ -8,7 +8,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 module.exports = {
   entry: {
     main: './webroot/js/main.js',
-    metricManager: './webroot/js/metricManager.js',
+    metricManager: './webroot/js/metricManager.jsx',
   },
   output: {
     filename: 'js/[name].js',
@@ -44,7 +44,7 @@ module.exports = {
         use: ['file-loader'],
       },
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)?$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
       },
