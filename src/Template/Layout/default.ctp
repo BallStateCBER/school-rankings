@@ -41,5 +41,6 @@
             <?= $this->fetch('buffered'); ?>
         });
     </script>
+    <?= $this->fetch('bottom') ?>
 </body>
 </html>
