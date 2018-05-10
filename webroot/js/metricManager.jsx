@@ -3,68 +3,12 @@ import PropTypes from 'prop-types';
 import 'jstree';
 import '../css/metric-manager.scss';
 import ReactDom from 'react-dom';
+import 'bootstrap';
+import {Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 
-function NameInput() {
-  return (
-    <fieldset className="form-group">
-      <label htmlFor="metric-name">Name:</label>
-      <input id="metric-name" type="text" className="form-control"
-             required="required"/>
-    </fieldset>
-  );
-}
+window.jsTreeData = [];
 
-function DescriptionInput() {
-  return (
-    <fieldset className="form-group">
-      <label htmlFor="metric-description">Description:</label>
-      <textarea id="metric-description" className="form-control"
-                rows="3"></textarea>
-    </fieldset>
-  );
-}
-
-function TypeInput() {
-  return (
-    <fieldset className="form-group">
-      <div className="form-check">
-        <input className="form-check-input" type="radio"
-               name="type" id="numeric-radio" value="numeric"
-               checked="checked"/>
-        <label className="form-check-label"
-               htmlFor="numeric-radio">
-          Numeric
-        </label>
-      </div>
-      <div className="form-check">
-        <input className="form-check-input" type="radio"
-               name="type" id="boolean-radio" value="boolean" />
-        <label className="form-check-label"
-               htmlFor="boolean-radio">
-          Boolean
-        </label>
-      </div>
-    </fieldset>
-  );
-}
-
-function SelectableInput() {
-  return (
-    <fieldset className="form-group">
-      <div className="form-check">
-        <input className="form-check-input" type="checkbox"
-               value="1" id="selectable-checkbox"
-               checked="checked"/>
-        <label className="form-check-label"
-               htmlFor="selectable-checkbox">
-          Selectable
-        </label>
-      </div>
-    </fieldset>
-  );
-}
-
-class ModalHeader extends React.Component {
+class PrevModalHeader extends React.Component {
   render() {
     return (
         <div className="modal-header">
@@ -78,23 +22,70 @@ class ModalHeader extends React.Component {
   }
 }
 
-ModalHeader.propTypes = {
+PrevModalHeader.propTypes = {
   title: PropTypes.string.isRequired,
 };
 
 class CreateModal extends React.Component {
+  componentDidMount() {
+
+  }
+
   render() {
+    let modal = $('#modal');
+    modal.modal('show');
+    modal.find('form').submit((event) => {
+      handleCreateSubmit(event, jsTreeData);
+    });
+
+
     return (
         <div className="modal" tabIndex="-1" role="dialog">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
-              <form>
+              <form onSubmit={handleCreateSubmit}>
                 <ModalHeader title="Add metric" />
                 <div className="modal-body">
-                  <NameInput />
-                  <DescriptionInput />
-                  <TypeInput />
-                  <SelectableInput />
+                  <fieldset className="form-group">
+                    <label htmlFor="metric-name">Name:</label>
+                    <input id="metric-name" type="text" className="form-control"
+                           required="required"/>
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <label htmlFor="metric-description">Description:</label>
+                    <textarea id="metric-description" className="form-control"
+                              rows="3"></textarea>
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <div className="form-check">
+                      <input className="form-check-input" type="radio"
+                             name="type" id="numeric-radio" value="numeric"
+                             defaultChecked="checked" />
+                      <label className="form-check-label"
+                             htmlFor="numeric-radio">
+                        Numeric
+                      </label>
+                    </div>
+                    <div className="form-check">
+                      <input className="form-check-input" type="radio"
+                             name="type" id="boolean-radio" value="boolean" />
+                      <label className="form-check-label"
+                             htmlFor="boolean-radio">
+                        Boolean
+                      </label>
+                    </div>
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <div className="form-check">
+                      <input className="form-check-input" type="checkbox"
+                             value="1" id="selectable-checkbox"
+                             defaultChecked="checked"/>
+                      <label className="form-check-label"
+                             htmlFor="selectable-checkbox">
+                        Selectable
+                      </label>
+                    </div>
+                  </fieldset>
                 </div>
                 <div className="modal-footer">
                   <button type="submit" className="btn btn-primary">Add</button>
@@ -109,6 +100,153 @@ class CreateModal extends React.Component {
     );
   }
 }
+
+class CreateModalReactstrap extends React.Component {
+  constructor(props) {
+    super(props);
+    this.close = this.close.bind(this);
+    this.submit = this.submit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+
+    this.submitButton = React.createRef();
+
+    this.state = {
+      metricName: '',
+      metricDescription: '',
+      metricSelectable: true,
+      metricType: 'numeric',
+      submitInProgress: false,
+    };
+  }
+
+  handleChange(event) {
+    const target = event.target;
+    const name = target.name;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+
+    this.setState({[name]: value});
+  }
+
+  close() {
+    this.props.onClose();
+  }
+
+  submit(event) {
+    event.preventDefault();
+
+    this.setState({submitInProgress: true});
+
+    const data = window.jsTreeData.createMetric;
+    let jstree = $.jstree.reference(data.reference);
+    let parentNode = jstree.get_node(data.reference);
+    const context = window.metricManager.context;
+    let metricId = parentNode.data.metricId;
+
+    const metricName = this.state.metricName.trim();
+    const description = this.state.metricDescription.trim();
+    const type = this.state.metricType;
+    const selectable = this.state.metricSelectable;
+
+    $.ajax({
+      method: 'POST',
+      url: '/admin/metrics/add.json',
+      dataType: 'json',
+      data: {
+        'context': context,
+        'parentId': metricId,
+        'name': metricName,
+        'description': description,
+        'type': type,
+        'selectable': selectable,
+      },
+    }).done(() => {
+      jstree.create_node(parentNode, metricName);
+
+      // modal.modal('hide').data('bs.modal', null);
+      this.close();
+    }).fail((jqXHR) => {
+      const msg = jqXHR.responseJSON.message;
+      alert(msg);
+      this.setState({submitInProgress: false});
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <Modal isOpen={this.props.isOpen} toggle={this.close}
+               className={this.props.className}
+               ref={(modal) => this.modal = modal}>
+          <ModalHeader toggle={this.close}>Add metric</ModalHeader>
+          <form onSubmit={this.submit}>
+            <ModalBody>
+              <fieldset className="form-group">
+                <label htmlFor="metric-name">Name:</label>
+                <input type="text" className="form-control"
+                       required="required" onChange={this.handleChange}
+                       name="metricName" value={this.state.metricName} />
+              </fieldset>
+              <fieldset className="form-group">
+                <label htmlFor="metric-description">Description:</label>
+                <textarea className="form-control"
+                          rows="3" onChange={this.handleChange}
+                          name="metricDescription"
+                          value={this.state.metricDescription}></textarea>
+              </fieldset>
+              <fieldset className="form-group">
+                <div className="form-check">
+                  <input className="form-check-input" type="radio"
+                         name="metricType" id="numeric-radio" value="numeric"
+                         checked={this.state.metricType === 'numeric'}
+                         onChange={this.handleChange} />
+                  <label className="form-check-label"
+                         htmlFor="numeric-radio">
+                    Numeric
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio"
+                         name="metricType" id="boolean-radio" value="boolean"
+                         checked={this.state.metricType === 'boolean'}
+                         onChange={this.handleChange} />
+                  <label className="form-check-label"
+                         htmlFor="boolean-radio">
+                    Boolean
+                  </label>
+                </div>
+              </fieldset>
+              <fieldset className="form-group">
+                <div className="form-check">
+                  <input className="form-check-input" type="checkbox"
+                         value="1" id="selectable-checkbox"
+                         name="metricSelectable"
+                         checked={this.state.metricSelectable}
+                         onChange={this.handleChange} />
+                  <label className="form-check-label"
+                         htmlFor="selectable-checkbox">
+                    Selectable
+                  </label>
+                </div>
+              </fieldset>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onClick={this.submit}
+                      ref={this.submitButton}
+                      disabled={this.state.submitInProgress}>
+                Add
+              </Button>
+              {' '}
+              <Button color="secondary" onClick={this.close}
+                      data-dismiss="modal">Cancel</Button>
+            </ModalFooter>
+          </form>
+        </Modal>
+      </div>
+    );
+  }
+}
+
+CreateModalReactstrap.propTypes = Modal.propTypes;
 
 let beforeSend = function(liElement, jstree, node) {
   let img = $('<img src="/jstree/themes/default/throbber.gif" />');
@@ -254,9 +392,19 @@ class MetricManager extends React.Component {
       loading: false,
       hasError: false,
       errorMsg: '',
-      hasCreateModal: false,
+      openCreateModal: false,
     };
     this.componentDidMount = this.componentDidMount.bind(this);
+    this.handleCreateModalOpen = this.handleCreateModalOpen.bind(this);
+    this.handleCreateModalClose = this.handleCreateModalClose.bind(this);
+  }
+
+  handleCreateModalOpen() {
+    this.setState({openCreateModal: true});
+  }
+
+  handleCreateModalClose() {
+    this.setState({openCreateModal: false});
   }
 
   componentDidMount() {
@@ -287,57 +435,8 @@ class MetricManager extends React.Component {
                 'label': 'Create',
                 'title': 'Create a metric in the selected group',
                 'action': (data) => {
-                  this.setState({hasCreateModal: true});
-                  let jstree = $.jstree.reference(data.reference);
-                  let parentNode = jstree.get_node(data.reference);
-                  const context = window.metricManager.context;
-                  let metricId = parentNode.data.metricId;
-
-                  let modal = $('#jstree');
-                  modal.modal('show');
-                  modal.find('form').submit(function(event) {
-                    event.preventDefault();
-
-                    let button = modal.find('button[type=submit]');
-                    const metricName = modal.find('input[type=text]').val()
-                      .trim();
-                    const description = modal.find('textarea').val().trim();
-                    const type = modal.find('input[type=radio]:checked').val();
-                    const selectable = modal.find('input[type=checkbox]')
-                      .is(':checked');
-
-                    button.prop('disabled', true);
-                    let img = $(
-                      '<img src="/jstree/themes/default/throbber.gif" />'
-                    );
-                    img.attr('alt', 'Loading...');
-                    button.append(img);
-
-                    $.ajax({
-                      method: 'POST',
-                      url: '/admin/metrics/add.json',
-                      dataType: 'json',
-                      data: {
-                        'context': context,
-                        'parentId': metricId,
-                        'name': metricName,
-                        'description': description,
-                        'type': type,
-                        'selectable': selectable,
-                      },
-                    }).done(function() {
-                      jstree.create_node(parentNode, metricName);
-                      modal.modal('hide').data('bs.modal', null);
-                    }).fail(function(jqXHR) {
-                      const msg = jqXHR.responseJSON.message;
-                      const error = '<p class="text-danger">' + msg + '</p>';
-                      let body = modal.find('.modal-body');
-                      body.find('.text-danger').remove();
-                      body.append(error);
-                      button.prop('disabled', false);
-                      button.find('img').remove();
-                    });
-                  });
+                  window.jsTreeData.createMetric = data;
+                  this.handleCreateModalOpen();
                 },
               },
               'Rename': renameConfig,
@@ -360,7 +459,6 @@ class MetricManager extends React.Component {
     const isLoading = this.state.loading;
     const hasError = this.state.hasError;
     const errorMsg = this.state.errorMsg;
-    const hasCreateModal = this.state.hasCreateModal;
 
     return <div>
       {isLoading &&
@@ -373,15 +471,14 @@ class MetricManager extends React.Component {
       {hasError &&
         <p className="text-danger">{errorMsg}</p>
       }
-      {hasCreateModal &&
-        <CreateModal />
-      }
       <div id="jstree"></div>
+      <CreateModalReactstrap onClose={this.handleCreateModalClose}
+                             isOpen={this.state.openCreateModal} />
     </div>;
   }
 }
 
 ReactDom.render(
-    <MetricManager />,
-    document.getElementById('metric-manager')
+  <MetricManager />,
+  document.getElementById('metric-manager')
 );
