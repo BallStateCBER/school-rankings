@@ -36,6 +36,12 @@ class CreateModal extends React.Component {
 
   close() {
     this.props.onClose();
+    this.setState({
+      metricName: '',
+      metricDescription: '',
+      metricSelectable: true,
+      metricType: 'numeric',
+    });
   }
 
   submit(event) {
