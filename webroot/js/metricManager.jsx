@@ -64,7 +64,7 @@ class CreateModal extends React.Component {
 
     $.ajax({
       method: 'POST',
-      url: '/admin/metrics/add.json',
+      url: '/api/metrics/add.json',
       dataType: 'json',
       data: submitData,
     }).done(() => {
@@ -241,7 +241,7 @@ class MetricManager extends React.Component {
 
       $.ajax({
         method: 'PATCH',
-        url: '/admin/metrics/rename.json',
+        url: '/api/metrics/rename.json',
         dataType: 'json',
         data: {
           'context': context,
@@ -281,7 +281,7 @@ class MetricManager extends React.Component {
 
     $.ajax({
       method: 'DELETE',
-      url: '/admin/metrics/delete.json',
+      url: '/api/metrics/delete.json',
       dataType: 'json',
       data: {
         'context': context,
