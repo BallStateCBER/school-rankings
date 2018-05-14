@@ -152,7 +152,8 @@ class CreateModal extends React.Component {
 
 CreateModal.propTypes = Modal.propTypes;
 
-let showNodeUpdateLoading = function(liElement, jstree, node) {
+let showNodeUpdateLoading = function(jstree, node) {
+  let liElement = $('#' + node.id);
   let img = $('<img src="/jstree/themes/default/throbber.gif" />');
   img.attr('alt', 'Loading...');
   img.addClass('loading');
@@ -160,7 +161,8 @@ let showNodeUpdateLoading = function(liElement, jstree, node) {
   jstree.disable_node(node);
 };
 
-let showNodeUpdateComplete = function(liElement, jstree, node) {
+let showNodeUpdateComplete = function(jstree, node) {
+  let liElement = $('#' + node.id);
   liElement.find('img.loading').remove();
   jstree.enable_node(node);
 };
@@ -226,7 +228,6 @@ class MetricManager extends React.Component {
       let newName = node.text;
       let originalName = node.original.text;
       let metricId = node.data.metricId;
-      let liElement = $('#' + node.id);
 
       if (cancelled) {
         return;
@@ -237,7 +238,7 @@ class MetricManager extends React.Component {
         return;
       }
 
-      showNodeUpdateLoading(liElement, jstree, node);
+      showNodeUpdateLoading(jstree, node);
 
       $.ajax({
         method: 'PATCH',
@@ -260,7 +261,7 @@ class MetricManager extends React.Component {
         console.log(exception);
         jstree.rename_node(node, originalName);
       }).always(function() {
-        showNodeUpdateComplete(liElement, jstree, node);
+        showNodeUpdateComplete(jstree, node);
       });
     });
   }
@@ -268,7 +269,6 @@ class MetricManager extends React.Component {
   handleDelete(data) {
     let jstree = $.jstree.reference(data.reference);
     let node = jstree.get_node(data.reference);
-    let liElement = $('#' + node.id);
     const context = window.metricManager.context;
     let metricId = node.data.metricId;
 
@@ -277,7 +277,7 @@ class MetricManager extends React.Component {
       return;
     }
 
-    showNodeUpdateLoading(liElement, jstree, node);
+    showNodeUpdateLoading(jstree, node);
 
     $.ajax({
       method: 'DELETE',
@@ -299,7 +299,7 @@ class MetricManager extends React.Component {
       console.log(exception);
       alert('There was an error deleting that metric');
     }).always(function() {
-      showNodeUpdateComplete(liElement, jstree, node);
+      showNodeUpdateComplete(jstree, node);
     });
   }
 
@@ -376,8 +376,7 @@ class MetricManager extends React.Component {
             ? parentNode.data.metricId
             : null;
 
-        let liElement = $('#' + draggedNode.id);
-        showNodeUpdateLoading(liElement, jstree, draggedNode);
+        showNodeUpdateLoading(jstree, draggedNode);
 
         $.ajax({
           method: 'PATCH',
@@ -404,7 +403,7 @@ class MetricManager extends React.Component {
               'Check console for details and refresh.');
           this.forceUpdate();
         }).always(function() {
-          showNodeUpdateComplete(liElement, jstree, draggedNode);
+          showNodeUpdateComplete(jstree, draggedNode);
         });
       });
     });
