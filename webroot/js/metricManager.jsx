@@ -50,12 +50,14 @@ class CreateModal extends React.Component {
     this.setState({submitInProgress: true});
 
     const data = window.jsTreeData.createMetric;
-    const jstree = $.jstree.reference(data.reference);
-    const parentNode = jstree.get_node(data.reference);
+    const isRoot = data.hasOwnProperty('root') && data.root;
+    const jstree = $('#jstree').jstree();
+    const parentNode = isRoot ? null : jstree.get_node(data.reference);
+    const parentId = isRoot ? null : parentNode.data.metricId;
     const metricName = this.state.metricName.trim();
     const submitData = {
       'context': window.metricManager.context,
-      'parentId': parentNode.data.metricId,
+      'parentId': parentId,
       'name': metricName,
       'description': this.state.metricDescription.trim(),
       'type': this.state.metricType,
@@ -210,6 +212,11 @@ class MetricManager extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this);
     this.handleCreateModalOpen = this.handleCreateModalOpen.bind(this);
     this.handleCreateModalClose = this.handleCreateModalClose.bind(this);
+  }
+
+  handleCreateModalRootOpen() {
+    window.jsTreeData.createMetric = {root: true};
+    this.handleCreateModalOpen();
   }
 
   handleCreateModalOpen() {
@@ -418,6 +425,15 @@ class MetricManager extends React.Component {
             <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
                  className="loading"/>
           </span>
+        }
+        {! this.state.loading &&
+          <Button color="outline-primary"
+                  onClick={() => {
+                    this.handleCreateModalRootOpen();
+                  }}
+                  ref={this.submitButton}>
+            Add root-level metric
+          </Button>
         }
         {this.state.hasError &&
           <p className="text-danger">{this.state.errorMsg}</p>
