@@ -44,3 +44,7 @@
 *.bz2 binary
 *.7z binary
 *.zip binary
+
+# Disable calculating diffs for compiled files
+/webroot/dist/css/* -diff
+/webroot/dist/js/* -diff
