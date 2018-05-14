@@ -31,6 +31,7 @@
     "lodash": "^4.17.10",
     "lodash.template": "^4.4.0",
     "node-sass": "^4.9.0",
+    "npm": "^6.0.1",
     "optimize-css-assets-webpack-plugin": "^4.0.1",
     "popper.js": "^1.14.3",
     "postcss-loader": "^2.1.4",
