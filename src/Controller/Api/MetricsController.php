@@ -146,4 +146,38 @@ class MetricsController extends AppController
             'result' => $result,
         ]);
     }
+
+    /**
+     * Reparents a metric
+     *
+     * @return void
+     */
+    public function reparent()
+    {
+        if (!$this->request->is('patch')) {
+            throw new MethodNotAllowedException('Request is not PATCH');
+        }
+
+        $metricId = $this->request->getData('metricId');
+        $newParentId = $this->request->getData('newParentId');
+        $context = $this->request->getData('context');
+        $table = MetricsTable::getContextTable($context);
+
+        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        $metric = $table->get($metricId);
+        $metric = $table->patchEntity($metric, [
+            'name' => $metric->name, // Necessary for validation
+            'parent_id' => $newParentId,
+        ]);
+        $result = (bool)$table->save($metric);
+
+        $this->set([
+            '_jsonOptions' => JSON_FORCE_OBJECT,
+            '_serialize' => ['message', 'result'],
+            'message' => $metric->getErrors() ?
+                implode("\n", Hash::flatten($metric->getErrors())) :
+                'Success',
+            'result' => $result,
+        ]);
+    }
 }

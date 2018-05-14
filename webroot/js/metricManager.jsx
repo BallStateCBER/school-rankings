@@ -366,7 +366,7 @@ class MetricManager extends React.Component {
       });
     }).always(() => {
       this.setState({loading: false});
-      $(document).on('dnd_stop.vakata', function(event, data) {
+      $(document).on('dnd_stop.vakata', (event, data) => {
         const jstree = $('#jstree').jstree();
         const draggedNode = jstree.get_node(data.element);
         const movedMetricId = draggedNode.data.metricId;
@@ -376,14 +376,36 @@ class MetricManager extends React.Component {
             ? parentNode.data.metricId
             : null;
 
-        if (parentMetricId) {
-          console.log('Metric ' + movedMetricId + ' being moved under ' + parentMetricId);
-        } else {
-          console.log('Metric ' + movedMetricId + ' being moved to root');
-        }
+        let liElement = $('#' + draggedNode.id);
+        showNodeUpdateLoading(liElement, jstree, draggedNode);
 
-        // TODO: Update database
-        // TODO: If DB update failed, reload component with this.forceUpdate()
+        $.ajax({
+          method: 'PATCH',
+          url: '/api/metrics/reparent.json',
+          dataType: 'json',
+          data: {
+            'metricId': movedMetricId,
+            'context': context,
+            'newParentId': parentMetricId,
+          },
+        }).done((data) => {
+          if (data.hasOwnProperty('result') && data.result) {
+            return;
+          }
+          alert('There was an error moving that metric. ' +
+              'Check console for details and refresh.');
+          this.forceUpdate();
+          console.log(data.message);
+        }).fail((jqXHR, errorType, exception) => {
+          console.log(jqXHR);
+          console.log(errorType);
+          console.log(exception);
+          alert('There was an error moving that metric. ' +
+              'Check console for details and refresh.');
+          this.forceUpdate();
+        }).always(function() {
+          showNodeUpdateComplete(liElement, jstree, draggedNode);
+        });
       });
     });
   }
