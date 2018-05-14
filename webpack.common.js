@@ -7,8 +7,8 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
   entry: {
-    main: './webroot/js/main.js',
-    metricManager: './webroot/js/metricManager.jsx',
+    'main': './webroot/js/main.js',
+    'metric-manager': './webroot/js/metric-manager.jsx',
   },
   output: {
     filename: 'js/[name].js',
