@@ -319,53 +319,7 @@ class MetricManager extends React.Component {
       url: '/api/metrics/' + context + 's.json',
       dataType: 'json',
     }).done((data) => {
-      $('#jstree').jstree({
-        'core': {
-          'data': formatMetricsForJsTree(data.metrics),
-          'check_callback': true,
-        },
-        'plugins': [
-          'contextmenu',
-          'dnd',
-          'sort',
-          'state',
-          'wholerow',
-        ],
-        'contextmenu': {
-          'items': () => {
-            return {
-              'Create': {
-                'label': 'Create',
-                'title': 'Create a metric in the selected group',
-                'action': (data) => {
-                  window.jsTreeData.createMetric = data;
-                  this.handleCreateModalOpen();
-                },
-              },
-              'Rename': {
-                'label': 'Rename',
-                'title': 'Rename this metric',
-                'action': (data) => {
-                  this.handleRename(data);
-                },
-              },
-              'Delete': {
-                'label': 'Delete',
-                'title': 'Delete this metric',
-                'action': (data) => {
-                  this.handleDelete(data);
-                },
-              },
-            };
-          },
-        },
-        'dnd': {
-          'inside_pos': 'last',
-          'large_drop_target': true,
-          'large_drag_target': true,
-          'use_html5': true,
-        },
-      });
+      $('#jstree').jstree(this.getJsTreeConfig(data));
     }).fail((jqXHR) => {
       this.setState({
         hasError: true,
@@ -374,45 +328,99 @@ class MetricManager extends React.Component {
     }).always(() => {
       this.setState({loading: false});
       $(document).on('dnd_stop.vakata', (event, data) => {
-        const jstree = $('#jstree').jstree();
-        const draggedNode = jstree.get_node(data.element);
-        const movedMetricId = draggedNode.data.metricId;
-        const parentNodeId = jstree.get_parent(draggedNode);
-        const parentNode = jstree.get_node(parentNodeId);
-        const parentMetricId = parentNode.hasOwnProperty('data')
-            ? parentNode.data.metricId
-            : null;
-
-        showNodeUpdateLoading(jstree, draggedNode);
-
-        $.ajax({
-          method: 'PATCH',
-          url: '/api/metrics/reparent.json',
-          dataType: 'json',
-          data: {
-            'metricId': movedMetricId,
-            'context': context,
-            'newParentId': parentMetricId,
-          },
-        }).done((data) => {
-          if (data.hasOwnProperty('result') && data.result) {
-            return;
-          }
-          alert('There was an error moving that metric. ' +
-              'Check console for details and refresh.');
-          this.forceUpdate();
-          console.log(data.message);
-        }).fail((jqXHR, errorType, exception) => {
-          console.log(jqXHR);
-          console.log(errorType);
-          console.log(exception);
-          alert('There was an error moving that metric. ' +
-              'Check console for details and refresh.');
-          this.forceUpdate();
-        }).always(function() {
-          showNodeUpdateComplete(jstree, draggedNode);
-        });
+        this.handleNodeDrop(data);
       });
+    });
+  }
+
+  getJsTreeConfig(data) {
+    return {
+      'core': {
+      'data': formatMetricsForJsTree(data.metrics),
+          'check_callback': true,
+      },
+      'plugins': [
+        'contextmenu',
+        'dnd',
+        'sort',
+        'state',
+        'wholerow',
+      ],
+      'contextmenu': {
+        'items': () => {
+          return {
+            'Create': {
+              'label': 'Create',
+              'title': 'Create a metric in the selected group',
+              'action': (data) => {
+                window.jsTreeData.createMetric = data;
+                this.handleCreateModalOpen();
+              },
+            },
+            'Rename': {
+              'label': 'Rename',
+              'title': 'Rename this metric',
+              'action': (data) => {
+                this.handleRename(data);
+              },
+            },
+            'Delete': {
+              'label': 'Delete',
+              'title': 'Delete this metric',
+              'action': (data) => {
+                this.handleDelete(data);
+              },
+            },
+          };
+        },
+      },
+      'dnd': {
+        'inside_pos': 'last',
+        'large_drop_target': true,
+        'large_drag_target': true,
+        'use_html5': true,
+      },
+    };
+  }
+
+  handleNodeDrop(data) {
+    const jstree = $('#jstree').jstree();
+    const draggedNode = jstree.get_node(data.element);
+    const movedMetricId = draggedNode.data.metricId;
+    const parentNodeId = jstree.get_parent(draggedNode);
+    const parentNode = jstree.get_node(parentNodeId);
+    const parentMetricId = parentNode.hasOwnProperty('data')
+        ? parentNode.data.metricId
+        : null;
+
+    showNodeUpdateLoading(jstree, draggedNode);
+
+    $.ajax({
+      method: 'PATCH',
+      url: '/api/metrics/reparent.json',
+      dataType: 'json',
+      data: {
+        'metricId': movedMetricId,
+        'context': context,
+        'newParentId': parentMetricId,
+      },
+    }).done((data) => {
+      if (data.hasOwnProperty('result') && data.result) {
+        return;
+      }
+      alert('There was an error moving that metric. ' +
+          'Check console for details and refresh.');
+      this.forceUpdate();
+      console.log(data.message);
+    }).fail((jqXHR, errorType, exception) => {
+      console.log(jqXHR);
+      console.log(errorType);
+      console.log(exception);
+      alert('There was an error moving that metric. ' +
+          'Check console for details and refresh.');
+      this.forceUpdate();
+    }).always(function() {
+      showNodeUpdateComplete(jstree, draggedNode);
     });
   }
 
@@ -428,9 +436,7 @@ class MetricManager extends React.Component {
         }
         {! this.state.loading &&
           <Button color="outline-primary"
-                  onClick={() => {
-                    this.handleCreateModalRootOpen();
-                  }}
+                  onClick={this.handleCreateModalRootOpen}
                   ref={this.submitButton}>
             Add root-level metric
           </Button>
