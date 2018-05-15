@@ -3,6 +3,7 @@ namespace App\Test\TestCase\Controller\Api;
 
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase;
+use Exception;
 
 /**
  * MetricsControllerTest class
@@ -45,6 +46,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * @param int $newParentId ID of new parent metric
      * @param array $context Metric context information
      * @return void
+     * @throws Exception
      */
     private function _testReparentSuccess($metricId, $newParentId, $context)
     {
@@ -59,7 +61,9 @@ class MetricsControllerTest extends IntegrationTestCase
         ];
         $table = TableRegistry::get($context['table']);
         $metric = $table->get($metricId);
-        $this->assertNotEquals($newParentId, $metric->parent_id, "Invalid {$context['name']} metric chosen");
+        if ($newParentId == $metric->parent_id) {
+            throw new Exception("Invalid {$context['name']} metric chosen");
+        }
 
         $data = [
             'metricId' => $metricId,
@@ -83,6 +87,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests that a metric can be moved TO the root of the metrics tree
      *
      * @return void
+     * @throws Exception
      */
     public function testReparentToRootSuccess()
     {
@@ -98,7 +103,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests that a metric can be moved FROM the root of the metrics tree
      *
      * @return void
-     * @return void
+     * @throws Exception
      */
     public function testReparentFromRootSuccess()
     {
@@ -107,6 +112,47 @@ class MetricsControllerTest extends IntegrationTestCase
 
         foreach ($this->getContexts() as $context) {
             $this->_testReparentSuccess($metricId, $newParentId, $context);
+        }
+    }
+
+    /**
+     * Tests that moving a metric in a way that creates two siblings with the same name fails
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testReparentFailNonunique()
+    {
+        $url = [
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'reparent',
+            '_ext' => 'json'
+        ];
+        $metricId = 5;
+        $newParentId = 1;
+        foreach ($this->getContexts() as $context) {
+            $table = TableRegistry::get($context['table']);
+            $metric = $table->get($metricId);
+            $originalParentId = $metric->parent_id;
+            if ($newParentId == $metric->parent_id) {
+                throw new Exception("Invalid {$context['name']} metric chosen");
+            }
+
+            $data = [
+                'metricId' => $metricId,
+                'context' => $context['name'],
+                'newParentId' => $newParentId,
+            ];
+            $this->patch($url, $data);
+            $this->assertResponseError();
+
+            $metric = $table->get($metricId);
+            $this->assertEquals(
+                $originalParentId,
+                $metric->parent_id,
+                "{$context['name']} metric parent changed"
+            );
         }
     }
 }
