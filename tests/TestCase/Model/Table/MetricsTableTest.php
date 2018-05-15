@@ -67,7 +67,7 @@ class MetricsTableTest extends TestCase
     }
 
     /**
-     * Test validationDefault method
+     * Test that a metric can't be moved underneath a parent that doesn't exist
      *
      * @return void
      */
@@ -76,6 +76,25 @@ class MetricsTableTest extends TestCase
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metricId = 4;
             $newParentId = 999;
+            $metric = $table->get($metricId);
+            $table->patchEntity($metric, [
+                'parent_id' => $newParentId
+            ]);
+            $result = $table->save($metric);
+            $this->assertFalse($result);
+        }
+    }
+
+    /**
+     * Test enforcement of locally-unique metric names
+     *
+     * @return void
+     */
+    public function testUpdateFailNonuniqueName()
+    {
+        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
+            $metricId = 5;
+            $newParentId = 1;
             $metric = $table->get($metricId);
             $table->patchEntity($metric, [
                 'parent_id' => $newParentId
