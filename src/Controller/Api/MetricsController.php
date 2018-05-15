@@ -2,6 +2,7 @@
 namespace App\Controller\Api;
 
 use App\Controller\AppController;
+use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrictMetric;
 use App\Model\Entity\SchoolMetric;
 use App\Model\Table\MetricsTable;
@@ -43,6 +44,26 @@ class MetricsController extends AppController
     }
 
     /**
+     * If the operation failed, throw an exception that includes error details
+     *
+     * @param bool $success Boolean indicating operation success
+     * @param Metric $metric Metric entity
+     * @return void
+     */
+    private function throwExceptionOnFail($success, $metric)
+    {
+        if ($success) {
+            return;
+        }
+
+        $msg = 'There was an error adding that metric.';
+        if ($metric->getErrors()) {
+            $msg .= ' Details: ' . print_r($metric->getErrors(), true);
+        }
+        throw new BadRequestException($msg);
+    }
+
+    /**
      * Renames a metric
      *
      * @return void
@@ -62,6 +83,8 @@ class MetricsController extends AppController
         $metric = $table->get($metricId);
         $metric = $table->patchEntity($metric, ['name' => $newName]);
         $result = (bool)$table->save($metric);
+
+        $this->throwExceptionOnFail($result, $metric);
 
         $this->set([
             '_jsonOptions' => JSON_FORCE_OBJECT,
@@ -97,7 +120,10 @@ class MetricsController extends AppController
             throw new BadRequestException('Remove all child metrics before removing this metric');
         }
 
-        $result = $table->delete($metric);
+        $result = (bool)$table->delete($metric);
+
+        $this->throwExceptionOnFail($result, $metric);
+
         $this->set([
             '_jsonOptions' => JSON_FORCE_OBJECT,
             '_serialize' => ['result'],
@@ -130,13 +156,7 @@ class MetricsController extends AppController
         ]);
         $result = (bool)$table->save($metric);
 
-        if (!$result) {
-            $msg = 'There was an error adding that metric.';
-            if ($metric->getErrors()) {
-                $msg .= ' Details: ' . print_r($metric->getErrors(), true);
-            }
-            throw new BadRequestException($msg);
-        }
+        $this->throwExceptionOnFail($result, $metric);
 
         $this->set([
             '_serialize' => ['message', 'result'],
@@ -170,6 +190,8 @@ class MetricsController extends AppController
             'parent_id' => $newParentId,
         ]);
         $result = (bool)$table->save($metric);
+
+        $this->throwExceptionOnFail($result, $metric);
 
         $this->set([
             '_jsonOptions' => JSON_FORCE_OBJECT,
