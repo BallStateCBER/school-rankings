@@ -155,4 +155,31 @@ class MetricsControllerTest extends IntegrationTestCase
             );
         }
     }
+
+    /**
+     * Tests moving a metric under a nonexistent parent
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testReparentFailUnknownParent()
+    {
+        $url = [
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'reparent',
+            '_ext' => 'json'
+        ];
+        $metricId = 4;
+        $newParentId = 999;
+        foreach ($this->getContexts() as $context) {
+            $data = [
+                'metricId' => $metricId,
+                'context' => $context['name'],
+                'newParentId' => $newParentId,
+            ];
+            $this->patch($url, $data);
+            $this->assertResponseError();
+        }
+    }
 }
