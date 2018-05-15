@@ -186,7 +186,6 @@ class MetricsController extends AppController
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
         $metric = $table->get($metricId);
         $metric = $table->patchEntity($metric, [
-            'name' => $metric->name, // Necessary for validation
             'parent_id' => $newParentId,
         ]);
         $result = (bool)$table->save($metric);

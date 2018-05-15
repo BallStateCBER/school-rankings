@@ -66,7 +66,15 @@ class MetricsTable extends Table
                 'rule' => function ($value, $context) use ($table) {
                     $metricId = $context['data']['id'] ?? null;
                     $parentId = $value;
-                    $name = $context['data']['name'];
+
+                    if (isset($context['data']['name'])) {
+                        $name = $context['data']['name'];
+                    } elseif ($metricId) {
+                        $metric = $table->get($metricId);
+                        $name = $metric->name;
+                    } else {
+                        throw new InternalErrorException('Either metric ID or name are required');
+                    }
 
                     return !$table->hasNameConflict($metricId, $parentId, $name);
                 },
