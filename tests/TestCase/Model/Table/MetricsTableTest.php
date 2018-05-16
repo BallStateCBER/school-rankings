@@ -92,7 +92,7 @@ class MetricsTableTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateFailNonuniqueName()
+    public function testUpdateFailReparentNonuniqueName()
     {
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metricId = 5;
@@ -100,6 +100,25 @@ class MetricsTableTest extends TestCase
             $metric = $table->get($metricId);
             $table->patchEntity($metric, [
                 'parent_id' => $newParentId
+            ]);
+            $result = $table->save($metric);
+            $this->assertFalse($result);
+        }
+    }
+
+    /**
+     * Test enforcement of locally-unique metric names
+     *
+     * @return void
+     */
+    public function testUpdateFailUpdateNonuniqueName()
+    {
+        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
+            $metric = $table->newEntity([
+                'name' => 'Identical name',
+                'parent_id' => 1,
+                'type' => 'numeric',
+                'selectable' => true
             ]);
             $result = $table->save($metric);
             $this->assertFalse($result);
