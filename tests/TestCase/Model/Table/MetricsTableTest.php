@@ -88,6 +88,25 @@ class MetricsTableTest extends TestCase
     }
 
     /**
+     * Test that a metric can't be created underneath a parent that doesn't exist
+     *
+     * @return void
+     */
+    public function testCreateFailUnknownParent()
+    {
+        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
+            $metric = $table->newEntity([
+                'name' => 'Metric name',
+                'parent_id' => 999,
+                'type' => 'numeric',
+                'selectable' => true
+            ]);
+            $result = $table->save($metric);
+            $this->assertFalse($result);
+        }
+    }
+
+    /**
      * Test enforcement of locally-unique metric names
      *
      * @return void
