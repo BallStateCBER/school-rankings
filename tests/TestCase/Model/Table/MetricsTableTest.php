@@ -73,7 +73,7 @@ class MetricsTableTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateFailUnknownParent()
+    public function testReparentFailUnknownParent()
     {
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metricId = 4;
@@ -92,7 +92,7 @@ class MetricsTableTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateFailReparentNonuniqueName()
+    public function testReparentFailNonuniqueName()
     {
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metricId = 5;
@@ -111,7 +111,7 @@ class MetricsTableTest extends TestCase
      *
      * @return void
      */
-    public function testCreateFailUpdateNonuniqueName()
+    public function testCreateFailNonuniqueName()
     {
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metric = $table->newEntity([
