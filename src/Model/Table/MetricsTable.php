@@ -4,7 +4,6 @@ namespace App\Model\Table;
 use App\Model\Entity\Metric;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
-use Cake\Event\Event;
 use Cake\Network\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -222,14 +221,18 @@ class MetricsTable extends Table
     /**
      * Prevents a metric from being deleted if it has children
      *
-     * @param Event $event Event object
      * @param EntityInterface $entity SchoolMetric or SchoolDistrictMetric entity
-     * @return void
+     * @param array $options Options to pass to parent delete() method
+     * @return bool
      */
-    public function beforeDelete(Event $event, EntityInterface $entity)
+    public function delete(EntityInterface $entity, $options = [])
     {
         if ($this->childCount($entity, true) > 0) {
-            $event->stopPropagation();
+            $entity->setError('delete', 'Cannot delete a metric with child-records');
+
+            return false;
         }
+
+        return parent::delete($entity, $options);
     }
 }
