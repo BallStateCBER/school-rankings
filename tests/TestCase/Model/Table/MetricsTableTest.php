@@ -111,7 +111,7 @@ class MetricsTableTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateFailUpdateNonuniqueName()
+    public function testCreateFailUpdateNonuniqueName()
     {
         foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
             $metric = $table->newEntity([
