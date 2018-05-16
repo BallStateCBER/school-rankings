@@ -17,7 +17,9 @@ class MetricsControllerTest extends IntegrationTestCase
      */
     public $fixtures = [
         'app.school_district_metrics',
-        'app.school_metrics'
+        'app.school_district_statistics',
+        'app.school_metrics',
+        'app.school_statistics'
     ];
 
     /**
@@ -165,6 +167,52 @@ class MetricsControllerTest extends IntegrationTestCase
                 'newParentId' => $newParentId,
             ];
             $this->patch($this->reparentUrl, $data);
+            $this->assertResponseError();
+        }
+    }
+
+    /**
+     * Tests successful deleting of a metric
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testDeleteSuccess()
+    {
+        $metricId = 4;
+        foreach ($this->contexts as $context => $table) {
+            $url = [
+                'prefix' => 'api',
+                'controller' => 'Metrics',
+                'action' => 'delete',
+                $context,
+                $metricId,
+                '_ext' => 'json'
+            ];
+            $this->delete($url);
+            $this->assertResponseOk();
+        }
+    }
+
+    /**
+     * Tests prevention of deleting parent metrics
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testDeleteFailHasChildren()
+    {
+        $metricId = 1;
+        foreach ($this->contexts as $context => $table) {
+            $url = [
+                'prefix' => 'api',
+                'controller' => 'Metrics',
+                'action' => 'delete',
+                $context,
+                $metricId,
+                '_ext' => 'json'
+            ];
+            $this->delete($url);
             $this->assertResponseError();
         }
     }
