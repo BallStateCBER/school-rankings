@@ -288,12 +288,8 @@ class MetricManager extends React.Component {
 
     $.ajax({
       method: 'DELETE',
-      url: '/api/metrics/delete.json',
+      url: '/api/metrics/delete/' + context + '/' + metricId + '.json',
       dataType: 'json',
-      data: {
-        'context': context,
-        'metricId': metricId,
-      },
     }).done((data) => {
       if (data.hasOwnProperty('result') && data.result) {
         jstree.delete_node(node);

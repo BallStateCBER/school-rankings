@@ -97,18 +97,17 @@ class MetricsController extends AppController
     }
 
     /**
-     * Renames a metric
+     * Deletes a metric
      *
+     * @param string $context Either 'school' or 'district'
+     * @param string $metricId ID of metric record
      * @return void
      */
-    public function delete()
+    public function delete($context, $metricId)
     {
         if (!$this->request->is('delete')) {
             throw new MethodNotAllowedException('Request is not DELETE');
         }
-
-        $metricId = $this->request->getData('metricId');
-        $context = $this->request->getData('context');
 
         /** @var SchoolMetricsTable|SchoolDistrictMetricsTable $table */
         $table = MetricsTable::getContextTable($context);
