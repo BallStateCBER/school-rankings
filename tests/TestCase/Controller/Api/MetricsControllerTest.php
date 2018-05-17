@@ -58,6 +58,18 @@ class MetricsControllerTest extends IntegrationTestCase
     ];
 
     /**
+     * The URL array for creating a metric
+     *
+     * @var array
+     */
+    private $renameUrl = [
+        'prefix' => 'api',
+        'controller' => 'Metrics',
+        'action' => 'rename',
+        '_ext' => 'json'
+    ];
+
+    /**
      * Tests a successful metric reparenting
      *
      * @param int $metricId ID of metric being moved
@@ -337,6 +349,25 @@ class MetricsControllerTest extends IntegrationTestCase
         foreach ($this->contexts as $context => $tableName) {
             $data['context'] = $context;
             $this->post($this->addUrl, $data);
+            $this->assertResponseError();
+        }
+    }
+
+    /**
+     * Tests failing to rename a metric in a way that causes a name conflict
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testRenameFailNameConflict()
+    {
+        $data = [
+            'metricId' => 2,
+            'name' => 'Identical name'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            $this->post($this->renameUrl, $data);
             $this->assertResponseError();
         }
     }
