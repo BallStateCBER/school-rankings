@@ -142,6 +142,9 @@ class MetricsController extends AppController
         }
 
         $context = $this->request->getData('context');
+        if (!in_array($context, ['school', 'district'])) {
+            throw new BadRequestException('Unrecognized metric context: ' . $context);
+        }
         $table = MetricsTable::getContextTable($context);
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
