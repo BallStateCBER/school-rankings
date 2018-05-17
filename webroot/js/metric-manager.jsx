@@ -208,6 +208,7 @@ class MetricManager extends React.Component {
       hasError: false,
       errorMsg: '',
       openCreateModal: false,
+      openEditModal: false,
     };
     this.componentDidMount = this.componentDidMount.bind(this);
     this.handleCreateModalOpen = this.handleCreateModalOpen.bind(this);
@@ -271,6 +272,14 @@ class MetricManager extends React.Component {
         showNodeUpdateComplete(jstree, node);
       });
     });
+  }
+
+  handleEditModalOpen(data) {
+    this.setState({openEditModal: true});
+  }
+
+  handleEditModalClose() {
+    this.setState({openEditModal: false});
   }
 
   handleDelete(data) {
@@ -358,6 +367,14 @@ class MetricManager extends React.Component {
               'title': 'Rename this metric',
               'action': (data) => {
                 this.handleRename(data);
+              },
+            },
+            'Edit': {
+              'label': 'Edit',
+              'title': 'Edit this metric',
+              'action': (data) => {
+                window.jsTreeData.editMetric = data;
+                this.handleEditModalOpen(data);
               },
             },
             'Delete': {
