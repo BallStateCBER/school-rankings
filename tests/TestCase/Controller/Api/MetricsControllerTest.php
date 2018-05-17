@@ -1,6 +1,7 @@
 <?php
 namespace App\Test\TestCase\Controller\Api;
 
+use App\Model\Entity\Metric;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase;
 use Exception;
@@ -41,6 +42,18 @@ class MetricsControllerTest extends IntegrationTestCase
         'prefix' => 'api',
         'controller' => 'Metrics',
         'action' => 'reparent',
+        '_ext' => 'json'
+    ];
+
+    /**
+     * The URL array for creating a metric
+     *
+     * @var array
+     */
+    private $addUrl = [
+        'prefix' => 'api',
+        'controller' => 'Metrics',
+        'action' => 'add',
         '_ext' => 'json'
     ];
 
@@ -214,6 +227,42 @@ class MetricsControllerTest extends IntegrationTestCase
             ];
             $this->delete($url);
             $this->assertResponseError();
+        }
+    }
+
+    /**
+     * Tests successful creation of a metric
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testCreateSuccess()
+    {
+        $metricName = 'New metric';
+        $data = [
+            'name' => $metricName,
+            'description' => 'Metric description',
+            'selectable' => 'true',
+            'parentId' => 1,
+            'type' => 'numeric'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            $this->post($this->addUrl, $data);
+            $this->assertResponseSuccess();
+
+            /** @var Metric $record */
+            $record = TableRegistry::get($tableName)->find()
+                ->where(['name' => $metricName])
+                ->first();
+            $className = $context == 'school' ? 'SchoolMetric' : 'SchoolDistrictMetric';
+            $this->assertInstanceOf('App\\Model\\Entity\\' . $className, $record);
+
+            $this->assertEquals($data['name'], $record->name);
+            $this->assertEquals($data['description'], $record->description);
+            $this->assertEquals(true, $record->selectable);
+            $this->assertEquals($data['type'], $record->type);
+            $this->assertEquals($data['parentId'], $record->parent_id);
         }
     }
 }
