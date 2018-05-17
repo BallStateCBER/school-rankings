@@ -265,4 +265,57 @@ class MetricsControllerTest extends IntegrationTestCase
             $this->assertEquals($data['parentId'], $record->parent_id);
         }
     }
+
+    /**
+     * Tests failing to create a metric with an invalid parent
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testCreateFailInvalidParent()
+    {
+        $data = [
+            'name' => 'New metric',
+            'description' => 'Metric description',
+            'selectable' => 'true',
+            'parentId' => 999,
+            'type' => 'numeric'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            $this->post($this->addUrl, $data);
+            $this->assertResponseError();
+        }
+    }
+
+    /**
+     * Tests failing to create a metric with missing required data
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testCreateFailMissingData()
+    {
+        $data = [
+            'name' => 'New metric',
+            'description' => 'Metric description',
+            'selectable' => 'true',
+            'parentId' => 1,
+            'type' => 'numeric'
+        ];
+        $requiredData = [
+            'name',
+            'type',
+            'context'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            foreach ($requiredData as $dataKey) {
+                $dataSubset = $data;
+                unset($dataSubset[$dataKey]);
+                $this->post($this->addUrl, $dataSubset);
+                $this->assertResponseError('Error expected with missing ' . $dataKey);
+            }
+        }
+    }
 }
