@@ -318,4 +318,26 @@ class MetricsControllerTest extends IntegrationTestCase
             }
         }
     }
+
+    /**
+     * Tests failing to create a metric with a name conflict
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testCreateFailNameConflict()
+    {
+        $data = [
+            'name' => 'Identical name',
+            'description' => 'Metric description',
+            'selectable' => 'true',
+            'parentId' => 1,
+            'type' => 'numeric'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            $this->post($this->addUrl, $data);
+            $this->assertResponseError();
+        }
+    }
 }
