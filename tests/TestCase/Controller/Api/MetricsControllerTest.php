@@ -371,4 +371,23 @@ class MetricsControllerTest extends IntegrationTestCase
             $this->assertResponseError();
         }
     }
+
+    /**
+     * Tests successfully renaming a metric
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testRenameSuccess()
+    {
+        $data = [
+            'metricId' => 2,
+            'newName' => 'Not an identical name'
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+            $this->patch($this->renameUrl, $data);
+            $this->assertResponseSuccess();
+        }
+    }
 }
