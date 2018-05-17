@@ -4,6 +4,7 @@ namespace App\Model\Table;
 use App\Model\Entity\Metric;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
+use Cake\Network\Exception\BadRequestException;
 use Cake\Network\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -72,7 +73,7 @@ class MetricsTable extends Table
                         $metric = $table->get($metricId);
                         $name = $metric->name;
                     } else {
-                        throw new InternalErrorException('Either metric ID or name are required');
+                        throw new BadRequestException('Either metric ID or name are required');
                     }
 
                     return !$table->hasNameConflict($metricId, $parentId, $name);
