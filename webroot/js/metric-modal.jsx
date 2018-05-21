@@ -1,17 +1,18 @@
 import React from 'react';
 import {Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 
-class CreateModal extends React.Component {
+class MetricModal extends React.Component {
   constructor(props) {
     super(props);
 
     this.close = this.close.bind(this);
-    this.submit = this.submit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
 
     this.submitButton = React.createRef();
 
     this.state = {
+      metricId: null,
       metricName: '',
       metricDescription: '',
       metricSelectable: true,
@@ -31,6 +32,7 @@ class CreateModal extends React.Component {
   close() {
     this.props.onClose();
     this.setState({
+      metricId: null,
       metricName: '',
       metricDescription: '',
       metricSelectable: true,
@@ -38,7 +40,7 @@ class CreateModal extends React.Component {
     });
   }
 
-  submit(event) {
+  handleSubmit(event) {
     event.preventDefault();
 
     this.setState({submitInProgress: true});
@@ -49,7 +51,7 @@ class CreateModal extends React.Component {
     const parentNode = isRoot ? null : jstree.get_node(data.reference);
     const parentId = isRoot ? null : parentNode.data.metricId;
     const metricName = this.state.metricName.trim();
-    const submitData = {
+    let submitData = {
       'context': window.metricManager.context,
       'parentId': parentId,
       'name': metricName,
@@ -57,10 +59,17 @@ class CreateModal extends React.Component {
       'type': this.state.metricType,
       'selectable': this.state.metricSelectable,
     };
+    if (this.props.mode === 'edit') {
+      submitData.id = window.jsTreeData.editMetricId;
+    }
+
+    const url = this.props.mode === 'edit'
+        ? '/api/metrics/edit/' + submitData.id + '.json'
+        : '/api/metrics/add.json';
 
     $.ajax({
-      method: 'POST',
-      url: '/api/metrics/add.json',
+      method: this.props.mode === 'edit' ? 'PUT' : 'POST',
+      url: url,
       dataType: 'json',
       data: submitData,
     }).done(() => {
@@ -78,8 +87,11 @@ class CreateModal extends React.Component {
       <Modal isOpen={this.props.isOpen} toggle={this.close}
              className={this.props.className}
              ref={(modal) => this.modal = modal}>
-        <ModalHeader toggle={this.close}>Add metric</ModalHeader>
-        <form onSubmit={this.submit}>
+        <ModalHeader toggle={this.close}>
+          {this.props.mode === 'add' ? 'Add' : 'Edit'}
+          Metric
+        </ModalHeader>
+        <form onSubmit={this.handleSubmit}>
           <ModalBody>
             <fieldset className="form-group">
               <label htmlFor="metric-name">Name:</label>
@@ -129,10 +141,10 @@ class CreateModal extends React.Component {
             </fieldset>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={this.submit}
+            <Button color="primary" onClick={this.handleSubmit}
                     ref={this.submitButton}
                     disabled={this.state.submitInProgress}>
-              Add
+              {this.props.mode === 'add' ? 'Add' : 'Edit'}
             </Button>
             {' '}
             <Button color="secondary" onClick={this.close} data-dismiss="modal">
@@ -145,6 +157,6 @@ class CreateModal extends React.Component {
   }
 }
 
-CreateModal.propTypes = Modal.propTypes;
+MetricModal.propTypes = Modal.propTypes;
 
-export {CreateModal};
+export {MetricModal};

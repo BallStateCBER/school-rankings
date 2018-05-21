@@ -4,7 +4,7 @@ import '../css/metric-manager.scss';
 import ReactDom from 'react-dom';
 import 'bootstrap';
 import {Button} from 'reactstrap';
-import {CreateModal} from 'metric-modal';
+import {MetricModal} from './metric-modal.jsx';
 
 window.jsTreeData = [];
 
@@ -67,6 +67,8 @@ class MetricManager extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this);
     this.handleCreateModalOpen = this.handleCreateModalOpen.bind(this);
     this.handleCreateModalClose = this.handleCreateModalClose.bind(this);
+    this.handleEditModalOpen = this.handleEditModalOpen.bind(this);
+    this.handleEditModalClose = this.handleEditModalClose.bind(this);
   }
 
   handleCreateModalRootOpen() {
@@ -227,7 +229,9 @@ class MetricManager extends React.Component {
               'label': 'Edit',
               'title': 'Edit this metric',
               'action': (data) => {
-                window.jsTreeData.editMetric = data;
+                const jstree = $('#jstree').jstree();
+                const node = jstree.get_node(data.reference);
+                window.jsTreeData.editMetricId = node.data.metricId;
                 this.handleEditModalOpen();
               },
             },
@@ -312,8 +316,10 @@ class MetricManager extends React.Component {
           <p className="text-danger">{this.state.errorMsg}</p>
         }
         <div id="jstree"></div>
-        <CreateModal onClose={this.handleCreateModalClose}
-                     isOpen={this.state.openCreateModal} />
+        <MetricModal onClose={this.handleCreateModalClose}
+                     isOpen={this.state.openCreateModal} mode="add" />
+        <MetricModal onClose={this.handleEditModalClose}
+                     isOpen={this.state.openEditModal} mode="edit" />
       </div>
     );
   }
