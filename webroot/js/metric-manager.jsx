@@ -6,7 +6,10 @@ import 'bootstrap';
 import {Button} from 'reactstrap';
 import {MetricModal} from './metric-modal.jsx';
 
-window.jsTreeData = [];
+window.jsTreeData = {
+  createMetric: {},
+  editMetric: {},
+};
 
 let showNodeUpdateLoading = function(jstree, node) {
   let liElement = $('#' + node.id);
@@ -229,7 +232,7 @@ class MetricManager extends React.Component {
               'action': (data) => {
                 const jstree = $('#jstree').jstree();
                 const node = jstree.get_node(data.reference);
-                window.jsTreeData.editMetricId = node.data.metricId;
+                window.jsTreeData.editMetric = node.data;
                 this.handleEditModalOpen();
               },
             },
