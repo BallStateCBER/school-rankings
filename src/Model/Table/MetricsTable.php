@@ -124,6 +124,12 @@ class MetricsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
+        $rules->addDelete(function ($entity) {
+            return $this->childCount($entity, true) === 0;
+        }, 'cantDeleteParentMetric', [
+            'message' => 'Cannot delete a metric with child-records'
+        ]);
+
         return $rules;
     }
 
@@ -217,23 +223,5 @@ class MetricsTable extends Table
         return $this->find()
             ->where($conditions)
             ->count() > 0;
-    }
-
-    /**
-     * Prevents a metric from being deleted if it has children
-     *
-     * @param EntityInterface $entity SchoolMetric or SchoolDistrictMetric entity
-     * @param array $options Options to pass to parent delete() method
-     * @return bool
-     */
-    public function delete(EntityInterface $entity, $options = [])
-    {
-        if ($this->childCount($entity, true) > 0) {
-            $entity->setError('delete', 'Cannot delete a metric with child-records');
-
-            return false;
-        }
-
-        return parent::delete($entity, $options);
     }
 }
