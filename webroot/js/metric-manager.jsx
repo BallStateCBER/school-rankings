@@ -319,8 +319,10 @@ class MetricManager extends React.Component {
         <div id="jstree"></div>
         <MetricModal onClose={this.handleCreateModalClose}
                      isOpen={this.state.openCreateModal} mode="add" />
-        <MetricModal onClose={this.handleEditModalClose}
-                     isOpen={this.state.openEditModal} mode="edit" />
+        {this.state.openEditModal &&
+          <MetricModal onClose={this.handleEditModalClose}
+                       isOpen={this.state.openEditModal} mode="edit"/>
+        }
       </div>
     );
   }

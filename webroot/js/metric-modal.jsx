@@ -21,6 +21,12 @@ class MetricModal extends React.Component {
     };
   }
 
+  componentWillMount() {
+    if (this.props.mode === 'edit') {
+      this.populateEditForm();
+    }
+  }
+
   populateEditForm() {
     if (! window.jsTreeData.editMetric.hasOwnProperty('metricId')) {
       return;
@@ -102,10 +108,6 @@ class MetricModal extends React.Component {
   }
 
   render() {
-    if (this.props.mode === 'edit') {
-      this.populateEditForm();
-    }
-
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.close}
              className={this.props.className}
