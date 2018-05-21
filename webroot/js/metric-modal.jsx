@@ -88,7 +88,7 @@ class MetricModal extends React.Component {
              className={this.props.className}
              ref={(modal) => this.modal = modal}>
         <ModalHeader toggle={this.close}>
-          {this.props.mode === 'add' ? 'Add' : 'Edit'}
+          {this.props.mode === 'add' ? 'Create New ' : 'Edit '}
           Metric
         </ModalHeader>
         <form onSubmit={this.handleSubmit}>
