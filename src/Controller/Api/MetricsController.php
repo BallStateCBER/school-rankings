@@ -203,4 +203,44 @@ class MetricsController extends AppController
             'result' => $result,
         ]);
     }
+
+    /**
+     * Updates a metric
+     *
+     * @param int $metricId ID of metric record
+     * @return void
+     */
+    public function edit($metricId)
+    {
+        if (!$this->request->is('put')) {
+            throw new MethodNotAllowedException('Request is not PUT');
+        }
+
+        $context = $this->request->getData('context');
+        if (!in_array($context, ['school', 'district'])) {
+            throw new BadRequestException('Unrecognized metric context: ' . $context);
+        }
+        $table = MetricsTable::getContextTable($context);
+
+        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        $selectable = $this->request->getData('selectable');
+        $metric = $table->get($metricId);
+        $table->patchEntity($metric, [
+            'name' => $this->request->getData('name'),
+            'description' => $this->request->getData('description'),
+            'type' => $this->request->getData('type'),
+            'selectable' => $selectable == 'false' ? false : (bool)$selectable
+        ]);
+        $result = (bool)$table->save($metric);
+
+        $this->throwExceptionOnFail($result, $metric);
+
+        $this->set([
+            '_serialize' => ['message', 'result'],
+            'message' => $metric->getErrors() ?
+                implode("\n", Hash::flatten($metric->getErrors())) :
+                'Success',
+            'result' => $result,
+        ]);
+    }
 }
