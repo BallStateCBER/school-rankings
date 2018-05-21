@@ -21,6 +21,25 @@ class MetricModal extends React.Component {
     };
   }
 
+  populateEditForm() {
+    if (! window.jsTreeData.editMetric.hasOwnProperty('metricId')) {
+      return;
+    }
+
+    const data = window.jsTreeData.editMetric;
+    if (this.state.metricId === data.metricId) {
+      return;
+    }
+
+    this.setState({
+      metricId: data.metricId,
+      metricName: data.name,
+      metricDescription: data.description,
+      metricSelectable: data.selectable,
+      metricType: data.type,
+    });
+  }
+
   handleChange(event) {
     const target = event.target;
     const name = target.name;
@@ -60,7 +79,7 @@ class MetricModal extends React.Component {
       'selectable': this.state.metricSelectable,
     };
     if (this.props.mode === 'edit') {
-      submitData.id = window.jsTreeData.editMetricId;
+      submitData.id = window.jsTreeData.editMetric.metricId;
     }
 
     const url = this.props.mode === 'edit'
@@ -83,6 +102,10 @@ class MetricModal extends React.Component {
   }
 
   render() {
+    if (this.props.mode === 'edit') {
+      this.populateEditForm();
+    }
+
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.close}
              className={this.props.className}
