@@ -35,14 +35,12 @@ function formatMetricsForJsTree(data) {
   data.forEach(function(metric) {
     let jTreeData = {
       text: metric.name,
-      a_attr: {
-        selectable: metric.selectable ? 1 : 0,
-        type: metric.type,
-      },
       data: {
         selectable: Boolean(metric.selectable),
         type: metric.type,
         metricId: metric.id,
+        name: metric.name,
+        description: metric.description,
       },
     };
     if (metric.children.length > 0) {
