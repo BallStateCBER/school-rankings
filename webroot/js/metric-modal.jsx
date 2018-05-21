@@ -65,11 +65,7 @@ class MetricModal extends React.Component {
     });
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
-
-    this.setState({submitInProgress: true});
-
+  handleAdd() {
     const data = window.jsTreeData.createMetric;
     const isRoot = data.hasOwnProperty('root') && data.root;
     const jstree = $('#jstree').jstree();
@@ -84,17 +80,10 @@ class MetricModal extends React.Component {
       'type': this.state.metricType,
       'selectable': this.state.metricSelectable,
     };
-    if (this.props.mode === 'edit') {
-      submitData.id = window.jsTreeData.editMetric.metricId;
-    }
-
-    const url = this.props.mode === 'edit'
-        ? '/api/metrics/edit/' + submitData.id + '.json'
-        : '/api/metrics/add.json';
 
     $.ajax({
-      method: this.props.mode === 'edit' ? 'PUT' : 'POST',
-      url: url,
+      method: 'POST',
+      url: '/api/metrics/add.json',
       dataType: 'json',
       data: submitData,
     }).done(() => {
@@ -105,6 +94,41 @@ class MetricModal extends React.Component {
       alert(msg);
       this.setState({submitInProgress: false});
     });
+  }
+
+  handleEdit() {
+    let submitData = {
+      'context': window.metricManager.context,
+      'name': this.state.metricName.trim(),
+      'description': this.state.metricDescription.trim(),
+      'type': this.state.metricType,
+      'selectable': this.state.metricSelectable,
+    };
+
+    $.ajax({
+      method: 'PUT',
+      url: '/api/metrics/edit/' + this.state.metricId + '.json',
+      dataType: 'json',
+      data: submitData,
+    }).done(() => {
+      // TODO: update displayed node data
+      console.log('TODO: update displayed node data');
+      this.close();
+    }).fail((jqXHR) => {
+      const msg = jqXHR.responseJSON.message;
+      alert(msg);
+      this.setState({submitInProgress: false});
+    });
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    this.setState({submitInProgress: true});
+    if (this.props.mode === 'add') {
+      this.handleAdd();
+    } else if (this.props.mode === 'edit') {
+      this.handleEdit();
+    }
   }
 
   render() {
