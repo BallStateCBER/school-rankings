@@ -56,13 +56,6 @@ class MetricModal extends React.Component {
 
   close() {
     this.props.onClose();
-    this.setState({
-      metricId: null,
-      metricName: '',
-      metricDescription: '',
-      metricSelectable: true,
-      metricType: 'numeric',
-    });
   }
 
   handleAdd() {
