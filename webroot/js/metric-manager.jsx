@@ -237,6 +237,7 @@ class MetricManager extends React.Component {
                 const jstree = $('#jstree').jstree();
                 const node = jstree.get_node(data.reference);
                 window.jsTreeData.editMetric = node.data;
+                window.jsTreeData.editMetricNode = node;
                 this.handleEditModalOpen();
               },
             },

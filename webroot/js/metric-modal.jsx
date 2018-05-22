@@ -97,7 +97,7 @@ class MetricModal extends React.Component {
   }
 
   handleEdit() {
-    let submitData = {
+    const submitData = {
       'context': window.metricManager.context,
       'name': this.state.metricName.trim(),
       'description': this.state.metricDescription.trim(),
@@ -111,14 +111,28 @@ class MetricModal extends React.Component {
       dataType: 'json',
       data: submitData,
     }).done(() => {
-      // TODO: update displayed node data
-      console.log('TODO: update displayed node data');
+      const node = window.jsTreeData.editMetricNode;
+      MetricModal.updateNode(node, submitData);
       this.close();
     }).fail((jqXHR) => {
-      const msg = jqXHR.responseJSON.message;
-      alert(msg);
+      if (jqXHR.hasOwnProperty('responseJSON')) {
+        if (jqXHR.responseJSON.hasOwnProperty('message')) {
+          alert(jqXHR.responseJSON.message);
+        }
+      }
+      alert('Error updating metric.');
       this.setState({submitInProgress: false});
     });
+  }
+
+  static updateNode(node, data) {
+    const jstree = $('#jstree').jstree();
+    jstree.rename_node(node, data.name);
+    for (let property in data) {
+      if ({}.hasOwnProperty.call(data, property)) {
+        node.data[property] = data[property];
+      }
+    }
   }
 
   handleSubmit(event) {
