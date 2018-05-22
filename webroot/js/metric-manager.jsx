@@ -118,12 +118,16 @@ class MetricManager extends React.Component {
         if (data.hasOwnProperty('result') && data.result) {
           return;
         }
+
+        // Display error and undo the renaming of this node
         alert(data.message);
         jstree.rename_node(node, originalName);
       }).fail(function(jqXHR, errorType, exception) {
         console.log(jqXHR);
         console.log(errorType);
         console.log(exception);
+
+        // Undo the renaming of this node
         jstree.rename_node(node, originalName);
       }).always(function() {
         showNodeUpdateComplete(jstree, node);
