@@ -11,50 +11,6 @@ window.jsTreeData = {
   editMetric: {},
 };
 
-let showNodeUpdateLoading = function(jstree, node) {
-  let liElement = $('#' + node.id);
-  let img = $('<img src="/jstree/themes/default/throbber.gif" />');
-  img.attr('alt', 'Loading...');
-  img.addClass('loading');
-  liElement.find('a.jstree-anchor').append(img);
-  jstree.disable_node(node);
-};
-
-let showNodeUpdateComplete = function(jstree, node) {
-  let liElement = $('#' + node.id);
-  liElement.find('img.loading').remove();
-  jstree.enable_node(node);
-};
-
-/**
- * Reformats metric data for JsTree
- *
- * @param {Object} data
- * @return {Array}
- */
-function formatMetricsForJsTree(data) {
-  let retval = [];
-
-  data.forEach(function(metric) {
-    let jTreeData = {
-      text: metric.name,
-      data: {
-        selectable: Boolean(metric.selectable),
-        type: metric.type,
-        metricId: metric.id,
-        name: metric.name,
-        description: metric.description,
-      },
-    };
-    if (metric.children.length > 0) {
-      jTreeData.children = formatMetricsForJsTree(metric.children);
-    }
-    retval.push(jTreeData);
-  });
-
-  return retval;
-}
-
 class MetricManager extends React.Component {
   constructor(props) {
     super(props);
@@ -89,7 +45,7 @@ class MetricManager extends React.Component {
     let jstree = $.jstree.reference(data.reference);
     let node = jstree.get_node(data.reference);
     const context = window.metricManager.context;
-    jstree.edit(node, null, function(node, status, cancelled) {
+    jstree.edit(node, null, (node, status, cancelled) => {
       let newName = node.text;
       let originalName = node.original.text;
       let metricId = node.data.metricId;
@@ -103,7 +59,7 @@ class MetricManager extends React.Component {
         return;
       }
 
-      showNodeUpdateLoading(jstree, node);
+      MetricManager.showNodeUpdateLoading(jstree, node);
 
       $.ajax({
         method: 'PATCH',
@@ -129,8 +85,8 @@ class MetricManager extends React.Component {
 
         // Undo the renaming of this node
         jstree.rename_node(node, originalName);
-      }).always(function() {
-        showNodeUpdateComplete(jstree, node);
+      }).always(() => {
+        MetricManager.showNodeUpdateComplete(jstree, node);
       });
     });
   }
@@ -154,7 +110,7 @@ class MetricManager extends React.Component {
       return;
     }
 
-    showNodeUpdateLoading(jstree, node);
+    MetricManager.showNodeUpdateLoading(jstree, node);
 
     $.ajax({
       method: 'DELETE',
@@ -171,8 +127,8 @@ class MetricManager extends React.Component {
       console.log(errorType);
       console.log(exception);
       alert('There was an error deleting that metric');
-    }).always(function() {
-      showNodeUpdateComplete(jstree, node);
+    }).always(() => {
+      MetricManager.showNodeUpdateComplete(jstree, node);
     });
   }
 
@@ -202,7 +158,7 @@ class MetricManager extends React.Component {
   getJsTreeConfig(data) {
     return {
       'core': {
-      'data': formatMetricsForJsTree(data.metrics),
+      'data': MetricManager.formatMetricsForJsTree(data.metrics),
           'check_callback': true,
       },
       'plugins': [
@@ -270,7 +226,7 @@ class MetricManager extends React.Component {
         ? parentNode.data.metricId
         : null;
 
-    showNodeUpdateLoading(jstree, draggedNode);
+    MetricManager.showNodeUpdateLoading(jstree, draggedNode);
 
     $.ajax({
       method: 'PATCH',
@@ -296,9 +252,49 @@ class MetricManager extends React.Component {
       alert('There was an error moving that metric. ' +
           'Check console for details and refresh.');
       this.forceUpdate();
-    }).always(function() {
-      showNodeUpdateComplete(jstree, draggedNode);
+    }).always(() => {
+      MetricManager.showNodeUpdateComplete(jstree, draggedNode);
     });
+  }
+
+  static showNodeUpdateLoading(jstree, node) {
+    let liElement = $('#' + node.id);
+    let img = $('<img src="/jstree/themes/default/throbber.gif" />');
+    img.attr('alt', 'Loading...');
+    img.addClass('loading');
+    liElement.find('a.jstree-anchor').append(img);
+    jstree.disable_node(node);
+  };
+
+  static showNodeUpdateComplete(jstree, node) {
+    let liElement = $('#' + node.id);
+    liElement.find('img.loading').remove();
+    jstree.enable_node(node);
+  };
+
+  static formatMetricsForJsTree(data) {
+    let retval = [];
+
+    data.forEach((metric) => {
+      let jTreeData = {
+        text: metric.name,
+        data: {
+          selectable: Boolean(metric.selectable),
+          type: metric.type,
+          metricId: metric.id,
+          name: metric.name,
+          description: metric.description,
+        },
+      };
+      if (metric.children.length > 0) {
+        jTreeData.children = MetricManager.formatMetricsForJsTree(
+            metric.children
+        );
+      }
+      retval.push(jTreeData);
+    });
+
+    return retval;
   }
 
   render() {
