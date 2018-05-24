@@ -5,15 +5,16 @@ import ReactDom from 'react-dom';
 import 'bootstrap';
 import {Button} from 'reactstrap';
 import {MetricModal} from './metric-modal.jsx';
+import fontawesome from '@fortawesome/fontawesome';
+require('@fortawesome/fontawesome-free-solid');
+require('@fortawesome/fontawesome-free-regular');
 
 window.jsTreeData = {
   createMetric: {},
   editMetric: {},
 };
 
-window.FontAwesomeConfig = {
-  searchPseudoElements: true,
-};
+fontawesome.config.searchPseudoElements = true;
 
 class MetricManager extends React.Component {
   constructor(props) {
