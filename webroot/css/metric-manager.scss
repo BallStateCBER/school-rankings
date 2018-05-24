@@ -6,3 +6,8 @@ div.jstree {
     font-style: italic;
   }
 }
+.jstree-anchor {
+  > .jstree-themeicon {
+    margin-right: 5px;
+  }
+}
