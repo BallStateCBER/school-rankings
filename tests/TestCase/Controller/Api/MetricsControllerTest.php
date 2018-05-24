@@ -390,4 +390,54 @@ class MetricsControllerTest extends IntegrationTestCase
             $this->assertResponseSuccess();
         }
     }
+
+    /**
+     * Returns the URL of an 'edit' API endpoint
+     *
+     * @param int $metricId Metric record ID
+     * @return array
+     */
+    private function getEditUrl($metricId)
+    {
+        return [
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'edit',
+            $metricId,
+            '_ext' => 'json'
+        ];
+    }
+
+    /**
+     * Tests successfully editing a metric
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function testEditSuccess()
+    {
+        $metricId = 1;
+        $data = [
+            'metricId' => $metricId,
+            'name' => 'Renamed',
+            'description' => 'New description',
+            'type' => 'boolean',
+            'selectable' => false
+        ];
+        foreach ($this->contexts as $context => $tableName) {
+            $data['context'] = $context;
+
+            // Ensure that fixture data is different from $data
+            $metric = TableRegistry::get($tableName)->get($metricId);
+            foreach ($data as $field => $value) {
+                if ($metric->$field == $value) {
+                    $msg = "Invalid $context metric chosen. Metric #$metricId's $field value is already $value";
+                    throw new Exception($msg);
+                }
+            }
+
+            $this->put($this->getEditUrl($metricId), $data);
+            $this->assertResponseSuccess();
+        }
+    }
 }
