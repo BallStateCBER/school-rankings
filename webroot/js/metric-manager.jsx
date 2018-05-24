@@ -11,6 +11,10 @@ window.jsTreeData = {
   editMetric: {},
 };
 
+window.FontAwesomeConfig = {
+  searchPseudoElements: true,
+};
+
 class MetricManager extends React.Component {
   constructor(props) {
     super(props);

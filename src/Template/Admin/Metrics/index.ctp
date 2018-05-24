@@ -10,6 +10,8 @@
     $this->Html->script('/dist/js/metric-manager.js', ['block' => 'bottom']);
 ?>
 
+<script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+
 <div id="metric-manager"></div>
 
 <script>

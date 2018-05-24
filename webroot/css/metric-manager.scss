@@ -11,3 +11,25 @@ div.jstree {
     margin-right: 5px;
   }
 }
+li.jstree-node {
+  &[data-type="numeric"] {
+    a::after {
+      display: none;
+      content: "\f080";
+      font-family: "Font Awesome 5 Regular", monospace;
+    }
+  }
+  &[data-type="boolean"] {
+    a::after {
+      display: none;
+      content: "\f164";
+      font-family: "Font Awesome 5 Regular", monospace;
+    }
+  }
+  > a {
+    > .svg-inline--fa:last-child {
+      color: #666;
+      margin-left: 5px;
+    }
+  }
+}
