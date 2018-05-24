@@ -418,26 +418,37 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $metricId = 1;
         $data = [
-            'metricId' => $metricId,
             'name' => 'Renamed',
             'description' => 'New description',
             'type' => 'boolean',
             'selectable' => false
         ];
         foreach ($this->contexts as $context => $tableName) {
-            $data['context'] = $context;
-
             // Ensure that fixture data is different from $data
-            $metric = TableRegistry::get($tableName)->get($metricId);
+            $table = TableRegistry::get($tableName);
+            $originalMetric = $table->get($metricId);
             foreach ($data as $field => $value) {
-                if ($metric->$field == $value) {
+                if ($originalMetric->$field == $value) {
                     $msg = "Invalid $context metric chosen. Metric #$metricId's $field value is already $value";
                     throw new Exception($msg);
                 }
             }
 
-            $this->put($this->getEditUrl($metricId), $data);
+            // Assert success response
+            $this->put(
+                $this->getEditUrl($metricId),
+                $data + [
+                    'metricId' => $metricId,
+                    'context' => $context
+                ]
+            );
             $this->assertResponseSuccess();
+
+            // Assert data was updated
+            $updatedMetric = $table->get($metricId);
+            foreach ($data as $field => $value) {
+                $this->assertEquals($value, $updatedMetric->$field);
+            }
         }
     }
 }
