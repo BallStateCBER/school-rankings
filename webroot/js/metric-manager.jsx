@@ -225,6 +225,7 @@ class MetricManager extends React.Component {
     const parentMetricId = parentNode.hasOwnProperty('data')
         ? parentNode.data.metricId
         : null;
+    const context = window.metricManager.context;
 
     MetricManager.showNodeUpdateLoading(jstree, draggedNode);
 
