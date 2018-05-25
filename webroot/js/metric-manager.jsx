@@ -344,10 +344,12 @@ class MetricManager extends React.Component {
           metricId: metric.id,
           name: metric.name,
           description: metric.description,
+          visible: metric.visible,
         },
         li_attr: {
           'data-selectable': Boolean(metric.selectable) ? 1 : 0,
           'data-type': metric.type,
+          'data-visible': Boolean(metric.visible) ? 1 : 0,
         },
         icon: Boolean(metric.selectable) ? 'far fa-check-circle' : 'fas fa-ban',
       };
