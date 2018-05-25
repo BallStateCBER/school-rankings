@@ -212,8 +212,8 @@ class MetricsController extends AppController
      */
     public function edit($metricId)
     {
-        if (!$this->request->is('put')) {
-            throw new MethodNotAllowedException('Request is not PUT');
+        if (!$this->request->is(['put', 'patch'])) {
+            throw new MethodNotAllowedException('Request is not PUT or PATCH');
         }
 
         $context = $this->request->getData('context');
@@ -223,14 +223,20 @@ class MetricsController extends AppController
         $table = MetricsTable::getContextTable($context);
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
-        $selectable = $this->request->getData('selectable');
         $metric = $table->get($metricId);
-        $table->patchEntity($metric, [
-            'name' => $this->request->getData('name'),
-            'description' => $this->request->getData('description'),
-            'type' => $this->request->getData('type'),
-            'selectable' => $selectable == 'false' ? false : (bool)$selectable
-        ]);
+        $selectable = $this->request->getData('selectable');
+        if (isset($selectable)) {
+            $table->patchEntity($metric, [
+                'selectable' => ($selectable == 'false') ? false : (bool)$selectable
+            ]);
+        }
+        foreach (['name', 'description', 'type'] as $field) {
+            $value = $this->request->getData($field);
+            if (isset($value)) {
+                $table->patchEntity($metric, [$field => $value]);
+            }
+        }
+
         $result = (bool)$table->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);

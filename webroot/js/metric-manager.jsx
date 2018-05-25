@@ -96,6 +96,42 @@ class MetricManager extends React.Component {
     });
   }
 
+  handleToggleSelectable(data) {
+    let jstree = $.jstree.reference(data.reference);
+    let node = jstree.get_node(data.reference);
+    const selectable = node.data.selectable;
+    const context = window.metricManager.context;
+    let metricId = node.data.metricId;
+
+    MetricManager.showNodeUpdateLoading(jstree, node);
+
+    $.ajax({
+      method: 'PATCH',
+      url: '/api/metrics/edit/' + metricId + '.json',
+      dataType: 'json',
+      data: {
+        'context': context,
+        'metricId': metricId,
+        'selectable': !selectable,
+      },
+    }).done(function(data) {
+      if (data.hasOwnProperty('result') && data.result) {
+        MetricManager.updateNode(node, {selectable: !selectable});
+        return;
+      }
+
+      // Display error and undo the renaming of this node
+      alert(data.message);
+    }).fail(function(jqXHR, errorType, exception) {
+      console.log(jqXHR);
+      console.log(errorType);
+      console.log(exception);
+      alert('Error updating metric');
+    }).always(() => {
+      MetricManager.showNodeUpdateComplete(jstree, node);
+    });
+  }
+
   handleEditModalOpen() {
     this.setState({openEditModal: true});
   }
@@ -200,6 +236,13 @@ class MetricManager extends React.Component {
                 window.jsTreeData.editMetric = node.data;
                 window.jsTreeData.editMetricNode = node;
                 this.handleEditModalOpen();
+              },
+            },
+            'Toggle selectable': {
+              'label': 'Toggle selectable',
+              'title': 'Toggle this metric between being selectable and not',
+              'action': (data) => {
+                this.handleToggleSelectable(data);
               },
             },
             'Delete': {
@@ -308,6 +351,26 @@ class MetricManager extends React.Component {
     return retval;
   }
 
+  static updateNode(node, data) {
+    if (data.hasOwnProperty('name')) {
+      node.text = data.name;
+    }
+    if (data.hasOwnProperty('selectable')) {
+      node.li_attr['data-selectable'] = data.selectable;
+      node.icon = data.selectable ? 'far fa-check-circle' : 'fas fa-ban';
+    }
+    if (data.hasOwnProperty('type')) {
+      node.li_attr['data-type'] = data.type;
+    }
+    for (let property in data) {
+      if ({}.hasOwnProperty.call(data, property)) {
+        node.data[property] = data[property];
+      }
+    }
+
+    $('#jstree').jstree(true).redraw(true);
+  }
+
   render() {
     return (
       <div>
@@ -339,6 +402,8 @@ class MetricManager extends React.Component {
     );
   }
 }
+
+export {MetricManager};
 
 ReactDom.render(
   <MetricManager />,

@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
+import {MetricManager} from './metric-manager.jsx';
 
 class MetricModal extends React.Component {
   constructor(props) {
@@ -105,7 +106,7 @@ class MetricModal extends React.Component {
       data: submitData,
     }).done(() => {
       const node = window.jsTreeData.editMetricNode;
-      MetricModal.updateNode(node, submitData);
+      MetricManager.updateNode(node, submitData);
       this.close();
     }).fail((jqXHR) => {
       if (jqXHR.hasOwnProperty('responseJSON')) {
@@ -116,20 +117,6 @@ class MetricModal extends React.Component {
       alert('Error updating metric.');
       this.setState({submitInProgress: false});
     });
-  }
-
-  static updateNode(node, data) {
-    node.text = data.name;
-    node.li_attr['data-selectable'] = data.selectable;
-    node.li_attr['data-type'] = data.type;
-    node.icon = data.selectable ? 'far fa-check-circle' : 'fas fa-ban';
-    for (let property in data) {
-      if ({}.hasOwnProperty.call(data, property)) {
-        node.data[property] = data[property];
-      }
-    }
-
-    $('#jstree').jstree(true).redraw(true);
   }
 
   handleSubmit(event) {
