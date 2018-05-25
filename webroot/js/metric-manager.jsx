@@ -163,8 +163,8 @@ class MetricManager extends React.Component {
   getJsTreeConfig(data) {
     return {
       'core': {
-      'data': MetricManager.formatMetricsForJsTree(data.metrics),
-          'check_callback': true,
+        'data': MetricManager.formatMetricsForJsTree(data.metrics),
+        'check_callback': true,
       },
       'plugins': [
         'contextmenu',
