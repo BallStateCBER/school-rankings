@@ -102,34 +102,13 @@ class MetricManager extends React.Component {
     const selectable = node.data.selectable;
     const context = window.metricManager.context;
     let metricId = node.data.metricId;
+    const requestData = {
+      'context': context,
+      'metricId': metricId,
+      'selectable': !selectable,
+    };
 
-    MetricManager.showNodeUpdateLoading(jstree, node);
-
-    $.ajax({
-      method: 'PATCH',
-      url: '/api/metrics/edit/' + metricId + '.json',
-      dataType: 'json',
-      data: {
-        'context': context,
-        'metricId': metricId,
-        'selectable': !selectable,
-      },
-    }).done(function(data) {
-      if (data.hasOwnProperty('result') && data.result) {
-        MetricManager.updateNode(node, {selectable: !selectable});
-        return;
-      }
-
-      // Display error and undo the renaming of this node
-      alert(data.message);
-    }).fail(function(jqXHR, errorType, exception) {
-      console.log(jqXHR);
-      console.log(errorType);
-      console.log(exception);
-      alert('Error updating metric');
-    }).always(() => {
-      MetricManager.showNodeUpdateComplete(jstree, node);
-    });
+    this.sendEditRequest(metricId, requestData, jstree, node);
   }
 
   handleToggleType(data) {
@@ -137,22 +116,27 @@ class MetricManager extends React.Component {
     let node = jstree.get_node(data.reference);
     const newType = node.data.type === 'boolean' ? 'numeric' : 'boolean';
     const context = window.metricManager.context;
-    let metricId = node.data.metricId;
+    const metricId = node.data.metricId;
+    const requestData = {
+      'context': context,
+      'metricId': metricId,
+      'type': newType,
+    };
 
+    this.sendEditRequest(metricId, requestData, jstree, node);
+  }
+
+  sendEditRequest(metricId, requestData, jstree, node) {
     MetricManager.showNodeUpdateLoading(jstree, node);
 
     $.ajax({
       method: 'PATCH',
       url: '/api/metrics/edit/' + metricId + '.json',
       dataType: 'json',
-      data: {
-        'context': context,
-        'metricId': metricId,
-        'type': newType,
-      },
+      data: requestData,
     }).done(function(data) {
       if (data.hasOwnProperty('result') && data.result) {
-        MetricManager.updateNode(node, {type: newType});
+        MetricManager.updateNode(node, requestData);
         return;
       }
 
