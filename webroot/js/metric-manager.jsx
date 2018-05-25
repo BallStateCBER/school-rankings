@@ -258,7 +258,9 @@ class MetricManager extends React.Component {
               'label': 'Delete',
               'title': 'Delete this metric',
               'action': (data) => {
-                this.handleDelete(data);
+                if (confirm('Delete metric and all associated data?')) {
+                  this.handleDelete(data);
+                }
               },
             },
           };
