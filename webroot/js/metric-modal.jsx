@@ -119,13 +119,17 @@ class MetricModal extends React.Component {
   }
 
   static updateNode(node, data) {
-    const jstree = $('#jstree').jstree();
-    jstree.rename_node(node, data.name);
+    node.text = data.name;
+    node.li_attr['data-selectable'] = data.selectable;
+    node.li_attr['data-type'] = data.type;
+    node.icon = data.selectable ? 'far fa-check-circle' : 'fas fa-ban';
     for (let property in data) {
       if ({}.hasOwnProperty.call(data, property)) {
         node.data[property] = data[property];
       }
     }
+
+    $('#jstree').jstree(true).redraw(true);
   }
 
   handleSubmit(event) {
