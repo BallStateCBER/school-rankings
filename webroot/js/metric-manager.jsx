@@ -255,25 +255,30 @@ class MetricManager extends React.Component {
                 this.handleEditModalOpen();
               },
             },
-            'Toggle selectable': {
-              'label': 'Toggle selectable',
-              'title': 'Toggle this metric between being selectable and not',
-              'action': (data) => {
-                this.handleToggleSelectable(data);
-              },
-            },
-            'Toggle data type': {
-              'label': 'Toggle data type',
-              'title': 'Toggle data type between numeric and boolean',
-              'action': (data) => {
-                this.handleToggleType(data);
-              },
-            },
-            'Toggle visibility': {
-              'label': 'Toggle visibility',
-              'title': 'Toggle whether this metric is visible to regular users',
-              'action': (data) => {
-                this.handleToggleVisible(data);
+            'Toggle submenu': {
+              'label': 'Toggle...',
+              'submenu': {
+                'Toggle selectable': {
+                  'label': 'Selectable',
+                  'title': 'Toggle ability to select this metric for rankings',
+                  'action': (data) => {
+                    this.handleToggleSelectable(data);
+                  },
+                },
+                'Toggle type': {
+                  'label': 'Numeric/boolean',
+                  'title': 'Toggle data type between numeric and boolean',
+                  'action': (data) => {
+                    this.handleToggleType(data);
+                  },
+                },
+                'Toggle visible': {
+                  'label': 'Visible',
+                  'title': 'Toggle metric visibility for regular users',
+                  'action': (data) => {
+                    this.handleToggleVisible(data);
+                  },
+                },
               },
             },
             'Delete': {
