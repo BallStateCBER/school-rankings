@@ -112,6 +112,11 @@ class MetricsTable extends Table
             ->requirePresence('selectable', 'create')
             ->notEmpty('selectable');
 
+        $validator
+            ->boolean('visible')
+            ->requirePresence('visible', 'create')
+            ->notEmpty('visible');
+
         return $validator;
     }
 
@@ -166,6 +171,7 @@ class MetricsTable extends Table
             'name' => $metricName,
             'description' => '',
             'selectable' => true,
+            'visible' => true,
             'type' => $type
         ]);
 

@@ -12,6 +12,7 @@ namespace App\Model\Entity;
  * @property int $lft
  * @property int $rght
  * @property bool $selectable
+ * @property bool $visible
  * @property \Cake\I18n\FrozenTime $created
  *
  * @property \App\Model\Entity\SchoolDistrictMetric $parent_school_district_metric
