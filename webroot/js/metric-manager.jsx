@@ -201,9 +201,15 @@ class MetricManager extends React.Component {
     }).done((data) => {
       $('#jstree').jstree(this.getJsTreeConfig(data));
     }).fail((jqXHR) => {
+      let errorMsg = 'Error loading metrics';
+      if (jqXHR.hasOwnProperty('responseJSON')) {
+        if (jqXHR.responseJSON.hasOwnProperty('message')) {
+          errorMsg = jqXHR.responseJSON.message;
+        }
+      }
       this.setState({
         hasError: true,
-        errorMsg: jqXHR.responseJSON.message,
+        errorMsg: errorMsg,
       });
     }).always(() => {
       this.setState({loading: false});
