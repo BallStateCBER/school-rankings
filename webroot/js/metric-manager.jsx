@@ -295,7 +295,7 @@ class MetricManager extends React.Component {
           'data-selectable': Boolean(metric.selectable) ? 1 : 0,
           'data-type': metric.type,
         },
-        icon: Boolean(metric.selectable) ? 'far fa-circle' : 'fas fa-ban',
+        icon: Boolean(metric.selectable) ? 'far fa-check-circle' : 'fas fa-ban',
       };
       if (metric.children.length > 0) {
         jTreeData.children = MetricManager.formatMetricsForJsTree(
