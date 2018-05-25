@@ -132,6 +132,42 @@ class MetricManager extends React.Component {
     });
   }
 
+  handleToggleType(data) {
+    let jstree = $.jstree.reference(data.reference);
+    let node = jstree.get_node(data.reference);
+    const newType = node.data.type === 'boolean' ? 'numeric' : 'boolean';
+    const context = window.metricManager.context;
+    let metricId = node.data.metricId;
+
+    MetricManager.showNodeUpdateLoading(jstree, node);
+
+    $.ajax({
+      method: 'PATCH',
+      url: '/api/metrics/edit/' + metricId + '.json',
+      dataType: 'json',
+      data: {
+        'context': context,
+        'metricId': metricId,
+        'type': newType,
+      },
+    }).done(function(data) {
+      if (data.hasOwnProperty('result') && data.result) {
+        MetricManager.updateNode(node, {type: newType});
+        return;
+      }
+
+      // Display error and undo the renaming of this node
+      alert(data.message);
+    }).fail(function(jqXHR, errorType, exception) {
+      console.log(jqXHR);
+      console.log(errorType);
+      console.log(exception);
+      alert('Error updating metric');
+    }).always(() => {
+      MetricManager.showNodeUpdateComplete(jstree, node);
+    });
+  }
+
   handleEditModalOpen() {
     this.setState({openEditModal: true});
   }
@@ -243,6 +279,13 @@ class MetricManager extends React.Component {
               'title': 'Toggle this metric between being selectable and not',
               'action': (data) => {
                 this.handleToggleSelectable(data);
+              },
+            },
+            'Toggle data type': {
+              'label': 'Toggle data type',
+              'title': 'Toggle data type between numeric and boolean',
+              'action': (data) => {
+                this.handleToggleType(data);
               },
             },
             'Delete': {
