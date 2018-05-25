@@ -101,6 +101,21 @@ class MetricManager extends React.Component {
     this.sendEditRequest(metricId, requestData, jstree, node);
   }
 
+  handleToggleVisible(data) {
+    let jstree = $.jstree.reference(data.reference);
+    let node = jstree.get_node(data.reference);
+    const newVisible = !node.data.visible;
+    const context = window.metricManager.context;
+    const metricId = node.data.metricId;
+    const requestData = {
+      'context': context,
+      'metricId': metricId,
+      'visible': newVisible,
+    };
+
+    this.sendEditRequest(metricId, requestData, jstree, node);
+  }
+
   sendEditRequest(metricId, requestData, jstree, node) {
     MetricManager.showNodeUpdateLoading(jstree, node);
 
@@ -252,6 +267,13 @@ class MetricManager extends React.Component {
               'title': 'Toggle data type between numeric and boolean',
               'action': (data) => {
                 this.handleToggleType(data);
+              },
+            },
+            'Toggle visibility': {
+              'label': 'Toggle visibility',
+              'title': 'Toggle whether this metric is visible to regular users',
+              'action': (data) => {
+                this.handleToggleVisible(data);
               },
             },
             'Delete': {
