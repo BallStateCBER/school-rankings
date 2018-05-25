@@ -191,11 +191,13 @@ class MetricsController extends AppController
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
         $metric = $table->get($metricId);
-        $selectable = $this->request->getData('selectable');
-        if (isset($selectable)) {
-            $table->patchEntity($metric, [
-                'selectable' => ($selectable == 'false') ? false : (bool)$selectable
-            ]);
+        foreach (['selectable', 'visible'] as $field) {
+            $value = $this->request->getData($field);
+            if (isset($value)) {
+                $table->patchEntity($metric, [
+                    $field => ($value == 'false') ? false : (bool)$value
+                ]);
+            }
         }
         foreach (['name', 'description', 'type'] as $field) {
             $value = $this->request->getData($field);

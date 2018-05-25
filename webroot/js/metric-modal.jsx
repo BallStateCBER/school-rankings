@@ -17,6 +17,7 @@ class MetricModal extends React.Component {
       metricName: '',
       metricDescription: '',
       metricSelectable: true,
+      metricVisible: true,
       metricType: 'numeric',
       submitInProgress: false,
     };
@@ -43,6 +44,7 @@ class MetricModal extends React.Component {
       metricName: data.name,
       metricDescription: data.description,
       metricSelectable: data.selectable,
+      metricVisible: data.visible,
       metricType: data.type,
     });
   }
@@ -73,6 +75,7 @@ class MetricModal extends React.Component {
       'description': this.state.metricDescription.trim(),
       'type': this.state.metricType,
       'selectable': this.state.metricSelectable,
+      'visible': this.state.metricVisible,
     };
 
     $.ajax({
@@ -97,6 +100,7 @@ class MetricModal extends React.Component {
       'description': this.state.metricDescription.trim(),
       'type': this.state.metricType,
       'selectable': this.state.metricSelectable,
+      'visible': this.state.metricVisible,
     };
 
     $.ajax({
@@ -183,6 +187,19 @@ class MetricModal extends React.Component {
                 <label className="form-check-label"
                        htmlFor="selectable-checkbox">
                   Selectable
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="form-group">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox"
+                       value="1" id="visible-checkbox"
+                       name="metricVisible"
+                       checked={this.state.metricVisible}
+                       onChange={this.handleChange} />
+                <label className="form-check-label"
+                       htmlFor="visible-checkbox">
+                  Visible
                 </label>
               </div>
             </fieldset>

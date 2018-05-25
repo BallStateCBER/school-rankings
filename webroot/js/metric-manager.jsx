@@ -375,6 +375,9 @@ class MetricManager extends React.Component {
     if (data.hasOwnProperty('type')) {
       node.li_attr['data-type'] = data.type;
     }
+    if (data.hasOwnProperty('visible')) {
+      node.li_attr['data-visible'] = data.visible ? 1 : 0;
+    }
     for (let property in data) {
       if ({}.hasOwnProperty.call(data, property)) {
         node.data[property] = data[property];
