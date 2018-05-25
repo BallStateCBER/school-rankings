@@ -51,10 +51,6 @@ class MetricManager extends React.Component {
     let node = jstree.get_node(data.reference);
     const context = window.metricManager.context;
     jstree.edit(node, null, (node, status, cancelled) => {
-      let newName = node.text;
-      let originalName = node.original.text;
-      let metricId = node.data.metricId;
-
       if (cancelled) {
         return;
       }
@@ -64,35 +60,14 @@ class MetricManager extends React.Component {
         return;
       }
 
-      MetricManager.showNodeUpdateLoading(jstree, node);
-
-      $.ajax({
-        method: 'PATCH',
-        url: '/api/metrics/rename.json',
-        dataType: 'json',
-        data: {
-          'context': context,
-          'metricId': metricId,
-          'newName': newName,
-        },
-      }).done(function(data) {
-        if (data.hasOwnProperty('result') && data.result) {
-          return;
-        }
-
-        // Display error and undo the renaming of this node
-        alert(data.message);
-        jstree.rename_node(node, originalName);
-      }).fail(function(jqXHR, errorType, exception) {
-        console.log(jqXHR);
-        console.log(errorType);
-        console.log(exception);
-
-        // Undo the renaming of this node
-        jstree.rename_node(node, originalName);
-      }).always(() => {
-        MetricManager.showNodeUpdateComplete(jstree, node);
-      });
+      const newName = node.text;
+      const metricId = node.data.metricId;
+      const requestData = {
+        'context': context,
+        'metricId': metricId,
+        'name': newName,
+      };
+      this.sendEditRequest(metricId, requestData, jstree, node);
     });
   }
 
@@ -129,6 +104,15 @@ class MetricManager extends React.Component {
   sendEditRequest(metricId, requestData, jstree, node) {
     MetricManager.showNodeUpdateLoading(jstree, node);
 
+    const handleError = function() {
+      // Undo renaming of node
+      if (requestData.hasOwnProperty('name')) {
+        jstree.rename_node(node, node.original.text);
+      }
+
+      alert('Error updating metric');
+    };
+
     $.ajax({
       method: 'PATCH',
       url: '/api/metrics/edit/' + metricId + '.json',
@@ -139,14 +123,12 @@ class MetricManager extends React.Component {
         MetricManager.updateNode(node, requestData);
         return;
       }
-
-      // Display error and undo the renaming of this node
-      alert(data.message);
+      handleError();
     }).fail(function(jqXHR, errorType, exception) {
       console.log(jqXHR);
       console.log(errorType);
       console.log(exception);
-      alert('Error updating metric');
+      handleError();
     }).always(() => {
       MetricManager.showNodeUpdateComplete(jstree, node);
     });
