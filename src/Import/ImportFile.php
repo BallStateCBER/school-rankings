@@ -633,6 +633,7 @@ class ImportFile
      * Loops through all data cells in the active worksheet and aborts script if any are invalid
      *
      * @return void
+     * @throws \Aura\Intl\Exception
      */
     public function validateData()
     {
@@ -696,6 +697,7 @@ class ImportFile
      * Checks the database for already-identified metrics and interacts with the user if necessary
      *
      * @return void
+     * @throws \Aura\Intl\Exception
      */
     public function identifyMetrics()
     {
@@ -865,6 +867,7 @@ class ImportFile
     /**
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return void
+     * @throws \Aura\Intl\Exception
      */
     public function recordData()
     {
