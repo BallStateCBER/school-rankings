@@ -194,9 +194,9 @@ class MetricsTable extends Table
     {
         switch ($context) {
             case 'school':
-                return TableRegistry::get('SchoolMetrics');
+                return TableRegistry::getTableLocator()->get('SchoolMetrics');
             case 'district':
-                return TableRegistry::get('SchoolDistrictMetrics');
+                return TableRegistry::getTableLocator()->get('SchoolDistrictMetrics');
             default:
                 throw new InternalErrorException('Metric context "' . $context . '" not recognized');
         }

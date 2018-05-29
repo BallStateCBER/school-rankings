@@ -78,9 +78,9 @@ class StatisticsTable extends Table
     {
         switch ($context) {
             case 'school':
-                return TableRegistry::get('SchoolStatistics');
+                return TableRegistry::getTableLocator()->get('SchoolStatistics');
             case 'district':
-                return TableRegistry::get('SchoolDistrictStatistics');
+                return TableRegistry::getTableLocator()->get('SchoolDistrictStatistics');
             default:
                 throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
         }

@@ -16,7 +16,7 @@ class Import
     public function getFiles()
     {
         /** @var ImportedFilesTable $importedFilesTable */
-        $importedFilesTable = TableRegistry::get('ImportedFiles');
+        $importedFilesTable = TableRegistry::getTableLocator()->get('ImportedFiles');
         $dataPath = ROOT . DS . 'data';
         $dir = new Folder($dataPath);
         $subdirs = $dir->subdirectories($dir->path, false);

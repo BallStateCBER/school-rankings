@@ -22,7 +22,7 @@ class MetricsController extends AppController
      */
     public function schools()
     {
-        $schoolMetricsTable = TableRegistry::get('SchoolMetrics');
+        $schoolMetricsTable = TableRegistry::getTableLocator()->get('SchoolMetrics');
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => $schoolMetricsTable->find('threaded')->toArray()
@@ -36,7 +36,7 @@ class MetricsController extends AppController
      */
     public function districts()
     {
-        $districtMetricsTable = TableRegistry::get('SchoolDistrictMetrics');
+        $districtMetricsTable = TableRegistry::getTableLocator()->get('SchoolDistrictMetrics');
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => $districtMetricsTable->find('threaded')->toArray()

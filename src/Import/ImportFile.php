@@ -473,7 +473,7 @@ class ImportFile
     private function getMetricId($colGroup, $colName)
     {
         /** @var SpreadsheetColumnsMetricsTable $table */
-        $table = TableRegistry::get('SpreadsheetColumnsMetrics');
+        $table = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
 
         return $table->getMetricId([
             'year' => $this->year,
@@ -747,8 +747,8 @@ class ImportFile
          * @var SchoolDistrictsTable $schoolDistrictsTable
          * @var SchoolsTable $schoolsTable
          */
-        $schoolDistrictsTable = TableRegistry::get('SchoolDistricts');
-        $schoolsTable = TableRegistry::get('Schools');
+        $schoolDistrictsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
+        $schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
         $this->shell->out("Identifying $subject...");
@@ -817,7 +817,7 @@ class ImportFile
             $this->shell->out('Metric #' . $metric->id . ' added');
 
             /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
-            $ssColsMetricsTable = TableRegistry::get('SpreadsheetColumnsMetrics');
+            $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
             $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
 
             return $metric->id;

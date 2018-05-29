@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c4eff305ac248792dac890359cedd00",
+    "content-hash": "b838c3ab6e9e1915b6dc6aaa13c55fe9",
     "packages": [
         {
             "name": "aura/intl",
@@ -54,21 +54,21 @@
         },
         {
             "name": "cakephp/cakephp",
-            "version": "3.5.13",
+            "version": "3.6.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cakephp/cakephp.git",
-                "reference": "7d52085e6f3874abb18a5de6df73c0c1332054ad"
+                "reference": "614f906e001f5e98174d1b273119931859bd7f39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cakephp/cakephp/zipball/7d52085e6f3874abb18a5de6df73c0c1332054ad",
-                "reference": "7d52085e6f3874abb18a5de6df73c0c1332054ad",
+                "url": "https://api.github.com/repos/cakephp/cakephp/zipball/614f906e001f5e98174d1b273119931859bd7f39",
+                "reference": "614f906e001f5e98174d1b273119931859bd7f39",
                 "shasum": ""
             },
             "require": {
                 "aura/intl": "^3.0.0",
-                "cakephp/chronos": "^1.0.0",
+                "cakephp/chronos": "^1.0.1",
                 "ext-intl": "*",
                 "ext-mbstring": "*",
                 "php": ">=5.6.0",
@@ -136,7 +136,7 @@
                 "rapid-development",
                 "validation"
             ],
-            "time": "2018-03-04T01:58:53+00:00"
+            "time": "2018-05-21T00:47:41+00:00"
         },
         {
             "name": "cakephp/chronos",
