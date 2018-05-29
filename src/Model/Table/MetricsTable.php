@@ -89,7 +89,11 @@ class MetricsTable extends Table
             ->add('name', 'unique', [
                 'rule' => function ($value, $context) use ($table) {
                     $metricId = $context['data']['id'] ?? null;
-                    $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
+                    if ($metricId) {
+                        $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
+                    } else {
+                        $parentId = null;
+                    }
 
                     return !$table->hasNameConflict($metricId, $parentId, $value);
                 },
