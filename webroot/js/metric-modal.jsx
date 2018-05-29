@@ -64,7 +64,7 @@ class MetricModal extends React.Component {
   handleAdd() {
     const data = window.jsTreeData.createMetric;
     const isRoot = data.hasOwnProperty('root') && data.root;
-    const jstree = $('#jstree').jstree();
+    const jstree = $('#jstree').jstree(true);
     const parentNode = isRoot ? null : jstree.get_node(data.reference);
     const parentId = isRoot ? null : parentNode.data.metricId;
     const metricName = this.state.metricName.trim();

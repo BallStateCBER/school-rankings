@@ -309,7 +309,7 @@ class MetricManager extends React.Component {
   }
 
   handleNodeDrop(data) {
-    const jstree = $('#jstree').jstree();
+    const jstree = $('#jstree').jstree(true);
     const draggedNode = jstree.get_node(data.element);
     const movedMetricId = draggedNode.data.metricId;
     const parentNodeId = jstree.get_parent(draggedNode);
