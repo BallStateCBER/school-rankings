@@ -1,24 +1,22 @@
 <?php
-namespace App\Shell;
+namespace App\Command;
 
 use App\Import\Import;
 use App\Import\ImportFile;
-use Cake\Console\Shell;
+use Cake\Console\Arguments;
+use Cake\Console\Command;
+use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
 use Exception;
+use InvalidArgumentException;
 
-/**
- * Class ImportShell
- * @package App\Shell
- * @property Import $import
- * @property ImportFile $importFile
- */
-class ImportShell extends Shell
+class ImportRunCommand extends Command
 {
     private $import;
     private $importFile;
 
     /**
-     * Initializes the Shell
+     * Initializes the command
      *
      * @return void
      */
@@ -31,11 +29,11 @@ class ImportShell extends Shell
     /**
      * Display help for this console.
      *
+     * @param ConsoleOptionParser $parser Console options parser object
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function buildOptionParser(ConsoleOptionParser $parser)
     {
-        $parser = parent::getOptionParser();
         $parser->addSubcommand('run', [
             'help' => 'Process file(s) and import data',
         ])->addSubcommand('status', [
@@ -49,44 +47,17 @@ class ImportShell extends Shell
     }
 
     /**
-     * Shows what files are available in /data and which have been imported
-     *
-     * @param string|null $year Specific year to look up
-     * @return void
-     */
-    public function status($year = null)
-    {
-        $files = $this->import->getFiles();
-
-        if ($year) {
-            if (isset($files[$year])) {
-                $files = [$year => $files[$year]];
-            } else {
-                $this->out('No import files found in data' . DS . $year);
-
-                return;
-            }
-        }
-
-        foreach ($files as $year => $yearFiles) {
-            $this->info($year);
-            array_unshift($yearFiles, ['File', 'Imported']);
-            $this->helper('Table')->output($yearFiles);
-            $this->out();
-        }
-    }
-
-    /**
      * Collects a year/subdirectory
      *
+     * @param ConsoleIo $io Console IO object
      * @return int
      */
-    private function selectYear()
+    private function selectYear($io)
     {
         $availableYears = $this->import->getYears();
         $year = null;
         while (!in_array($year, $availableYears)) {
-            $year = $this->in('Select a year (' . min($availableYears) . '-' . max($availableYears) . '):');
+            $year = $io->ask('Select a year (' . min($availableYears) . '-' . max($availableYears) . '):');
         }
 
         return (int)$year;
@@ -96,26 +67,28 @@ class ImportShell extends Shell
      * Collects a file key for the specified key from the user
      *
      * @param int $year The year/subdirectory to select a file from
+     * @param ConsoleIo $io Console IO object
+     * @throws InvalidArgumentException
      * @return int
      */
-    private function selectFileKey($year)
+    private function selectFileKey($year, $io)
     {
         $files = $this->import->getFiles();
         if (!isset($files[$year])) {
-            $this->abort('No import files found in data' . DS . $year);
+            throw new InvalidArgumentException('No import files found in data' . DS . $year);
         }
 
         $fileKeys = range(1, count($files[$year]));
         $fileKey = null;
         do {
-            $this->out('Import files for year ' . $year . ':');
+            $io->out('Import files for year ' . $year . ':');
             $tableData = $files[$year];
             foreach ($tableData as $key => &$file) {
                 array_unshift($file, $key + 1);
             }
             array_unshift($tableData, ['Key', 'File', 'Imported']);
-            $this->helper('Table')->output($tableData);
-            $fileKey = $this->in('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
+            $io->helper('Table')->output($tableData);
+            $fileKey = $io->ask('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
             $validKey = $fileKey == 'all' || (is_numeric($fileKey) && in_array($fileKey, $fileKeys));
         } while (!$validKey);
 
@@ -123,28 +96,44 @@ class ImportShell extends Shell
     }
 
     /**
-     * @param null|string $year Year/subdirectory to read from
-     * @param null|string $fileKey Key of the file to read from
-     * @return void
+     * Processes import files and updates the database
+     *
+     * @param Arguments $args Arguments
+     * @param ConsoleIo $io Console IO object
+     * @return int|null|void
+     * @throws \Exception
      */
-    public function run($year = null, $fileKey = null)
+    public function execute(Arguments $args, ConsoleIo $io)
     {
+        $year = $args->hasArgument('year') ? $args->getArgument('year') : null;
+        $fileKey = $args->hasArgument('fileKey') ? $args->getArgument('fileKey') : null;
+
         // Gather parameters
         if (!$year) {
-            $year = $this->selectYear();
+            $year = $this->selectYear($io);
         }
         if (!$fileKey) {
-            $fileKey = $this->selectFileKey($year);
+            try {
+                $fileKey = $this->selectFileKey($year, $io);
+            } catch (InvalidArgumentException $e) {
+                $io->error($e->getMessage());
+
+                return;
+            }
         }
 
         // Validate parameters
         $files = $this->import->getFiles();
         if (!isset($files[$year])) {
-            $this->abort('No import files found in data' . DS . $year);
+            $io->error('No import files found in data' . DS . $year);
+
+            return;
         }
         if ($fileKey != 'all') {
             if (!is_numeric($fileKey) || !isset($files[$year][$fileKey - 1])) {
-                $this->abort('Invalid file key');
+                $io->error('Invalid file key');
+
+                return;
             }
         }
 
@@ -153,18 +142,20 @@ class ImportShell extends Shell
             $files[$year] :
             [$files[$year][$fileKey - 1]];
         foreach ($selectedFiles as $file) {
-            $this->out('Opening ' . $file['filename'] . '...');
-            $this->importFile = new ImportFile($year, $file['filename'], $this);
+            $io->out('Opening ' . $file['filename'] . '...');
+            $this->importFile = new ImportFile($year, $file['filename'], $io);
             if ($this->importFile->getError()) {
-                $this->abort($this->importFile->getError());
+                $io->error($this->importFile->getError());
+
+                return;
             }
 
             // Read in worksheet info and validate data
-            $this->out('Analyzing worksheets...');
-            $this->out();
+            $io->out('Analyzing worksheets...');
+            $io->out();
             foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-                $this->info('Worksheet: ' . $worksheetName);
-                $this->out('Context: ' . ucwords($worksheetInfo['context']));
+                $io->info('Worksheet: ' . $worksheetName);
+                $io->out('Context: ' . ucwords($worksheetInfo['context']));
                 try {
                     $this->importFile->selectWorksheet($worksheetName);
                     $this->importFile->validateData();
@@ -172,11 +163,15 @@ class ImportShell extends Shell
                     $this->importFile->identifyLocations();
                     $this->importFile->recordData();
                 } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
-                    $this->abort($e->getMessage());
+                    $io->error($e->getMessage());
+
+                    return;
                 } catch (Exception $e) {
-                    $this->abort($e->getMessage());
+                    $io->error($e->getMessage());
+
+                    return;
                 }
-                $this->out();
+                $io->out();
             }
 
             // Free up memory
@@ -184,6 +179,6 @@ class ImportShell extends Shell
             unset($this->importFile);
         }
 
-        $this->out('Import complete');
+        $io->out('Import complete');
     }
 }

@@ -2,7 +2,7 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\SchoolDistrict;
-use App\Shell\ImportShell;
+use Cake\Console\ConsoleIo;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
@@ -114,10 +114,10 @@ class SchoolDistrictsTable extends Table
      *
      * @param string $code School district code
      * @param string $name School name
-     * @param ImportShell|null $shell ImportShell object
+     * @param ConsoleIo|null $io Console IO object
      * @return int
      */
-    public function getOrCreate($code, $name, $shell = null)
+    public function getOrCreate($code, $name, $io = null)
     {
         $record = $this->find()
             ->select(['id'])
@@ -131,9 +131,9 @@ class SchoolDistrictsTable extends Table
         $record = $this->newEntity(compact('code', 'name'));
         $this->saveOrFail($record);
 
-        if ($shell) {
+        if ($io) {
             $msg = " - Added district #$code: $name";
-            $shell->out($msg);
+            $io->out($msg);
         }
 
         return $record->id;

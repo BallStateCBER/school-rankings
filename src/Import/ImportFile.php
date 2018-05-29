@@ -7,7 +7,7 @@ use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
-use App\Shell\ImportShell;
+use Cake\Console\ConsoleIo;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Exception;
@@ -20,7 +20,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * @package App\Import
  * @property array $worksheets
  * @property bool $overwrite
- * @property ImportShell $shell
+ * @property ConsoleIo $shell_io
  * @property Spreadsheet $spreadsheet
  * @property string $filename
  * @property string $year
@@ -32,7 +32,7 @@ class ImportFile
     private $error;
     private $filename;
     private $overwrite;
-    private $shell;
+    private $shell_io;
     private $worksheets;
     private $year;
     public $activeWorksheet;
@@ -43,15 +43,15 @@ class ImportFile
      *
      * @param string $year Year (subdirectory of /data)
      * @param string $filename Filename of spreadsheet to import
-     * @param ImportShell $shell Shell object
+     * @param ConsoleIo $io Console IO object
      */
-    public function __construct($year, $filename, $shell)
+    public function __construct($year, $filename, $io)
     {
         $type = 'Xlsx';
         $path = ROOT . DS . 'data' . DS . $year . DS . $filename;
         $this->year = $year;
         $this->filename = $filename;
-        $this->shell = $shell;
+        $this->shell_io = $io;
 
         try {
             // Read spreadsheet
@@ -634,17 +634,18 @@ class ImportFile
      *
      * @return void
      * @throws \Aura\Intl\Exception
+     * @throws Exception
      */
     public function validateData()
     {
-        $this->shell->out('Validating data...');
+        $this->shell_io->out('Validating data...');
 
         $ws = $this->getWorksheets()[$this->activeWorksheet];
         $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
         $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
 
         /** @var ProgressHelper $progress */
-        $progress = $this->shell->helper('Progress');
+        $progress = $this->shell_io->helper('Progress');
         $progress->init([
             'total' => $dataRowCount * $dataColCount,
             'width' => 40,
@@ -677,18 +678,19 @@ class ImportFile
                 $invalidData = array_slice($invalidData, 0, $limit);
             }
 
-            $this->shell->getIo()->overwrite('Data errors:');
+            $this->shell_io->overwrite('Data errors:');
             array_unshift($invalidData, ['Col', 'Row', 'Invalid value']);
-            $this->shell->helper('Table')->output($invalidData);
+            $this->shell_io->helper('Table')->output($invalidData);
             if (count($invalidData) < $count) {
                 $difference = $count - count($invalidData);
                 $msg = '+ ' . $difference . ' more invalid ' . __n('value', 'values', $difference);
-                $this->shell->out($msg);
+                $this->shell_io->out($msg);
             }
-            $this->shell->abort('Cannot continue. Invalid data found.');
+            $this->shell_io->error('Cannot continue. Invalid data found.');
+            throw new Exception();
         }
 
-        $this->shell->getIo()->overwrite(' - Done');
+        $this->shell_io->overwrite(' - Done');
     }
 
     /**
@@ -701,10 +703,10 @@ class ImportFile
      */
     public function identifyMetrics()
     {
-        $this->shell->out('Identifying metrics...');
+        $this->shell_io->out('Identifying metrics...');
         $unknownMetrics = $this->getUnknownMetrics();
         if (!$unknownMetrics) {
-            $this->shell->out(' - Done');
+            $this->shell_io->out(' - Done');
 
             return;
         }
@@ -716,21 +718,21 @@ class ImportFile
             " - Enter an existing $context metric ID\n" .
             " - Enter the name of a new metric to create \n" .
             " - Enter nothing to accept the suggested name";
-        $this->shell->out($msg);
+        $this->shell_io->out($msg);
 
         $filename = $this->getFilename();
         $worksheetName = $this->activeWorksheet;
         $import = new Import();
         foreach ($unknownMetrics as $colNum => $unknownMetric) {
             $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
-            $this->shell->info("\nColumn: $cleanColName");
+            $this->shell_io->info("\nColumn: $cleanColName");
             $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
-            $this->shell->out('Suggested metric name: ' . $suggestedName);
+            $this->shell_io->out('Suggested metric name: ' . $suggestedName);
             try {
                 $metricId = $this->getMetricInput($suggestedName, $unknownMetric);
                 $this->setMetricId($colNum, $metricId);
             } catch (\Exception $e) {
-                $this->shell->err('Error: ' . $e->getMessage());
+                $this->shell_io->error('Error: ' . $e->getMessage());
             }
         }
     }
@@ -753,7 +755,7 @@ class ImportFile
         $schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
-        $this->shell->out("Identifying $subject...");
+        $this->shell_io->out("Identifying $subject...");
 
         foreach ($this->getLocations() as $rowNum => $location) {
             $districtId = null;
@@ -761,7 +763,7 @@ class ImportFile
                 $districtId = $schoolDistrictsTable->getOrCreate(
                     $location['districtCode'],
                     $location['districtName'],
-                    $this->shell
+                    $this->shell_io
                 );
                 $this->setLocationInfo($rowNum, 'districtId', $districtId);
             } elseif (isset($location['districtCode'])) {
@@ -774,14 +776,14 @@ class ImportFile
                     $location['schoolCode'],
                     $location['schoolName'],
                     $districtId,
-                    $this->shell
+                    $this->shell_io
                 );
                 $this->setLocationInfo($rowNum, 'schoolId', $schoolId);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
         }
-        $this->shell->out(' - Done');
+        $this->shell_io->out(' - Done');
     }
 
     /**
@@ -794,14 +796,14 @@ class ImportFile
      */
     private function getMetricInput($suggestedName, $unknownMetric)
     {
-        $input = $this->shell->in('Metric ID or name:');
+        $input = $this->shell_io->ask('Metric ID or name:');
         $context = $this->getContext();
 
         // Existing metric ID entered
         if (is_numeric($input)) {
             $metricId = (int)$input;
             if (!MetricsTable::recordExists($context, $metricId)) {
-                $this->shell->err(ucwords($context) . ' metric ID ' . $metricId . ' not found');
+                $this->shell_io->error(ucwords($context) . ' metric ID ' . $metricId . ' not found');
 
                 return $this->getMetricInput($suggestedName, $unknownMetric);
             }
@@ -816,7 +818,7 @@ class ImportFile
             if (!$metric) {
                 throw new Exception('Metric could not be saved.');
             }
-            $this->shell->out('Metric #' . $metric->id . ' added');
+            $this->shell_io->out('Metric #' . $metric->id . ' added');
 
             /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
             $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
@@ -824,7 +826,7 @@ class ImportFile
 
             return $metric->id;
         } catch (Exception $e) {
-            $this->shell->err('Error: ' . $e->getMessage());
+            $this->shell_io->error('Error: ' . $e->getMessage());
 
             return $this->getMetricInput($suggestedName, $unknownMetric);
         }
@@ -858,7 +860,7 @@ class ImportFile
             return $this->overwrite;
         }
 
-        $input = $this->shell->in("\nOverwrite statistics that have already been recorded?", ['y', 'n']);
+        $input = $this->shell_io->askChoice("\nOverwrite statistics that have already been recorded?", ['y', 'n']);
         $this->overwrite = ($input == 'y');
 
         return $this->overwrite;
@@ -868,17 +870,18 @@ class ImportFile
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return void
      * @throws \Aura\Intl\Exception
+     * @throws Exception
      */
     public function recordData()
     {
-        $this->shell->out('Importing data...');
+        $this->shell_io->out('Importing data...');
 
         $ws = $this->getWorksheets()[$this->activeWorksheet];
         $dataRowCount = $ws['totalRows'] - ($ws['firstDataRow'] - 1);
         $dataColCount = $ws['totalCols'] - ($ws['firstDataCol'] - 1);
 
         /** @var ProgressHelper $progress */
-        $progress = $this->shell->helper('Progress');
+        $progress = $this->shell_io->helper('Progress');
         $progress->init([
             'total' => $dataRowCount * $dataColCount,
             'width' => 40,
@@ -927,9 +930,8 @@ class ImportFile
                     ]);
                     if ($statistic->getErrors()) {
                         $errors = print_r($statistic->getErrors(), true);
-                        $this->shell->abort("Error adding statistic. Details: \n" . $errors);
-
-                        return;
+                        $this->shell_io->error("Error adding statistic. Details: \n" . $errors);
+                        throw new Exception();
                     } else {
                         $table->save($statistic);
                     }
@@ -943,9 +945,8 @@ class ImportFile
                     $table->patchEntity($statistic, ['value' => $value]);
                     if ($statistic->getErrors()) {
                         $errors = print_r($statistic->getErrors(), true);
-                        $this->shell->abort("Error updating statistic. Details: \n" . $errors);
-
-                        return;
+                        $this->shell_io->error("Error updating statistic. Details: \n" . $errors);
+                        throw new Exception();
                     } else {
                         $table->save($statistic);
                     }
@@ -957,13 +958,13 @@ class ImportFile
             }
         }
 
-        $this->shell->getIo()->overwrite(' - Done');
+        $this->shell_io->overwrite(' - Done');
         foreach ($counts as $action => $count) {
             if (!$count) {
                 continue;
             }
             $msg = " - $count " . __n('stat ', 'stats ', $count) . $action;
-            $this->shell->out($msg);
+            $this->shell_io->out($msg);
         }
     }
 }
