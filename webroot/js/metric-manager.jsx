@@ -121,13 +121,17 @@ class MetricManager extends React.Component {
   sendEditRequest(metricId, requestData, jstree, node) {
     MetricManager.showNodeUpdateLoading(jstree, node);
 
-    const handleError = function() {
+    const handleError = function(msg) {
       // Undo renaming of node
       if (requestData.hasOwnProperty('name')) {
         jstree.rename_node(node, node.original.text);
       }
 
-      alert('Error updating metric');
+      if (! msg) {
+        msg = 'Error updating metric';
+      }
+
+      alert(msg);
     };
 
     $.ajax({
@@ -140,12 +144,26 @@ class MetricManager extends React.Component {
         MetricManager.updateNode(node, requestData);
         return;
       }
-      handleError();
+
+      let msg = null;
+      if (data.hasOwnProperty('message')) {
+        msg = data.message;
+      }
+
+      handleError(msg);
     }).fail(function(jqXHR, errorType, exception) {
       console.log(jqXHR);
       console.log(errorType);
       console.log(exception);
-      handleError();
+
+      let msg = null;
+      if (jqXHR.hasOwnProperty('responseJSON')) {
+        if (jqXHR.responseJSON.hasOwnProperty('message')) {
+          msg = jqXHR.responseJSON.message;
+        }
+      }
+
+      handleError(msg);
     }).always(() => {
       MetricManager.showNodeUpdateComplete(jstree, node);
     });
@@ -172,6 +190,14 @@ class MetricManager extends React.Component {
 
     MetricManager.showNodeUpdateLoading(jstree, node);
 
+    const handleError = function(msg) {
+      if (! msg) {
+        msg = 'There was an error deleting that metric';
+      }
+
+      alert(msg);
+    };
+
     $.ajax({
       method: 'DELETE',
       url: '/api/metrics/delete/' + context + '/' + metricId + '.json',
@@ -181,12 +207,26 @@ class MetricManager extends React.Component {
         jstree.delete_node(node);
         return;
       }
-      alert('There was an error deleting that metric');
+
+      let msg = null;
+      if (data.hasOwnProperty('message')) {
+        msg = data.message;
+      }
+
+      handleError(msg);
     }).fail(function(jqXHR, errorType, exception) {
       console.log(jqXHR);
       console.log(errorType);
       console.log(exception);
-      alert('There was an error deleting that metric');
+
+      let msg = null;
+      if (jqXHR.hasOwnProperty('responseJSON')) {
+        if (jqXHR.responseJSON.hasOwnProperty('message')) {
+          msg = jqXHR.responseJSON.message;
+        }
+      }
+
+      handleError(msg);
     }).always(() => {
       MetricManager.showNodeUpdateComplete(jstree, node);
     });

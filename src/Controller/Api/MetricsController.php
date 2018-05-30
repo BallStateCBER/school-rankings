@@ -58,7 +58,10 @@ class MetricsController extends AppController
 
         $msg = 'There was an error processing that request.';
         if ($metric->getErrors()) {
-            $msg .= ' Details: ' . print_r($metric->getErrors(), true);
+            $msg .= "\nDetails: ";
+            foreach (Hash::flatten($metric->getErrors()) as $field => $errorMsg) {
+                $msg .= "\n - $errorMsg";
+            }
         }
         throw new BadRequestException($msg);
     }
