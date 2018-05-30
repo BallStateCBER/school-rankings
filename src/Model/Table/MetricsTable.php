@@ -288,10 +288,7 @@ class MetricsTable extends Table
             ->where([
                 'metric_id' => $metricId,
                 function (QueryExpression $exp) {
-                    return $exp->notEq('value', '1');
-                },
-                function (QueryExpression $exp) {
-                    return $exp->notEq('value', '0');
+                    return $exp->notIn('value', ['0', '1']);
                 }
             ])
             ->count() > 0;
