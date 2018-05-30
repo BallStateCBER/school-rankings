@@ -296,4 +296,83 @@ class MetricsTable extends Table
             ])
             ->count() > 0;
     }
+
+    /**
+     * Returns TRUE if the specified metrics have overlapping statistics
+     *
+     * "Overlapping" meaning statistics that represent the same metric, location, and date
+     *
+     * @param int[] $metricIds IDs of metric records to be merged
+     * @return bool
+     */
+    public function mergeHasStatConflict($metricIds)
+    {
+        if (count($metricIds) != 2) {
+            $msg = 'Merge must be between 2 metrics. Cannot merge ' . count($metricIds) . '.';
+            throw new InternalErrorException($msg);
+        }
+
+        $context = $this->getCurrentContext();
+        $statisticsTable = StatisticsTable::getContextTable($context);
+
+        // Collect the years of all statistics associated with each metric
+        $years = [];
+        foreach ($metricIds as $metricId) {
+            $results = $statisticsTable->find()
+                ->select(['year'])
+                ->distinct(['year'])
+                ->where(['metric_id' => $metricId])
+                ->all()
+                ->extract('{n}.year');
+
+            // If either metric has no associated statistics, then no conflict is possible
+            if (empty($results)) {
+                return false;
+            }
+
+            $years[] = $results;
+        }
+
+        // Check for year overlaps
+        $sharedYears = [];
+        foreach ($years[0] as $yearA) {
+            foreach ($years[1] as $yearB) {
+                if ($yearA == $yearB) {
+                    $sharedYears[] = $yearA;
+                }
+            }
+        }
+        if (! $sharedYears) {
+            return false;
+        }
+        $sharedYears = array_unique($sharedYears);
+
+        // Collect locations in those years
+        $locations = [];
+        $locationField = $context == 'school' ? 'school_id' : 'school_district_id';
+        foreach ($metricIds as $metricId) {
+            $locations[] = $statisticsTable->find()
+                ->select([$locationField])
+                ->distinct([$locationField])
+                ->where([
+                    'metric_id' => $metricId,
+                ])
+                ->where(function (QueryExpression $exp) use ($sharedYears) {
+                    return $exp->in('year', $sharedYears);
+                })
+                ->all()
+                ->extract("{n}.$locationField");
+        }
+
+        // Return true if there is an overlapping location in the range of overlapping years
+        foreach ($locations[0] as $locationA) {
+            foreach ($locations[1] as $locationB) {
+                if ($locationA == $locationB) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
