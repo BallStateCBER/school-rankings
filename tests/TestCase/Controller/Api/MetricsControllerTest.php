@@ -247,7 +247,8 @@ class MetricsControllerTest extends IntegrationTestCase
         $data = [
             'name' => $metricName,
             'description' => 'Metric description',
-            'selectable' => 'true',
+            'selectable' => true,
+            'visible' => true,
             'parentId' => 1,
             'type' => 'numeric'
         ];
@@ -266,6 +267,7 @@ class MetricsControllerTest extends IntegrationTestCase
             $this->assertEquals($data['name'], $record->name);
             $this->assertEquals($data['description'], $record->description);
             $this->assertEquals(true, $record->selectable);
+            $this->assertEquals(true, $record->visible);
             $this->assertEquals($data['type'], $record->type);
             $this->assertEquals($data['parentId'], $record->parent_id);
         }
@@ -283,7 +285,8 @@ class MetricsControllerTest extends IntegrationTestCase
         $data = [
             'name' => 'New metric',
             'description' => 'Metric description',
-            'selectable' => 'true',
+            'selectable' => true,
+            'visible' => true,
             'parentId' => 999,
             'type' => 'numeric'
         ];
@@ -305,7 +308,8 @@ class MetricsControllerTest extends IntegrationTestCase
         $data = [
             'name' => 'New metric',
             'description' => 'Metric description',
-            'selectable' => 'true',
+            'selectable' => true,
+            'visible' => true,
             'parentId' => 1,
             'type' => 'numeric'
         ];
@@ -336,7 +340,7 @@ class MetricsControllerTest extends IntegrationTestCase
         $data = [
             'name' => 'Identical name',
             'description' => 'Metric description',
-            'selectable' => 'true',
+            'selectable' => true,
             'parentId' => 1,
             'type' => 'numeric'
         ];
@@ -378,7 +382,8 @@ class MetricsControllerTest extends IntegrationTestCase
             'name' => 'Renamed',
             'description' => 'New description',
             'type' => 'boolean',
-            'selectable' => false
+            'selectable' => false,
+            'visible' => false
         ];
         foreach ($this->contexts as $context => $tableName) {
             // Ensure that fixture data is different from $data
