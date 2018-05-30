@@ -47,7 +47,7 @@ class StatisticsFixture extends TestFixture
             'id' => 1,
             'metric_id' => 1,
             '{location_id}' => 1,
-            'value' => '100',
+            'value' => '1',
             'year' => 2018
         ]
     ];
@@ -66,7 +66,7 @@ class StatisticsFixture extends TestFixture
         $defaultData = [
             'metric_id' => 1,
             '{location_id}' => 1,
-            'value' => '100',
+            'value' => '1',
             'year' => 2018,
             'contiguous' => 1,
             'file' => 'import_file.xlsx',
