@@ -8,6 +8,7 @@ import {MetricModal} from './metric-modal.jsx';
 import fontawesome from '@fortawesome/fontawesome';
 require('@fortawesome/fontawesome-free-solid');
 require('@fortawesome/fontawesome-free-regular');
+import {MetricManagerLegend} from './metric-manager-legend.jsx';
 
 window.jsTreeData = {
   createMetric: {},
@@ -462,6 +463,9 @@ class MetricManager extends React.Component {
         {this.state.openEditModal &&
           <MetricModal onClose={this.handleEditModalClose}
                        isOpen={this.state.openEditModal} mode="edit"/>
+        }
+        {! this.state.loading &&
+          <MetricManagerLegend/>
         }
       </div>
     );
