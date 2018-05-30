@@ -4,8 +4,8 @@ namespace App\Model\Table;
 use App\Model\Entity\Metric;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
-use Cake\Network\Exception\BadRequestException;
-use Cake\Network\Exception\InternalErrorException;
+use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
@@ -136,10 +136,40 @@ class MetricsTable extends Table
         $rules->addDelete(function ($entity) {
             return $this->childCount($entity, true) === 0;
         }, 'cantDeleteParentMetric', [
-            'message' => 'Cannot delete a metric with child-records'
+            'message' => 'Cannot delete a metric with child-records',
+            'errorField' => 'children'
+        ]);
+
+        $rules->addUpdate(function ($entity) {
+            $context = $this->getCurrentContext();
+
+            return !$this->hasIncompatibleStatistics($context, $entity->type, $entity->id);
+        }, 'cantChangeMetricContext', [
+            'message' => 'Cannot change metric type. Existing statistics are incompatible with new type.',
+            'errorField' => 'statistics'
         ]);
 
         return $rules;
+    }
+
+    /**
+     * Returns either 'school' or 'district' depending on what the current subclass is
+     *
+     * @return string
+     * @throws InternalErrorException
+     */
+    public function getCurrentContext()
+    {
+        $className = explode('\\', get_class($this));
+
+        switch (end($className)) {
+            case 'SchoolMetricsTable':
+                return 'school';
+            case 'SchoolDistrictMetricsTable':
+                return 'district';
+        }
+
+        throw new InternalErrorException('Can\'t get context for ' . get_class($this) . ' class');
     }
 
     /**
@@ -232,6 +262,38 @@ class MetricsTable extends Table
 
         return $this->find()
             ->where($conditions)
+            ->count() > 0;
+    }
+
+    /**
+     * Returns TRUE if the specified metric should NOT be changed to the provided type because existing statistics
+     * have incompatible values
+     *
+     * @param string $context Either 'school' or 'district'
+     * @param string $metricType Either 'numeric' or 'boolean'
+     * @param int $metricId Metric record ID
+     * @return bool
+     */
+    public function hasIncompatibleStatistics($context, $metricType, $metricId)
+    {
+        // All statistic values (including 1 and 0) can be of the "numeric" type
+        if ($metricType == 'numeric') {
+            return false;
+        } elseif ($metricType != 'boolean') {
+            throw new InternalErrorException('Unrecognized metric type: ' . $metricType);
+        }
+
+        // Boolean values can only be 1 and 0
+        return StatisticsTable::getContextTable($context)->find()
+            ->where([
+                'metric_id' => $metricId,
+                function (QueryExpression $exp) {
+                    return $exp->notEq('value', '1');
+                },
+                function (QueryExpression $exp) {
+                    return $exp->notEq('value', '0');
+                }
+            ])
             ->count() > 0;
     }
 }
