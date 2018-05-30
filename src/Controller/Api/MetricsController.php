@@ -56,7 +56,7 @@ class MetricsController extends AppController
             return;
         }
 
-        $msg = 'There was an error adding that metric.';
+        $msg = 'There was an error processing that request.';
         if ($metric->getErrors()) {
             $msg .= ' Details: ' . print_r($metric->getErrors(), true);
         }
