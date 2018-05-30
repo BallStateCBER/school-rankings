@@ -4,7 +4,7 @@ namespace App\Model\Table;
 use App\Import\ImportFile;
 use App\Model\Entity\SpreadsheetColumnsMetric;
 use Cake\Datasource\EntityInterface;
-use Cake\Network\Exception\InternalErrorException;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;

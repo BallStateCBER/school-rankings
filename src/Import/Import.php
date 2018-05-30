@@ -3,7 +3,7 @@ namespace App\Import;
 
 use App\Model\Table\ImportedFilesTable;
 use Cake\Filesystem\Folder;
-use Cake\Network\Exception\InternalErrorException;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 
 class Import

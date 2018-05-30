@@ -8,8 +8,8 @@ use App\Model\Entity\SchoolMetric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\SchoolDistrictMetricsTable;
 use App\Model\Table\SchoolMetricsTable;
-use Cake\Network\Exception\BadRequestException;
-use Cake\Network\Exception\MethodNotAllowedException;
+use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 

@@ -2,7 +2,7 @@
 namespace App\Controller\Admin;
 
 use App\Controller\AppController;
-use Cake\Network\Exception\BadRequestException;
+use Cake\Http\Exception\BadRequestException;
 
 class MetricsController extends AppController
 {
