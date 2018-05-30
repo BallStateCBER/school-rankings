@@ -60,8 +60,8 @@ class CountiesTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Counties') ? [] : ['className' => CountiesTable::class];
-        $this->Counties = TableRegistry::get('Counties', $config);
+        $config = TableRegistry::getTableLocator()->exists('Counties') ? [] : ['className' => CountiesTable::class];
+        $this->Counties = TableRegistry::getTableLocator()->get('Counties', $config);
     }
 
     /**

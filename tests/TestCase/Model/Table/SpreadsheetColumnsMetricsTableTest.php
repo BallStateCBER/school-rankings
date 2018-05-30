@@ -37,8 +37,8 @@ class SpreadsheetColumnsMetricsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('SpreadsheetColumnsMetrics') ? [] : ['className' => SpreadsheetColumnsMetricsTable::class];
-        $this->SpreadsheetColumnsMetrics = TableRegistry::get('SpreadsheetColumnsMetrics', $config);
+        $config = TableRegistry::getTableLocator()->exists('SpreadsheetColumnsMetrics') ? [] : ['className' => SpreadsheetColumnsMetricsTable::class];
+        $this->SpreadsheetColumnsMetrics = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics', $config);
     }
 
     /**

@@ -65,8 +65,8 @@ class SharedFormulasTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('SharedFormulas') ? [] : ['className' => SharedFormulasTable::class];
-        $this->SharedFormulas = TableRegistry::get('SharedFormulas', $config);
+        $config = TableRegistry::getTableLocator()->exists('SharedFormulas') ? [] : ['className' => SharedFormulasTable::class];
+        $this->SharedFormulas = TableRegistry::getTableLocator()->get('SharedFormulas', $config);
     }
 
     /**

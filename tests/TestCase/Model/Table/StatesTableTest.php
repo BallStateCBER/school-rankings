@@ -60,8 +60,8 @@ class StatesTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('States') ? [] : ['className' => StatesTable::class];
-        $this->States = TableRegistry::get('States', $config);
+        $config = TableRegistry::getTableLocator()->exists('States') ? [] : ['className' => StatesTable::class];
+        $this->States = TableRegistry::getTableLocator()->get('States', $config);
     }
 
     /**

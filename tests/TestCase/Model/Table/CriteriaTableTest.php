@@ -65,8 +65,8 @@ class CriteriaTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Criteria') ? [] : ['className' => CriteriaTable::class];
-        $this->Criteria = TableRegistry::get('Criteria', $config);
+        $config = TableRegistry::getTableLocator()->exists('Criteria') ? [] : ['className' => CriteriaTable::class];
+        $this->Criteria = TableRegistry::getTableLocator()->get('Criteria', $config);
     }
 
     /**

@@ -60,8 +60,8 @@ class CitiesTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Cities') ? [] : ['className' => CitiesTable::class];
-        $this->Cities = TableRegistry::get('Cities', $config);
+        $config = TableRegistry::getTableLocator()->exists('Cities') ? [] : ['className' => CitiesTable::class];
+        $this->Cities = TableRegistry::getTableLocator()->get('Cities', $config);
     }
 
     /**

@@ -35,8 +35,8 @@ class ImportedFilesTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('ImportedFiles') ? [] : ['className' => ImportedFilesTable::class];
-        $this->ImportedFiles = TableRegistry::get('ImportedFiles', $config);
+        $config = TableRegistry::getTableLocator()->exists('ImportedFiles') ? [] : ['className' => ImportedFilesTable::class];
+        $this->ImportedFiles = TableRegistry::getTableLocator()->get('ImportedFiles', $config);
     }
 
     /**

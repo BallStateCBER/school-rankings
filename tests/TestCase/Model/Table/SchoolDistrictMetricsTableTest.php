@@ -35,8 +35,8 @@ class SchoolDistrictMetricsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('SchoolDistrictMetrics') ? [] : ['className' => SchoolDistrictMetricsTable::class];
-        $this->SchoolDistrictMetrics = TableRegistry::get('SchoolDistrictMetrics', $config);
+        $config = TableRegistry::getTableLocator()->exists('SchoolDistrictMetrics') ? [] : ['className' => SchoolDistrictMetricsTable::class];
+        $this->SchoolDistrictMetrics = TableRegistry::getTableLocator()->get('SchoolDistrictMetrics', $config);
     }
 
     /**

@@ -65,8 +65,8 @@ class FormulasTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Formulas') ? [] : ['className' => FormulasTable::class];
-        $this->Formulas = TableRegistry::get('Formulas', $config);
+        $config = TableRegistry::getTableLocator()->exists('Formulas') ? [] : ['className' => FormulasTable::class];
+        $this->Formulas = TableRegistry::getTableLocator()->get('Formulas', $config);
     }
 
     /**

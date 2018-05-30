@@ -62,8 +62,8 @@ class RangesTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('Ranges') ? [] : ['className' => RangesTable::class];
-        $this->Ranges = TableRegistry::get('Ranges', $config);
+        $config = TableRegistry::getTableLocator()->exists('Ranges') ? [] : ['className' => RangesTable::class];
+        $this->Ranges = TableRegistry::getTableLocator()->get('Ranges', $config);
     }
 
     /**

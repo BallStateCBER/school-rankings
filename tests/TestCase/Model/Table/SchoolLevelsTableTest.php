@@ -62,8 +62,8 @@ class SchoolLevelsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::exists('SchoolLevels') ? [] : ['className' => SchoolLevelsTable::class];
-        $this->SchoolLevels = TableRegistry::get('SchoolLevels', $config);
+        $config = TableRegistry::getTableLocator()->exists('SchoolLevels') ? [] : ['className' => SchoolLevelsTable::class];
+        $this->SchoolLevels = TableRegistry::getTableLocator()->get('SchoolLevels', $config);
     }
 
     /**

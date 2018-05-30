@@ -45,11 +45,11 @@ class MetricsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->SchoolMetrics = TableRegistry::get(
+        $this->SchoolMetrics = TableRegistry::getTableLocator()->get(
             'SchoolMetrics',
             ['className' => SchoolMetricsTable::class]
         );
-        $this->SchoolDistrictMetrics = TableRegistry::get(
+        $this->SchoolDistrictMetrics = TableRegistry::getTableLocator()->get(
             'SchoolDistrictMetrics',
             ['className' => SchoolDistrictMetricsTable::class]
         );

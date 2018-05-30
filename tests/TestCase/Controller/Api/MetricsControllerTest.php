@@ -73,7 +73,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'headers' => ['Accept' => 'application/json']
         ]);
         $tableName = $this->contexts[$context];
-        $table = TableRegistry::get($tableName);
+        $table = TableRegistry::getTableLocator()->get($tableName);
         $metric = $table->get($metricId);
         if ($newParentId == $metric->parent_id) {
             throw new Exception("Invalid $context metric chosen");
@@ -143,7 +143,7 @@ class MetricsControllerTest extends IntegrationTestCase
         $metricId = 5;
         $newParentId = 1;
         foreach ($this->contexts as $context => $table) {
-            $table = TableRegistry::get($table);
+            $table = TableRegistry::getTableLocator()->get($table);
             $metric = $table->get($metricId);
             $originalParentId = $metric->parent_id;
             if ($newParentId == $metric->parent_id) {
@@ -258,7 +258,7 @@ class MetricsControllerTest extends IntegrationTestCase
             $this->assertResponseSuccess();
 
             /** @var Metric $record */
-            $record = TableRegistry::get($tableName)->find()
+            $record = TableRegistry::getTableLocator()->get($tableName)->find()
                 ->where(['name' => $metricName])
                 ->first();
             $className = $context == 'school' ? 'SchoolMetric' : 'SchoolDistrictMetric';
@@ -387,7 +387,7 @@ class MetricsControllerTest extends IntegrationTestCase
         ];
         foreach ($this->contexts as $context => $tableName) {
             // Ensure that fixture data is different from $data
-            $table = TableRegistry::get($tableName);
+            $table = TableRegistry::getTableLocator()->get($tableName);
             $originalMetric = $table->get($metricId);
             foreach ($data as $field => $value) {
                 if ($originalMetric->$field == $value) {
