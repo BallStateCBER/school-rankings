@@ -28,6 +28,7 @@ class MetricManager extends React.Component {
     };
     this.componentDidMount = this.componentDidMount.bind(this);
     this.handleCreateModalOpen = this.handleCreateModalOpen.bind(this);
+    this.handleCreateModalRootOpen = this.handleCreateModalRootOpen.bind(this);
     this.handleCreateModalClose = this.handleCreateModalClose.bind(this);
     this.handleEditModalOpen = this.handleEditModalOpen.bind(this);
     this.handleEditModalClose = this.handleEditModalClose.bind(this);
