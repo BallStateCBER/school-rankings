@@ -44,6 +44,18 @@
                 </li>
             </ul>
         </section>
+
+        <section>
+            <h6 class="card-subtitle mb-2">
+                Visible to users
+            </h6>
+            <ul class="card-text">
+                <li>
+                    <span class="far fa-eye-slash"></span>
+                    <span class="metric-hidden">Hidden</span>
+                </li>
+            </ul>
+        </section>
     </div>
 </div>
 

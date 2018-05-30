@@ -1,3 +1,8 @@
+@mixin metric-hidden {
+  color: #666;
+  font-style: italic;
+}
+
 div.jstree {
   img.loading {
     margin-left: 10px;
@@ -34,8 +39,7 @@ li.jstree-node {
       font-family: "Font Awesome 5 Regular", monospace;
     }
     > a {
-      color: #666;
-      font-style: italic;
+      @include metric-hidden;
     }
   }
   > a {
@@ -52,6 +56,9 @@ li.jstree-node {
   ul {
     list-style-type: none;
     padding-left: 20px;
+  }
+  .metric-hidden {
+    @include metric-hidden;
   }
 }
 #metric-manager {
