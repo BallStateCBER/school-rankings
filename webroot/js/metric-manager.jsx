@@ -379,10 +379,14 @@ class MetricManager extends React.Component {
           description: metric.description,
           visible: metric.visible,
         },
+        a_attr: {
+          'data-metric-id': metric.id,
+        },
         li_attr: {
           'data-selectable': Boolean(metric.selectable) ? 1 : 0,
           'data-type': metric.type,
           'data-visible': Boolean(metric.visible) ? 1 : 0,
+          'data-metric-id': metric.id,
         },
         icon: Boolean(metric.selectable) ? 'far fa-check-circle' : 'fas fa-ban',
       };
@@ -420,6 +424,10 @@ class MetricManager extends React.Component {
     $('#jstree').jstree(true).redraw(true);
   }
 
+  static toggleMetricIds() {
+    $('#metric-manager').toggleClass('show-metric-ids');
+  }
+
   render() {
     return (
       <div>
@@ -431,11 +439,18 @@ class MetricManager extends React.Component {
           </span>
         }
         {! this.state.loading &&
-          <Button color="outline-primary"
-                  onClick={this.handleCreateModalRootOpen}
-                  ref={this.submitButton}>
-            Add root-level metric
-          </Button>
+          <div>
+            <Button color="outline-primary"
+                    onClick={this.handleCreateModalRootOpen}
+                    ref={this.submitButton}>
+              Add root-level metric
+            </Button>
+            {' '}
+            <Button color="outline-primary"
+                    onClick={MetricManager.toggleMetricIds}>
+              Show metric IDs
+            </Button>
+          </div>
         }
         {this.state.hasError &&
           <p className="text-danger">{this.state.errorMsg}</p>

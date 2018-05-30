@@ -54,3 +54,16 @@ li.jstree-node {
     padding-left: 20px;
   }
 }
+#metric-manager {
+  &.show-metric-ids {
+    li.jstree-node {
+      > a {
+        &::before {
+          content: "#" attr(data-metric-id);
+          display: inline;
+          margin-right: 5px;
+        }
+      }
+    }
+  }
+}
