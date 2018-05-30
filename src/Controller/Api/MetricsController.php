@@ -124,7 +124,8 @@ class MetricsController extends AppController
             'parent_id' => $this->request->getData('parentId'),
             'description' => $this->request->getData('description'),
             'type' => $this->request->getData('type'),
-            'selectable' => $selectable == 'false' ? false : (bool)$selectable
+            'selectable' => $selectable == 'false' ? false : (bool)$selectable,
+            'visible' => (bool)$selectable
         ]);
         $result = (bool)$table->save($metric);
 
