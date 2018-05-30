@@ -65,6 +65,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * @param string $context Metric context name
      * @return void
      * @throws Exception
+     * @throws \PHPUnit\Exception
      */
     private function _testReparentSuccess($metricId, $newParentId, $context)
     {
@@ -101,6 +102,7 @@ class MetricsControllerTest extends IntegrationTestCase
      *
      * @return void
      * @throws Exception
+     * @throws \PHPUnit\Exception
      */
     public function testReparentToRootSuccess()
     {
@@ -117,6 +119,7 @@ class MetricsControllerTest extends IntegrationTestCase
      *
      * @return void
      * @throws Exception
+     * @throws \PHPUnit\Exception
      */
     public function testReparentFromRootSuccess()
     {
@@ -133,6 +136,7 @@ class MetricsControllerTest extends IntegrationTestCase
      *
      * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testReparentFailNonunique()
     {
@@ -166,8 +170,8 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests moving a metric under a nonexistent parent
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testReparentFailUnknownParent()
     {
@@ -187,8 +191,8 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests successful deleting of a metric
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testDeleteSuccess()
     {
@@ -210,8 +214,8 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests prevention of deleting parent metrics
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testDeleteFailHasChildren()
     {
@@ -233,8 +237,9 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests successful creation of a metric
      *
-     * @throws Exception
      * @return void
+     * @throws \Exception
+     * @throws \PHPUnit\Exception
      */
     public function testCreateSuccess()
     {
@@ -269,8 +274,9 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests failing to create a metric with an invalid parent
      *
-     * @throws Exception
      * @return void
+     * @throws Exception
+     * @throws \PHPUnit\Exception
      */
     public function testCreateFailInvalidParent()
     {
@@ -291,8 +297,8 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests failing to create a metric with missing required data
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testCreateFailMissingData()
     {
@@ -322,8 +328,8 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests failing to create a metric with a name conflict
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testCreateFailNameConflict()
     {
@@ -361,8 +367,9 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests successfully editing a metric
      *
-     * @throws Exception
      * @return void
+     * @throws \PHPUnit\Exception
+     * @throws \Exception
      */
     public function testEditSuccess()
     {
