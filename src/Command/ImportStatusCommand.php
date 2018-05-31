@@ -30,13 +30,8 @@ class ImportStatusCommand extends Command
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
-        $parser->addSubcommand('run', [
-            'help' => 'Process file(s) and import data',
-        ])->addSubcommand('status', [
-            'help' => 'Show what files are available and which have been imported',
-        ])->addArguments([
-            'year' => ['help' => 'The specific year to look up'],
-            'fileKey' => ['help' => 'The numeric key for the specific file to process']
+        $parser->addArguments([
+            'year' => ['help' => 'The specific year to look up']
         ]);
 
         return $parser;
