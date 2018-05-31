@@ -1,7 +1,9 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\Statistic;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
@@ -43,6 +45,9 @@ class StatisticsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
+            ->integer('metric_id');
+
+        $validator
             ->scalar('value')
             ->maxLength('value', 255)
             ->requirePresence('value', 'create')
@@ -65,6 +70,29 @@ class StatisticsTable extends Table
             ->notEmpty('file');
 
         return $validator;
+    }
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param RulesChecker $rules The rules object to be modified.
+     * @return RulesChecker
+     */
+    public function buildRules(RulesChecker $rules)
+    {
+        parent::buildRules($rules);
+
+        $rules->add(function ($entity, $options) use ($rules) {
+            /** @var Statistic $entity */
+            $context = $entity->getCurrentContext();
+            $metricTableName = $context == 'school' ? 'SchoolMetricsTable' : 'SchoolDistrictMetricsTable';
+            $rule = $rules->existsIn(['metric_id'], $metricTableName);
+
+            return $rule($entity, $options);
+        });
+
+        return $rules;
     }
 
     /**

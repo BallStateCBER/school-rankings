@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 
 /**
@@ -32,4 +33,24 @@ class Statistic extends Entity
     protected $_accessible = [
         '*' => true
     ];
+
+    /**
+     * Returns either 'school' or 'district' depending on what the current subclass is
+     *
+     * @return string
+     * @throws InternalErrorException
+     */
+    public function getCurrentContext()
+    {
+        $className = explode('\\', get_class($this));
+
+        switch (end($className)) {
+            case 'SchoolStatistic':
+                return 'school';
+            case 'SchoolDistrictStatistic':
+                return 'district';
+        }
+
+        throw new InternalErrorException('Can\'t get context for ' . get_class($this) . ' class');
+    }
 }
