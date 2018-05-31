@@ -1,8 +1,6 @@
 <?php
 namespace App\Model\Entity;
 
-use Cake\ORM\Entity;
-
 /**
  * SchoolDistrictStatistic Entity
  *
@@ -19,28 +17,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Metric $metric
  * @property \App\Model\Entity\SchoolDistrict $school_district
  */
-class SchoolDistrictStatistic extends Entity
+class SchoolDistrictStatistic extends Statistic
 {
 
-    /**
-     * Fields that can be mass assigned using newEntity() or patchEntity().
-     *
-     * Note that when '*' is set to true, this allows all unspecified fields to
-     * be mass assigned. For security purposes, it is advised to set '*' to false
-     * (or remove it), and explicitly make individual fields accessible as needed.
-     *
-     * @var array
-     */
-    protected $_accessible = [
-        'metric_id' => true,
-        'school_district_id' => true,
-        'value' => true,
-        'year' => true,
-        'contiguous' => true,
-        'file' => true,
-        'created' => true,
-        'modified' => true,
-        'metric' => true,
-        'school_district' => true
-    ];
 }
