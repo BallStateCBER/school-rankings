@@ -10,6 +10,7 @@ use App\Model\Table\SchoolDistrictMetricsTable;
 use App\Model\Table\SchoolMetricsTable;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\MethodNotAllowedException;
+use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 
@@ -220,6 +221,36 @@ class MetricsController extends AppController
                 implode("\n", Hash::flatten($metric->getErrors())) :
                 'Success',
             'result' => $result,
+        ]);
+    }
+
+    /**
+     * API endpoint that returns a result indicating whether or not the two metrics have associated stats that share
+     * the same year and location (and thus would need one or the other to take precedence when merging)
+     *
+     * @return void
+     */
+    public function metricsHaveStatConflict()
+    {
+        $context = $this->request->getData('context');
+        if (!in_array($context, ['school', 'district'])) {
+            throw new BadRequestException('Unrecognized metric context: ' . $context);
+        }
+
+        $metricIdA = $this->request->getData('metricIdA');
+        $metricIdB = $this->request->getData('metricIdB');
+        foreach (['A', 'B'] as $letter) {
+            $metricId = ${'metricId' . $letter};
+            if (!MetricsTable::recordExists($context, $metricId)) {
+                throw new NotFoundException("Metric $letter (#$metricId) not found");
+            }
+        }
+
+        $hasStatConflict = MetricsTable::mergeHasStatConflict([$metricIdA, $metricIdB], $context);
+
+        $this->set([
+            '_serialize' => ['result'],
+            'result' => $hasStatConflict
         ]);
     }
 }

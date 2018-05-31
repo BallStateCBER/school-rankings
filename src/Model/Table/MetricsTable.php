@@ -300,16 +300,16 @@ class MetricsTable extends Table
      * "Overlapping" meaning statistics that represent the same metric, location, and date
      *
      * @param int[] $metricIds IDs of metric records to be merged
+     * @param string|null $context Either 'school' or 'district'
      * @return bool
      */
-    public function mergeHasStatConflict($metricIds)
+    public static function mergeHasStatConflict($metricIds, $context = null)
     {
         if (count($metricIds) != 2) {
             $msg = 'Merge must be between 2 metrics. Cannot merge ' . count($metricIds) . '.';
             throw new InternalErrorException($msg);
         }
 
-        $context = $this->getCurrentContext();
         $statisticsTable = StatisticsTable::getContextTable($context);
 
         // Collect the years of all statistics associated with each metric
