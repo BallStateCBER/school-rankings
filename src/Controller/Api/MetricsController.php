@@ -112,10 +112,7 @@ class MetricsController extends AppController
             throw new MethodNotAllowedException('Request is not POST');
         }
 
-        $context = $this->request->getData('context');
-        if (!in_array($context, ['school', 'district'])) {
-            throw new BadRequestException('Unrecognized metric context: ' . $context);
-        }
+        $context = $this->getContext();
         $table = MetricsTable::getContextTable($context);
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
@@ -154,7 +151,7 @@ class MetricsController extends AppController
 
         $metricId = $this->request->getData('metricId');
         $newParentId = $this->request->getData('newParentId');
-        $context = $this->request->getData('context');
+        $context = $this->getContext();
         $table = MetricsTable::getContextTable($context);
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
@@ -188,10 +185,7 @@ class MetricsController extends AppController
             throw new MethodNotAllowedException('Request is not PUT or PATCH');
         }
 
-        $context = $this->request->getData('context');
-        if (!in_array($context, ['school', 'district'])) {
-            throw new BadRequestException('Unrecognized metric context: ' . $context);
-        }
+        $context = $this->getContext();
         $table = MetricsTable::getContextTable($context);
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
@@ -236,11 +230,7 @@ class MetricsController extends AppController
             throw new MethodNotAllowedException('Request is not GET');
         }
 
-        $context = $this->request->getData('context');
-        if (!in_array($context, ['school', 'district'])) {
-            throw new BadRequestException('Unrecognized metric context: ' . $context);
-        }
-
+        $context = $this->getContext();
         $metricIdA = $this->request->getData('metricIdA');
         $metricIdB = $this->request->getData('metricIdB');
         foreach (['A', 'B'] as $letter) {
@@ -256,5 +246,21 @@ class MetricsController extends AppController
             '_serialize' => ['result'],
             'result' => $hasStatConflict
         ]);
+    }
+
+    /**
+     * Returns the 'context' value from request data
+     *
+     * @return string
+     * @throws BadRequestException
+     */
+    private function getContext()
+    {
+        $context = $this->request->getData('context');
+        if (!in_array($context, ['school', 'district'])) {
+            throw new BadRequestException('Unrecognized metric context: ' . $context);
+        }
+
+        return $context;
     }
 }
