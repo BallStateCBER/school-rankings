@@ -232,6 +232,10 @@ class MetricsController extends AppController
      */
     public function metricsHaveStatConflict()
     {
+        if (!$this->request->is('get')) {
+            throw new MethodNotAllowedException('Request is not GET');
+        }
+
         $context = $this->request->getData('context');
         if (!in_array($context, ['school', 'district'])) {
             throw new BadRequestException('Unrecognized metric context: ' . $context);
