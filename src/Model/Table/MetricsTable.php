@@ -13,7 +13,7 @@ use Cake\Validation\Validator;
 use Exception;
 
 /**
- * SchoolMetrics Model
+ * Metrics Model
  *
  * @method Metric get($primaryKey, $options = [])
  * @method Metric newEntity($data = null, array $options = [])
