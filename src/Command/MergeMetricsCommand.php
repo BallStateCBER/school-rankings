@@ -11,6 +11,7 @@ use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Console\Exception\StopException;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Database\Query;
 use Cake\Datasource\Exception\RecordNotFoundException;
@@ -20,36 +21,40 @@ use Cake\ORM\TableRegistry;
 /**
  * Class MergeMetricsCommand
  * @package App\Command
- * @property MetricsTable $metricsTable
- * @property StatisticsTable $statisticsTable
- * @property CriteriaTable $criteriaTable
+ * @property array $criteriaToDelete
+ * @property array $criteriaToUpdate
+ * @property array $sortedCriteria
+ * @property array $sortedStats
+ * @property array $statsToDelete
+ * @property array $statsToUpdate
  * @property ConsoleIo $io
- * @property string $context
+ * @property CriteriaTable $criteriaTable
  * @property int[] $metricIds
  * @property Metric[] $metrics
- * @property ResultSet $statsToMerge
- * @property array $sortedStats
- * @property array $sortedCriteria
- * @property array $statsToUpdate
- * @property array $statsToDelete
+ * @property MetricsTable $metricsTable
  * @property ResultSet $criteriaToMerge
+ * @property ResultSet $statsToMerge
+ * @property StatisticsTable $statisticsTable
+ * @property string $context
  */
 class MergeMetricsCommand extends Command
 {
-    private $metricsTable;
-    private $statisticsTable;
-    private $criteriaTable;
-    private $io;
     private $context;
+    private $criteriaTable;
+    private $criteriaToDelete;
+    private $criteriaToMerge;
+    private $criteriaToUpdate;
+    private $io;
     private $metricIds;
     private $metrics;
-    private $statsToMerge;
-    private $sortedStats;
+    private $metricsTable;
     private $sortedCriteria;
-    private $statsToUpdate;
+    private $sortedStats;
+    private $statisticsTable;
     private $statsToDelete;
-    private $criteriaToMerge;
-    
+    private $statsToMerge;
+    private $statsToUpdate;
+
     /**
      * Initializes the command
      *
@@ -107,20 +112,39 @@ class MergeMetricsCommand extends Command
             $args->getArgument('metricIdB')
         ];
 
-        $this->verifyMetrics();
-        $this->collectStatistics();
+        try {
+            $this->verifyMetrics();
 
-        if (!$this->statsToMerge->isEmpty()) {
-            $this->checkForStatConflicts();
-            $this->io->out();
-            $this->prepareStats();
-        }
+            $this->collectStatistics();
+            if (!$this->statsToMerge->isEmpty()) {
+                $this->checkForStatConflicts();
+                $this->io->out();
+                $this->prepareStats();
+            }
 
-        $this->collectCriteria();
-        if (!$this->criteriaToMerge->isEmpty()) {
-            $this->checkForCriteriaConflicts();
+            $this->collectCriteria();
+            if (!$this->criteriaToMerge->isEmpty()) {
+                $this->checkForCriteriaConflicts();
+                $this->io->out();
+                $this->prepareCriteria();
+            }
+
+            if (!$this->statsToMerge->isEmpty()) {
+                $this->io->out();
+                $this->mergeStats();
+            }
+
+            if (!$this->criteriaToMerge->isEmpty()) {
+                $this->io->out();
+                $this->mergeCriteria();
+            }
+
             $this->io->out();
-            $this->io->out('Preparing criteria...', 0);
+            $this->deleteMetric();
+
+            $this->io->success('Merge successful');
+        } catch (StopException $e) {
+            return;
         }
     }
 
@@ -142,6 +166,17 @@ class MergeMetricsCommand extends Command
                 $this->abort();
             }
         }
+
+        $hasChildren = $this->metricsTable->childCount($this->metrics[0], true) > 0;
+        if ($hasChildren) {
+            $this->io->out();
+            $this->io->error(
+                ucwords($this->context) . ' metric #' . $this->metricIds[0] .
+                ' cannot be merge while it has child-metrics'
+            );
+            $this->abort();
+        }
+
         $this->io->overwrite('Metrics verified', 2);
     }
 
@@ -250,7 +285,7 @@ class MergeMetricsCommand extends Command
     }
 
     /**
-     * Checks that planned update and delete operations would be valid
+     * Prepares update operations and checks that update and delete operations would be valid
      *
      * @return void
      */
@@ -387,5 +422,119 @@ class MergeMetricsCommand extends Command
                 $this->metricIds[0]
             ));
         }
+    }
+
+    /**
+     * Runs update and delete operations on statistics associated with the first metric
+     *
+     * @return void
+     */
+    private function mergeStats()
+    {
+        $this->io->out('Merging stats...');
+        foreach ($this->statsToUpdate as $stat) {
+            if (!$this->statisticsTable->save($stat)) {
+                $this->io->error('Error updating statistic #' . $stat->id);
+                $this->abort();
+            }
+            $this->io->out(' - Updated stat #' . $stat->id);
+        }
+
+        foreach ($this->statsToDelete as $stat) {
+            if (!$this->statisticsTable->delete($stat)) {
+                $this->io->error('Error deleting statistic #' . $stat->id);
+                $this->abort();
+            }
+            $this->io->out(' - Deleted stat #' . $stat->id);
+        }
+    }
+
+    /**
+     * Prepares update operations and checks that update and delete operations would be valid
+     *
+     * @return void
+     */
+    private function prepareCriteria()
+    {
+        $this->io->out('Preparing criteria...', 0);
+
+        $this->criteriaToUpdate = [];
+        $this->criteriaToDelete = [];
+
+        /** @var Criterion $criterion */
+        foreach ($this->criteriaToMerge as $criterion) {
+            // Moving
+            if (in_array($criterion->id, $this->sortedCriteria['noConflict'])) {
+                $criterion = $this->criteriaTable->patchEntity($criterion, ['metric_id' => $this->metricIds[1]]);
+
+                $errors = $criterion->getErrors();
+                $passesRules = $this->criteriaTable->checkRules($criterion, 'update');
+                if (empty($errors) && $passesRules) {
+                    $this->criteriaToUpdate[] = $criterion;
+                    continue;
+                }
+
+                $msg = "\nCannot update criterion #$criterion->id.";
+                $msg .= $errors
+                    ? "\nDetails:\n" . print_r($errors, true)
+                    : ' No details available. (Check for application rule violation)';
+                $this->io->error($msg);
+                $this->abort();
+            }
+
+            // Deleting
+            $passesRules = $this->criteriaTable->checkRules($criterion, 'delete');
+            if ($passesRules) {
+                $this->criteriaToDelete[] = $criterion;
+                continue;
+            }
+
+            $this->io->error("\nCannot delete criterion #$criterion->id.");
+            $this->abort();
+        }
+
+        $this->io->overwrite('Criteria prepared');
+    }
+
+    /**
+     * Runs update and delete operations on criteria associated with the first metric
+     *
+     * @return void
+     */
+    private function mergeCriteria()
+    {
+        $this->io->out('Merging criteria...');
+        foreach ($this->criteriaToUpdate as $criterion) {
+            if (!$this->criteriaTable->save($criterion)) {
+                $this->io->error('Error updating criterion #' . $criterion->id);
+                $this->abort();
+            }
+            $this->io->out(' - Updated criterion #' . $criterion->id);
+        }
+
+        foreach ($this->criteriaToDelete as $criterion) {
+            if (!$this->criteriaTable->delete($criterion)) {
+                $this->io->error('Error deleting criterion #' . $criterion->id);
+                $this->abort();
+            }
+            $this->io->out(' - Deleted criterion #' . $criterion->id);
+        }
+    }
+
+    /**
+     * Deletes the first of the two specified metrics
+     *
+     * @return void
+     */
+    private function deleteMetric()
+    {
+        if ($this->metricsTable->delete($this->metrics[0])) {
+            $this->io->out('Metric #' . $this->metricIds[0] . ' deleted', 2);
+
+            return;
+        }
+
+        $this->io->error('Error deleting metric #' . $this->metricIds[0]);
+        $this->abort();
     }
 }
