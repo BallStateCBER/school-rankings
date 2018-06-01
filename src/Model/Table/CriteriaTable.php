@@ -1,7 +1,6 @@
 <?php
 namespace App\Model\Table;
 
-use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -41,10 +40,9 @@ class CriteriaTable extends Table
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
-        $this->belongsToMany('Formulas', [
-            'foreignKey' => 'criterion_id',
-            'targetForeignKey' => 'formula_id',
-            'joinTable' => 'formulas_criteria'
+        $this->belongsTo('Formulas', [
+            'foreignKey' => 'formula_id',
+            'joinType' => 'INNER'
         ]);
     }
 

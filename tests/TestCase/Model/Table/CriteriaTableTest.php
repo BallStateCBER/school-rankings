@@ -53,8 +53,7 @@ class CriteriaTableTest extends TestCase
         'app.schools_school_levels',
         'app.ranges',
         'app.rankings_ranges',
-        'app.shared_formulas',
-        'app.formulas_criteria'
+        'app.shared_formulas'
     ];
 
     /**

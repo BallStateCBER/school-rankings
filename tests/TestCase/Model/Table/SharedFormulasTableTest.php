@@ -53,8 +53,7 @@ class SharedFormulasTableTest extends TestCase
         'app.schools_school_levels',
         'app.ranges',
         'app.rankings_ranges',
-        'app.criteria',
-        'app.formulas_criteria'
+        'app.criteria'
     ];
 
     /**

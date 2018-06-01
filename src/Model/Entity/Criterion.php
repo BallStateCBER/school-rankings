@@ -12,7 +12,7 @@ use Cake\ORM\Entity;
  * @property string $preference
  *
  * @property \App\Model\Entity\Metric $metric
- * @property \App\Model\Entity\Formula[] $formulas
+ * @property \App\Model\Entity\Formula $formula
  */
 class Criterion extends Entity
 {
@@ -31,6 +31,6 @@ class Criterion extends Entity
         'weight' => true,
         'preference' => true,
         'metric' => true,
-        'formulas' => true
+        'formula' => true
     ];
 }

@@ -57,10 +57,8 @@ class FormulasTable extends Table
         $this->hasMany('SharedFormulas', [
             'foreignKey' => 'formula_id'
         ]);
-        $this->belongsToMany('Criteria', [
-            'foreignKey' => 'formula_id',
-            'targetForeignKey' => 'criterion_id',
-            'joinTable' => 'formulas_criteria'
+        $this->hasMany('Criteria', [
+            'foreignKey' => 'formula_id'
         ]);
     }
 

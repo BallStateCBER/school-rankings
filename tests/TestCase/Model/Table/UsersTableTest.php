@@ -53,8 +53,7 @@ class UsersTableTest extends TestCase
         'app.ranges',
         'app.rankings_ranges',
         'app.shared_formulas',
-        'app.criteria',
-        'app.formulas_criteria'
+        'app.criteria'
     ];
 
     /**
