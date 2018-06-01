@@ -53,13 +53,13 @@ class FormulasTable extends Table
         ]);
         $this->hasMany('Rankings', [
             'foreignKey' => 'formula_id'
-        ]);
+        ])->setDependent(true);
         $this->hasMany('SharedFormulas', [
             'foreignKey' => 'formula_id'
-        ]);
+        ])->setDependent(true);
         $this->hasMany('Criteria', [
             'foreignKey' => 'formula_id'
-        ]);
+        ])->setDependent(true);
     }
 
     /**
