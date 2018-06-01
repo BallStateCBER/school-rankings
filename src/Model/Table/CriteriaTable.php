@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\Criterion;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -11,13 +12,13 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\BelongsTo $Metrics
  * @property \App\Model\Table\FormulasTable|\Cake\ORM\Association\BelongsToMany $Formulas
  *
- * @method \App\Model\Entity\Criterion get($primaryKey, $options = [])
- * @method \App\Model\Entity\Criterion newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\Criterion[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Criterion|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Criterion patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\Criterion[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\Criterion findOrCreate($search, callable $callback = null, $options = [])
+ * @method Criterion get($primaryKey, $options = [])
+ * @method Criterion newEntity($data = null, array $options = [])
+ * @method Criterion[] newEntities(array $data, array $options = [])
+ * @method Criterion|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method Criterion patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method Criterion[] patchEntities($entities, array $data, array $options = [])
+ * @method Criterion findOrCreate($search, callable $callback = null, $options = [])
  */
 class CriteriaTable extends Table
 {
@@ -36,7 +37,11 @@ class CriteriaTable extends Table
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
 
-        $this->belongsTo('Metrics', [
+        $this->belongsTo('SchoolMetrics', [
+            'foreignKey' => 'metric_id',
+            'joinType' => 'INNER'
+        ]);
+        $this->belongsTo('SchoolDistrictMetrics', [
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
@@ -81,8 +86,47 @@ class CriteriaTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['metric_id'], 'Metrics'));
+        $criteriaTable = $this;
+
+        $rules->add(
+            function ($entity, $options) use ($rules, $criteriaTable) {
+                $context = $criteriaTable->getContext($entity);
+                $rule = $rules->existsIn(
+                    ['metric_id'],
+                    $context == 'school'
+                        ? 'SchoolMetrics'
+                        : 'SchoolDistrictMetrics'
+                );
+
+                return $rule($entity, $options);
+            },
+            'metricNotFound',
+            [
+                'errorField' => 'metric_id',
+                'message' => 'Associated metric not found'
+            ]
+        );
 
         return $rules;
+    }
+
+    /**
+     * Returns the context (school or district) for the provided criterion
+     *
+     * @param Criterion $criterion Criterion entity
+     * @return string
+     */
+    public function getContext($criterion)
+    {
+        if (isset($criterion->formula->context)) {
+            return $criterion->formula->context;
+        }
+
+        /** @var Criterion $criterion */
+        $criterion = $this->get($criterion->id, [
+            'contain' => ['Formulas']
+        ]);
+
+        return $criterion->formula->context;
     }
 }
