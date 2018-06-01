@@ -44,6 +44,10 @@ class MetricsTable extends Table
 
         $this->addBehavior('Timestamp');
         $this->addBehavior('Tree');
+
+        $this->hasMany('Criteria', [
+            'foreignKey' => 'metric_id'
+        ])->setDependent(true);
     }
 
     /**
