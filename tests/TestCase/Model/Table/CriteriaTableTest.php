@@ -101,12 +101,21 @@ class CriteriaTableTest extends TestCase
     }
 
     /**
-     * Test buildRules method
+     * Tests that adding a criterion fails when metric_id is invalid
      *
      * @return void
      */
-    public function testBuildRules()
+    public function testAddFailInvalidMetric()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $table = TableRegistry::getTableLocator()->get('Criteria');
+        $criterion = $table->newEntity([
+            'formula_id' => 1,
+            'metric_id' => 999999,
+            'preference' => 'high',
+            'weight' => 1
+        ]);
+
+        $result = $table->save($criterion);
+        $this->assertFalse($result);
     }
 }
