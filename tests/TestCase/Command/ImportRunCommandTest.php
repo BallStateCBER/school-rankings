@@ -47,4 +47,22 @@ class ImportRunCommandTest extends ConsoleIntegrationTestCase
             $this->assertErrorContains($errorMsg);
         }
     }
+
+    /**
+     * Tests that a merge fails because a metric was not found
+     *
+     * @return void
+     */
+    public function testMergeFailNotFound()
+    {
+        for ($n = 0; $n <= 1; $n++) {
+            foreach ($this->contexts as $context) {
+                $metricA = $n ? 2 : 9999999;
+                $metricB = $n ? 9999999 : 3;
+                $this->exec("merge-metrics $context $metricA $metricB");
+                $errorMsg = 'not found';
+                $this->assertErrorContains($errorMsg);
+            }
+        }
+    }
 }
