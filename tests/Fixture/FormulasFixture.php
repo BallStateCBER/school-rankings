@@ -36,6 +36,17 @@ class FormulasFixture extends TestFixture
     ];
     // @codingStandardsIgnoreEnd
 
+    private $defaultData = [
+        'user_id' => 1,
+        'is_example' => 0,
+        'title' => '',
+        'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
+        'context' => 'school',
+        'hash' => 'hashstring',
+        'created' => '2018-04-05 21:03:47',
+        'modified' => '2018-04-05 21:03:47'
+    ];
+
     /**
      * Records
      *
@@ -44,25 +55,37 @@ class FormulasFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
-            'user_id' => 1,
-            'is_example' => 0,
             'title' => 'School ranking formula',
-            'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
-            'context' => 'school',
-            'hash' => 'hash1',
-            'created' => '2018-04-05 21:03:47',
-            'modified' => '2018-04-05 21:03:47'
+            'context' => 'school'
         ],
         [
             'id' => 2,
-            'user_id' => 1,
-            'is_example' => 0,
             'title' => 'School district ranking formula',
-            'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
-            'context' => 'district',
-            'hash' => 'hash2',
-            'created' => '2018-04-05 21:03:47',
-            'modified' => '2018-04-05 21:03:47'
+            'context' => 'district'
         ],
+        [
+            'id' => 3,
+            'title' => 'Another school ranking formula',
+            'context' => 'school'
+        ],
+        [
+            'id' => 4,
+            'title' => 'Another school district ranking formula',
+            'context' => 'district'
+        ]
     ];
+
+    /**
+     * Initialization function
+     *
+     * @return void
+     */
+    public function init()
+    {
+        foreach ($this->records as &$record) {
+            $record += $this->defaultData;
+        }
+
+        parent::init();
+    }
 }
