@@ -39,6 +39,14 @@ class CriteriaFixture extends TestFixture
     ];
     // @codingStandardsIgnoreEnd
 
+    private $defaultData = [
+        'id' => 1,
+        'formula_id' => 1,
+        'metric_id' => 1,
+        'weight' => 1,
+        'preference' => 'high'
+    ];
+
     /**
      * Records
      *
@@ -61,16 +69,8 @@ class CriteriaFixture extends TestFixture
      */
     public function init()
     {
-        $defaultData = [
-            'id' => 1,
-            'formula_id' => 1,
-            'metric_id' => 1,
-            'weight' => 1,
-            'preference' => 'high'
-        ];
-
         foreach ($this->records as &$record) {
-            $record += $defaultData;
+            $record += $this->defaultData;
         }
 
         parent::init();

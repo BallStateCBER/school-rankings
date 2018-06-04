@@ -37,6 +37,17 @@ class StatisticsFixture extends TestFixture
     ];
     // @codingStandardsIgnoreEnd
 
+    private $defaultData = [
+        'metric_id' => 1,
+        '{location_id}' => 1,
+        'value' => '1',
+        'year' => 2018,
+        'contiguous' => 1,
+        'file' => 'import_file.xlsx',
+        'created' => '2018-04-05 20:53:25',
+        'modified' => '2018-04-05 20:53:25'
+    ];
+
     /**
      * Records
      *
@@ -72,19 +83,8 @@ class StatisticsFixture extends TestFixture
         $this->fields[$this->locationField] = $this->fields[$locationPlaceholder];
         unset($this->fields[$locationPlaceholder]);
 
-        $defaultData = [
-            'metric_id' => 1,
-            '{location_id}' => 1,
-            'value' => '1',
-            'year' => 2018,
-            'contiguous' => 1,
-            'file' => 'import_file.xlsx',
-            'created' => '2018-04-05 20:53:25',
-            'modified' => '2018-04-05 20:53:25'
-        ];
-
         foreach ($this->records as &$record) {
-            $record += $defaultData;
+            $record += $this->defaultData;
             $record[$this->locationField] = $record[$locationPlaceholder];
             unset($record[$locationPlaceholder]);
         }

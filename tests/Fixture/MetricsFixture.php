@@ -36,6 +36,15 @@ class MetricsFixture extends TestFixture
         ],
     ];
 
+    private $defaultData = [
+        'description' => '',
+        'type' => 'numeric',
+        'parent_id' => null,
+        'selectable' => 1,
+        'visible' => 1,
+        'created' => '2018-04-03 16:18:09'
+    ];
+
     /**
      * Records
      *
@@ -85,17 +94,9 @@ class MetricsFixture extends TestFixture
     public function init()
     {
         parent::init();
-        $defaultData = [
-            'description' => '',
-            'type' => 'numeric',
-            'parent_id' => null,
-            'selectable' => 1,
-            'visible' => 1,
-            'created' => '2018-04-03 16:18:09'
-        ];
 
         foreach ($this->records as &$record) {
-            $record += $defaultData;
+            $record += $this->defaultData;
         }
     }
 }
