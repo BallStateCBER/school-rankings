@@ -45,31 +45,19 @@ class StatisticsFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
-            'metric_id' => 1,
-            '{location_id}' => 1,
-            'value' => '1',
-            'year' => 2018
         ],
         [
             'id' => 2,
             'metric_id' => 2,
-            '{location_id}' => 1,
-            'value' => '1',
             'year' => 2017
         ],
         [
             'id' => 3,
             'metric_id' => 2,
-            '{location_id}' => 1,
-            'value' => '1',
-            'year' => 2018
         ],
         [
             'id' => 4,
             'metric_id' => 3,
-            '{location_id}' => 1,
-            'value' => '1',
-            'year' => 2018
         ],
     ];
 
