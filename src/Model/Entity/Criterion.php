@@ -31,6 +31,7 @@ class Criterion extends Entity
         'weight' => true,
         'preference' => true,
         'metric' => true,
-        'formula' => true
+        'formula' => true,
+        'formula_id' => true,
     ];
 }
