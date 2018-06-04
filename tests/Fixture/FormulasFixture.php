@@ -45,11 +45,22 @@ class FormulasFixture extends TestFixture
         [
             'id' => 1,
             'user_id' => 1,
-            'is_example' => 1,
-            'title' => 'Lorem ipsum dolor sit amet',
-            'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
-            'context' => 'Lorem ipsum dolor sit amet',
-            'hash' => 'Lorem ipsum dolor sit amet',
+            'is_example' => 0,
+            'title' => 'School ranking formula',
+            'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
+            'context' => 'school',
+            'hash' => 'hash1',
+            'created' => '2018-04-05 21:03:47',
+            'modified' => '2018-04-05 21:03:47'
+        ],
+        [
+            'id' => 2,
+            'user_id' => 1,
+            'is_example' => 0,
+            'title' => 'School district ranking formula',
+            'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
+            'context' => 'district',
+            'hash' => 'hash2',
             'created' => '2018-04-05 21:03:47',
             'modified' => '2018-04-05 21:03:47'
         ],

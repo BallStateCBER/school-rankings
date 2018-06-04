@@ -87,4 +87,20 @@ class CriteriaTableTest extends TestCase
         $result = $this->Criteria->save($criterion);
         $this->assertInstanceOf('App\Model\Entity\Criterion', $result);
     }
+
+    /**
+     * Tests CriteriaTable::getContext()
+     *
+     * @return void
+     */
+    public function testGetContext()
+    {
+        $schoolCriterion = $this->Criteria->get(1);
+        $context = $this->Criteria->getContext($schoolCriterion);
+        $this->assertEquals('school', $context);
+
+        $districtCriterion = $this->Criteria->get(2);
+        $context = $this->Criteria->getContext($districtCriterion);
+        $this->assertEquals('district', $context);
+    }
 }

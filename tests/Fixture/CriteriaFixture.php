@@ -50,7 +50,14 @@ class CriteriaFixture extends TestFixture
             'formula_id' => 1,
             'metric_id' => 1,
             'weight' => 1,
-            'preference' => 'Lorem ipsum dolor sit amet'
+            'preference' => 'high'
+        ],
+        [
+            'id' => 2,
+            'formula_id' => 2,
+            'metric_id' => 1,
+            'weight' => 1,
+            'preference' => 'high'
         ],
     ];
 }
