@@ -2,8 +2,10 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Criterion;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 /**
@@ -115,6 +117,7 @@ class CriteriaTable extends Table
      *
      * @param Criterion $criterion Criterion entity
      * @return string
+     * @throws InternalErrorException
      */
     public function getContext($criterion)
     {
@@ -122,11 +125,13 @@ class CriteriaTable extends Table
             return $criterion->formula->context;
         }
 
-        /** @var Criterion $criterion */
-        $criterion = $this->get($criterion->id, [
-            'contain' => ['Formulas']
-        ]);
+        if (isset($criterion->formula_id)) {
+            $formulasTable = TableRegistry::getTableLocator()->get('Formulas');
+            $formula = $formulasTable->get($criterion->formula_id);
 
-        return $criterion->formula->context;
+            return $formula->context;
+        }
+
+        throw new InternalErrorException('Cannot find context of criterion');
     }
 }
