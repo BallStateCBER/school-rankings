@@ -47,17 +47,32 @@ class CriteriaFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
+        ],
+        [
+            'id' => 2,
+            'formula_id' => 2
+        ],
+    ];
+
+    /**
+     * Initialization function
+     *
+     * @return void
+     */
+    public function init()
+    {
+        $defaultData = [
+            'id' => 1,
             'formula_id' => 1,
             'metric_id' => 1,
             'weight' => 1,
             'preference' => 'high'
-        ],
-        [
-            'id' => 2,
-            'formula_id' => 2,
-            'metric_id' => 1,
-            'weight' => 1,
-            'preference' => 'high'
-        ],
-    ];
+        ];
+
+        foreach ($this->records as &$record) {
+            $record += $defaultData;
+        }
+
+        parent::init();
+    }
 }
