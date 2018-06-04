@@ -114,8 +114,25 @@ class CriteriaTableTest extends TestCase
             'preference' => 'high',
             'weight' => 1
         ]);
-
         $result = $table->save($criterion);
         $this->assertFalse($result);
+    }
+
+    /**
+     * Tests that adding a criterion fails when metric_id is invalid
+     *
+     * @return void
+     */
+    public function testAddSuccess()
+    {
+        $table = TableRegistry::getTableLocator()->get('Criteria');
+        $criterion = $table->newEntity([
+            'formula_id' => 1,
+            'metric_id' => 1,
+            'preference' => 'high',
+            'weight' => 1
+        ]);
+        $result = $table->save($criterion);
+        $this->assertInstanceOf('App\Model\Entity\Criterion', $result);
     }
 }
