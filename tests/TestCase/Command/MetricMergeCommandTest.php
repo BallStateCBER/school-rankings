@@ -1,6 +1,8 @@
 <?php
 namespace App\Test\TestCase\Command;
 
+use App\Model\Table\StatisticsTable;
+use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestCase;
 
 class MetricMergeCommandTest extends ConsoleIntegrationTestCase
@@ -63,6 +65,43 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
                 $errorMsg = 'not found';
                 $this->assertErrorContains($errorMsg);
             }
+        }
+    }
+
+    /**
+     * Tests that a merge successfully updates and deletes statistics
+     *
+     * @return void
+     */
+    public function testMergeStats()
+    {
+        /** @var StatisticsTable $statsTable */
+        $statsTable = TableRegistry::getTableLocator()->get('Statistics');
+        $metricA = 2;
+        $metricB = 3;
+        $statIdToUpdate = 2;
+        $statIdToDelete = 3;
+
+        foreach ($this->contexts as $context) {
+            /** @var StatisticsTable $contextStatsTable */
+            $contextStatsTable = $statsTable->getContextTable($context);
+            $this->assertTrue(
+                $contextStatsTable->exists(['id' => $statIdToDelete])
+            );
+            $this->assertEquals(
+                $metricA,
+                $contextStatsTable->get($statIdToUpdate)->metric_id
+            );
+
+            $this->exec("merge-metrics $context $metricA $metricB");
+
+            $this->assertEquals(
+                $metricB,
+                $contextStatsTable->get($statIdToUpdate)->metric_id
+            );
+            $this->assertFalse(
+                $contextStatsTable->exists(['id' => $statIdToDelete])
+            );
         }
     }
 }
