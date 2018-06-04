@@ -172,7 +172,7 @@ class MergeMetricsCommand extends Command
             $this->io->out();
             $this->io->error(
                 ucwords($this->context) . ' metric #' . $this->metricIds[0] .
-                ' cannot be merge while it has child-metrics'
+                ' cannot be merged while it has child-metrics'
             );
             $this->abort();
         }
