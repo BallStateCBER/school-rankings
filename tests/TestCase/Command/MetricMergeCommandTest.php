@@ -3,7 +3,7 @@ namespace App\Test\TestCase\Command;
 
 use Cake\TestSuite\ConsoleIntegrationTestCase;
 
-class ImportRunCommandTest extends ConsoleIntegrationTestCase
+class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 {
     /**
      * Fixtures
