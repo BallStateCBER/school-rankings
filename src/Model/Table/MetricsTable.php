@@ -47,7 +47,7 @@ class MetricsTable extends Table
 
         $this->hasMany('Criteria', [
             'foreignKey' => 'metric_id'
-        ])->setDependent(true);
+        ]);
     }
 
     /**
