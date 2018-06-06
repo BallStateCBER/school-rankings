@@ -10,6 +10,7 @@ use Cake\ORM\Entity;
  * @property int $metric_id
  * @property int $weight
  * @property string $preference
+ * @property int $formula_id
  *
  * @property \App\Model\Entity\Metric $metric
  * @property \App\Model\Entity\Formula $formula
