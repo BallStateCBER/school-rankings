@@ -1,6 +1,7 @@
 <?php
 namespace App\Test\TestCase\Command;
 
+use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Exception\StopException;
 use Cake\ORM\TableRegistry;
@@ -167,6 +168,23 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
                 $criteriaTable->exists(['id' => $criterionToDelete]),
                 'Criterion that should have been deleted (' . $criterionToDelete . ') wasn\'t'
             );
+        }
+    }
+
+    /**
+     * Tests that a metric is successfully deleted after being merged
+     *
+     * @return void
+     */
+    public function testPostMergeDelete()
+    {
+        $metricA = 2;
+        $metricB = 3;
+        foreach ($this->contexts as $context) {
+            $table = MetricsTable::getContextTable($context);
+            $this->assertTrue($table->exists(['id' => $metricA]));
+            $this->exec("merge-metrics $context $metricA $metricB");
+            $this->assertFalse($table->exists(['id' => $metricA]));
         }
     }
 }
