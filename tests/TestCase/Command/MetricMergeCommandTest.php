@@ -2,6 +2,7 @@
 namespace App\Test\TestCase\Command;
 
 use App\Model\Table\StatisticsTable;
+use Cake\Console\Exception\StopException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestCase;
 
@@ -101,6 +102,70 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
             );
             $this->assertFalse(
                 $contextStatsTable->exists(['id' => $statIdToDelete])
+            );
+        }
+    }
+
+    /**
+     * Tests that a merge successfully updates and deletes criteria
+     *
+     * @return void
+     */
+    public function testMergeCriteria()
+    {
+        $criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
+        $metricA = 2;
+        $metricB = 3;
+
+        // Array of IDs of criteria records to be updated and deleted
+        $criteria = [
+            'school' => [
+                'toUpdate' => 3,
+                'toDelete' => 4
+            ],
+            'district' => [
+                'toUpdate' => 6,
+                'toDelete' => 7
+            ]
+        ];
+
+        foreach ($criteria as $context => $criteriaIds) {
+            $criterionToUpdate = $criteriaIds['toUpdate'];
+            $criterionToDelete = $criteriaIds['toDelete'];
+
+            // Test that fixture data is correct
+            $this->assertTrue(
+                $criteriaTable->exists(['id' => $criterionToUpdate])
+            );
+            $this->assertEquals(
+                $metricA,
+                $criteriaTable->get($criterionToUpdate)->metric_id
+            );
+            $this->assertTrue(
+                $criteriaTable->exists(['id' => $criterionToDelete])
+            );
+
+            // Execute merge
+            try {
+                $this->exec("merge-metrics $context $metricA $metricB");
+            } catch (StopException $e) {
+                print_r($e->getCode());
+            }
+
+            // Test that update succeeded
+            $this->assertTrue(
+                $criteriaTable->exists(['id' => $criterionToUpdate]),
+                'Criterion that should have been updated (' . $criterionToUpdate . ') was deleted'
+            );
+            $this->assertEquals(
+                $metricB,
+                $criteriaTable->get($criterionToUpdate)->metric_id
+            );
+
+            // Test that delete succeeded
+            $this->assertFalse(
+                $criteriaTable->exists(['id' => $criterionToDelete]),
+                'Criterion that should have been deleted (' . $criterionToDelete . ') wasn\'t'
             );
         }
     }

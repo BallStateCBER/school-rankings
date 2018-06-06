@@ -60,6 +60,35 @@ class CriteriaFixture extends TestFixture
             'id' => 2,
             'formula_id' => 2
         ],
+        [
+            'id' => 3,
+            'metric_id' => 2
+        ],
+        [
+            'id' => 4,
+            'metric_id' => 2,
+            'formula_id' => 3
+        ],
+        [
+            'id' => 5,
+            'metric_id' => 3,
+            'formula_id' => 3
+        ],
+        [
+            'id' => 6,
+            'metric_id' => 2,
+            'formula_id' => 2
+        ],
+        [
+            'id' => 7,
+            'metric_id' => 2,
+            'formula_id' => 4
+        ],
+        [
+            'id' => 8,
+            'metric_id' => 3,
+            'formula_id' => 4
+        ]
     ];
 
     /**
