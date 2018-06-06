@@ -342,7 +342,7 @@ class MergeMetricsCommand extends Command
         $this->io->out("\nCollecting formula criteria...", 0);
         $context = $this->context;
         $this->criteriaToMerge = $this->criteriaTable->find()
-            ->select(['id'])
+            ->select(['id', 'formula_id'])
             ->where(['metric_id' => $this->metricIds[0]])
             ->matching('Formulas', function (Query $q) use ($context) {
                 return $q->where(['Formulas.context' => $context]);
@@ -374,7 +374,6 @@ class MergeMetricsCommand extends Command
             'noConflict' => [],
             'conflict' => []
         ];
-        $context = $this->context;
         foreach ($this->criteriaToMerge as $criterion) {
             /** @var Criterion $criterion */
             $conflictCriterion = $this->criteriaTable->find()
@@ -383,12 +382,11 @@ class MergeMetricsCommand extends Command
                     function (QueryExpression $exp) use ($criterion) {
                         return $exp->notEq('Criteria.id', $criterion->id);
                     },
+                    'formula_id' => $criterion->formula_id,
                     'metric_id' => $this->metricIds[1]
                 ])
-                ->matching('Formulas', function (Query $q) use ($context) {
-                    return $q->where(['Formulas.context' => $context]);
-                })
                 ->first();
+
             if ($conflictCriterion) {
                 $this->sortedCriteria['conflict'][] = $criterion->id;
                 continue;
