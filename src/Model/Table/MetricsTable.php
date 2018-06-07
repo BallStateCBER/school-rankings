@@ -376,4 +376,28 @@ class MetricsTable extends Table
 
         return false;
     }
+
+    /**
+     * Returns an array of metrics that traverses from a root-level
+     * metric through its descendants to the selected metric
+     *
+     * @param int $metricId ID of a metric record
+     * @return array
+     * @throws InternalErrorException
+     */
+    public function getMetricTreePath($metricId)
+    {
+        if (get_class($this) == 'MetricsTable') {
+            throw new InternalErrorException(
+                'getMetricTreePath() must be called on a context-specific metric table object'
+            );
+        }
+        $options = ['for' => $metricId];
+        $results = $this->find('path', $options)
+            ->select(['id', 'name'])
+            ->enableHydration(false)
+            ->toArray();
+
+        return $results;
+    }
 }

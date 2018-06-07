@@ -17,6 +17,7 @@ use Cake\Database\Query;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
+use Cake\Utility\Hash;
 
 /**
  * Class MergeMetricsCommand
@@ -185,7 +186,13 @@ class MergeMetricsCommand extends Command
             $this->abort();
         }
 
-        $this->io->overwrite('Metrics verified', 2);
+        $this->io->overwrite('Metrics found');
+        foreach ($this->metrics as $metric) {
+            $path = $this->metricsTable->getMetricTreePath($metric->id);
+            $pathString = implode(' > ', Hash::extract($path, '{n}.name'));
+            $this->io->out(' - Metric #' . $metric->id . ': ' . $pathString);
+        }
+        $this->io->out();
     }
 
     /**
