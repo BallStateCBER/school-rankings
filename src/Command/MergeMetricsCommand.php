@@ -129,6 +129,14 @@ class MergeMetricsCommand extends Command
                 $this->prepareCriteria();
             }
 
+            $this->io->out(
+                "\nMetric #" . $this->metricIds[0] . ' will be deleted'
+            );
+            $continue = $this->io->askChoice('Continue?', ['y', 'n'], 'n');
+            if ($continue !== 'y') {
+                return;
+            }
+
             if (!$this->statsToMerge->isEmpty()) {
                 $this->io->out();
                 $this->mergeStats();
