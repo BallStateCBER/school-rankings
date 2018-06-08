@@ -304,7 +304,7 @@ class ImportFile
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return bool
      */
-    private function isdistrictCodeHeader($col, $row)
+    private function isDistrictCodeHeader($col, $row)
     {
         $value = $this->getValue($col, $row);
 
