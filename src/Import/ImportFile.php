@@ -141,11 +141,7 @@ class ImportFile
     {
         $value = $this->getCell($col, $row)->getValue();
 
-        if (is_string($value)) {
-            $value = trim($value);
-        }
-
-        return Statistic::roundValue($value);
+        return is_string($value) ? trim($value) : $value;
     }
 
     /**
@@ -918,6 +914,7 @@ class ImportFile
                 $progress->draw();
 
                 $value = $this->getValue($col, $row);
+                $value = Statistic::roundValue($value);
 
                 // Ignore, not a value
                 if ($datum->isIgnorable($value)) {
