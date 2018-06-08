@@ -95,7 +95,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
                 $contextStatsTable->get($statIdToUpdate)->metric_id
             );
 
-            $this->exec("merge-metrics $context $metricA $metricB");
+            $this->exec("merge-metrics $context $metricA $metricB", ['y']);
 
             $this->assertEquals(
                 $metricB,
@@ -148,7 +148,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 
             // Execute merge
             try {
-                $this->exec("merge-metrics $context $metricA $metricB");
+                $this->exec("merge-metrics $context $metricA $metricB", ['y']);
             } catch (StopException $e) {
                 print_r($e->getCode());
             }
@@ -183,7 +183,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         foreach ($this->contexts as $context) {
             $table = MetricsTable::getContextTable($context);
             $this->assertTrue($table->exists(['id' => $metricA]));
-            $this->exec("merge-metrics $context $metricA $metricB");
+            $this->exec("merge-metrics $context $metricA $metricB", ['y']);
             $this->assertFalse($table->exists(['id' => $metricA]));
         }
     }
