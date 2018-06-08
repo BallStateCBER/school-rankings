@@ -121,34 +121,44 @@ class StatisticsTable extends Table
      * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
      * @param int $locationId School ID or SchoolDistrict ID
      * @param int $year Year to look up data for
-     * @return array|null
+     * @return Statistic|null
      * @throws InternalErrorException
      */
     public static function getStatistic($context, $metricId, $locationId, $year)
     {
-        $conditions = [
-            'metric_id' => $metricId,
-            'year' => $year
-        ];
+        $locationField = self::getLocationFieldName($context);
 
-        switch ($context) {
-            case 'school':
-                $conditions['school_id'] = $locationId;
-                break;
-            case 'district':
-                $conditions['school_district_id'] = $locationId;
-                break;
-            default:
-                throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
-        }
-
+        /** @var Statistic $statistic */
         $statistic = self::getContextTable($context)->find()
             ->select(['id', 'value'])
-            ->where($conditions)
+            ->where([
+                'metric_id' => $metricId,
+                'year' => $year,
+                $locationField => $locationId
+            ])
             ->orderDesc('created')
-            ->enableHydration(false)
             ->first();
 
         return $statistic;
+    }
+
+
+    /**
+     * Returns the location field name corresponding to the specified context
+     *
+     * @param string $context Either school or district
+     * @return string
+     * @throws InternalErrorException
+     */
+    public static function getLocationFieldName($context)
+    {
+        switch ($context) {
+            case 'school':
+                return 'school_id';
+            case 'district':
+                return 'school_district_id';
+            default:
+                throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
+        }
     }
 }

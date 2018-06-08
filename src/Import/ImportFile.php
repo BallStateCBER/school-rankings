@@ -913,7 +913,10 @@ class ImportFile
                 $progress->draw();
 
                 $value = $this->getValue($col, $row);
+
+                // Ignore, not a value
                 if ($datum->isIgnorable($value)) {
+                    $counts['ignored']++;
                     continue;
                 }
 
@@ -942,22 +945,24 @@ class ImportFile
                     continue;
                 }
 
-                // Update
-                if ($this->getOverwrite()) {
-                    $statistic = $table->get($existingStat['id']);
-                    $table->patchEntity($statistic, ['value' => $value]);
-                    if ($statistic->getErrors()) {
-                        $errors = print_r($statistic->getErrors(), true);
-                        $this->shell_io->error("Error updating statistic. Details: \n" . $errors);
-                        throw new Exception();
-                    } else {
-                        $table->save($statistic);
-                    }
-                    $counts['updated']++;
+                // Ignore, same value
+                if ($existingStat->value == $value) {
+                    $counts['ignored']++;
                     continue;
                 }
 
-                $counts['ignored']++;
+                // Update
+                if ($this->getOverwrite()) {
+                    $table->patchEntity($existingStat, ['value' => $value]);
+                    if ($existingStat->getErrors()) {
+                        $errors = print_r($existingStat->getErrors(), true);
+                        $this->shell_io->error("Error updating statistic. Details: \n" . $errors);
+                        throw new Exception();
+                    } else {
+                        $table->save($existingStat);
+                    }
+                    $counts['updated']++;
+                }
             }
         }
 
