@@ -2,6 +2,7 @@
 namespace App\Import;
 
 use App\Model\Entity\SchoolDistrict;
+use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
@@ -134,13 +135,17 @@ class ImportFile
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
      * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @return mixed
+     * @return string|int|float
      */
     public function getValue($col, $row)
     {
         $value = $this->getCell($col, $row)->getValue();
 
-        return is_string($value) ? trim($value) : $value;
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+
+        return Statistic::roundValue($value);
     }
 
     /**
