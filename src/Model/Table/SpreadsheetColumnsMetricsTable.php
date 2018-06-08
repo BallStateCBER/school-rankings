@@ -3,6 +3,7 @@ namespace App\Model\Table;
 
 use App\Import\ImportFile;
 use App\Model\Entity\SpreadsheetColumnsMetric;
+use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
@@ -146,6 +147,12 @@ class SpreadsheetColumnsMetricsTable extends Table
         foreach ($expectedKeys as $key) {
             if (!array_key_exists($key, $conditions)) {
                 throw new InternalErrorException('Cannot find metric. Missing parameter: ' . $key);
+            }
+            if ($conditions[$key] === null) {
+                unset($conditions[$key]);
+                $conditions[] = function (QueryExpression $exp) use ($key) {
+                    return $exp->isNull($key);
+                };
             }
         }
         if (count($conditions) != count($expectedKeys)) {
