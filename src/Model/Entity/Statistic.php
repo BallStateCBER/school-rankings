@@ -9,7 +9,7 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property int $metric_id
- * @property string $value
+ * @property string|int|float $value
  * @property int $year
  * @property bool $contiguous
  * @property string $file
