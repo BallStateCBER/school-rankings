@@ -142,7 +142,6 @@ class StatisticsTable extends Table
         return $statistic;
     }
 
-
     /**
      * Returns the location field name corresponding to the specified context
      *
