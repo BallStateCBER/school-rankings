@@ -860,6 +860,9 @@ class ImportFile
             return $this->overwrite;
         }
 
+        // Blank out progress bar
+        $this->shell_io->overwrite('');
+
         $input = $this->shell_io->askChoice("\nOverwrite statistics that have already been recorded?", ['y', 'n']);
         $this->overwrite = ($input == 'y');
 
