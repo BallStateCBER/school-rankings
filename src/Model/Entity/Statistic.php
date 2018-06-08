@@ -53,4 +53,39 @@ class Statistic extends Entity
 
         throw new InternalErrorException('Can\'t get context for ' . get_class($this) . ' class');
     }
+
+    /**
+     * Converts numeric values to integers or floats rounded to 5 decimal places
+     *
+     * Applies this conversion when accessing $stat->value or before saving statistics to the database
+     *
+     * @param string|float|int $value Statistic value
+     * @return string|float|int
+     */
+    protected function _getValue($value)
+    {
+        return self::roundValue($value);
+    }
+
+    /**
+     * Casts the provided value to int or float if appropriate and rounds to five decimal places if the value is a float
+     *
+     * @param string|int|float $value Statistic value
+     * @return string|float|int
+     */
+    public static function roundValue($value)
+    {
+        // String
+        if (!is_numeric($value)) {
+            return $value;
+        }
+
+        // Integer
+        if (is_int($value) || strpos($value, '.') === false) {
+            return (int)$value;
+        }
+
+        // Float
+        return round((float)$value, 5);
+    }
 }

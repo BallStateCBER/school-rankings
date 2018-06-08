@@ -160,28 +160,4 @@ class StatisticsTable extends Table
                 throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
         }
     }
-
-    /**
-     * Converts numeric values to integers or floats rounded to 5 decimal places
-     *
-     * Applies this conversion when accessing $stat->value or before saving statistics to the database
-     *
-     * @param string|float|int $value Statistic value
-     * @return string|float|int
-     */
-    protected function _getValue($value)
-    {
-        // String
-        if (!is_numeric($value)) {
-            return $value;
-        }
-
-        // Integer
-        if (is_int($value) || strpos($value, '.') === false) {
-            return (int)$value;
-        }
-
-        // Float
-        return round((float)$value, 5);
-    }
 }
