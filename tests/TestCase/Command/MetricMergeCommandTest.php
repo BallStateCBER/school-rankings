@@ -187,4 +187,14 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
             $this->assertFalse($table->exists(['id' => $metricA]));
         }
     }
+
+    /**
+     * Tests that a merge does not take place if the user enters 'n' to cancel
+     *
+     * @return void
+     */
+    public function testMergeFailCanceled()
+    {
+        $this->markTestIncomplete();
+    }
 }
