@@ -23,7 +23,7 @@ before_script:
   - if [[ $PHPUNIT = 1 ]]; then composer install; fi
   - if [[ $PHPUNIT = 1 ]]; then composer run-script post-install-cmd --no-interaction; fi
   - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
-  - if [[ $JSLINT = 1 ]]; then npm install; fi
+  - if [[ $JSLINT = 1 ]]; then npm ci; fi
 
 script:
   - if [[ $PHPUNIT = 1 ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
