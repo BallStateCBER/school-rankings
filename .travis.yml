@@ -28,3 +28,6 @@ script:
 
 notifications:
   email: false
+
+after_success:
+  - vendor/bin/test-reporter
