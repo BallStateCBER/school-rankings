@@ -11,7 +11,7 @@ matrix:
   include:
     - language: php
       php: 7.1
-      env: PHPUNIT=1,DB_USERNAME=root
+      env: PHPUNIT=1 DB_USERNAME=root
     - language: php
       php: 7.1
       env: PHPCS=1
