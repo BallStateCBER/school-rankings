@@ -22,7 +22,7 @@ matrix:
 install:
   - if [[ $PHPUNIT = 1 ]]; then composer install; fi
   - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
-  - if [[ $JSLINT = 1 ]]; then npm ci; fi
+  - if [[ $JSLINT = 1 ]]; then npm install; fi
 
 before_script:
   - if [[ $PHPUNIT = 1 ]]; then composer run-script post-install-cmd --no-interaction; fi
@@ -47,3 +47,4 @@ after_success:
 cache:
   directories:
     - node_modules
+    - $HOME/.npm
