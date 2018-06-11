@@ -11,19 +11,22 @@ matrix:
   include:
     - language: php
       php: 7.1
+      env: PHPUNIT=1
+    - language: php
+      php: 7.1
       env: PHPCS=1
     - language: node_js
       node_js: 6
       env: JSLINT=1
 
 before_script:
+  - if [[ $PHPUNIT = 1 ]]; then composer install; fi
+  - if [[ $PHPUNIT = 1 ]]; then composer run-script post-install-cmd --no-interaction; fi
   - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
-  - if [[ $PHPCS != 1 ]]; then composer install; fi
-  - if [[ $PHPCS != 1 ]]; then composer run-script post-install-cmd --no-interaction; fi
 
 script:
-  - if [[ $PHPCS != 1 ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
-  - if [[ $PHPCS != 1 ]]; then mkdir -p build/logs; fi
+  - if [[ $PHPUNIT = 1 ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
+  - if [[ $PHPUNIT = 1 ]]; then mkdir -p build/logs; fi
   - if [[ $PHPCS = 1 ]]; then vendor/bin/phpcs -p --extensions=php --error-severity=1 --warning-severity=0 --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config ./webroot; fi
   - if [[ $JSLINT = 1 ]]; then npm run lint; fi
 
