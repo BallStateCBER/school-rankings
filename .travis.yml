@@ -2,9 +2,6 @@ dist: trusty
 
 sudo: false
 
-php:
-  - 7.1
-
 matrix:
   fast_finish: true
 
