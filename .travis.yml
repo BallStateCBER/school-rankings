@@ -18,11 +18,14 @@ matrix:
     - language: node_js
       node_js: 6
       env: JSLINT=1
+    - language: node_js
+      node_js: 6
+      env: WEBPACK_BUILD=1
 
 install:
   - if [[ $PHPUNIT = 1 ]]; then composer install; fi
   - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
-  - if [[ $JSLINT = 1 ]]; then npm install; fi
+  - if [[ $JSLINT = 1 || $WEBPACK_BUILD = 1 ]]; then npm install; fi
 
 before_script:
   - if [[ $PHPUNIT = 1 ]]; then sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS test_school_rankings;'"; fi
@@ -33,6 +36,7 @@ script:
   - if [[ $PHPUNIT = 1 ]]; then mkdir -p build/logs; fi
   - if [[ $PHPCS = 1 ]]; then vendor/bin/phpcs -p --extensions=php --error-severity=1 --warning-severity=0 --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config ./webroot; fi
   - if [[ $JSLINT = 1 ]]; then npm run lint; fi
+  - if [[ $WEBPACK_BUILD = 1 ]]; then npm run build; fi
 
 notifications:
   email: false
