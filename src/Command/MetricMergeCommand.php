@@ -20,7 +20,7 @@ use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 
 /**
- * Class MergeMetricsCommand
+ * Class MetricMergeCommand
  * @package App\Command
  * @property array $criteriaToDelete
  * @property array $criteriaToUpdate
@@ -38,7 +38,7 @@ use Cake\Utility\Hash;
  * @property StatisticsTable $statisticsTable
  * @property string $context
  */
-class MergeMetricsCommand extends Command
+class MetricMergeCommand extends Command
 {
     private $context;
     private $criteriaTable;

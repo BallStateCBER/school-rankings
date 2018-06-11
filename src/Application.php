@@ -16,7 +16,7 @@ namespace App;
 
 use App\Command\ImportRunCommand;
 use App\Command\ImportStatusCommand;
-use App\Command\MergeMetricsCommand;
+use App\Command\MetricMergeCommand;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
 use Cake\Routing\Middleware\AssetMiddleware;
@@ -64,7 +64,7 @@ class Application extends BaseApplication
 
         $commands->add('import:run', ImportRunCommand::class);
         $commands->add('import:status', ImportStatusCommand::class);
-        $commands->add('merge-metrics', MergeMetricsCommand::class);
+        $commands->add('metric-merge', MetricMergeCommand::class);
 
         return $commands;
     }

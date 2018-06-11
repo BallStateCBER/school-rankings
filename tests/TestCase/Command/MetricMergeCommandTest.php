@@ -46,7 +46,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         foreach ($this->contexts as $context) {
             $metricIdWithChildren = 1;
             $metricIdOther = 4;
-            $this->exec("merge-metrics $context $metricIdWithChildren $metricIdOther");
+            $this->exec("metric-merge $context $metricIdWithChildren $metricIdOther");
             $errorMsg = 'cannot be merged while it has child-metrics';
             $this->assertErrorContains($errorMsg);
         }
@@ -63,7 +63,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
             foreach ($this->contexts as $context) {
                 $metricA = $n ? 2 : 9999999;
                 $metricB = $n ? 9999999 : 3;
-                $this->exec("merge-metrics $context $metricA $metricB");
+                $this->exec("metric-merge $context $metricA $metricB");
                 $errorMsg = 'not found';
                 $this->assertErrorContains($errorMsg);
             }
@@ -95,7 +95,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
                 $contextStatsTable->get($statIdToUpdate)->metric_id
             );
 
-            $this->exec("merge-metrics $context $metricA $metricB", ['y']);
+            $this->exec("metric-merge $context $metricA $metricB", ['y']);
 
             $this->assertEquals(
                 $metricB,
@@ -148,7 +148,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 
             // Execute merge
             try {
-                $this->exec("merge-metrics $context $metricA $metricB", ['y']);
+                $this->exec("metric-merge $context $metricA $metricB", ['y']);
             } catch (StopException $e) {
                 print_r($e->getCode());
             }
@@ -183,7 +183,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         foreach ($this->contexts as $context) {
             $table = MetricsTable::getContextTable($context);
             $this->assertTrue($table->exists(['id' => $metricA]));
-            $this->exec("merge-metrics $context $metricA $metricB", ['y']);
+            $this->exec("metric-merge $context $metricA $metricB", ['y']);
             $this->assertFalse($table->exists(['id' => $metricA]));
         }
     }
