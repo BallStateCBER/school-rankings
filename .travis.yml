@@ -1,5 +1,3 @@
-language: php
-
 dist: trusty
 
 sudo: false
@@ -11,8 +9,12 @@ matrix:
   fast_finish: true
 
   include:
-    - php: 7.1
+    - language: php
+      php: 7.1
       env: PHPCS=1
+    - language: node_js
+      node_js: 6
+      env: JSLINT=1
 
 before_script:
   - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
@@ -23,6 +25,7 @@ script:
   - if [[ $PHPCS != 1 ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
   - if [[ $PHPCS != 1 ]]; then mkdir -p build/logs; fi
   - if [[ $PHPCS = 1 ]]; then vendor/bin/phpcs -p --extensions=php --error-severity=1 --warning-severity=0 --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config ./webroot; fi
+  - if [[ $JSLINT = 1 ]]; then npm run lint; fi
 
 notifications:
   email: false
@@ -34,3 +37,7 @@ addons:
 
 after_success:
   - vendor/bin/test-reporter
+
+cache:
+  directories:
+    - node_modules
