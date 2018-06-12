@@ -5,7 +5,6 @@ use App\Model\Entity\Statistic;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
-use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 class StatisticsTable extends Table
@@ -24,6 +23,10 @@ class StatisticsTable extends Table
 
         $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
+            'joinType' => 'INNER'
+        ]);
+        $this->belongsTo('Schools', [
+            'foreignKey' => 'school_id',
             'joinType' => 'INNER'
         ]);
         $this->belongsTo('SchoolDistricts', [
@@ -46,6 +49,14 @@ class StatisticsTable extends Table
 
         $validator
             ->integer('metric_id');
+
+        $validator
+            ->integer('school_id')
+            ->allowEmpty('school_id');
+
+        $validator
+            ->integer('school_district_id')
+            ->allowEmpty('school_district_id');
 
         $validator
             ->scalar('value')
@@ -83,35 +94,40 @@ class StatisticsTable extends Table
     {
         parent::buildRules($rules);
 
+        // Metric must exist
         $rules->add(function ($entity, $options) use ($rules) {
-            /** @var Statistic $entity */
-            $context = $entity->getCurrentContext();
-            $metricTableName = $context == 'school' ? 'SchoolMetricsTable' : 'SchoolDistrictMetricsTable';
-            $rule = $rules->existsIn(['metric_id'], $metricTableName);
+            $rule = $rules->existsIn(['metric_id'], 'Metrics');
+
+            return $rule($entity, $options);
+        });
+
+        // Either school or district must be specified
+        $rules->add(function ($entity) {
+            return $entity->school_id || $entity->school_district_id;
+        });
+
+        // School must exist
+        $rules->add(function ($entity, $options) use ($rules) {
+            if (!$entity->school_id) {
+                return true;
+            }
+            $rule = $rules->existsIn(['school_id'], 'Schools');
+
+            return $rule($entity, $options);
+        });
+
+        // District must exist
+        $rules->add(function ($entity, $options) use ($rules) {
+            if (!$entity->school_district_id) {
+                return true;
+            }
+
+            $rule = $rules->existsIn(['school_district_id'], 'SchoolDistricts');
 
             return $rule($entity, $options);
         });
 
         return $rules;
-    }
-
-    /**
-     * Returns a SchoolMetricsTable or SchoolDistrictMetricsTable
-     *
-     * @param string $context Either 'school' or 'district'
-     * @return \Cake\ORM\Table
-     * @throws InternalErrorException
-     */
-    public static function getContextTable($context)
-    {
-        switch ($context) {
-            case 'school':
-                return TableRegistry::getTableLocator()->get('SchoolStatistics');
-            case 'district':
-                return TableRegistry::getTableLocator()->get('SchoolDistrictStatistics');
-            default:
-                throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
-        }
     }
 
     /**
@@ -124,12 +140,12 @@ class StatisticsTable extends Table
      * @return Statistic|null
      * @throws InternalErrorException
      */
-    public static function getStatistic($context, $metricId, $locationId, $year)
+    public function getStatistic($context, $metricId, $locationId, $year)
     {
         $locationField = self::getLocationFieldName($context);
 
         /** @var Statistic $statistic */
-        $statistic = self::getContextTable($context)->find()
+        $statistic = $this->find()
             ->select(['id', 'value'])
             ->where([
                 'metric_id' => $metricId,
