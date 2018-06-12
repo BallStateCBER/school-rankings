@@ -2,6 +2,7 @@
 namespace App\Controller\Api;
 
 use App\Controller\AppController;
+use App\Model\Context\Context;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use Cake\Http\Exception\BadRequestException;
@@ -106,6 +107,7 @@ class MetricsController extends AppController
      * Adds a metric
      *
      * @return void
+     * @throws \Exception
      */
     public function add()
     {
@@ -222,6 +224,7 @@ class MetricsController extends AppController
      * the same year and location (and thus would need one or the other to take precedence when merging)
      *
      * @return void
+     * @throws \Exception
      */
     public function metricsHaveStatConflict()
     {
@@ -251,16 +254,14 @@ class MetricsController extends AppController
     /**
      * Returns the 'context' value from request data
      *
-     * @return string
+     * @return string|null
      * @throws BadRequestException
+     * @throws \Exception
      */
     private function getContext()
     {
         $context = $this->request->getData('context');
-        if (!in_array($context, ['school', 'district'])) {
-            throw new BadRequestException('Unrecognized metric context: ' . $context);
-        }
 
-        return $context;
+        return Context::isValidOrFail($context) ? $context : null;
     }
 }
