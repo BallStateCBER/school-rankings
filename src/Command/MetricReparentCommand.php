@@ -50,11 +50,6 @@ class MetricReparentCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
-            'context' => [
-                'help' => 'Either "school" or "district"',
-                'choices' => ['school', 'district'],
-                'required' => true
-            ],
             'childMetrics' => [
                 'help' => 'One or more metric IDs (comma separated) or ranges (with dashes); e.g. "1,3-5,7-10"',
                 'required' => true
@@ -78,7 +73,6 @@ class MetricReparentCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->context = $args->getArgument('context');
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         $this->getParent($args, $io);
@@ -107,6 +101,7 @@ class MetricReparentCommand extends Command
         } else {
             try {
                 $this->parentMetric = $this->metricsTable->get($this->parentMetricId);
+                $this->context = $this->parentMetric->context;
             } catch (RecordNotFoundException $e) {
                 $io->error('Parent metric not found');
                 $this->abort();
@@ -196,6 +191,12 @@ class MetricReparentCommand extends Command
         $this->metricsTable->patchEntity($childMetric, ['parent_id' => $this->parentMetricId]);
         $errors = $childMetric->getErrors();
         $passesRules = $this->metricsTable->checkRules($childMetric, 'update');
+
+        if ($this->context && $childMetric->context != $this->context) {
+            $msg = "Cannot move $childMetric->context metric #$childMetricId to under $this->context metric";
+            $io->error($msg);
+            $this->abort();
+        }
 
         if (empty($errors) && $passesRules) {
             $this->childMetrics[] = $childMetric;
