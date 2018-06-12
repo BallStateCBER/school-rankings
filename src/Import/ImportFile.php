@@ -465,7 +465,7 @@ class ImportFile
     }
 
     /**
-     * Returns the SchoolMetric ID or SchoolDistrictMetric ID associated with the given column, or NULL
+     * Returns the Metric ID associated with the given column, or NULL
      *
      * @param string $colGroup The name of the grouping that the current column is part of
      * @param string $colName The name of the current column
@@ -549,7 +549,7 @@ class ImportFile
      * Sets metric ID in $this->dataColumns
      *
      * @param int $colNum Column number
-     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @param int $metricId Metric ID
      * @return void
      * @throws Exception
      */

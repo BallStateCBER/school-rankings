@@ -134,7 +134,7 @@ class StatisticsTable extends Table
      * Returns the value of a specified statistic
      *
      * @param string $context Either 'school' or 'district'
-     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @param int $metricId Metric ID
      * @param int $locationId School ID or SchoolDistrict ID
      * @param int $year Year to look up data for
      * @return Statistic|null

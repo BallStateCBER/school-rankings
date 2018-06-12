@@ -8,7 +8,7 @@ class MetricsHelper extends Helper
     /**
      * Takes a threaded array of records and returns an array formatted for jsTree
      *
-     * @param array $metrics Threaded array of SchoolMetric or SchoolDistrictMetric records
+     * @param array $metrics Threaded array of Metric records
      * @return array
      */
     public function getJsTreeData($metrics)

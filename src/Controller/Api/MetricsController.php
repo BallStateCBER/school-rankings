@@ -3,8 +3,6 @@ namespace App\Controller\Api;
 
 use App\Controller\AppController;
 use App\Model\Entity\Metric;
-use App\Model\Entity\SchoolDistrictMetric;
-use App\Model\Entity\SchoolMetric;
 use App\Model\Table\MetricsTable;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\MethodNotAllowedException;
@@ -21,10 +19,11 @@ class MetricsController extends AppController
      */
     public function schools()
     {
-        $schoolMetricsTable = TableRegistry::getTableLocator()->get('SchoolMetrics');
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metricsTable->behaviors()->Tree->config('scope', ['context' => 'school']);
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $schoolMetricsTable->find('threaded')->toArray()
+            'metrics' => $metricsTable->find('threaded')->toArray()
         ]);
     }
 
@@ -35,10 +34,11 @@ class MetricsController extends AppController
      */
     public function districts()
     {
-        $districtMetricsTable = TableRegistry::getTableLocator()->get('SchoolDistrictMetrics');
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metricsTable->behaviors()->Tree->config('scope', ['context' => 'district']);
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $districtMetricsTable->find('threaded')->toArray()
+            'metrics' => $metricsTable->find('threaded')->toArray()
         ]);
     }
 
@@ -80,7 +80,7 @@ class MetricsController extends AppController
         /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
-        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        /** @var Metric $metric */
         $metric = $metricsTable->get($metricId);
 
         if ($metricsTable->childCount($metric, true) > 0) {
@@ -111,7 +111,7 @@ class MetricsController extends AppController
 
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
-        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        /** @var Metric $metric */
         $selectable = $this->request->getData('selectable');
         $metric = $metricsTable->newEntity([
             'context' => $this->getContext(),
@@ -150,7 +150,7 @@ class MetricsController extends AppController
         $newParentId = $this->request->getData('newParentId');
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
-        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        /** @var Metric $metric */
         $metric = $metricsTable->get($metricId);
         $metric = $metricsTable->patchEntity($metric, [
             'parent_id' => $newParentId,
@@ -183,7 +183,7 @@ class MetricsController extends AppController
 
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
-        /** @var SchoolMetric|SchoolDistrictMetric $metric */
+        /** @var Metric $metric */
         $metric = $metricsTable->get($metricId);
         foreach (['selectable', 'visible'] as $field) {
             $value = $this->request->getData($field);

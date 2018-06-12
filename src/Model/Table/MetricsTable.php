@@ -217,7 +217,7 @@ class MetricsTable extends Table
     /**
      * Returns true if the specified metric does (or would have) the same name as another metric with the same parent_id
      *
-     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @param int $metricId ID of a metric record
      * @param int|null $parentId Metric parent_id
      * @param string $name Metric name being validated
      * @return bool

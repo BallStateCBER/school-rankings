@@ -43,12 +43,7 @@ class SpreadsheetColumnsMetricsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('SchoolMetrics', [
-            'foreignKey' => 'metric_id',
-            'joinType' => 'INNER'
-        ]);
-
-        $this->belongsTo('SchoolDistrictMetrics', [
+        $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
@@ -114,21 +109,14 @@ class SpreadsheetColumnsMetricsTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add(function ($entity, $options) use ($rules) {
-            switch ($entity->context) {
-                case 'school':
-                    return $rules->existsIn(['metric_id'], 'SchoolMetrics')($entity, $options);
-                case 'district':
-                    return $rules->existsIn(['metric_id'], 'SchoolDistrictMetrics')($entity, $options);
-                default:
-                    throw new Exception('Unrecognized metric context: ' . $entity->context);
-            }
+            return $rules->existsIn(['metric_id'], 'Metrics')($entity, $options);
         }, 'metricExists');
 
         return $rules;
     }
 
     /**
-     * Returns the corresponding SchoolMetric ID or SchoolDistrictMetric ID, or NULL if no result is found
+     * Returns the corresponding Metric ID, or NULL if no result is found
      *
      * @param array $conditions Array of parameters for find()->where()
      * @return int|null
@@ -174,7 +162,7 @@ class SpreadsheetColumnsMetricsTable extends Table
      *
      * @param ImportFile $importFile Current ImportFile object
      * @param array $colInfo Array of info about the name and group of the current column
-     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
+     * @param int $metricId Metric ID
      * @return bool
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws Exception

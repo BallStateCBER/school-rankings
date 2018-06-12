@@ -39,11 +39,7 @@ class CriteriaTable extends Table
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
 
-        $this->belongsTo('SchoolMetrics', [
-            'foreignKey' => 'metric_id',
-            'joinType' => 'INNER'
-        ]);
-        $this->belongsTo('SchoolDistrictMetrics', [
+        $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER'
         ]);
@@ -92,13 +88,7 @@ class CriteriaTable extends Table
 
         $rules->add(
             function ($entity, $options) use ($rules, $criteriaTable) {
-                $context = $criteriaTable->getContext($entity);
-                $rule = $rules->existsIn(
-                    ['metric_id'],
-                    $context == 'school'
-                        ? 'SchoolMetrics'
-                        : 'SchoolDistrictMetrics'
-                );
+                $rule = $rules->existsIn(['metric_id'], 'Metrics');
 
                 return $rule($entity, $options);
             },
