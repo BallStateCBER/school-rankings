@@ -17,7 +17,7 @@ use Cake\Validation\Validator;
  *
  * @property SchoolDistrictsTable|BelongsTo $SchoolDistricts
  * @property SchoolTypesTable|BelongsTo $SchoolTypes
- * @property SchoolStatisticsTable|HasMany $SchoolStatistics
+ * @property StatisticsTable|HasMany $Statistics
  * @property CitiesTable|BelongsToMany $Cities
  * @property CountiesTable|BelongsToMany $Counties
  * @property SchoolLevelsTable|BelongsToMany $SchoolLevels
@@ -58,7 +58,7 @@ class SchoolsTable extends Table
         $this->belongsTo('SchoolTypes', [
             'foreignKey' => 'school_type_id'
         ]);
-        $this->hasMany('SchoolStatistics', [
+        $this->hasMany('Statistics', [
             'foreignKey' => 'school_id'
         ]);
         $this->belongsToMany('Cities', [

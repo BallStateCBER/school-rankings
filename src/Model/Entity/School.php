@@ -19,7 +19,7 @@ use Cake\ORM\Entity;
  *
  * @property SchoolDistrict $school_district
  * @property SchoolType $school_type
- * @property SchoolStatistic[] $school_statistics
+ * @property Statistic[] $statistics
  * @property City[] $cities
  * @property County[] $counties
  * @property SchoolLevel[] $school_levels

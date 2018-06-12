@@ -13,7 +13,7 @@ use Cake\Validation\Validator;
 /**
  * SchoolDistricts Model
  *
- * @property SchoolDistrictStatisticsTable|HasMany $SchoolDistrictStatistics
+ * @property StatisticsTable|HasMany $Statistics
  * @property SchoolsTable|HasMany $Schools
  * @property RankingsTable|BelongsToMany $Rankings
  * @property CitiesTable|BelongsToMany $Cities
@@ -49,7 +49,7 @@ class SchoolDistrictsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->hasMany('SchoolDistrictStatistics', [
+        $this->hasMany('Statistics', [
             'foreignKey' => 'school_district_id'
         ]);
         $this->hasMany('Schools', [

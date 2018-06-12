@@ -14,7 +14,7 @@ use Cake\ORM\Entity;
  * @property FrozenTime $created
  * @property FrozenTime $modified
  *
- * @property SchoolDistrictStatistic[] $school_district_statistics
+ * @property Statistic[] $statistics
  * @property School[] $schools
  * @property Ranking[] $rankings
  * @property City[] $cities
