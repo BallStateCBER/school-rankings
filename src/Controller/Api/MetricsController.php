@@ -120,7 +120,7 @@ class MetricsController extends AppController
         /** @var Metric $metric */
         $selectable = $this->request->getData('selectable');
         $metric = $metricsTable->newEntity([
-            'context' => $this->getContext(),
+            'context' => $this->request->getData('context'),
             'name' => $this->request->getData('name'),
             'parent_id' => $this->request->getData('parentId'),
             'description' => $this->request->getData('description'),
