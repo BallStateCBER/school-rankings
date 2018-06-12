@@ -104,58 +104,43 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
         $metricA = 2;
         $metricB = 3;
+        $criterionToUpdate = 3;
+        $criterionToDelete = 4;
 
-        // Array of IDs of criteria records to be updated and deleted
-        $criteria = [
-            'school' => [
-                'toUpdate' => 3,
-                'toDelete' => 4
-            ],
-            'district' => [
-                'toUpdate' => 6,
-                'toDelete' => 7
-            ]
-        ];
+        // Test that fixture data is correct
+        $this->assertTrue(
+            $criteriaTable->exists(['id' => $criterionToUpdate])
+        );
+        $this->assertEquals(
+            $metricA,
+            $criteriaTable->get($criterionToUpdate)->metric_id
+        );
+        $this->assertTrue(
+            $criteriaTable->exists(['id' => $criterionToDelete])
+        );
 
-        foreach ($criteria as $context => $criteriaIds) {
-            $criterionToUpdate = $criteriaIds['toUpdate'];
-            $criterionToDelete = $criteriaIds['toDelete'];
-
-            // Test that fixture data is correct
-            $this->assertTrue(
-                $criteriaTable->exists(['id' => $criterionToUpdate])
-            );
-            $this->assertEquals(
-                $metricA,
-                $criteriaTable->get($criterionToUpdate)->metric_id
-            );
-            $this->assertTrue(
-                $criteriaTable->exists(['id' => $criterionToDelete])
-            );
-
-            // Execute merge
-            try {
-                $this->exec("metric-merge $metricA $metricB", ['y']);
-            } catch (StopException $e) {
-                print_r($e->getCode());
-            }
-
-            // Test that update succeeded
-            $this->assertTrue(
-                $criteriaTable->exists(['id' => $criterionToUpdate]),
-                'Criterion that should have been updated (' . $criterionToUpdate . ') was deleted'
-            );
-            $this->assertEquals(
-                $metricB,
-                $criteriaTable->get($criterionToUpdate)->metric_id
-            );
-
-            // Test that delete succeeded
-            $this->assertFalse(
-                $criteriaTable->exists(['id' => $criterionToDelete]),
-                'Criterion that should have been deleted (' . $criterionToDelete . ') wasn\'t'
-            );
+        // Execute merge
+        try {
+            $this->exec("metric-merge $metricA $metricB", ['y']);
+        } catch (StopException $e) {
+            print_r($e->getCode());
         }
+
+        // Test that update succeeded
+        $this->assertTrue(
+            $criteriaTable->exists(['id' => $criterionToUpdate]),
+            'Criterion that should have been updated (' . $criterionToUpdate . ') was deleted'
+        );
+        $this->assertEquals(
+            $metricB,
+            $criteriaTable->get($criterionToUpdate)->metric_id
+        );
+
+        // Test that delete succeeded
+        $this->assertFalse(
+            $criteriaTable->exists(['id' => $criterionToDelete]),
+            'Criterion that should have been deleted (' . $criterionToDelete . ') wasn\'t'
+        );
     }
 
     /**
