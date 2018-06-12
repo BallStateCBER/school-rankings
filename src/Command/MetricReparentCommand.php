@@ -8,6 +8,7 @@ use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Datasource\Exception\RecordNotFoundException;
+use Cake\ORM\TableRegistry;
 
 /**
  * Class MetricReparentCommand
@@ -78,7 +79,7 @@ class MetricReparentCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->context = $args->getArgument('context');
-        $this->metricsTable = MetricsTable::getContextTable($this->context);
+        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         $this->getParent($args, $io);
 

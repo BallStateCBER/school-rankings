@@ -180,7 +180,6 @@ class MetricManager extends React.Component {
   handleDelete(data) {
     let jstree = $.jstree.reference(data.reference);
     let node = jstree.get_node(data.reference);
-    const context = window.metricManager.context;
     let metricId = node.data.metricId;
 
     if (jstree.is_parent(node)) {
@@ -200,7 +199,7 @@ class MetricManager extends React.Component {
 
     $.ajax({
       method: 'DELETE',
-      url: '/api/metrics/delete/' + context + '/' + metricId + '.json',
+      url: '/api/metrics/delete/' + metricId + '.json',
       dataType: 'json',
     }).done((data) => {
       if (data.hasOwnProperty('result') && data.result) {

@@ -560,7 +560,8 @@ class ImportFile
         }
 
         $context = $this->getActiveWorksheetProperty('context');
-        if (!MetricsTable::recordExists($context, $metricId)) {
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        if ($metricsTable->exists(['id' => $metricId])) {
             throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
         }
 
@@ -803,7 +804,8 @@ class ImportFile
         // Existing metric ID entered
         if (is_numeric($input)) {
             $metricId = (int)$input;
-            if (!MetricsTable::recordExists($context, $metricId)) {
+            $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+            if (!$metricsTable->exists(['id' => $metricId])) {
                 $this->shell_io->error(ucwords($context) . ' metric ID ' . $metricId . ' not found');
 
                 return $this->getMetricInput($suggestedName, $unknownMetric);
@@ -815,7 +817,9 @@ class ImportFile
         // Name of new metric entered
         try {
             $metricName = $input ?: $suggestedName;
-            $metric = MetricsTable::addRecord($context, $metricName);
+            /** @var MetricsTable $metricsTable */
+            $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+            $metric = $metricsTable->addRecord($context, $metricName);
             if (!$metric) {
                 throw new Exception('Metric could not be saved.');
             }

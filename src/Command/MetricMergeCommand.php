@@ -104,7 +104,7 @@ class MetricMergeCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->context = $args->getArgument('context');
-        $this->metricsTable = MetricsTable::getContextTable($this->context);
+        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
         $this->io = $io;

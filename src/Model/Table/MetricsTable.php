@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Metric;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
@@ -14,6 +15,9 @@ use Exception;
 
 /**
  * Metrics Model
+ *
+ * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\BelongsTo $ParentMetrics
+ * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\HasMany $ChildMetrics
  *
  * @method Metric get($primaryKey, $options = [])
  * @method Metric newEntity($data = null, array $options = [])
@@ -48,6 +52,21 @@ class MetricsTable extends Table
         $this->hasMany('Criteria', [
             'foreignKey' => 'metric_id'
         ]);
+
+        $this->hasMany('Statistics', [
+            'className' => 'Statistics',
+            'foreignKey' => 'metric_id'
+        ])->setDependent(true);
+
+        $this->belongsTo('ParentMetrics', [
+            'className' => 'Metrics',
+            'foreignKey' => 'parent_id'
+        ]);
+
+        $this->hasMany('ChildMetrics', [
+            'className' => 'Metrics',
+            'foreignKey' => 'parent_id'
+        ]);
     }
 
     /**
@@ -61,6 +80,17 @@ class MetricsTable extends Table
         $validator
             ->integer('id')
             ->allowEmpty('id', 'create');
+
+        $validator
+            ->scalar('context')
+            ->requirePresence('context', 'create')
+            ->notEmpty('context')
+            ->add('context', 'isValidContext', [
+                'rule' => function ($value) {
+                    return Context::isValid($value);
+                },
+                'message' => 'The title is not valid'
+            ]);
 
         $table = $this;
         $validator
@@ -137,6 +167,8 @@ class MetricsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
+        $rules->add($rules->existsIn(['parent_id'], 'Metrics'));
+
         $rules->addDelete(function ($entity) {
             return $this->childCount($entity, true) === 0;
         }, 'cantDeleteParentMetric', [
@@ -155,43 +187,6 @@ class MetricsTable extends Table
     }
 
     /**
-     * Returns either 'school' or 'district' depending on what the current subclass is
-     *
-     * @return string
-     * @throws InternalErrorException
-     */
-    public function getCurrentContext()
-    {
-        $className = explode('\\', get_class($this));
-
-        switch (end($className)) {
-            case 'SchoolMetricsTable':
-                return 'school';
-            case 'SchoolDistrictMetricsTable':
-                return 'district';
-        }
-
-        throw new InternalErrorException('Can\'t get context for ' . get_class($this) . ' class');
-    }
-
-    /**
-     * Returns TRUE if the metric is found in the database
-     *
-     * @param string $context Either 'school' or 'district'
-     * @param int $metricId SchoolMetric ID or SchoolDistrictMetric ID
-     * @return bool
-     * @throws InternalErrorException
-     */
-    public static function recordExists($context, $metricId)
-    {
-        $count = self::getContextTable($context)->find()
-            ->where(['id' => $metricId])
-            ->count();
-
-        return $count > 0;
-    }
-
-    /**
      * Adds a metric record to the appropriate table
      *
      * @param string $context Either 'school' or 'district'
@@ -200,10 +195,10 @@ class MetricsTable extends Table
      * @return \Cake\Datasource\EntityInterface
      * @throws Exception
      */
-    public static function addRecord($context, $metricName, $type = 'numeric')
+    public function addRecord($context, $metricName, $type = 'numeric')
     {
-        $table = self::getContextTable($context);
-        $metric = $table->newEntity([
+        $metric = $this->newEntity([
+            'context' => $context,
             'name' => $metricName,
             'description' => '',
             'selectable' => true,
@@ -211,31 +206,12 @@ class MetricsTable extends Table
             'type' => $type
         ]);
 
-        if ($table->save($metric)) {
+        if ($this->save($metric)) {
             return $metric;
         }
 
         $msg = 'Cannot add metric ' . $metricName . "\nDetails: " . print_r($metric->getErrors(), true);
         throw new Exception($msg);
-    }
-
-    /**
-     * Returns a SchoolMetricsTable or SchoolDistrictMetricsTable
-     *
-     * @param string $context Either 'school' or 'district'
-     * @return \Cake\ORM\Table
-     * @throws InternalErrorException
-     */
-    public static function getContextTable($context)
-    {
-        switch ($context) {
-            case 'school':
-                return TableRegistry::getTableLocator()->get('SchoolMetrics');
-            case 'district':
-                return TableRegistry::getTableLocator()->get('SchoolDistrictMetrics');
-            default:
-                throw new InternalErrorException('Metric context "' . $context . '" not recognized');
-        }
     }
 
     /**
@@ -349,7 +325,7 @@ class MetricsTable extends Table
 
         // Collect locations in those years
         $locations = [];
-        $locationField = $context == 'school' ? 'school_id' : 'school_district_id';
+        $locationField = Context::getLocationField($context);
         foreach ($metricIds as $metricId) {
             $locations[] = $statisticsTable->find()
                 ->select([$locationField])

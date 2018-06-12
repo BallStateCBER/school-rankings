@@ -6,8 +6,6 @@ use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrictMetric;
 use App\Model\Entity\SchoolMetric;
 use App\Model\Table\MetricsTable;
-use App\Model\Table\SchoolDistrictMetricsTable;
-use App\Model\Table\SchoolMetricsTable;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Exception\NotFoundException;
@@ -70,27 +68,26 @@ class MetricsController extends AppController
     /**
      * Deletes a metric
      *
-     * @param string $context Either 'school' or 'district'
      * @param string $metricId ID of metric record
      * @return void
      */
-    public function delete($context, $metricId)
+    public function delete($metricId)
     {
         if (!$this->request->is('delete')) {
             throw new MethodNotAllowedException('Request is not DELETE');
         }
 
-        /** @var SchoolMetricsTable|SchoolDistrictMetricsTable $table */
-        $table = MetricsTable::getContextTable($context);
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
-        $metric = $table->get($metricId);
+        $metric = $metricsTable->get($metricId);
 
-        if ($table->childCount($metric, true) > 0) {
+        if ($metricsTable->childCount($metric, true) > 0) {
             throw new BadRequestException('Remove all child metrics before removing this metric');
         }
 
-        $result = (bool)$table->delete($metric);
+        $result = (bool)$metricsTable->delete($metric);
 
         $this->throwExceptionOnFail($result, $metric);
 
@@ -112,12 +109,12 @@ class MetricsController extends AppController
             throw new MethodNotAllowedException('Request is not POST');
         }
 
-        $context = $this->getContext();
-        $table = MetricsTable::getContextTable($context);
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
         $selectable = $this->request->getData('selectable');
-        $metric = $table->newEntity([
+        $metric = $metricsTable->newEntity([
+            'context' => $this->getContext(),
             'name' => $this->request->getData('name'),
             'parent_id' => $this->request->getData('parentId'),
             'description' => $this->request->getData('description'),
@@ -125,7 +122,7 @@ class MetricsController extends AppController
             'selectable' => (bool)$selectable,
             'visible' => (bool)$selectable
         ]);
-        $result = (bool)$table->save($metric);
+        $result = (bool)$metricsTable->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);
 
@@ -151,15 +148,14 @@ class MetricsController extends AppController
 
         $metricId = $this->request->getData('metricId');
         $newParentId = $this->request->getData('newParentId');
-        $context = $this->getContext();
-        $table = MetricsTable::getContextTable($context);
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
-        $metric = $table->get($metricId);
-        $metric = $table->patchEntity($metric, [
+        $metric = $metricsTable->get($metricId);
+        $metric = $metricsTable->patchEntity($metric, [
             'parent_id' => $newParentId,
         ]);
-        $result = (bool)$table->save($metric);
+        $result = (bool)$metricsTable->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);
 
@@ -185,15 +181,14 @@ class MetricsController extends AppController
             throw new MethodNotAllowedException('Request is not PUT or PATCH');
         }
 
-        $context = $this->getContext();
-        $table = MetricsTable::getContextTable($context);
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         /** @var SchoolMetric|SchoolDistrictMetric $metric */
-        $metric = $table->get($metricId);
+        $metric = $metricsTable->get($metricId);
         foreach (['selectable', 'visible'] as $field) {
             $value = $this->request->getData($field);
             if (isset($value)) {
-                $table->patchEntity($metric, [
+                $metricsTable->patchEntity($metric, [
                     $field => ($value == 'false') ? false : (bool)$value
                 ]);
             }
@@ -201,11 +196,11 @@ class MetricsController extends AppController
         foreach (['name', 'description', 'type'] as $field) {
             $value = $this->request->getData($field);
             if (isset($value)) {
-                $table->patchEntity($metric, [$field => $value]);
+                $metricsTable->patchEntity($metric, [$field => $value]);
             }
         }
 
-        $result = (bool)$table->save($metric);
+        $result = (bool)$metricsTable->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);
 
@@ -233,9 +228,10 @@ class MetricsController extends AppController
         $context = $this->getContext();
         $metricIdA = $this->request->getData('metricIdA');
         $metricIdB = $this->request->getData('metricIdB');
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         foreach (['A', 'B'] as $letter) {
             $metricId = ${'metricId' . $letter};
-            if (!MetricsTable::recordExists($context, $metricId)) {
+            if ($metricsTable->exists(['id' => $metricId])) {
                 throw new NotFoundException("Metric $letter (#$metricId) not found");
             }
         }
