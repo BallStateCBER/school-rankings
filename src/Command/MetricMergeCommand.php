@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Criterion;
 use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
@@ -75,11 +76,6 @@ class MetricMergeCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
-            'context' => [
-                'help' => 'Either "school" or "district"',
-                'choices' => ['school', 'district'],
-                'required' => true
-            ],
             'metricIdA' => [
                 'help' => 'First metric ID (will be removed)',
                 'required' => true
@@ -103,7 +99,6 @@ class MetricMergeCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->context = $args->getArgument('context');
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
@@ -168,7 +163,14 @@ class MetricMergeCommand extends Command
         $this->metrics = [];
         foreach ($this->metricIds as $metricId) {
             try {
-                $this->metrics[] = $this->metricsTable->get($metricId);
+                $metric = $this->metricsTable->get($metricId);
+                if ($this->context && $metric->context != $this->context) {
+                    $this->io->out();
+                    $this->io->error("Cannot merge a $this->context metric with a $metric->context metric");
+                    $this->abort();
+                }
+                $this->metrics[] = $metric;
+                $this->context = $metric->context;
             } catch (RecordNotFoundException $e) {
                 $this->io->out();
                 $this->io->error(ucwords($this->context) . ' metric #' . $metricId . ' not found');
@@ -204,7 +206,7 @@ class MetricMergeCommand extends Command
     private function collectStatistics()
     {
         $this->io->out('Collecting statistics...', 0);
-        $locationField = $this->context == 'school' ? 'school_id' : 'school_district_id';
+        $locationField = Context::getLocationField($this->context);
         $this->statsToMerge = $this->statisticsTable->find()
             ->select([
                 'id',
@@ -235,7 +237,7 @@ class MetricMergeCommand extends Command
      */
     private function checkForStatConflicts()
     {
-        $locationField = $this->context == 'school' ? 'school_id' : 'school_district_id';
+        $locationField = Context::getLocationField($this->context);
         $this->io->out('Checking for conflicts...', 0);
         $this->sortedStats = [
             'noConflict' => [],

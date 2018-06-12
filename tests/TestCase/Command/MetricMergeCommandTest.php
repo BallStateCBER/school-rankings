@@ -20,8 +20,6 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         'app.statistics',
     ];
 
-    private $contexts = ['school', 'district'];
-
     /**
      * Sets up each test
      *
@@ -40,13 +38,11 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
      */
     public function testMergeFailHasChildren()
     {
-        foreach ($this->contexts as $context) {
-            $metricIdWithChildren = 1;
-            $metricIdOther = 4;
-            $this->exec("metric-merge $context $metricIdWithChildren $metricIdOther");
-            $errorMsg = 'cannot be merged while it has child-metrics';
-            $this->assertErrorContains($errorMsg);
-        }
+        $metricIdWithChildren = 1;
+        $metricIdOther = 4;
+        $this->exec("metric-merge $metricIdWithChildren $metricIdOther");
+        $errorMsg = 'cannot be merged while it has child-metrics';
+        $this->assertErrorContains($errorMsg);
     }
 
     /**
@@ -57,13 +53,11 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
     public function testMergeFailNotFound()
     {
         for ($n = 0; $n <= 1; $n++) {
-            foreach ($this->contexts as $context) {
-                $metricA = $n ? 2 : 9999999;
-                $metricB = $n ? 9999999 : 3;
-                $this->exec("metric-merge $context $metricA $metricB");
-                $errorMsg = 'not found';
-                $this->assertErrorContains($errorMsg);
-            }
+            $metricA = $n ? 2 : 9999999;
+            $metricB = $n ? 9999999 : 3;
+            $this->exec("metric-merge $metricA $metricB");
+            $errorMsg = 'not found';
+            $this->assertErrorContains($errorMsg);
         }
     }
 
@@ -81,25 +75,23 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $statIdToUpdate = 2;
         $statIdToDelete = 3;
 
-        foreach ($this->contexts as $context) {
-            $this->assertTrue(
-                $statsTable->exists(['id' => $statIdToDelete])
-            );
-            $this->assertEquals(
-                $metricA,
-                $statsTable->get($statIdToUpdate)->metric_id
-            );
+        $this->assertTrue(
+            $statsTable->exists(['id' => $statIdToDelete])
+        );
+        $this->assertEquals(
+            $metricA,
+            $statsTable->get($statIdToUpdate)->metric_id
+        );
 
-            $this->exec("metric-merge $context $metricA $metricB", ['y']);
+        $this->exec("metric-merge $metricA $metricB", ['y']);
 
-            $this->assertEquals(
-                $metricB,
-                $statsTable->get($statIdToUpdate)->metric_id
-            );
-            $this->assertFalse(
-                $statsTable->exists(['id' => $statIdToDelete])
-            );
-        }
+        $this->assertEquals(
+            $metricB,
+            $statsTable->get($statIdToUpdate)->metric_id
+        );
+        $this->assertFalse(
+            $statsTable->exists(['id' => $statIdToDelete])
+        );
     }
 
     /**
@@ -143,7 +135,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 
             // Execute merge
             try {
-                $this->exec("metric-merge $context $metricA $metricB", ['y']);
+                $this->exec("metric-merge $metricA $metricB", ['y']);
             } catch (StopException $e) {
                 print_r($e->getCode());
             }
@@ -176,11 +168,9 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $metricA = 2;
         $metricB = 3;
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        foreach ($this->contexts as $context) {
-            $this->assertTrue($metricsTable->exists(['id' => $metricA]));
-            $this->exec("metric-merge $context $metricA $metricB", ['y']);
-            $this->assertFalse($metricsTable->exists(['id' => $metricA]));
-        }
+        $this->assertTrue($metricsTable->exists(['id' => $metricA]));
+        $this->exec("metric-merge $metricA $metricB", ['y']);
+        $this->assertFalse($metricsTable->exists(['id' => $metricA]));
     }
 
     /**
