@@ -1,29 +1,21 @@
 <?php
 namespace App\Test\TestCase\Model\Table;
 
-use App\Model\Table\SchoolDistrictMetricsTable;
-use App\Model\Table\SchoolMetricsTable;
+use App\Model\Table\MetricsTable;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Model\Table\SchoolMetricsTable Test Case
+ * App\Model\Table\MetricsTable Test Case
  */
 class MetricsTableTest extends TestCase
 {
     /**
-     * School metrics table
+     * Metrics table
      *
-     * @var \App\Model\Table\SchoolMetricsTable
+     * @var \App\Model\Table\MetricsTable
      */
-    public $SchoolMetrics;
-
-    /**
-     * School district metrics table
-     *
-     * @var \App\Model\Table\SchoolDistrictMetricsTable
-     */
-    public $SchoolDistrictMetrics;
+    public $Metrics;
 
     /**
      * Fixtures
@@ -31,8 +23,7 @@ class MetricsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.school_district_metrics',
-        'app.school_metrics',
+        'app.metrics',
         'app.statistics'
     ];
 
@@ -44,13 +35,9 @@ class MetricsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->SchoolMetrics = TableRegistry::getTableLocator()->get(
-            'SchoolMetrics',
-            ['className' => SchoolMetricsTable::class]
-        );
-        $this->SchoolDistrictMetrics = TableRegistry::getTableLocator()->get(
-            'SchoolDistrictMetrics',
-            ['className' => SchoolDistrictMetricsTable::class]
+        $this->Metrics = TableRegistry::getTableLocator()->get(
+            'Metrics',
+            ['className' => MetricsTable::class]
         );
     }
 
@@ -61,8 +48,7 @@ class MetricsTableTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->SchoolMetrics);
-        unset($this->SchoolDistrictMetrics);
+        unset($this->Metrics);
 
         parent::tearDown();
     }
@@ -74,16 +60,14 @@ class MetricsTableTest extends TestCase
      */
     public function testReparentFailUnknownParent()
     {
-        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
-            $metricId = 4;
-            $newParentId = 999;
-            $metric = $table->get($metricId);
-            $table->patchEntity($metric, [
-                'parent_id' => $newParentId
-            ]);
-            $result = $table->save($metric);
-            $this->assertFalse($result);
-        }
+        $metricId = 4;
+        $newParentId = 999;
+        $metric = $this->Metrics->get($metricId);
+        $this->Metrics->patchEntity($metric, [
+            'parent_id' => $newParentId
+        ]);
+        $result = $this->Metrics->save($metric);
+        $this->assertFalse($result);
     }
 
     /**
@@ -93,16 +77,14 @@ class MetricsTableTest extends TestCase
      */
     public function testCreateFailUnknownParent()
     {
-        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
-            $metric = $table->newEntity([
-                'name' => 'Metric name',
-                'parent_id' => 999,
-                'type' => 'numeric',
-                'selectable' => true
-            ]);
-            $result = $table->save($metric);
-            $this->assertFalse($result);
-        }
+        $metric = $this->Metrics->newEntity([
+            'name' => 'Metric name',
+            'parent_id' => 999,
+            'type' => 'numeric',
+            'selectable' => true
+        ]);
+        $result = $this->Metrics->save($metric);
+        $this->assertFalse($result);
     }
 
     /**
@@ -112,16 +94,14 @@ class MetricsTableTest extends TestCase
      */
     public function testReparentFailNonuniqueName()
     {
-        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
-            $metricId = 5;
-            $newParentId = 1;
-            $metric = $table->get($metricId);
-            $table->patchEntity($metric, [
-                'parent_id' => $newParentId
-            ]);
-            $result = $table->save($metric);
-            $this->assertFalse($result);
-        }
+        $metricId = 5;
+        $newParentId = 1;
+        $metric = $this->Metrics->get($metricId);
+        $this->Metrics->patchEntity($metric, [
+            'parent_id' => $newParentId
+        ]);
+        $result = $this->Metrics->save($metric);
+        $this->assertFalse($result);
     }
 
     /**
@@ -131,16 +111,14 @@ class MetricsTableTest extends TestCase
      */
     public function testCreateFailNonuniqueName()
     {
-        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
-            $metric = $table->newEntity([
-                'name' => 'Identical name',
-                'parent_id' => 1,
-                'type' => 'numeric',
-                'selectable' => true
-            ]);
-            $result = $table->save($metric);
-            $this->assertFalse($result);
-        }
+        $metric = $this->Metrics->newEntity([
+            'name' => 'Identical name',
+            'parent_id' => 1,
+            'type' => 'numeric',
+            'selectable' => true
+        ]);
+        $result = $this->Metrics->save($metric);
+        $this->assertFalse($result);
     }
 
     /**
@@ -150,11 +128,9 @@ class MetricsTableTest extends TestCase
      */
     public function testDeleteFailHasChildren()
     {
-        foreach ([$this->SchoolMetrics, $this->SchoolDistrictMetrics] as $table) {
-            $metricId = 1;
-            $metric = $table->get($metricId);
-            $result = $table->delete($metric);
-            $this->assertFalse($result, 'Metric with children can be deleted');
-        }
+        $metricId = 1;
+        $metric = $this->Metrics->get($metricId);
+        $result = $this->Metrics->delete($metric);
+        $this->assertFalse($result, 'Metric with children can be deleted');
     }
 }

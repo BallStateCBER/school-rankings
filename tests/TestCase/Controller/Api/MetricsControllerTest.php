@@ -2,34 +2,28 @@
 namespace App\Test\TestCase\Controller\Api;
 
 use App\Model\Entity\Metric;
+use App\Model\Table\MetricsTable;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase;
 use Exception;
 
 /**
  * MetricsControllerTest class
+ *
+ * @property MetricsTable $Metrics
  */
 class MetricsControllerTest extends IntegrationTestCase
 {
+    private $Metrics;
+
     /**
      * Fixtures
      *
      * @var array
      */
     public $fixtures = [
-        'app.school_district_metrics',
-        'app.school_metrics',
+        'app.metrics',
         'app.statistics'
-    ];
-
-    /**
-     * A list of metric contexts and their corresponding table names
-     *
-     * @var array
-     */
-    private $contexts = [
-        'school' => 'SchoolMetrics',
-        'district' => 'SchoolDistrictMetrics'
     ];
 
     /**
@@ -57,37 +51,44 @@ class MetricsControllerTest extends IntegrationTestCase
     ];
 
     /**
+     * setUp method
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        $this->Metrics = TableRegistry::getTableLocator()->get('Metrics', ['className' => MetricsTable::class]);
+    }
+
+    /**
      * Tests a successful metric reparenting
      *
      * @param int $metricId ID of metric being moved
      * @param int $newParentId ID of new parent metric
-     * @param string $context Metric context name
      * @return void
      * @throws Exception
      * @throws \PHPUnit\Exception
      */
-    private function _testReparentSuccess($metricId, $newParentId, $context)
+    private function _testReparentSuccess($metricId, $newParentId)
     {
         $this->configRequest([
             'headers' => ['Accept' => 'application/json']
         ]);
-        $tableName = $this->contexts[$context];
-        $table = TableRegistry::getTableLocator()->get($tableName);
-        $metric = $table->get($metricId);
+        $metric = $this->Metrics->get($metricId);
         if ($newParentId == $metric->parent_id) {
-            throw new Exception("Invalid $context metric chosen");
+            throw new Exception("Invalid metric chosen");
         }
 
         $data = [
             'metricId' => $metricId,
-            'context' => $context,
             'newParentId' => $newParentId,
         ];
         $this->patch($this->reparentUrl, $data);
         $this->assertResponseOk();
 
-        $metric = $table->get($metricId);
-        $this->assertEquals($newParentId, $metric->parent_id, "$context metric not moved to root");
+        $metric = $this->Metrics->get($metricId);
+        $this->assertEquals($newParentId, $metric->parent_id, "Metric not moved to root");
 
         $expected = json_encode([
             'message' => 'Success',
@@ -107,10 +108,7 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $metricId = 2;
         $newParentId = null;
-
-        foreach ($this->contexts as $context => $table) {
-            $this->_testReparentSuccess($metricId, $newParentId, $context);
-        }
+        $this->_testReparentSuccess($metricId, $newParentId);
     }
 
     /**
@@ -124,10 +122,7 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $metricId = 4;
         $newParentId = 1;
-
-        foreach ($this->contexts as $context => $table) {
-            $this->_testReparentSuccess($metricId, $newParentId, $context);
-        }
+        $this->_testReparentSuccess($metricId, $newParentId);
     }
 
     /**
@@ -141,29 +136,26 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $metricId = 5;
         $newParentId = 1;
-        foreach ($this->contexts as $context => $table) {
-            $table = TableRegistry::getTableLocator()->get($table);
-            $metric = $table->get($metricId);
-            $originalParentId = $metric->parent_id;
-            if ($newParentId == $metric->parent_id) {
-                throw new Exception("Invalid $context metric chosen");
-            }
 
-            $data = [
-                'metricId' => $metricId,
-                'context' => $context,
-                'newParentId' => $newParentId,
-            ];
-            $this->patch($this->reparentUrl, $data);
-            $this->assertResponseError();
-
-            $metric = $table->get($metricId);
-            $this->assertEquals(
-                $originalParentId,
-                $metric->parent_id,
-                "$context metric parent changed"
-            );
+        $metric = $this->Metrics->get($metricId);
+        $originalParentId = $metric->parent_id;
+        if ($newParentId == $metric->parent_id) {
+            throw new Exception("Invalid metric chosen");
         }
+
+        $data = [
+            'metricId' => $metricId,
+            'newParentId' => $newParentId,
+        ];
+        $this->patch($this->reparentUrl, $data);
+        $this->assertResponseError();
+
+        $metric = $this->Metrics->get($metricId);
+        $this->assertEquals(
+            $originalParentId,
+            $metric->parent_id,
+            "Metric parent changed"
+        );
     }
 
     /**
@@ -176,15 +168,12 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $metricId = 4;
         $newParentId = 999;
-        foreach ($this->contexts as $context => $table) {
-            $data = [
-                'metricId' => $metricId,
-                'context' => $context,
-                'newParentId' => $newParentId,
-            ];
-            $this->patch($this->reparentUrl, $data);
-            $this->assertResponseError();
-        }
+        $data = [
+            'metricId' => $metricId,
+            'newParentId' => $newParentId,
+        ];
+        $this->patch($this->reparentUrl, $data);
+        $this->assertResponseError();
     }
 
     /**
@@ -196,18 +185,15 @@ class MetricsControllerTest extends IntegrationTestCase
     public function testDeleteSuccess()
     {
         $metricId = 4;
-        foreach ($this->contexts as $context => $table) {
-            $url = [
-                'prefix' => 'api',
-                'controller' => 'Metrics',
-                'action' => 'delete',
-                $context,
-                $metricId,
-                '_ext' => 'json'
-            ];
-            $this->delete($url);
-            $this->assertResponseOk();
-        }
+        $url = [
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'delete',
+            $metricId,
+            '_ext' => 'json'
+        ];
+        $this->delete($url);
+        $this->assertResponseOk();
     }
 
     /**
@@ -219,18 +205,15 @@ class MetricsControllerTest extends IntegrationTestCase
     public function testDeleteFailHasChildren()
     {
         $metricId = 1;
-        foreach ($this->contexts as $context => $table) {
-            $url = [
-                'prefix' => 'api',
-                'controller' => 'Metrics',
-                'action' => 'delete',
-                $context,
-                $metricId,
-                '_ext' => 'json'
-            ];
-            $this->delete($url);
-            $this->assertResponseError();
-        }
+        $url = [
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'delete',
+            $metricId,
+            '_ext' => 'json'
+        ];
+        $this->delete($url);
+        $this->assertResponseError();
     }
 
     /**
@@ -251,25 +234,21 @@ class MetricsControllerTest extends IntegrationTestCase
             'parentId' => 1,
             'type' => 'numeric'
         ];
-        foreach ($this->contexts as $context => $tableName) {
-            $data['context'] = $context;
-            $this->post($this->addUrl, $data);
-            $this->assertResponseSuccess();
+        $this->post($this->addUrl, $data);
+        $this->assertResponseSuccess();
 
-            /** @var Metric $record */
-            $record = TableRegistry::getTableLocator()->get($tableName)->find()
-                ->where(['name' => $metricName])
-                ->first();
-            $className = $context == 'school' ? 'SchoolMetric' : 'SchoolDistrictMetric';
-            $this->assertInstanceOf('App\\Model\\Entity\\' . $className, $record);
+        /** @var Metric $record */
+        $record = $this->Metrics->find()
+            ->where(['name' => $metricName])
+            ->first();
+        $this->assertInstanceOf('App\\Model\\Entity\\Metric', $record);
 
-            $this->assertEquals($data['name'], $record->name);
-            $this->assertEquals($data['description'], $record->description);
-            $this->assertEquals(true, $record->selectable);
-            $this->assertEquals(true, $record->visible);
-            $this->assertEquals($data['type'], $record->type);
-            $this->assertEquals($data['parentId'], $record->parent_id);
-        }
+        $this->assertEquals($data['name'], $record->name);
+        $this->assertEquals($data['description'], $record->description);
+        $this->assertEquals(true, $record->selectable);
+        $this->assertEquals(true, $record->visible);
+        $this->assertEquals($data['type'], $record->type);
+        $this->assertEquals($data['parentId'], $record->parent_id);
     }
 
     /**
@@ -289,11 +268,8 @@ class MetricsControllerTest extends IntegrationTestCase
             'parentId' => 999,
             'type' => 'numeric'
         ];
-        foreach ($this->contexts as $context => $tableName) {
-            $data['context'] = $context;
-            $this->post($this->addUrl, $data);
-            $this->assertResponseError();
-        }
+        $this->post($this->addUrl, $data);
+        $this->assertResponseError();
     }
 
     /**
@@ -317,14 +293,11 @@ class MetricsControllerTest extends IntegrationTestCase
             'type',
             'context'
         ];
-        foreach ($this->contexts as $context => $tableName) {
-            $data['context'] = $context;
-            foreach ($requiredData as $dataKey) {
-                $dataSubset = $data;
-                unset($dataSubset[$dataKey]);
-                $this->post($this->addUrl, $dataSubset);
-                $this->assertResponseError('Error expected with missing ' . $dataKey);
-            }
+        foreach ($requiredData as $dataKey) {
+            $dataSubset = $data;
+            unset($dataSubset[$dataKey]);
+            $this->post($this->addUrl, $dataSubset);
+            $this->assertResponseError('Error expected with missing ' . $dataKey);
         }
     }
 
@@ -343,11 +316,8 @@ class MetricsControllerTest extends IntegrationTestCase
             'parentId' => 1,
             'type' => 'numeric'
         ];
-        foreach ($this->contexts as $context => $tableName) {
-            $data['context'] = $context;
-            $this->post($this->addUrl, $data);
-            $this->assertResponseError();
-        }
+        $this->post($this->addUrl, $data);
+        $this->assertResponseError();
     }
 
     /**
@@ -384,32 +354,29 @@ class MetricsControllerTest extends IntegrationTestCase
             'selectable' => false,
             'visible' => false
         ];
-        foreach ($this->contexts as $context => $tableName) {
-            // Ensure that fixture data is different from $data
-            $table = TableRegistry::getTableLocator()->get($tableName);
-            $originalMetric = $table->get($metricId);
-            foreach ($data as $field => $value) {
-                if ($originalMetric->$field == $value) {
-                    $msg = "Invalid $context metric chosen. Metric #$metricId's $field value is already $value";
-                    throw new Exception($msg);
-                }
-            }
 
-            // Assert success response
-            $this->put(
-                $this->getEditUrl($metricId),
-                $data + [
-                    'metricId' => $metricId,
-                    'context' => $context
-                ]
-            );
-            $this->assertResponseSuccess();
-
-            // Assert data was updated
-            $updatedMetric = $table->get($metricId);
-            foreach ($data as $field => $value) {
-                $this->assertEquals($value, $updatedMetric->$field);
+        // Ensure that fixture data is different from $data
+        $originalMetric = $this->Metrics->get($metricId);
+        foreach ($data as $field => $value) {
+            if ($originalMetric->$field == $value) {
+                $msg = "Invalid metric chosen. Metric #$metricId's $field value is already $value";
+                throw new Exception($msg);
             }
+        }
+
+        // Assert success response
+        $this->put(
+            $this->getEditUrl($metricId),
+            $data + [
+                'metricId' => $metricId
+            ]
+        );
+        $this->assertResponseSuccess();
+
+        // Assert data was updated
+        $updatedMetric = $this->Metrics->get($metricId);
+        foreach ($data as $field => $value) {
+            $this->assertEquals($value, $updatedMetric->$field);
         }
     }
 }

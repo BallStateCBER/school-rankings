@@ -1,7 +1,6 @@
 <?php
 namespace App\Test\TestCase\Command;
 
-use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Exception\StopException;
 use Cake\ORM\TableRegistry;
@@ -16,8 +15,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
      */
     public $fixtures = [
         'app.criteria',
-        'app.school_district_metrics',
-        'app.school_metrics',
+        'app.metrics',
         'app.formulas',
         'app.statistics',
     ];
@@ -177,11 +175,11 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
     {
         $metricA = 2;
         $metricB = 3;
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         foreach ($this->contexts as $context) {
-            $table = MetricsTable::getContextTable($context);
-            $this->assertTrue($table->exists(['id' => $metricA]));
+            $this->assertTrue($metricsTable->exists(['id' => $metricA]));
             $this->exec("metric-merge $context $metricA $metricB", ['y']);
-            $this->assertFalse($table->exists(['id' => $metricA]));
+            $this->assertFalse($metricsTable->exists(['id' => $metricA]));
         }
     }
 

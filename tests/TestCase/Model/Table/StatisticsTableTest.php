@@ -25,8 +25,7 @@ class StatisticsTableTest extends TestCase
      */
     public $fixtures = [
         'app.statistics',
-        'app.school_district_metrics',
-        'app.school_metrics',
+        'app.metrics',
         'app.schools',
         'app.school_districts'
     ];

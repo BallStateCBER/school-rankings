@@ -25,8 +25,7 @@ class CriteriaTableTest extends TestCase
      */
     public $fixtures = [
         'app.criteria',
-        'app.school_district_metrics',
-        'app.school_metrics',
+        'app.metrics',
         'app.formulas'
     ];
 
