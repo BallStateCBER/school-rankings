@@ -167,7 +167,7 @@ class MetricsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['parent_id'], 'Metrics'));
+        $rules->add($rules->existsIn(['parent_id'], 'ParentMetrics'));
 
         $rules->addDelete(function ($entity) {
             return $this->childCount($entity, true) === 0;
