@@ -2,6 +2,7 @@
 namespace App\Model\Context;
 
 use Cake\Http\Exception\InternalErrorException;
+use Exception;
 
 /**
  * Class Context
@@ -31,6 +32,22 @@ class Context
     public static function isValid($context)
     {
         return in_array($context, self::getContexts());
+    }
+
+    /**
+     * Returns TRUE provided context is valid or throws an exception
+     *
+     * @param string $context Data context, such as 'school' or 'district'
+     * @return bool
+     * @throws Exception
+     */
+    public static function isValidOrFail($context)
+    {
+        if (in_array($context, self::getContexts())) {
+            return true;
+        }
+
+        throw new Exception('Unrecognized context: ' . $context);
     }
 
     /**
