@@ -1,7 +1,6 @@
 <?php
 namespace App\Model\Entity;
 
-use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 
 /**
@@ -9,6 +8,8 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property int $metric_id
+ * @property int $school_id
+ * @property int $school_district_id
  * @property string|int|float $value
  * @property int $year
  * @property bool $contiguous
@@ -17,6 +18,8 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\FrozenTime $modified
  *
  * @property \App\Model\Entity\Metric $metric
+ * @property \App\Model\Entity\School $school
+ * @property \App\Model\Entity\SchoolDistrict $school_district
  */
 class Statistic extends Entity
 {
@@ -33,26 +36,6 @@ class Statistic extends Entity
     protected $_accessible = [
         '*' => true
     ];
-
-    /**
-     * Returns either 'school' or 'district' depending on what the current subclass is
-     *
-     * @return string
-     * @throws InternalErrorException
-     */
-    public function getCurrentContext()
-    {
-        $className = explode('\\', get_class($this));
-
-        switch (end($className)) {
-            case 'SchoolStatistic':
-                return 'school';
-            case 'SchoolDistrictStatistic':
-                return 'district';
-        }
-
-        throw new InternalErrorException('Can\'t get context for ' . get_class($this) . ' class');
-    }
 
     /**
      * Converts numeric values to integers or floats rounded to 5 decimal places
