@@ -145,9 +145,7 @@ class MetricsTable extends Table
         ]);
 
         $rules->addUpdate(function ($entity) {
-            $context = $this->getCurrentContext();
-
-            return !$this->hasIncompatibleStatistics($context, $entity->type, $entity->id);
+            return !$this->hasIncompatibleStatistics($entity->type, $entity->id);
         }, 'cantChangeMetricContext', [
             'message' => 'Cannot change metric type. Existing statistics are incompatible with new type.',
             'errorField' => 'statistics'
@@ -273,12 +271,11 @@ class MetricsTable extends Table
      * Returns TRUE if the specified metric should NOT be changed to the provided type because existing statistics
      * have incompatible values
      *
-     * @param string $context Either 'school' or 'district'
      * @param string $metricType Either 'numeric' or 'boolean'
      * @param int $metricId Metric record ID
      * @return bool
      */
-    public function hasIncompatibleStatistics($context, $metricType, $metricId)
+    public function hasIncompatibleStatistics($metricType, $metricId)
     {
         // All statistic values (including 1 and 0) can be of the "numeric" type
         if ($metricType == 'numeric') {
@@ -288,7 +285,9 @@ class MetricsTable extends Table
         }
 
         // Boolean values can only be 1 and 0
-        return StatisticsTable::getContextTable($context)->find()
+        return TableRegistry::getTableLocator()
+            ->get('Statistics')
+            ->find()
             ->where([
                 'metric_id' => $metricId,
                 function (QueryExpression $exp) {
@@ -314,7 +313,7 @@ class MetricsTable extends Table
             throw new InternalErrorException($msg);
         }
 
-        $statisticsTable = StatisticsTable::getContextTable($context);
+        $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
 
         // Collect the years of all statistics associated with each metric
         $years = [];

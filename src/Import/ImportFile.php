@@ -900,7 +900,8 @@ class ImportFile
             'updated' => 0,
             'ignored' => 0
         ];
-        $table = StatisticsTable::getContextTable($context);
+        /** @var StatisticsTable $statisticsTable */
+        $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
             // Skip rows with no location
             if (!isset($this->worksheets[$this->activeWorksheet]['locations'][$row])) {
@@ -923,12 +924,12 @@ class ImportFile
                 }
 
                 $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
-                $existingStat = StatisticsTable::getStatistic($context, $metricId, $locationId, $year);
+                $existingStat = $statisticsTable->getStatistic($context, $metricId, $locationId, $year);
 
                 // Add
                 if (!$existingStat) {
                     $locationIdField = ($context == 'school') ? 'school_id' : 'school_district_id';
-                    $statistic = $table->newEntity([
+                    $statistic = $statisticsTable->newEntity([
                         'metric_id' => $metricId,
                         $locationIdField => $locationId,
                         'value' => $value,
@@ -941,7 +942,7 @@ class ImportFile
                         $this->shell_io->error("Error adding statistic. Details: \n" . $errors);
                         throw new Exception();
                     } else {
-                        $table->save($statistic);
+                        $statisticsTable->save($statistic);
                     }
                     $counts['added']++;
                     continue;
@@ -955,13 +956,13 @@ class ImportFile
 
                 // Update
                 if ($this->getOverwrite()) {
-                    $table->patchEntity($existingStat, ['value' => $value]);
+                    $statisticsTable->patchEntity($existingStat, ['value' => $value]);
                     if ($existingStat->getErrors()) {
                         $errors = print_r($existingStat->getErrors(), true);
                         $this->shell_io->error("Error updating statistic. Details: \n" . $errors);
                         throw new Exception();
                     } else {
-                        $table->save($existingStat);
+                        $statisticsTable->save($existingStat);
                     }
                     $counts['updated']++;
                 }
