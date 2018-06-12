@@ -7,6 +7,7 @@ use Cake\ORM\Entity;
  * Metric parent entity
  *
  * @property int $id
+ * @property string $context
  * @property string $name
  * @property string $description
  * @property string $type
@@ -16,6 +17,9 @@ use Cake\ORM\Entity;
  * @property bool $selectable
  * @property bool $visible
  * @property \Cake\I18n\FrozenTime $created
+ *
+ * @property \App\Model\Entity\Metric $parent_metric
+ * @property \App\Model\Entity\Metric[] $child_metrics
  */
 class Metric extends Entity
 {
