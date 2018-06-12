@@ -16,11 +16,13 @@ class MetricsController extends AppController
      * Returns a tree-structured list of school metrics
      *
      * @return void
+     * @throws \Exception
      */
     public function schools()
     {
+        /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metricsTable->behaviors()->Tree->config('scope', ['context' => 'school']);
+        $metricsTable->setScope('school');
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => $metricsTable->find('threaded')->toArray()
@@ -31,11 +33,13 @@ class MetricsController extends AppController
      * Returns a tree-structured list of school district metrics
      *
      * @return void
+     * @throws \Exception
      */
     public function districts()
     {
+        /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metricsTable->behaviors()->Tree->config('scope', ['context' => 'district']);
+        $metricsTable->setScope('district');
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => $metricsTable->find('threaded')->toArray()

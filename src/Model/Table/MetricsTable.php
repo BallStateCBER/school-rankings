@@ -375,4 +375,18 @@ class MetricsTable extends Table
 
         return $results;
     }
+
+    /**
+     * Sets the scope for tree operations
+     *
+     * @param string $context 'school' or 'district'
+     * @throws Exception
+     * @return void
+     */
+    public function setScope($context)
+    {
+        if (Context::isValidOrFail($context)) {
+            $this->behaviors()->Tree->config('scope', ['context' => $context]);
+        }
+    }
 }
