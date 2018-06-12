@@ -314,6 +314,7 @@ class MetricsControllerTest extends IntegrationTestCase
     {
         $data = [
             'name' => 'Identical name',
+            'context' => 'school',
             'description' => 'Metric description',
             'selectable' => true,
             'parentId' => 1,
