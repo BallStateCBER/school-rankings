@@ -24,12 +24,11 @@ class StatisticsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.school_statistics',
+        'app.statistics',
         'app.school_district_metrics',
         'app.school_metrics',
         'app.schools',
-        'app.school_districts',
-        'app.school_district_statistics'
+        'app.school_districts'
     ];
 
     /**

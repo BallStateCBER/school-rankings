@@ -19,8 +19,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         'app.school_district_metrics',
         'app.school_metrics',
         'app.formulas',
-        'app.school_district_statistics',
-        'app.school_statistics',
+        'app.statistics',
     ];
 
     private $contexts = ['school', 'district'];
@@ -85,24 +84,22 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $statIdToDelete = 3;
 
         foreach ($this->contexts as $context) {
-            /** @var StatisticsTable $contextStatsTable */
-            $contextStatsTable = $statsTable->getContextTable($context);
             $this->assertTrue(
-                $contextStatsTable->exists(['id' => $statIdToDelete])
+                $statsTable->exists(['id' => $statIdToDelete])
             );
             $this->assertEquals(
                 $metricA,
-                $contextStatsTable->get($statIdToUpdate)->metric_id
+                $statsTable->get($statIdToUpdate)->metric_id
             );
 
             $this->exec("metric-merge $context $metricA $metricB", ['y']);
 
             $this->assertEquals(
                 $metricB,
-                $contextStatsTable->get($statIdToUpdate)->metric_id
+                $statsTable->get($statIdToUpdate)->metric_id
             );
             $this->assertFalse(
-                $contextStatsTable->exists(['id' => $statIdToDelete])
+                $statsTable->exists(['id' => $statIdToDelete])
             );
         }
     }

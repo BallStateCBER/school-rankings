@@ -20,7 +20,8 @@ class StatisticsFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'autoIncrement' => true, 'precision' => null],
         'metric_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
-        '{location_id}' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
+        'school_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
+        'school_district_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'value' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'year' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'contiguous' => ['type' => 'boolean', 'length' => null, 'null' => false, 'default' => '1', 'comment' => '', 'precision' => null],
@@ -39,7 +40,8 @@ class StatisticsFixture extends TestFixture
 
     private $defaultData = [
         'metric_id' => 1,
-        '{location_id}' => 1,
+        'school_id' => null,
+        'school_district_id' => null,
         'value' => '1',
         'year' => 2018,
         'contiguous' => 1,
@@ -56,19 +58,23 @@ class StatisticsFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
+            'school_id' => 1
         ],
         [
             'id' => 2,
             'metric_id' => 2,
+            'school_id' => 1,
             'year' => 2017
         ],
         [
             'id' => 3,
             'metric_id' => 2,
+            'school_id' => 1
         ],
         [
             'id' => 4,
             'metric_id' => 3,
+            'school_id' => 1
         ],
     ];
 
@@ -79,14 +85,8 @@ class StatisticsFixture extends TestFixture
      */
     public function init()
     {
-        $locationPlaceholder = '{location_id}';
-        $this->fields[$this->locationField] = $this->fields[$locationPlaceholder];
-        unset($this->fields[$locationPlaceholder]);
-
         foreach ($this->records as &$record) {
             $record += $this->defaultData;
-            $record[$this->locationField] = $record[$locationPlaceholder];
-            unset($record[$locationPlaceholder]);
         }
 
         parent::init();

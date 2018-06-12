@@ -26,7 +26,6 @@ class SchoolsTableTest extends TestCase
     public $fixtures = [
         'app.schools',
         'app.school_districts',
-        'app.school_district_statistics',
         'app.rankings',
         'app.rankings_school_districts',
         'app.cities',
@@ -36,7 +35,7 @@ class SchoolsTableTest extends TestCase
         'app.states',
         'app.school_districts_states',
         'app.school_types',
-        'app.school_statistics',
+        'app.statistics',
         'app.schools_cities',
         'app.schools_counties',
         'app.school_levels',
