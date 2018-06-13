@@ -190,6 +190,12 @@ class MetricMergeCommand extends Command
 
         $this->io->overwrite('Metrics found');
         foreach ($this->metrics as $metric) {
+            try {
+                $this->metricsTable->setScope($this->context);
+            } catch (\Exception $e) {
+                $this->io->error('Invalid context: ' . $this->context);
+                $this->abort();
+            }
             $path = $this->metricsTable->getMetricTreePath($metric->id);
             $pathString = implode(' > ', Hash::extract($path, '{n}.name'));
             $this->io->out(' - Metric #' . $metric->id . ': ' . $pathString);
