@@ -1,6 +1,7 @@
 <?php
 namespace App\Import;
 
+use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
@@ -9,6 +10,7 @@ use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\ConsoleIo;
+use Cake\Database\Expression\QueryExpression;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Exception;
@@ -23,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * @property bool $autoNameMetrics
  * @property bool $overwrite
  * @property ConsoleIo $shell_io
+ * @property MetricsTable $metricsTable
  * @property Spreadsheet $spreadsheet
  * @property string $filename
  * @property string $year
@@ -34,6 +37,7 @@ class ImportFile
     private $autoNameMetrics;
     private $error;
     private $filename;
+    private $metricsTable;
     private $overwrite;
     private $shell_io;
     private $worksheets;
@@ -55,6 +59,7 @@ class ImportFile
         $this->year = $year;
         $this->filename = $filename;
         $this->shell_io = $io;
+        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         try {
             // Read spreadsheet
@@ -717,12 +722,14 @@ class ImportFile
 
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $count = count($unknownMetrics);
-        $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n" .
-            "Options for each:\n" .
+        $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n\n" .
+            (($count == 1) ? "Options:\n" : "Options for each:\n") .
             " - Enter an existing $context metric ID\n" .
             " - Enter the name of a new metric to create \n" .
             " - Enter nothing to accept the suggested name \n" .
-            ' - Enter "auto" to accept all suggested names for this file';
+            " - Enter \"auto\" to accept all suggested names for this file\n\n" .
+            'To nest a metric underneath one or more ancestors, separate each level with " > ", ' .
+            'e.g. "Population > Nerds > Sci-fi nerds > Star Trek nerds"';
         $this->shell_io->out($msg);
 
         $filename = $this->getFilename();
@@ -804,7 +811,7 @@ class ImportFile
         $context = $this->getContext();
 
         if ($this->autoNameMetrics) {
-            return $this->addMetric($context, $unknownMetric, $suggestedName);
+            return $this->addMetricChain($context, $unknownMetric, $suggestedName);
         }
 
         $input = $this->shell_io->ask('Metric ID or name:');
@@ -831,7 +838,7 @@ class ImportFile
                 $metricName = $input ?: $suggestedName;
             }
 
-            return $this->addMetric($context, $unknownMetric, $metricName);
+            return $this->addMetricChain($context, $unknownMetric, $metricName);
         } catch (Exception $e) {
             $this->shell_io->error('Error: ' . $e->getMessage());
 
@@ -849,21 +856,95 @@ class ImportFile
      * @throws \Exception
      * @return int
      */
-    private function addMetric($context, $unknownMetric, $metricName)
+    private function addMetricChain($context, $unknownMetric, $metricName)
     {
-        /** @var MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metric = $metricsTable->addRecord($context, $metricName);
-        if (!$metric) {
-            throw new Exception('Metric could not be saved.');
-        }
-        $this->shell_io->out('Metric #' . $metric->id . ' added');
+        $metricParents = explode(' > ', $metricName);
+        $finalMetric = array_pop($metricParents);
+        $metric = null;
+        $parentId = null;
 
+        // Add ancestor metrics (e.g. grandparent > parent > final metric
+        foreach ($metricParents as $namePart) {
+            $metric = $this->getOrAddMetricParent($context, $namePart, $parentId);
+            $parentId = $metric->id;
+        }
+
+        // Add final metric
+        $this->addMetric($context, $finalMetric, $parentId);
+
+        // Store column info => metric ID information in DB to save time later
         /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
         $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
         $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
 
         return $metric->id;
+    }
+
+    /**
+     * Adds a new metric to the database
+     *
+     * @param string $context Either school or district
+     * @param string $metricName Name of new metric
+     * @param int|null $parentId ID of parent metric, or null for root
+     * @throws \Exception
+     * @return Metric
+     */
+    private function getOrAddMetricParent($context, $metricName, $parentId)
+    {
+        // Get existing
+        $conditions = [
+            'context' => $context,
+            'name' => $metricName
+        ];
+        if ($parentId) {
+            $conditions['parent_id'] = $parentId;
+        } else {
+            $conditions[] = function (QueryExpression $exp) {
+                return $exp->isNull('parent_id');
+            };
+        }
+        /** @var Metric $existingMetric */
+        $existingMetric = $this->metricsTable->find()
+            ->where($conditions)
+            ->first();
+        if ($existingMetric) {
+            return $existingMetric;
+        }
+
+        // Create new
+        return $this->addMetric($context, $metricName, $parentId, false);
+    }
+
+    /**
+     * Adds a new metric to the database
+     *
+     * @param string $context Either school or district
+     * @param string $metricName Name of new metric
+     * @param int|null $parentId ID of parent metric, or null for root
+     * @param bool $selectable Whether or not this metric should be selectable when creating a ranking formula
+     * @throws \Exception
+     * @return Metric
+     */
+    private function addMetric($context, $metricName, $parentId, $selectable = true)
+    {
+        $this->metricsTable->setScope($context);
+        $metric = $this->metricsTable->newEntity([
+            'context' => $context,
+            'name' => $metricName,
+            'description' => '',
+            'type' => 'numeric',
+            'parent_id' => $parentId,
+            'selectable' => $selectable,
+            'visible' => true
+        ]);
+        if (!$this->metricsTable->save($metric)) {
+            $msg = 'Cannot add metric ' . $metricName . "\nDetails: " . print_r($metric->getErrors(), true);
+            throw new Exception($msg);
+        }
+
+        $this->shell_io->out('Metric #' . $metric->id . ' added');
+
+        return $metric;
     }
 
     /**
