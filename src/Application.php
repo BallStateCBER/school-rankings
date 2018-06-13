@@ -63,8 +63,8 @@ class Application extends BaseApplication
     {
         $commands->autoDiscover();
 
-        $commands->add('import:run', ImportRunCommand::class);
-        $commands->add('import:status', ImportStatusCommand::class);
+        $commands->add('import-run', ImportRunCommand::class);
+        $commands->add('import-status', ImportStatusCommand::class);
         $commands->add('metric-merge', MetricMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
 
