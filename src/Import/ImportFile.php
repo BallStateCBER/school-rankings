@@ -20,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * Class ImportFile
  * @package App\Import
  * @property array $worksheets
+ * @property bool $autoNameMetrics
  * @property bool $overwrite
  * @property ConsoleIo $shell_io
  * @property Spreadsheet $spreadsheet
@@ -30,6 +31,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class ImportFile
 {
+    private $autoNameMetrics;
     private $error;
     private $filename;
     private $overwrite;
@@ -719,7 +721,8 @@ class ImportFile
             "Options for each:\n" .
             " - Enter an existing $context metric ID\n" .
             " - Enter the name of a new metric to create \n" .
-            " - Enter nothing to accept the suggested name";
+            " - Enter nothing to accept the suggested name \n" .
+            ' - Enter "auto" to accept all suggested names for this file';
         $this->shell_io->out($msg);
 
         $filename = $this->getFilename();
@@ -798,8 +801,13 @@ class ImportFile
      */
     private function getMetricInput($suggestedName, $unknownMetric)
     {
-        $input = $this->shell_io->ask('Metric ID or name:');
         $context = $this->getContext();
+
+        if ($this->autoNameMetrics) {
+            return $this->addMetric($context, $unknownMetric, $suggestedName);
+        }
+
+        $input = $this->shell_io->ask('Metric ID or name:');
 
         // Existing metric ID entered
         if (is_numeric($input)) {
@@ -816,25 +824,46 @@ class ImportFile
 
         // Name of new metric entered
         try {
-            $metricName = $input ?: $suggestedName;
-            /** @var MetricsTable $metricsTable */
-            $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-            $metric = $metricsTable->addRecord($context, $metricName);
-            if (!$metric) {
-                throw new Exception('Metric could not be saved.');
+            if ($input == 'auto') {
+                $metricName = $suggestedName;
+                $this->autoNameMetrics = true;
+            } else {
+                $metricName = $input ?: $suggestedName;
             }
-            $this->shell_io->out('Metric #' . $metric->id . ' added');
 
-            /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
-            $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
-            $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
-
-            return $metric->id;
+            return $this->addMetric($context, $unknownMetric, $metricName);
         } catch (Exception $e) {
             $this->shell_io->error('Error: ' . $e->getMessage());
 
             return $this->getMetricInput($suggestedName, $unknownMetric);
         }
+    }
+
+    /**
+     * Adds a new metric to the database
+     *
+     * @param string $context Either school or district
+     * @param array $unknownMetric Array of name and group information for the current column
+     * @param string $metricName Name of new metric
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
+     * @return int
+     */
+    private function addMetric($context, $unknownMetric, $metricName)
+    {
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metric = $metricsTable->addRecord($context, $metricName);
+        if (!$metric) {
+            throw new Exception('Metric could not be saved.');
+        }
+        $this->shell_io->out('Metric #' . $metric->id . ' added');
+
+        /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
+        $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
+        $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
+
+        return $metric->id;
     }
 
     /**
