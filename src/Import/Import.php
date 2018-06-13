@@ -78,19 +78,41 @@ class Import
      */
     public function getSuggestedName($filename, $worksheetName, $unknownMetric)
     {
-        $nameDelimiter = ' - ';
-        $groupName = $unknownMetric['group'];
-        $columnName = $unknownMetric['name'];
+        // Start with filename
         $suggestedNameParts = [explode('.', $filename)[0]];
+
+        // Add worksheet name (unless if it's a year)
         if (!$this->isYear($worksheetName)) {
-            $suggestedNameParts[] = $worksheetName;
+            $suggestedNameParts[] = trim($worksheetName);
         }
-        $cleanColumnName = str_replace("\n", $nameDelimiter, $columnName);
-        $cleanColumnName = str_replace('  ', ' ', $cleanColumnName);
-        if ($groupName) {
-            $cleanColumnName .= ' (' . $groupName . ')';
+
+        // Clean up and add the column name
+        $columnName = $unknownMetric['name'];
+        $cleanColumnName = $columnName;
+        while (strpos($cleanColumnName, '  ') !== false) {
+            $cleanColumnName = str_replace("\n", ' ', $cleanColumnName);
+            $cleanColumnName = str_replace('  ', ' ', $cleanColumnName);
         }
-        $suggestedNameParts[] = $cleanColumnName;
+        $suggestedNameParts[] = trim($cleanColumnName);
+
+        // Add group, if applicable
+        if ($unknownMetric['group']) {
+            $suggestedNameParts[] = $unknownMetric['group'];
+        }
+
+        // Remove blank and repeated parts
+        foreach ($suggestedNameParts as $i => $namePart) {
+            if ($namePart == '') {
+                unset($suggestedNameParts[$i]);
+                continue;
+            }
+            if ($i > 0 && $suggestedNameParts[$i - 1] == $namePart) {
+                unset($suggestedNameParts[$i]);
+                continue;
+            }
+        }
+
+        $nameDelimiter = ' > ';
 
         return implode($nameDelimiter, $suggestedNameParts);
     }
