@@ -386,7 +386,7 @@ class MetricsTable extends Table
     public function setScope($context)
     {
         if (Context::isValidOrFail($context)) {
-            $this->behaviors()->Tree->config('scope', ['context' => $context]);
+            $this->behaviors()->Tree->setConfig('scope', ['context' => $context]);
         }
     }
 }
