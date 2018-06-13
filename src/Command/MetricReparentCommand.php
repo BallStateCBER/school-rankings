@@ -70,6 +70,7 @@ class MetricReparentCommand extends Command
      * @param ConsoleIo $io Console IO object
      * @return void
      * @throws \Aura\Intl\Exception
+     * @throws \Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -115,27 +116,14 @@ class MetricReparentCommand extends Command
      * @param Arguments $args Command arguments
      * @param ConsoleIo $io Console IO object
      * @return void
+     * @throws \Exception
      */
     private function getChildren(Arguments $args, ConsoleIo $io)
     {
         // Collect child metric info
         $childMetricsString = $args->getArgument('childMetrics');
-        $this->childMetricIds = [];
+        $this->childMetricIds = Utility::parseMultipleIdString($childMetricsString);
         $this->childMetrics = [];
-        foreach (explode(',', $childMetricsString) as $range) {
-            $dashCount = substr_count($range, '-');
-            if (!$dashCount) {
-                $this->childMetricIds[] = $range;
-                continue;
-            }
-            if ($dashCount == 1) {
-                list($rangeStart, $rangeEnd) = explode('-', $range);
-                $this->childMetricIds = array_merge($this->childMetricIds, range($rangeStart, $rangeEnd));
-                continue;
-            }
-            $io->error('Invalid range: ' . $range);
-            $this->abort();
-        }
         foreach ($this->childMetricIds as $childMetricId) {
             if ($childMetricId == $this->parentMetricId) {
                 $io->error('Cannot make metric #' . $childMetricId . ' its own parent');
