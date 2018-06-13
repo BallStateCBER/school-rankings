@@ -16,7 +16,6 @@ use Cake\Console\Exception\StopException;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Database\Query;
 use Cake\Datasource\Exception\RecordNotFoundException;
-use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 
@@ -31,11 +30,13 @@ use Cake\Utility\Hash;
  * @property array $statsToUpdate
  * @property ConsoleIo $io
  * @property CriteriaTable $criteriaTable
- * @property int[] $metricIds
- * @property Metric[] $metrics
+ * @property int $metricIdToRetain
+ * @property int[] $metricIdsToDelete
+ * @property Metric $metricToDelete
+ * @property Metric[] $metricToRetain
  * @property MetricsTable $metricsTable
- * @property ResultSet $criteriaToMerge
- * @property ResultSet $statsToMerge
+ * @property array $criteriaToMerge
+ * @property array $statsToMerge
  * @property StatisticsTable $statisticsTable
  * @property string $context
  */
@@ -47,9 +48,11 @@ class MetricMergeCommand extends Command
     private $criteriaToMerge;
     private $criteriaToUpdate;
     private $io;
-    private $metricIds;
-    private $metrics;
+    private $metricIdsToDelete;
+    private $metricIdToRetain;
     private $metricsTable;
+    private $metricsToDelete;
+    private $metricToRetain;
     private $sortedCriteria;
     private $sortedStats;
     private $statisticsTable;
@@ -76,12 +79,13 @@ class MetricMergeCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
-            'metricIdA' => [
-                'help' => 'First metric ID (will be removed)',
+            'metricIdsToDelete' => [
+                'help' => 'One or more metric IDs or ranges (e.g. "1,3-5,7-10") ' .
+                    'to merge into the second argument and delete',
                 'required' => true
             ],
-            'metricIdB' => [
-                'help' => 'Second metric ID (will be retained)',
+            'metricIdToRetain' => [
+                'help' => 'A metric ID to merge the first metric(s) into and retain',
                 'required' => true
             ],
         ]);
@@ -96,6 +100,7 @@ class MetricMergeCommand extends Command
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
      * @throws \Aura\Intl\Exception
+     * @throws \Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -103,42 +108,44 @@ class MetricMergeCommand extends Command
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
         $this->io = $io;
-        $this->metricIds = [
-            $args->getArgument('metricIdA'),
-            $args->getArgument('metricIdB')
-        ];
+        $this->metricIdsToDelete = Utility::parseMultipleIdString($args->getArgument('metricIdsToDelete'));
+        $this->metricIdToRetain = $args->getArgument('metricIdToRetain');
 
         try {
             $this->verifyMetrics();
 
             $this->collectStatistics();
-            if (!$this->statsToMerge->isEmpty()) {
+            if (!$this->statsToMerge) {
                 $this->checkForStatConflicts();
                 $this->io->out();
                 $this->prepareStats();
             }
 
             $this->collectCriteria();
-            if (!$this->criteriaToMerge->isEmpty()) {
+            if (!$this->criteriaToMerge) {
                 $this->checkForCriteriaConflicts();
                 $this->io->out();
                 $this->prepareCriteria();
             }
 
             $this->io->out(
-                "\nMetric #" . $this->metricIds[0] . ' will be deleted'
+                sprintf(
+                    "\n%s #%s will be deleted",
+                    __n('Metric', 'Metrics', count($this->metricIdsToDelete)),
+                    implode(', ', $this->metricIdsToDelete)
+                )
             );
             $continue = $this->io->askChoice('Continue?', ['y', 'n'], 'n');
             if ($continue !== 'y') {
                 return;
             }
 
-            if (!$this->statsToMerge->isEmpty()) {
+            if (!$this->statsToMerge) {
                 $this->io->out();
                 $this->mergeStats();
             }
 
-            if (!$this->criteriaToMerge->isEmpty()) {
+            if (!$this->criteriaToMerge) {
                 $this->io->out();
                 $this->mergeCriteria();
             }
@@ -156,50 +163,66 @@ class MetricMergeCommand extends Command
      * Checks that the specified metrics exist
      *
      * @return void
+     * @throws \Exception
      */
     private function verifyMetrics()
     {
         $this->io->out('Verifying metrics...', 0);
-        $this->metrics = [];
-        foreach ($this->metricIds as $metricId) {
-            try {
+        $this->metricsToDelete = [];
+
+        try {
+            $metricId = null;
+            foreach ($this->metricIdsToDelete as $metricId) {
                 $metric = $this->metricsTable->get($metricId);
+
+                // Check to see if we can merge these metrics
                 if ($this->context && $metric->context != $this->context) {
                     $this->io->out();
-                    $this->io->error("Cannot merge a $this->context metric with a $metric->context metric");
+                    $this->io->error("Metrics in first argument have mixed school/district contexts");
                     $this->abort();
                 }
-                $this->metrics[] = $metric;
+                $hasChildren = $this->metricsTable->childCount($metric, true) > 0;
+                if ($hasChildren) {
+                    $this->io->out();
+                    $this->io->error(
+                        ucwords($this->context) . ' metric #' . $metric .
+                        ' cannot be merged while it has child-metrics'
+                    );
+                    $this->abort();
+                }
+
+                $this->metricsToDelete[] = $metric;
                 $this->context = $metric->context;
-            } catch (RecordNotFoundException $e) {
+            }
+
+            $metric = $this->metricsTable->get($this->metricIdToRetain);
+
+            // Make sure the metric being merged into is valid
+            if ($metric->context != $this->context) {
                 $this->io->out();
-                $this->io->error(ucwords($this->context) . ' metric #' . $metricId . ' not found');
+                $this->io->error("Cannot merge $this->context metric(s) into $metric->context metric");
                 $this->abort();
             }
-        }
 
-        $hasChildren = $this->metricsTable->childCount($this->metrics[0], true) > 0;
-        if ($hasChildren) {
+            $this->metricToRetain = $metric;
+        } catch (RecordNotFoundException $e) {
             $this->io->out();
-            $this->io->error(
-                ucwords($this->context) . ' metric #' . $this->metricIds[0] .
-                ' cannot be merged while it has child-metrics'
-            );
+            $this->io->error(ucwords($this->context) . ' metric #' . $metricId . ' not found');
             $this->abort();
         }
 
         $this->io->overwrite('Metrics found');
-        foreach ($this->metrics as $metric) {
-            try {
-                $this->metricsTable->setScope($this->context);
-            } catch (\Exception $e) {
-                $this->io->error('Invalid context: ' . $this->context);
-                $this->abort();
-            }
+        $this->metricsTable->setScope($this->context);
+        $displayPath = function ($metric) {
             $path = $this->metricsTable->getMetricTreePath($metric->id);
             $pathString = implode(' > ', Hash::extract($path, '{n}.name'));
             $this->io->out(' - Metric #' . $metric->id . ': ' . $pathString);
+        };
+        foreach ($this->metricsToDelete as $metric) {
+            $displayPath($metric);
         }
+        $this->io->out('To be merged into:');
+        $displayPath($this->metricToRetain);
         $this->io->out();
     }
 
@@ -213,26 +236,33 @@ class MetricMergeCommand extends Command
     {
         $this->io->out('Collecting statistics...', 0);
         $locationField = Context::getLocationField($this->context);
-        $this->statsToMerge = $this->statisticsTable->find()
-            ->select([
-                'id',
-                $locationField,
-                'year',
-                'value'
-            ])
-            ->where(['metric_id' => $this->metricIds[0]])
-            ->all();
-        if ($this->statsToMerge->isEmpty()) {
-            $this->io->overwrite('No statistics associated with metric #' . $this->metricIds[0]);
+        $this->statsToMerge = [];
 
-            return;
+        foreach ($this->metricIdsToDelete as $metricId) {
+            $stats = $this->statisticsTable->find()
+                ->select([
+                    'id',
+                    $locationField,
+                    'year',
+                    'value',
+                    'metric_id'
+                ])
+                ->where(['metric_id' => $metricId])
+                ->toArray();
+            if (!$stats) {
+                $this->io->overwrite('No statistics associated with metric #' . $metricId);
+
+                continue;
+            }
+
+            $count = count($stats);
+            $this->io->overwrite(
+                $count . __n(' statistic', ' statistics', $count) .
+                ' found for metric #' . $metricId
+            );
+
+            $this->statsToMerge = array_merge($this->statsToMerge, $stats);
         }
-
-        $count = count($this->statsToMerge);
-        $this->io->overwrite(
-            $count . __n(' statistic', ' statistics', $count) .
-            ' found for metric #' . $this->metricIds[0]
-        );
     }
 
     /**
@@ -257,7 +287,7 @@ class MetricMergeCommand extends Command
                 ->where([
                     $locationField => $stat->$locationField,
                     'year' => $stat->year,
-                    'metric_id' => $this->metricIds[1]
+                    'metric_id' => $this->metricIdToRetain
                 ])
                 ->first();
             if ($conflictStat) {
@@ -280,29 +310,26 @@ class MetricMergeCommand extends Command
         if ($totalConflicts) {
             if ($evCount) {
                 $this->io->out(sprintf(
-                    ' - %s redundant %s will be deleted from metric #%s',
+                    ' - %s redundant %s will be deleted',
                     $evCount,
-                    __n('stat', 'stats', $evCount),
-                    $this->metricIds[0]
+                    __n('stat', 'stats', $evCount)
                 ));
             }
             if ($ivCount) {
                 $this->io->out(sprintf(
-                    ' - %s %s with different values for each metric will be deleted from metric #%s',
+                    ' - %s %s with different values for each metric will be deleted',
                     $ivCount,
-                    __n('stat', 'stats', $ivCount),
-                    $this->metricIds[0]
+                    __n('stat', 'stats', $ivCount)
                 ));
             }
         }
         $ncCount = count($this->sortedStats['noConflict']);
         if ($ncCount) {
             $this->io->out(sprintf(
-                ' - %s %s will be moved from metric #%s to metric #%s',
+                ' - %s %s will be moved to metric #%s',
                 $ncCount,
                 __n('stat', 'stats', $ncCount),
-                $this->metricIds[0],
-                $this->metricIds[1]
+                $this->metricIdToRetain
             ));
         }
     }
@@ -323,7 +350,7 @@ class MetricMergeCommand extends Command
         foreach ($this->statsToMerge as $stat) {
             // Moving
             if (in_array($stat->id, $this->sortedStats['noConflict'])) {
-                $stat = $this->statisticsTable->patchEntity($stat, ['metric_id' => $this->metricIds[1]]);
+                $stat = $this->statisticsTable->patchEntity($stat, ['metric_id' => $this->metricIdToRetain]);
 
                 $errors = $stat->getErrors();
                 $passesRules = $this->statisticsTable->checkRules($stat, 'update');
@@ -364,24 +391,29 @@ class MetricMergeCommand extends Command
     {
         $this->io->out("\nCollecting formula criteria...", 0);
         $context = $this->context;
-        $this->criteriaToMerge = $this->criteriaTable->find()
-            ->select(['id', 'formula_id'])
-            ->where(['metric_id' => $this->metricIds[0]])
-            ->matching('Formulas', function (Query $q) use ($context) {
-                return $q->where(['Formulas.context' => $context]);
-            })
-            ->all();
-        if ($this->criteriaToMerge->isEmpty()) {
-            $this->io->overwrite('No criteria associated with metric #' . $this->metricIds[0]);
+        $this->criteriaToMerge = [];
 
-            return;
+        foreach ($this->metricIdsToDelete as $metricId) {
+            $criteria = $this->criteriaTable->find()
+                ->select(['id', 'formula_id'])
+                ->where(['metric_id' => $metricId])
+                ->matching('Formulas', function (Query $q) use ($context) {
+                    return $q->where(['Formulas.context' => $context]);
+                })
+                ->toArray();
+            if (!$criteria) {
+                $this->io->overwrite('No criteria associated with metric #' . $metricId);
+
+                continue;
+            }
+            $count = count($this->criteriaToMerge);
+            $this->io->overwrite(
+                $count . __n(' criterion', ' criteria', $count) .
+                ' found for metric #' . $metricId
+            );
+
+            $this->criteriaToMerge = array_merge($this->criteriaToMerge, $criteria);
         }
-
-        $count = count($this->criteriaToMerge);
-        $this->io->overwrite(
-            $count . __n(' criterion', ' criteria', $count) .
-            ' found for metric #' . $this->metricIds[0]
-        );
     }
 
     /**
@@ -406,7 +438,7 @@ class MetricMergeCommand extends Command
                         return $exp->notEq('Criteria.id', $criterion->id);
                     },
                     'formula_id' => $criterion->formula_id,
-                    'metric_id' => $this->metricIds[1]
+                    'metric_id' => $this->metricIdToRetain
                 ])
                 ->first();
 
@@ -428,19 +460,17 @@ class MetricMergeCommand extends Command
 
         if ($noConflictCount) {
             $this->io->out(sprintf(
-                ' - %s %s will be moved from metric #%s to metric #%s',
+                ' - %s %s will be moved to metric #%s',
                 $noConflictCount,
                 __n('criterion', 'criteria', $noConflictCount),
-                $this->metricIds[0],
-                $this->metricIds[1]
+                $this->metricIdToRetain
             ));
         }
         if ($conflictCount) {
             $this->io->out(sprintf(
-                ' - %s redundant %s using metric #%s will be deleted',
+                ' - %s redundant %s will be deleted',
                 $conflictCount,
-                __n('criterion', 'criteria', $conflictCount),
-                $this->metricIds[0]
+                __n('criterion', 'criteria', $conflictCount)
             ));
         }
     }
@@ -486,7 +516,7 @@ class MetricMergeCommand extends Command
         foreach ($this->criteriaToMerge as $criterion) {
             // Moving
             if (in_array($criterion->id, $this->sortedCriteria['noConflict'])) {
-                $criterion = $this->criteriaTable->patchEntity($criterion, ['metric_id' => $this->metricIds[1]]);
+                $criterion = $this->criteriaTable->patchEntity($criterion, ['metric_id' => $this->metricIdToRetain]);
 
                 $errors = $criterion->getErrors();
                 $passesRules = $this->criteriaTable->checkRules($criterion, 'update');
@@ -546,16 +576,20 @@ class MetricMergeCommand extends Command
      * Deletes the first of the two specified metrics
      *
      * @return void
+     * @throws \Exception
      */
     private function deleteMetric()
     {
-        if ($this->metricsTable->delete($this->metrics[0])) {
-            $this->io->out('Metric #' . $this->metricIds[0] . ' deleted', 2);
+        $this->metricsTable->setScope($this->context);
+        foreach ($this->metricsToDelete as $metric) {
+            if ($this->metricsTable->delete($metric)) {
+                $this->io->out('Metric #' . $metric->id . ' deleted', 2);
 
-            return;
+                continue;
+            }
+
+            $this->io->error('Error deleting metric #' . $metric->id);
+            $this->abort();
         }
-
-        $this->io->error('Error deleting metric #' . $this->metricIds[0]);
-        $this->abort();
     }
 }
