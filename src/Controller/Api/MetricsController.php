@@ -21,12 +21,12 @@ class MetricsController extends AppController
      */
     public function schools()
     {
-        /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metricsTable->setScope('school');
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metricsTable->find('threaded')->toArray()
+            'metrics' => $metricsTable->find('threaded')
+                ->where(['context' => 'school'])
+                ->toArray()
         ]);
     }
 
@@ -38,12 +38,12 @@ class MetricsController extends AppController
      */
     public function districts()
     {
-        /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metricsTable->setScope('district');
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metricsTable->find('threaded')->toArray()
+            'metrics' => $metricsTable->find('threaded')
+                ->where(['context' => 'district'])
+                ->toArray()
         ]);
     }
 
