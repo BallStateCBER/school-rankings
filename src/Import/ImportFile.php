@@ -561,7 +561,7 @@ class ImportFile
 
         $context = $this->getActiveWorksheetProperty('context');
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        if ($metricsTable->exists(['id' => $metricId])) {
+        if (!$metricsTable->exists(['id' => $metricId])) {
             throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
         }
 
