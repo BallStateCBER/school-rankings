@@ -67,7 +67,7 @@
     "url": ""
   },
   "scripts": {
-    "lint": "eslint webroot/js/* --ext .js,.jsx",
+    "lint": "./node_modules/.bin/eslint webroot/js/* --ext .js,.jsx",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack --mode development --config webpack.dev.js",
     "build": "webpack --mode production --config webpack.prod.js",
