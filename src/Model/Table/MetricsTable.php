@@ -92,27 +92,13 @@ class MetricsTable extends Table
                 'message' => 'The title is not valid'
             ]);
 
-        $table = $this;
         $validator
             ->integer('parent_id')
             ->allowEmpty('parent_id')
-            ->add('parent_id', 'unique', [
-                'rule' => function ($value, $context) use ($table) {
-                    $metricId = $context['data']['id'] ?? null;
-                    $parentId = $value;
-
-                    if (isset($context['data']['name'])) {
-                        $name = $context['data']['name'];
-                    } elseif ($metricId) {
-                        $metric = $table->get($metricId);
-                        $name = $metric->name;
-                    } else {
-                        throw new BadRequestException('Either metric ID or name are required');
-                    }
-
-                    return !$table->hasNameConflict($metricId, $parentId, $name);
-                },
-                'message' => 'Another metric with the same parent has the same name'
+            ->add('parent_id', 'isValidParent', [
+                'rule' => 'validateParent',
+                'message' => 'Another metric with the same parent has the same name',
+                'provider' => 'table'
             ]);
 
         $validator
@@ -121,17 +107,9 @@ class MetricsTable extends Table
             ->requirePresence('name', 'create')
             ->notEmpty('name')
             ->add('name', 'unique', [
-                'rule' => function ($value, $context) use ($table) {
-                    $metricId = $context['data']['id'] ?? null;
-                    if ($metricId) {
-                        $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
-                    } else {
-                        $parentId = null;
-                    }
-
-                    return !$table->hasNameConflict($metricId, $parentId, $value);
-                },
-                'message' => 'Another metric with the same parent has the same name'
+                'rule' => 'validateName',
+                'message' => 'Another metric with the same parent has the same name',
+                'provider' => 'table'
             ]);
 
         $validator
@@ -143,7 +121,7 @@ class MetricsTable extends Table
             ->maxLength('type', 255)
             ->requirePresence('type', 'create')
             ->notEmpty('type')
-            ->inList('type', ['numeric', 'boolean']);
+            ->inList('type', $this->getMetricTypes());
 
         $validator
             ->boolean('selectable')
@@ -388,5 +366,57 @@ class MetricsTable extends Table
         if (Context::isValidOrFail($context)) {
             $this->behaviors()->Tree->setConfig('scope', ['context' => $context]);
         }
+    }
+
+    /**
+     * Returns whether or not the metric specified in $context can have $parentId
+     *
+     * @param int $parentId ID of parent metric
+     * @param array $context Validation context array
+     * @return bool
+     */
+    public function validateParent($parentId, array $context)
+    {
+        $metricId = $context['data']['id'] ?? null;
+
+        if (isset($context['data']['name'])) {
+            $name = $context['data']['name'];
+        } elseif ($metricId) {
+            $metric = $this->get($metricId);
+            $name = $metric->name;
+        } else {
+            throw new BadRequestException('Either metric ID or name are required');
+        }
+
+        return !$this->hasNameConflict($metricId, $parentId, $name);
+    }
+
+    /**
+     * Returns whether or not the metric specified in $context can have $name
+     *
+     * @param string $name Metric name
+     * @param array $context Validation context array
+     * @return bool
+     */
+    public function validateName($name, array $context)
+    {
+        $metricId = $context['data']['id'] ?? null;
+        if ($metricId) {
+            $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
+        } else {
+            $parentId = null;
+        }
+
+        return !$this->hasNameConflict($metricId, $parentId, $name);
+    }
+
+    /**
+     * Returns an array of valid metric types
+     *
+     * @return array
+     */
+    public function getMetricTypes()
+    {
+        return ['numeric', 'boolean'];
     }
 }
