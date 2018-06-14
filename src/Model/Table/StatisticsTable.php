@@ -74,7 +74,12 @@ class StatisticsTable extends Table
         $validator
             ->integer('year')
             ->requirePresence('year', 'create')
-            ->notEmpty('year');
+            ->notEmpty('year')
+            ->add('role', 'validYear', [
+                'rule' => 'isValidYear',
+                'message' => 'Invalid year',
+                'provider' => 'table'
+            ]);
 
         $validator
             ->boolean('contiguous')
@@ -210,5 +215,26 @@ class StatisticsTable extends Table
         }
 
         return false;
+    }
+
+    /**
+     * Returns whether or not $year appears to be a year within a sensible range
+     *
+     * @param int|string $year Year value
+     * @return bool|string
+     */
+    public function validateYear($year)
+    {
+        if (!is_numeric($year) || is_float($year)) {
+            return "$year is not a valid year";
+        }
+
+        $earliestYear = date('Y') - 100;
+        $latestYear = date('Y') + 1;
+        if ((int)$year < $earliestYear || (int)$year > $latestYear) {
+            return "$year is out of the acceptable range of years ($earliestYear-$latestYear)";
+        }
+
+        return true;
     }
 }
