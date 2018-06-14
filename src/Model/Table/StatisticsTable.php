@@ -64,7 +64,12 @@ class StatisticsTable extends Table
             ->scalar('value')
             ->maxLength('value', 255)
             ->requirePresence('value', 'create')
-            ->notEmpty('value');
+            ->notEmpty('value')
+            ->add('role', 'validValue', [
+                'rule' => 'isValidValue',
+                'message' => 'Stat values must be numbers, percents, or capital letter grades',
+                'provider' => 'table'
+            ]);
 
         $validator
             ->integer('year')
@@ -177,5 +182,33 @@ class StatisticsTable extends Table
             default:
                 throw new InternalErrorException('Statistics context "' . $context . '" not recognized');
         }
+    }
+
+    /**
+     * Returns whether or not the statistic value is valid
+     *
+     * @param string $value Value of statistic
+     * @return bool
+     */
+    public function isValidValue($value)
+    {
+        // Grades
+        if (in_array($value, ['A', 'B', 'C', 'D', 'F'])) {
+            return true;
+        }
+
+        // Percentages
+        $hasPercentSign = strpos($value, '%') == strlen($value) - 1;
+        $isNumericPercent = is_numeric(substr($value, 0, -1));
+        if ($hasPercentSign && $isNumericPercent) {
+            return true;
+        }
+
+        // Numbers
+        if (is_numeric($value)) {
+            return true;
+        }
+
+        return false;
     }
 }
