@@ -159,10 +159,12 @@ class ImportRunCommand extends Command
                     $this->importFile->identifyLocations();
                     $this->importFile->recordData();
                 } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                    $io->nl();
                     $io->error($e->getMessage());
 
                     return;
                 } catch (Exception $e) {
+                    $io->nl();
                     $io->error($e->getMessage());
 
                     return;
