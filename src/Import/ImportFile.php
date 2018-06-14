@@ -769,6 +769,14 @@ class ImportFile
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
         $this->shell_io->out("Identifying $subject...");
 
+        /** @var ProgressHelper $progress */
+        $progress = $this->shell_io->helper('Progress');
+        $progress->init([
+            'total' => count($this->getLocations()),
+            'width' => 40,
+        ]);
+        $progress->draw();
+
         foreach ($this->getLocations() as $rowNum => $location) {
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
@@ -794,8 +802,11 @@ class ImportFile
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
+
+            $progress->increment(1);
+            $progress->draw();
         }
-        $this->shell_io->out(' - Done');
+        $this->shell_io->overwrite(' - Done');
     }
 
     /**
