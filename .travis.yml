@@ -35,7 +35,7 @@ script:
   - if [[ $PHPUNIT = 1 ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi
   - if [[ $PHPUNIT = 1 ]]; then mkdir -p build/logs; fi
   - if [[ $PHPCS = 1 ]]; then vendor/bin/phpcs -p --extensions=php --error-severity=1 --warning-severity=0 --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config ./webroot; fi
-  - if [[ $JSLINT = 1 ]]; then node_modules/.bin/eslint webroot/js/* --ext .js,.jsx; fi
+  - if [[ $JSLINT = 1 ]]; then npm run lint; fi
   - if [[ $WEBPACK_BUILD = 1 ]]; then npm run build; fi
 
 notifications:
