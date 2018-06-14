@@ -231,7 +231,7 @@ class MetricsTable extends Table
      */
     public function hasIncompatibleStatistics($metricType, $metricId)
     {
-        // All statistic values (including 1 and 0) can be of the "numeric" type
+        // All statistic values (including the boolean 1/0 and letter grades A-F) can be of the "numeric" type
         if ($metricType == 'numeric') {
             return false;
         } elseif ($metricType != 'boolean') {
