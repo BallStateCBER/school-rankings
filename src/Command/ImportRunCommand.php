@@ -10,6 +10,12 @@ use Cake\Console\ConsoleOptionParser;
 use Exception;
 use InvalidArgumentException;
 
+/**
+ * Class ImportRunCommand
+ * @package App\Command
+ * @property Import $import
+ * @property ImportFile $importFile
+ */
 class ImportRunCommand extends Command
 {
     private $import;
