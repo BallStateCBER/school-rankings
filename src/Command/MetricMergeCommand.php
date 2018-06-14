@@ -115,14 +115,14 @@ class MetricMergeCommand extends Command
             $this->verifyMetrics();
 
             $this->collectStatistics();
-            if (!$this->statsToMerge) {
+            if ($this->statsToMerge) {
                 $this->checkForStatConflicts();
                 $this->io->out();
                 $this->prepareStats();
             }
 
             $this->collectCriteria();
-            if (!$this->criteriaToMerge) {
+            if ($this->criteriaToMerge) {
                 $this->checkForCriteriaConflicts();
                 $this->io->out();
                 $this->prepareCriteria();
@@ -140,12 +140,12 @@ class MetricMergeCommand extends Command
                 return;
             }
 
-            if (!$this->statsToMerge) {
+            if ($this->statsToMerge) {
                 $this->io->out();
                 $this->mergeStats();
             }
 
-            if (!$this->criteriaToMerge) {
+            if ($this->criteriaToMerge) {
                 $this->io->out();
                 $this->mergeCriteria();
             }
