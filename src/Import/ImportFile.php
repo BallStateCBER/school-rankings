@@ -769,33 +769,98 @@ class ImportFile
         $subject = ($context == 'district' ? 'districts' : 'schools/districts');
         $this->shell_io->out("Identifying $subject...");
 
+        /** @var ProgressHelper $progress */
+        $progress = $this->shell_io->helper('Progress');
+        $progress->init([
+            'total' => count($this->getLocations()),
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        $log = [
+            'district' => [
+                'identifiedCount' => 0,
+                'addedList' => []
+            ],
+            'school' => [
+                'identifiedCount' => 0,
+                'addedList' => []
+            ]
+        ];
         foreach ($this->getLocations() as $rowNum => $location) {
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
-                $districtId = $schoolDistrictsTable->getOrCreate(
-                    $location['districtCode'],
-                    $location['districtName'],
-                    $this->shell_io
-                );
-                $this->setLocationInfo($rowNum, 'districtId', $districtId);
+                $district = $schoolDistrictsTable->find()
+                    ->select(['id', 'name'])
+                    ->where(['code' => $location['districtCode']])
+                    ->first();
+                if ($district) {
+                    $log['district']['identifiedCount']++;
+                } else {
+                    $district = $schoolDistrictsTable->newEntity(compact('code', 'name'));
+                    $schoolDistrictsTable->saveOrFail($district);
+                    $log['district']['addedList'][] = "#$district->code: $district->name";
+                }
+                $this->setLocationInfo($rowNum, 'districtId', $district->id);
             } elseif (isset($location['districtCode'])) {
                 throw new Exception('District name missing in row ' . $rowNum);
             }
 
             $schoolId = null;
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
-                $schoolId = $schoolsTable->getOrCreate(
-                    $location['schoolCode'],
-                    $location['schoolName'],
-                    $districtId,
-                    $this->shell_io
-                );
-                $this->setLocationInfo($rowNum, 'schoolId', $schoolId);
+                $school = $schoolsTable->find()
+                    ->select(['id', 'name'])
+                    ->where(['code' => $location['schoolCode']])
+                    ->first();
+                if ($school) {
+                    $log['school']['identifiedCount']++;
+                } else {
+                    $school = $schoolsTable->newEntity([
+                        'code' => $location['schoolCode'],
+                        'name' => $location['schoolName'],
+                        'school_district_id' => $districtId
+                    ]);
+                    $schoolsTable->saveOrFail($school);
+                    $log['school']['addedList'][] = "#$school->code: $school->name";
+                }
+                $this->setLocationInfo($rowNum, 'schoolId', $school->id);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
                 throw new Exception('Incomplete school information in row ' . $rowNum);
             }
+
+            $progress->increment(1);
+            $progress->draw();
         }
-        $this->shell_io->overwrite(' - Done');
+
+        $firstLine = true;
+        foreach ($log as $context => $contextLog) {
+            if ($contextLog['identifiedCount']) {
+                $msg = sprintf(
+                    ' - %s %s identified',
+                    $contextLog['identifiedCount'],
+                    __n($context, "{$context}s", $contextLog['identifiedCount'])
+                );
+                if ($firstLine) {
+                    $this->shell_io->overwrite($msg);
+                    $firstLine = false;
+                } else {
+                    $this->shell_io->out($msg);
+                }
+            }
+            foreach ($contextLog['addedList'] as $addedRecord) {
+                $msg = sprintf(
+                    ' - Added %s %s',
+                    $context,
+                    $addedRecord
+                );
+                if ($firstLine) {
+                    $this->shell_io->overwrite($msg);
+                    $firstLine = false;
+                } else {
+                    $this->shell_io->out($msg);
+                }
+            }
+        }
     }
 
     /**
