@@ -145,12 +145,18 @@ class SchoolsTable extends Table
      */
     public function getOrCreate($code, $name, $districtId = null, $io = null)
     {
+        /** @var School $record */
         $record = $this->find()
-            ->select(['id'])
+            ->select(['id', 'name'])
             ->where(['code' => $code])
             ->first();
 
         if ($record) {
+            if ($io) {
+                $msg = " - Identified school #$code: $record->name";
+                $io->out($msg);
+            }
+
             return $record->id;
         }
 

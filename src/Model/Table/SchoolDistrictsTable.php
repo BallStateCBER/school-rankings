@@ -119,12 +119,18 @@ class SchoolDistrictsTable extends Table
      */
     public function getOrCreate($code, $name, $io = null)
     {
+        /** @var SchoolDistrict $record */
         $record = $this->find()
-            ->select(['id'])
+            ->select(['id', 'name'])
             ->where(['code' => $code])
             ->first();
 
         if ($record) {
+            if ($io) {
+                $msg = " - Identified district #$code: $record->name";
+                $io->out($msg);
+            }
+
             return $record->id;
         }
 
