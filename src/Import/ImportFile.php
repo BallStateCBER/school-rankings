@@ -17,6 +17,7 @@ use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use ZipArchive;
 
 /**
  * Class ImportFile
@@ -60,6 +61,15 @@ class ImportFile
         $this->filename = $filename;
         $this->shell_io = $io;
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+
+        $zip = new ZipArchive();
+        $readable = $zip->open($path);
+        if ($readable !== true) {
+            $this->error = $msg = 'Error opening ' . $filename . "\n" . $this->getZipArchiveErrorMsg($readable);
+
+            return;
+        }
+        $zip->close();
 
         try {
             // Read spreadsheet
@@ -1159,5 +1169,21 @@ class ImportFile
             $msg = " - $count " . __n('stat ', 'stats ', $count) . $action;
             $this->shell_io->out($msg);
         }
+    }
+
+    /**
+     * Returns a string description of a ZipArchive error
+     *
+     * @param int $code ZipArchive error code
+     * @return string
+     */
+    private function getZipArchiveErrorMsg($code)
+    {
+        switch ($code) {
+            case ZipArchive::ER_INCONS:
+                return 'Zip archive inconsistent';
+        }
+
+        return 'ZipArchive error code: ' . $code;
     }
 }
