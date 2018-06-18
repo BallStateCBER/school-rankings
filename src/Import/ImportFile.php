@@ -935,12 +935,12 @@ class ImportFile
         }
 
         // Add final metric
-        $this->addMetric($context, $finalMetric, $parentId);
+        $finalMetric = $this->addMetric($context, $finalMetric, $parentId);
 
         // Store column info => metric ID information in DB to save time later
         /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
         $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
-        $ssColsMetricsTable->add($this, $unknownMetric, $metric->id);
+        $ssColsMetricsTable->add($this, $unknownMetric, $finalMetric->id);
 
         return $metric->id;
     }
