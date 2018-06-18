@@ -797,7 +797,10 @@ class ImportFile
                 if ($district) {
                     $log['district']['identifiedCount']++;
                 } else {
-                    $district = $schoolDistrictsTable->newEntity(compact('code', 'name'));
+                    $district = $schoolDistrictsTable->newEntity([
+                        'code' => $location['districtCode'],
+                        'name' => $location['districtName']
+                    ]);
                     $schoolDistrictsTable->saveOrFail($district);
                     $log['district']['addedList'][] = "#$district->code: $district->name";
                 }
