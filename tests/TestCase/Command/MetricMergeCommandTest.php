@@ -167,4 +167,14 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
     {
         $this->markTestIncomplete();
     }
+
+    /**
+     * Tests that a merge successfully updates spreadsheet column -> metric ID relationships
+     *
+     * @return void
+     */
+    public function testMergeSpreadsheetColumns()
+    {
+        $this->markTestIncomplete();
+    }
 }
