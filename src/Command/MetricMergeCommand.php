@@ -642,7 +642,7 @@ class MetricMergeCommand extends Command
 
     /**
      * Prepares spreadsheet column records for updating and aborts on error
-     * 
+     *
      * @return void
      */
     private function prepareSpreadsheetColumns()
