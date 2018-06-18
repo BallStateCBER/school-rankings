@@ -4,9 +4,11 @@ namespace App\Command;
 use App\Model\Context\Context;
 use App\Model\Entity\Criterion;
 use App\Model\Entity\Metric;
+use App\Model\Entity\SpreadsheetColumnsMetric;
 use App\Model\Entity\Statistic;
 use App\Model\Table\CriteriaTable;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
@@ -23,10 +25,12 @@ use Cake\Utility\Hash;
  * Class MetricMergeCommand
  * @package App\Command
  * @property array $criteriaToDelete
+ * @property array $criteriaToMerge
  * @property array $criteriaToUpdate
  * @property array $sortedCriteria
  * @property array $sortedStats
  * @property array $statsToDelete
+ * @property array $statsToMerge
  * @property array $statsToUpdate
  * @property ConsoleIo $io
  * @property CriteriaTable $criteriaTable
@@ -35,8 +39,8 @@ use Cake\Utility\Hash;
  * @property Metric $metricToDelete
  * @property Metric[] $metricToRetain
  * @property MetricsTable $metricsTable
- * @property array $criteriaToMerge
- * @property array $statsToMerge
+ * @property SpreadsheetColumnsMetric[] $spreadsheetColumnsToUpdate
+ * @property SpreadsheetColumnsMetricsTable $spreadsheetColumnsTable
  * @property StatisticsTable $statisticsTable
  * @property string $context
  */
@@ -55,6 +59,8 @@ class MetricMergeCommand extends Command
     private $metricToRetain;
     private $sortedCriteria;
     private $sortedStats;
+    private $spreadsheetColumnsTable;
+    private $spreadsheetColumnsToUpdate;
     private $statisticsTable;
     private $statsToDelete;
     private $statsToMerge;
@@ -107,6 +113,7 @@ class MetricMergeCommand extends Command
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
+        $this->spreadsheetColumnsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
         $this->io = $io;
         $this->metricIdsToDelete = Utility::parseMultipleIdString($args->getArgument('metricIdsToDelete'));
         $this->metricIdToRetain = $args->getArgument('metricIdToRetain');
@@ -117,15 +124,20 @@ class MetricMergeCommand extends Command
             $this->collectStatistics();
             if ($this->statsToMerge) {
                 $this->checkForStatConflicts();
-                $this->io->out();
+                $this->io->nl();
                 $this->prepareStats();
             }
 
             $this->collectCriteria();
             if ($this->criteriaToMerge) {
                 $this->checkForCriteriaConflicts();
-                $this->io->out();
+                $this->io->nl();
                 $this->prepareCriteria();
+            }
+
+            $this->collectSpreadsheetColumns();
+            if ($this->spreadsheetColumnsToUpdate) {
+                $this->prepareSpreadsheetColumns();
             }
 
             $this->io->out(
@@ -141,16 +153,21 @@ class MetricMergeCommand extends Command
             }
 
             if ($this->statsToMerge) {
-                $this->io->out();
+                $this->io->nl();
                 $this->mergeStats();
             }
 
             if ($this->criteriaToMerge) {
-                $this->io->out();
+                $this->io->nl();
                 $this->mergeCriteria();
             }
 
-            $this->io->out();
+            if ($this->spreadsheetColumnsToUpdate) {
+                $this->io->nl();
+                $this->updateSpreadsheetColumns();
+            }
+
+            $this->io->nl();
             $this->deleteMetric();
 
             $this->io->success('Merge successful');
@@ -590,6 +607,75 @@ class MetricMergeCommand extends Command
 
             $this->io->error('Error deleting metric #' . $metric->id);
             $this->abort();
+        }
+    }
+
+    /**
+     * Collects the records in SpreadsheetColumnsMetricsTable that need their metric_id fields updated
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function collectSpreadsheetColumns()
+    {
+        $this->io->out("\nCollecting import spreadsheet columns...", 0);
+        $this->spreadsheetColumnsToUpdate = $this->spreadsheetColumnsTable->find()
+            ->where([
+                function (QueryExpression $exp) {
+                    return $exp->in('metric_id', $this->metricIdsToDelete);
+                }
+            ])
+            ->toArray();
+
+        if ($this->spreadsheetColumnsToUpdate) {
+            $count = count($this->spreadsheetColumnsToUpdate);
+            $this->io->overwrite(sprintf(
+                "%s associated spreadsheet %s found",
+                $count,
+                __n('column', 'columns', $count)
+            ));
+        } else {
+            $this->io->overwrite("No associated spreadsheet columns found");
+        }
+    }
+
+    /**
+     * Prepares spreadsheet column records for updating and aborts on error
+     * 
+     * @return void
+     */
+    private function prepareSpreadsheetColumns()
+    {
+        foreach ($this->spreadsheetColumnsToUpdate as &$column) {
+            $column = $this->spreadsheetColumnsTable->patchEntity($column, ['metric_id' => $this->metricIdToRetain]);
+
+            $passesRules = $this->spreadsheetColumnsTable->checkRules($column, 'update');
+            if (empty($errors) && $passesRules) {
+                continue;
+            }
+
+            $msg = "\nCannot update spreadsheet column #$column->id.";
+            $msg .= $errors
+                ? "\nDetails:\n" . print_r($errors, true)
+                : ' No details available. (Check for application rule violation)';
+            $this->io->error($msg);
+            $this->abort();
+        }
+    }
+
+    /**
+     * Updates spreadsheet column records in the database
+     *
+     * @return void
+     */
+    private function updateSpreadsheetColumns()
+    {
+        foreach ($this->spreadsheetColumnsToUpdate as $column) {
+            if (!$this->spreadsheetColumnsTable->save($column)) {
+                $this->io->error('Error updating spreadsheet column #' . $column->id);
+                $this->abort();
+            }
+            $this->io->out(' - Updated spreadsheet column  #' . $column->id);
         }
     }
 }
