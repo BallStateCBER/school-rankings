@@ -597,10 +597,11 @@ class MetricMergeCommand extends Command
      */
     private function deleteMetric()
     {
+        $this->io->out('Deleting metrics...');
         $this->metricsTable->setScope($this->context);
         foreach ($this->metricsToDelete as $metric) {
             if ($this->metricsTable->delete($metric)) {
-                $this->io->out('Metric #' . $metric->id . ' deleted', 2);
+                $this->io->out(' - Deleted metric #' . $metric->id);
 
                 continue;
             }
@@ -670,6 +671,7 @@ class MetricMergeCommand extends Command
      */
     private function updateSpreadsheetColumns()
     {
+        $this->io->out('Merging spreadsheet columns...');
         foreach ($this->spreadsheetColumnsToUpdate as $column) {
             if (!$this->spreadsheetColumnsTable->save($column)) {
                 $this->io->error('Error updating spreadsheet column #' . $column->id);
