@@ -955,7 +955,7 @@ class ImportFile
         $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
         $ssColsMetricsTable->add($this, $unknownMetric, $finalMetric->id);
 
-        return $metric->id;
+        return $finalMetric->id;
     }
 
     /**
