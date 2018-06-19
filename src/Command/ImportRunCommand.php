@@ -43,8 +43,15 @@ class ImportRunCommand extends Command
         $parser->addArguments([
             'year' => ['help' => 'The specific year to look up or "all"'],
             'fileKey' => ['help' => 'The numeric key for the specific file to process, or "all"']
-        ]);
-        $parser->setEpilog('Run "import-run all all" to process all files');
+        ])->addOption(
+            'auto-metrics',
+            [
+                'help' => 'Automatically accept all suggested metric names',
+                'boolean' => true
+            ]
+        )->setEpilog(
+            'Run "import-run all all --auto-metrics" to process all files and accept all suggested metric names'
+        );
 
         return $parser;
     }
@@ -159,6 +166,7 @@ class ImportRunCommand extends Command
             foreach ($selectedFiles as $file) {
                 $io->out('Opening ' . $file['filename'] . '...');
                 $this->importFile = new ImportFile($year, $file['filename'], $io);
+                $this->importFile->acceptMetricSuggestions = $args->getOption('auto-metrics');
                 if ($this->importFile->getError()) {
                     $io->error($this->importFile->getError());
 

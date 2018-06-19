@@ -23,6 +23,7 @@ use ZipArchive;
  * Class ImportFile
  * @package App\Import
  * @property array $worksheets
+ * @property bool $acceptMetricSuggestions
  * @property bool $autoNameMetrics
  * @property bool $overwrite
  * @property ConsoleIo $shell_io
@@ -43,6 +44,7 @@ class ImportFile
     private $shell_io;
     private $worksheets;
     private $year;
+    public $acceptMetricSuggestions;
     public $activeWorksheet;
     public $spreadsheet;
 
@@ -732,15 +734,23 @@ class ImportFile
 
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
         $count = count($unknownMetrics);
-        $msg = $count . ' new ' . __n('metric', 'metrics', $count) . ' found' . "\n\n" .
-            (($count == 1) ? "Options:\n" : "Options for each:\n") .
-            " - Enter an existing $context metric ID\n" .
-            " - Enter the name of a new metric to create \n" .
-            " - Enter nothing to accept the suggested name \n" .
-            " - Enter \"auto\" to accept all suggested names for this file\n\n" .
-            'To nest a metric underneath one or more ancestors, separate each level with " > ", ' .
-            'e.g. "Population > Nerds > Sci-fi nerds > Star Trek nerds"';
-        $this->shell_io->out($msg);
+        $this->shell_io->out(sprintf(
+            "%s new %s found",
+            $count,
+            __n('metric', 'metrics', $count)
+        ));
+        if (!$this->acceptMetricSuggestions) {
+            $this->shell_io->out(
+                "\n\n" .
+                (($count == 1) ? "Options:\n" : "Options for each:\n") .
+                " - Enter an existing $context metric ID\n" .
+                " - Enter the name of a new metric to create \n" .
+                " - Enter nothing to accept the suggested name \n" .
+                " - Enter \"auto\" to accept all suggested names for this file\n\n" .
+                'To nest a metric underneath one or more ancestors, separate each level with " > ", ' .
+                'e.g. "Population > Nerds > Sci-fi nerds > Star Trek nerds"'
+            );
+        }
 
         $filename = $this->getFilename();
         $worksheetName = $this->activeWorksheet;
@@ -892,7 +902,9 @@ class ImportFile
             return $this->addMetricChain($context, $unknownMetric, $suggestedName);
         }
 
-        $input = $this->shell_io->ask('Metric ID or name:');
+        $input = $this->acceptMetricSuggestions
+            ? 'auto'
+            : $this->shell_io->ask('Metric ID or name:');
 
         // Existing metric ID entered
         if (is_numeric($input)) {
