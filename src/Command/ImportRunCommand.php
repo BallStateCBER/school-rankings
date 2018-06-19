@@ -41,28 +41,33 @@ class ImportRunCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
-            'year' => ['help' => 'The specific year to look up'],
-            'fileKey' => ['help' => 'The numeric key for the specific file to process']
+            'year' => ['help' => 'The specific year to look up or "all"'],
+            'fileKey' => ['help' => 'The numeric key for the specific file to process, or "all"']
         ]);
+        $parser->setEpilog('Run "import-run all all" to process all files');
 
         return $parser;
     }
 
     /**
-     * Collects a year/subdirectory
+     * Asks the user for a year (or "all") and returns the response
      *
      * @param ConsoleIo $io Console IO object
-     * @return int
+     * @return string
      */
     private function selectYear($io)
     {
         $availableYears = $this->import->getYears();
-        $year = null;
-        while (!in_array($year, $availableYears)) {
-            $year = $io->ask('Select a year (' . min($availableYears) . '-' . max($availableYears) . '):');
+        $years = null;
+        while (!in_array($years, $availableYears) && $years != 'all') {
+            $years = $io->ask(sprintf(
+                'Select a year (%s-%s) or enter "all":',
+                min($availableYears),
+                max($availableYears)
+            ));
         }
 
-        return (int)$year;
+        return $years;
     }
 
     /**
@@ -107,80 +112,89 @@ class ImportRunCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $year = $args->hasArgument('year') ? $args->getArgument('year') : null;
+        $years = $args->hasArgument('year') ? $args->getArgument('year') : null;
         $fileKey = $args->hasArgument('fileKey') ? $args->getArgument('fileKey') : null;
 
         // Gather parameters
-        if (!$year) {
-            $year = $this->selectYear($io);
+        if (!$years) {
+            $years = $this->selectYear($io);
         }
-        if (!$fileKey) {
-            try {
-                $fileKey = $this->selectFileKey($year, $io);
-            } catch (InvalidArgumentException $e) {
-                $io->error($e->getMessage());
+        $years = ($years == 'all') ? $this->import->getYears() : [(int)$years];
 
-                return;
-            }
-        }
-
-        // Validate parameters
-        $files = $this->import->getFiles();
-        if (!isset($files[$year])) {
-            $io->error('No import files found in data' . DS . $year);
-
-            return;
-        }
-        if ($fileKey != 'all') {
-            if (!is_numeric($fileKey) || !isset($files[$year][$fileKey - 1])) {
-                $io->error('Invalid file key');
-
-                return;
-            }
-        }
-
-        // Loop through files
-        $selectedFiles = $fileKey == 'all' ?
-            $files[$year] :
-            [$files[$year][$fileKey - 1]];
-        foreach ($selectedFiles as $file) {
-            $io->out('Opening ' . $file['filename'] . '...');
-            $this->importFile = new ImportFile($year, $file['filename'], $io);
-            if ($this->importFile->getError()) {
-                $io->error($this->importFile->getError());
-
-                return;
+        foreach ($years as $year) {
+            if (count($years) > 1) {
+                $io->info("----------\n|  $year  |\n----------");
+                $io->out();
             }
 
-            // Read in worksheet info and validate data
-            $io->out('Analyzing worksheets...');
-            $io->out();
-            foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-                $io->info('Worksheet: ' . $worksheetName);
-                $io->out('Context: ' . ucwords($worksheetInfo['context']));
+            if (!$fileKey) {
                 try {
-                    $this->importFile->selectWorksheet($worksheetName);
-                    $this->importFile->validateData();
-                    $this->importFile->identifyMetrics();
-                    $this->importFile->identifyLocations();
-                    $this->importFile->recordData();
-                } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
-                    $io->nl();
-                    $io->error($e->getMessage());
-
-                    return;
-                } catch (Exception $e) {
-                    $io->nl();
+                    $fileKey = $this->selectFileKey($year, $io);
+                } catch (InvalidArgumentException $e) {
                     $io->error($e->getMessage());
 
                     return;
                 }
-                $io->out();
             }
 
-            // Free up memory
-            $this->importFile->spreadsheet->disconnectWorksheets();
-            unset($this->importFile);
+            // Validate parameters
+            $files = $this->import->getFiles();
+            if (!isset($files[$year])) {
+                $io->error('No import files found in data' . DS . $year);
+
+                return;
+            }
+            if ($fileKey != 'all') {
+                if (!is_numeric($fileKey) || !isset($files[$year][$fileKey - 1])) {
+                    $io->error('Invalid file key');
+
+                    return;
+                }
+            }
+
+            // Loop through files
+            $selectedFiles = $fileKey == 'all' ?
+                $files[$year] :
+                [$files[$year][$fileKey - 1]];
+            foreach ($selectedFiles as $file) {
+                $io->out('Opening ' . $file['filename'] . '...');
+                $this->importFile = new ImportFile($year, $file['filename'], $io);
+                if ($this->importFile->getError()) {
+                    $io->error($this->importFile->getError());
+
+                    return;
+                }
+
+                // Read in worksheet info and validate data
+                $io->out('Analyzing worksheets...');
+                $io->out();
+                foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+                    $io->info('Worksheet: ' . $worksheetName);
+                    $io->out('Context: ' . ucwords($worksheetInfo['context']));
+                    try {
+                        $this->importFile->selectWorksheet($worksheetName);
+                        $this->importFile->validateData();
+                        $this->importFile->identifyMetrics();
+                        $this->importFile->identifyLocations();
+                        $this->importFile->recordData();
+                    } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                        $io->nl();
+                        $io->error($e->getMessage());
+
+                        return;
+                    } catch (Exception $e) {
+                        $io->nl();
+                        $io->error($e->getMessage());
+
+                        return;
+                    }
+                    $io->out();
+                }
+
+                // Free up memory
+                $this->importFile->spreadsheet->disconnectWorksheets();
+                unset($this->importFile);
+            }
         }
 
         $io->out('Import complete');
