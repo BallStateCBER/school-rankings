@@ -358,7 +358,7 @@ class ImportFile
      * Returns true if the given cell contains a header for a school code column
      *
      * Known values:
-     * School / School ID / Sch ID / IDOE_SCHOOL_ID / SCH ID / Schl. Id
+     * School / School ID / Sch ID / IDOE_SCHOOL_ID / SCH ID / Schl. Id / Sch No
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
@@ -373,14 +373,14 @@ class ImportFile
         $value = strtolower($value);
         $value = str_replace([' ', '_', '.', 'idoe'], '', $value);
 
-        return in_array($value, ['school', 'schoolid', 'schid', 'schlid']);
+        return in_array($value, ['school', 'schoolid', 'schid', 'schlid', 'schno']);
     }
 
     /**
      * Returns true if the given cell contains a header for a school name column
      *
      * Known values:
-     * School Name / SCHOOL_NAME / SCHOOL NAME / Schl. Name
+     * School Name / SCHOOL_NAME / SCHOOL NAME / Schl. Name / Sch Name
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
