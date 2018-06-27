@@ -312,7 +312,7 @@ class ImportFile
      * Returns true if the given cell contains a header for a district code column
      *
      * Known values:
-     * Corp / Corp ID / IDOE_CORPORATION_ID / CORP ID / Corporation Id / Corp. Id / Corp. ID
+     * Corp / Corp ID / IDOE_CORPORATION_ID / CORP ID / Corporation Id / Corp. Id / Corp. ID / Corp. No
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
@@ -328,7 +328,7 @@ class ImportFile
         $value = str_replace([' ', '_', '.', 'idoe'], '', $value);
         $value = str_replace('corporation', 'corp', $value);
 
-        return in_array($value, ['corp', 'corpid']);
+        return in_array($value, ['corp', 'corpid', 'corpno']);
     }
 
     /**
