@@ -45,11 +45,6 @@ class ImportedFilesTable extends Table
     public function validationDefault(Validator $validator)
     {
         $validator
-            ->integer('id')
-            ->requirePresence('id', 'create')
-            ->notEmpty('id');
-
-        $validator
             ->scalar('file')
             ->maxLength('file', 255)
             ->requirePresence('file', 'create')
