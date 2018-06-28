@@ -53,13 +53,18 @@ class ImportFile
      * ImportFile constructor
      *
      * @param string $year Year (subdirectory of /data)
+     * @param string $dir Full path to the directory containing the spreadsheet
      * @param string $filename Filename of spreadsheet to import
      * @param ConsoleIo $io Console IO object
      */
-    public function __construct($year, $filename, $io)
+    public function __construct($year, $dir, $filename, $io)
     {
-        $type = 'Xlsx';
-        $path = ROOT . DS . 'data' . DS . $year . DS . $filename;
+        // Make sure $dir ends with a directory-separator character
+        if (substr($dir, -1, 1) != DS) {
+            $dir .= DS;
+        }
+
+        $path = $dir . $filename;
         $this->year = $year;
         $this->filename = $filename;
         $this->shell_io = $io;
@@ -77,7 +82,7 @@ class ImportFile
         try {
             // Read spreadsheet
             /** @var Xlsx $reader */
-            $reader = IOFactory::createReader($type);
+            $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $this->spreadsheet = $reader->load($path);
 

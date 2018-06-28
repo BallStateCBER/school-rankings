@@ -166,9 +166,10 @@ class ImportRunCommand extends Command
             $selectedFiles = $fileKey == 'all' ?
                 $files[$year] :
                 [$files[$year][$fileKey - 1]];
+            $dir = ROOT . DS . 'data' . DS . $year . DS;
             foreach ($selectedFiles as $file) {
                 $io->out('Opening ' . $file['filename'] . '...');
-                $this->importFile = new ImportFile($year, $file['filename'], $io);
+                $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
                 $this->importFile->acceptMetricSuggestions = $args->getOption('auto-metrics');
                 if ($this->importFile->getError()) {
                     $io->error($this->importFile->getError());
