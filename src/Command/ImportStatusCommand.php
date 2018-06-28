@@ -1,12 +1,16 @@
 <?php
 namespace App\Command;
 
-use App\Import\Import;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 
+/**
+ * Class ImportStatusCommand
+ * @package App\Command
+ * @property ImportUtility $import
+ */
 class ImportStatusCommand extends Command
 {
     private $import;
@@ -19,7 +23,7 @@ class ImportStatusCommand extends Command
     public function initialize()
     {
         parent::initialize();
-        $this->import = new Import();
+        $this->import = new ImportUtility();
     }
 
     /**

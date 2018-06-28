@@ -1,7 +1,6 @@
 <?php
 namespace App\Command;
 
-use App\Import\Import;
 use App\Import\ImportFile;
 use App\Model\Table\ImportedFilesTable;
 use Cake\Console\Arguments;
@@ -15,7 +14,7 @@ use InvalidArgumentException;
 /**
  * Class ImportRunCommand
  * @package App\Command
- * @property Import $import
+ * @property ImportUtility $import
  * @property ImportFile $importFile
  * @property ImportedFilesTable $importedFiles
  */
@@ -33,7 +32,7 @@ class ImportRunCommand extends Command
     public function initialize()
     {
         parent::initialize();
-        $this->import = new Import();
+        $this->import = new ImportUtility();
         $this->importedFiles = TableRegistry::getTableLocator()->get('ImportedFiles');
     }
 

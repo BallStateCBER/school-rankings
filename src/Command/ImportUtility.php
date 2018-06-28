@@ -1,12 +1,12 @@
 <?php
-namespace App\Import;
+namespace App\Command;
 
 use App\Model\Table\ImportedFilesTable;
 use Cake\Filesystem\Folder;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 
-class Import
+class ImportUtility
 {
     /**
      * Returns an array of sets of files, grouped by year, including both filename and date of last import
