@@ -198,9 +198,10 @@ class MetricsTable extends Table
      * @param int $metricId ID of a metric record
      * @param int|null $parentId Metric parent_id
      * @param string $name Metric name being validated
+     * @param string $metricContext Either 'school' or 'district'
      * @return bool
      */
-    public function hasNameConflict($metricId, $parentId, $name)
+    public function hasNameConflict($metricId, $parentId, $name, $metricContext)
     {
         $conditions = ['name' => $name];
         if ($parentId) {
@@ -209,6 +210,7 @@ class MetricsTable extends Table
             $conditions[] = function (QueryExpression $exp) {
                 return $exp->isNull('parent_id');
             };
+            $conditions['context'] = $metricContext;
         }
         if ($metricId) {
             $conditions[] = function (QueryExpression $exp) use ($metricId) {
@@ -372,15 +374,15 @@ class MetricsTable extends Table
      * Returns whether or not the metric specified in $context can have $parentId
      *
      * @param int $parentId ID of parent metric
-     * @param array $context Validation context array
+     * @param array $validationContext Validation context array
      * @return bool
      */
-    public function validateParent($parentId, array $context)
+    public function validateParent($parentId, array $validationContext)
     {
-        $metricId = $context['data']['id'] ?? null;
+        $metricId = $validationContext['data']['id'] ?? null;
 
-        if (isset($context['data']['name'])) {
-            $name = $context['data']['name'];
+        if (isset($validationContext['data']['name'])) {
+            $name = $validationContext['data']['name'];
         } elseif ($metricId) {
             $metric = $this->get($metricId);
             $name = $metric->name;
@@ -388,26 +390,30 @@ class MetricsTable extends Table
             throw new BadRequestException('Either metric ID or name are required');
         }
 
-        return !$this->hasNameConflict($metricId, $parentId, $name);
+        $metricContext = $validationContext['data']['context'];
+
+        return !$this->hasNameConflict($metricId, $parentId, $name, $metricContext);
     }
 
     /**
      * Returns whether or not the metric specified in $context can have $name
      *
      * @param string $name Metric name
-     * @param array $context Validation context array
+     * @param array $validationContext Validation context array
      * @return bool
      */
-    public function validateName($name, array $context)
+    public function validateName($name, array $validationContext)
     {
-        $metricId = $context['data']['id'] ?? null;
+        $metricId = $validationContext['data']['id'] ?? null;
         if ($metricId) {
-            $parentId = $context['data']['parent_id'] ?? $this->get($metricId)->parent_id;
+            $parentId = $validationContext['data']['parent_id'] ?? $this->get($metricId)->parent_id;
         } else {
             $parentId = null;
         }
 
-        return !$this->hasNameConflict($metricId, $parentId, $name);
+        $metricContext = $validationContext['data']['context'];
+
+        return !$this->hasNameConflict($metricId, $parentId, $name, $metricContext);
     }
 
     /**
