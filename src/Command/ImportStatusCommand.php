@@ -9,12 +9,9 @@ use Cake\Console\ConsoleOptionParser;
 /**
  * Class ImportStatusCommand
  * @package App\Command
- * @property ImportUtility $import
  */
 class ImportStatusCommand extends Command
 {
-    private $import;
-
     /**
      * Initializes the command
      *
@@ -23,7 +20,6 @@ class ImportStatusCommand extends Command
     public function initialize()
     {
         parent::initialize();
-        $this->import = new ImportUtility();
     }
 
     /**
@@ -52,7 +48,7 @@ class ImportStatusCommand extends Command
     {
         $year = $args->hasArgument('year') ? $args->getArgument('year') : null;
 
-        $files = $this->import->getFiles();
+        $files = ImportRunCommand::getFiles();
 
         if ($year) {
             if (isset($files[$year])) {

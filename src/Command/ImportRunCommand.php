@@ -7,6 +7,8 @@ use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Filesystem\Folder;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Exception;
 use InvalidArgumentException;
@@ -14,13 +16,11 @@ use InvalidArgumentException;
 /**
  * Class ImportRunCommand
  * @package App\Command
- * @property ImportUtility $import
  * @property ImportFile $importFile
  * @property ImportedFilesTable $importedFiles
  */
 class ImportRunCommand extends Command
 {
-    private $import;
     private $importFile;
     private $importedFiles;
 
@@ -32,7 +32,6 @@ class ImportRunCommand extends Command
     public function initialize()
     {
         parent::initialize();
-        $this->import = new ImportUtility();
         $this->importedFiles = TableRegistry::getTableLocator()->get('ImportedFiles');
     }
 
@@ -68,7 +67,7 @@ class ImportRunCommand extends Command
      */
     private function selectYear($io)
     {
-        $availableYears = $this->import->getYears();
+        $availableYears = $this->getYears();
         $years = null;
         while (!in_array($years, $availableYears) && $years != 'all') {
             $years = $io->ask(sprintf(
@@ -91,7 +90,7 @@ class ImportRunCommand extends Command
      */
     private function selectFileKey($year, $io)
     {
-        $files = $this->import->getFiles();
+        $files = self::getFiles();
         if (!isset($files[$year])) {
             throw new InvalidArgumentException('No import files found in data' . DS . $year);
         }
@@ -130,7 +129,7 @@ class ImportRunCommand extends Command
         if (!$years) {
             $years = $this->selectYear($io);
         }
-        $years = ($years == 'all') ? $this->import->getYears() : [(int)$years];
+        $years = ($years == 'all') ? $this->getYears() : [(int)$years];
 
         foreach ($years as $year) {
             if (count($years) > 1) {
@@ -149,7 +148,7 @@ class ImportRunCommand extends Command
             }
 
             // Validate parameters
-            $files = $this->import->getFiles();
+            $files = self::getFiles();
             if (!isset($files[$year])) {
                 $io->error('No import files found in data' . DS . $year);
 
@@ -237,5 +236,65 @@ class ImportRunCommand extends Command
             ? "\nDetails:\n" . print_r($record->getErrors(), true)
             : ' No details available. (Check for application rule violation)';
         $io->error($msg);
+    }
+
+    /**
+     * Returns an array of years corresponding to subdirectories of /data
+     *
+     * @return array
+     */
+    private function getYears()
+    {
+        $dataPath = ROOT . DS . 'data';
+        $dir = new Folder($dataPath);
+        $years = $dir->subdirectories($dir->path, false);
+        sort($years);
+
+        return $years;
+    }
+
+    /**
+     * Returns an array of sets of files, grouped by year, including both filename and date of last import
+     *
+     * @return array
+     */
+    public static function getFiles()
+    {
+        /** @var ImportedFilesTable $importedFilesTable */
+        $importedFilesTable = TableRegistry::getTableLocator()->get('ImportedFiles');
+        $dataPath = ROOT . DS . 'data';
+        $dir = new Folder($dataPath);
+        $subdirs = $dir->subdirectories($dir->path, false);
+        $retval = [];
+
+        foreach ($subdirs as $year) {
+            if (!self::isYear($year)) {
+                throw new InternalErrorException('Directory ' . $dataPath . DS . $year . ' is not a year.');
+            }
+            $subdir = new Folder($dataPath . DS . $year);
+            $files = $subdir->find('.*.xlsx');
+            if (!$files) {
+                continue;
+            }
+            foreach ($files as $file) {
+                $retval[$year][] = [
+                    'filename' => $file,
+                    'imported' => $importedFilesTable->getImportDate($year, $file)
+                ];
+            }
+        }
+
+        return $retval;
+    }
+
+    /**
+     * Returns true or false, indicating if $string appears to be a year
+     *
+     * @param string $string String to be tested
+     * @return bool
+     */
+    public static function isYear($string)
+    {
+        return strlen($string) == 4 && is_numeric($string);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Import;
 
+use App\Command\ImportRunCommand;
 use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
@@ -754,11 +755,10 @@ class ImportFile
 
         $filename = $this->getFilename();
         $worksheetName = $this->activeWorksheet;
-        $import = new Import();
         foreach ($unknownMetrics as $colNum => $unknownMetric) {
             $cleanColName = str_replace("\n", ' ', $unknownMetric['name']);
             $this->shell_io->info("\nColumn: $cleanColName");
-            $suggestedName = $import->getSuggestedName($filename, $worksheetName, $unknownMetric);
+            $suggestedName = $this->getSuggestedMetricName($filename, $worksheetName, $unknownMetric);
             $this->shell_io->out('Suggested metric name: ' . $suggestedName);
             try {
                 $metricId = $this->getMetricInput($suggestedName, $unknownMetric);
@@ -1197,5 +1197,54 @@ class ImportFile
         }
 
         return 'ZipArchive error code: ' . $code;
+    }
+
+    /**
+     * Returns a suggested metric name, given information about an import spreadsheet column
+     *
+     * @param string $filename Import file name
+     * @param string $worksheetName Name of active worksheet in import file
+     * @param array $unknownMetric Array of information about the name and group of a column
+     * @return string
+     */
+    private function getSuggestedMetricName($filename, $worksheetName, $unknownMetric)
+    {
+        // Start with filename
+        $suggestedNameParts = [explode('.', $filename)[0]];
+
+        // Add worksheet name (unless if it's a year)
+        if (!ImportRunCommand::isYear($worksheetName)) {
+            $suggestedNameParts[] = trim($worksheetName);
+        }
+
+        // Clean up and add the column name
+        $columnName = $unknownMetric['name'];
+        $cleanColumnName = $columnName;
+        while (strpos($cleanColumnName, '  ') !== false) {
+            $cleanColumnName = str_replace("\n", ' ', $cleanColumnName);
+            $cleanColumnName = str_replace('  ', ' ', $cleanColumnName);
+        }
+        $suggestedNameParts[] = trim($cleanColumnName);
+
+        // Add group, if applicable
+        if ($unknownMetric['group']) {
+            $suggestedNameParts[] = $unknownMetric['group'];
+        }
+
+        // Remove blank and repeated parts
+        foreach ($suggestedNameParts as $i => $namePart) {
+            if ($namePart == '') {
+                unset($suggestedNameParts[$i]);
+                continue;
+            }
+            if ($i > 0 && $suggestedNameParts[$i - 1] == $namePart) {
+                unset($suggestedNameParts[$i]);
+                continue;
+            }
+        }
+
+        $nameDelimiter = ' > ';
+
+        return implode($nameDelimiter, $suggestedNameParts);
     }
 }
