@@ -3,10 +3,12 @@ namespace App\Command;
 
 use App\Import\Import;
 use App\Import\ImportFile;
+use App\Model\Table\ImportedFilesTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\ORM\TableRegistry;
 use Exception;
 use InvalidArgumentException;
 
@@ -15,11 +17,13 @@ use InvalidArgumentException;
  * @package App\Command
  * @property Import $import
  * @property ImportFile $importFile
+ * @property ImportedFilesTable $importedFiles
  */
 class ImportRunCommand extends Command
 {
     private $import;
     private $importFile;
+    private $importedFiles;
 
     /**
      * Initializes the command
@@ -30,6 +34,7 @@ class ImportRunCommand extends Command
     {
         parent::initialize();
         $this->import = new Import();
+        $this->importedFiles = TableRegistry::getTableLocator()->get('ImportedFiles');
     }
 
     /**
@@ -199,6 +204,8 @@ class ImportRunCommand extends Command
                     $io->out();
                 }
 
+                $this->markFileProcessed($file['filename'], $io);
+
                 // Free up memory
                 $this->importFile->spreadsheet->disconnectWorksheets();
                 unset($this->importFile);
@@ -206,5 +213,26 @@ class ImportRunCommand extends Command
         }
 
         $io->out('Import complete');
+    }
+
+    /**
+     * Records an entry in the imported_files table
+     *
+     * @param string $filename Name of file that's just been processed
+     * @param ConsoleIo $io Console IO object
+     * @return void
+     */
+    private function markFileProcessed($filename, $io)
+    {
+        $record = $this->importedFiles->newEntity(['file' => $filename]);
+        if ($this->importedFiles->save($record)) {
+            return;
+        }
+
+        $io->error('Error saving imported file record: ');
+        $msg = $record->getErrors()
+            ? "\nDetails:\n" . print_r($record->getErrors(), true)
+            : ' No details available. (Check for application rule violation)';
+        $io->error($msg);
     }
 }
