@@ -31,7 +31,9 @@ use ZipArchive;
  * @property MetricsTable $metricsTable
  * @property Spreadsheet $spreadsheet
  * @property string $filename
+ * @property string $path
  * @property string $year
+ * @property string[] $ignoredWorksheets
  * @property string|null $activeWorksheet
  * @property string|null $error
  */
@@ -40,8 +42,10 @@ class ImportFile
     private $autoNameMetrics;
     private $error;
     private $filename;
+    private $ignoredWorksheets = [];
     private $metricsTable;
     private $overwrite;
+    private $path;
     private $shell_io;
     private $worksheets;
     private $year;
@@ -64,31 +68,43 @@ class ImportFile
             $dir .= DS;
         }
 
-        $path = $dir . $filename;
+        $this->path = $dir . $filename;
         $this->year = $year;
         $this->filename = $filename;
         $this->shell_io = $io;
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         $zip = new ZipArchive();
-        $readable = $zip->open($path);
+        $readable = $zip->open($this->path);
         if ($readable !== true) {
             $this->error = $msg = 'Error opening ' . $filename . "\n" . $this->getZipArchiveErrorMsg($readable);
 
             return;
         }
         $zip->close();
+    }
 
+    /**
+     * Reads the file and populates the 'spreadsheet' and 'worksheets' properties
+     *
+     * @return void
+     */
+    public function read()
+    {
         try {
             // Read spreadsheet
             /** @var Xlsx $reader */
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
-            $this->spreadsheet = $reader->load($path);
+            $this->spreadsheet = $reader->load($this->path);
 
             // Analyze each worksheet
-            foreach ($reader->listWorksheetInfo($path) as $worksheet) {
+            foreach ($reader->listWorksheetInfo($this->path) as $worksheet) {
                 $wsName = $worksheet['worksheetName'];
+                if (in_array($wsName, $this->ignoredWorksheets)) {
+                    continue;
+                }
+
                 $this->selectWorksheet($wsName);
                 $this->worksheets[$wsName] = [
                     'context' => $this->getContext(),
@@ -1251,5 +1267,20 @@ class ImportFile
         $nameDelimiter = ' > ';
 
         return implode($nameDelimiter, $suggestedNameParts);
+    }
+
+    /**
+     * Adds one or more worksheets to the ignore list
+     *
+     * @param string|string[] $worksheets One or multiple worksheet names
+     * @return void
+     */
+    public function ignoreWorksheets($worksheets)
+    {
+        if (is_string($worksheets)) {
+            $worksheets = [$worksheets];
+        }
+
+        $this->ignoredWorksheets = array_merge($this->ignoredWorksheets, $worksheets);
     }
 }

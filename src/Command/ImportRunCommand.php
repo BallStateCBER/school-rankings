@@ -170,6 +170,7 @@ class ImportRunCommand extends Command
             foreach ($selectedFiles as $file) {
                 $io->out('Opening ' . $file['filename'] . '...');
                 $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
+                $this->importFile->read();
                 $this->importFile->acceptMetricSuggestions = $args->getOption('auto-metrics');
                 if ($this->importFile->getError()) {
                     $io->error($this->importFile->getError());
