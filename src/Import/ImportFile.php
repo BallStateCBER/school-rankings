@@ -807,7 +807,7 @@ class ImportFile
         $schoolDistrictsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
         $schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
-        $subject = ($context == 'district' ? 'districts' : 'schools/districts');
+        $subject = ($context == 'district' ? 'districts' : 'schools');
         $this->shell_io->out("Identifying $subject...");
 
         /** @var ProgressHelper $progress */
