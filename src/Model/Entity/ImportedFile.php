@@ -7,6 +7,7 @@ use Cake\ORM\Entity;
  * ImportedFile Entity
  *
  * @property int $id
+ * @property int $year
  * @property string $file
  * @property \Cake\I18n\FrozenTime $created
  */
@@ -24,6 +25,7 @@ class ImportedFile extends Entity
      */
     protected $_accessible = [
         'id' => true,
+        'year' => true,
         'file' => true,
         'created' => true
     ];

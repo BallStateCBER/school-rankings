@@ -45,6 +45,11 @@ class ImportedFilesTable extends Table
     public function validationDefault(Validator $validator)
     {
         $validator
+            ->integer('year')
+            ->requirePresence('year', 'create')
+            ->notEmpty('year');
+
+        $validator
             ->scalar('file')
             ->maxLength('file', 255)
             ->requirePresence('file', 'create')
@@ -56,15 +61,19 @@ class ImportedFilesTable extends Table
     /**
      * Returns the date that the specified file was last imported, or null if it hasn't been imported yet
      *
+     * @param int|string $year Four-digit year
      * @param string $file File path, starting with $year . DS
      * @return \Cake\I18n\FrozenTime|null
      */
-    public function getImportDate($file)
+    public function getImportDate($year, $file)
     {
         /** @var ImportedFile $result */
         $result = $this->find()
             ->select(['created'])
-            ->where(['file' => $file])
+            ->where([
+                'year' => (int)$year,
+                'file' => $file
+            ])
             ->orderDesc('created')
             ->first();
 

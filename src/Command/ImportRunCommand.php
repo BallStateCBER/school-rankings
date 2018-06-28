@@ -204,7 +204,7 @@ class ImportRunCommand extends Command
                     $io->out();
                 }
 
-                $this->markFileProcessed($file['filename'], $io);
+                $this->markFileProcessed($year, $file['filename'], $io);
 
                 // Free up memory
                 $this->importFile->spreadsheet->disconnectWorksheets();
@@ -218,13 +218,17 @@ class ImportRunCommand extends Command
     /**
      * Records an entry in the imported_files table
      *
+     * @param int|string $year The year represented by this file
      * @param string $filename Name of file that's just been processed
      * @param ConsoleIo $io Console IO object
      * @return void
      */
-    private function markFileProcessed($filename, $io)
+    private function markFileProcessed($year, $filename, $io)
     {
-        $record = $this->importedFiles->newEntity(['file' => $filename]);
+        $record = $this->importedFiles->newEntity([
+            'year' => (int)$year,
+            'file' => $filename
+        ]);
         if ($this->importedFiles->save($record)) {
             return;
         }

@@ -34,7 +34,7 @@ class Import
             foreach ($files as $file) {
                 $retval[$year][] = [
                     'filename' => $file,
-                    'imported' => $importedFilesTable->getImportDate($year . DS . $file)
+                    'imported' => $importedFilesTable->getImportDate($year, $file)
                 ];
             }
         }
