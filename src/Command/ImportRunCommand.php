@@ -17,12 +17,10 @@ use InvalidArgumentException;
  * Class ImportRunCommand
  * @package App\Command
  * @property ImportFile $importFile
- * @property ImportedFilesTable $importedFiles
  */
 class ImportRunCommand extends Command
 {
     private $importFile;
-    private $importedFiles;
 
     /**
      * Initializes the command
@@ -32,7 +30,6 @@ class ImportRunCommand extends Command
     public function initialize()
     {
         parent::initialize();
-        $this->importedFiles = TableRegistry::getTableLocator()->get('ImportedFiles');
     }
 
     /**
@@ -223,13 +220,15 @@ class ImportRunCommand extends Command
      * @param ConsoleIo $io Console IO object
      * @return void
      */
-    private function markFileProcessed($year, $filename, $io)
+    public static function markFileProcessed($year, $filename, $io)
     {
-        $record = $this->importedFiles->newEntity([
+        $importedFiles = TableRegistry::getTableLocator()->get('ImportedFiles');
+
+        $record = $importedFiles->newEntity([
             'year' => (int)$year,
             'file' => $filename
         ]);
-        if ($this->importedFiles->save($record)) {
+        if ($importedFiles->save($record)) {
             return;
         }
 
