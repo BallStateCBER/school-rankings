@@ -100,7 +100,9 @@ class StatesTable extends Table
     public static function getAbbreviations()
     {
         return [
-            'Indiana' => 'IN'
+            'Indiana' => 'IN',
+            'Illinois' => 'IL',
+            'Ohio' => 'OH'
         ];
     }
 
