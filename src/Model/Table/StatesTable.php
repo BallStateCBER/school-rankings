@@ -3,6 +3,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\State;
 use Cake\Datasource\EntityInterface;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Table;
@@ -90,5 +91,63 @@ class StatesTable extends Table
             ->notEmpty('abbreviation');
 
         return $validator;
+    }
+
+    /**
+     * Returns an array of state abbreviations, keyed with full state names
+     *
+     * @return array
+     */
+    public static function getAbbreviations()
+    {
+        return [
+            'Indiana' => 'IN'
+        ];
+    }
+
+    /**
+     * Takes a state name/abbreviation and returns an abbreviation
+     *
+     * Used to take unknown state-identifying strings and normalize them to abbreviations
+     *
+     * @param string $name Full or abbreviated state name
+     * @return string
+     * @throws InternalErrorException
+     */
+    public static function abbreviateName($name)
+    {
+        $abbreviations = self::getAbbreviations();
+        if (in_array($name, array_values($abbreviations))) {
+            return $name;
+        }
+
+        if (array_key_exists($name, $abbreviations)) {
+            return $abbreviations[$name];
+        }
+
+        throw new InternalErrorException('Unsupported state: ' . $name);
+    }
+
+    /**
+     * Takes a state name/abbreviation and returns a full state name
+     *
+     * Used to take unknown state-identifying strings and normalize them to full names
+     *
+     * @param string $name Full or abbreviated state name
+     * @return string
+     * @throws InternalErrorException
+     */
+    public static function unabbreviateName($name)
+    {
+        $abbreviations = self::getAbbreviations();
+        if (array_search($name, $abbreviations) !== false) {
+            return array_search($name, $abbreviations);
+        }
+
+        if (array_key_exists($name, $abbreviations)) {
+            return $name;
+        }
+
+        throw new InternalErrorException('Unsupported state: ' . $name);
     }
 }
