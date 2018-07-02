@@ -2,6 +2,7 @@
 namespace App\Command;
 
 use App\Import\ImportFile;
+use App\Model\Context\Context;
 use App\Model\Entity\City;
 use App\Model\Entity\County;
 use App\Model\Entity\School;
@@ -61,6 +62,22 @@ class ImportLocationsCommand extends Command
     private $statesTable;
 
     /**
+     * Initialization method
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this->citiesTable = TableRegistry::getTableLocator()->get('Cities');
+        $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
+        $this->districtsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
+        $this->schoolsTable = TableRegistry::getTableLocator()->get('Schools');
+        $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
+        $this->statesTable = TableRegistry::getTableLocator()->get('States');
+    }
+
+    /**
      * Processes location info file and updates the database
      *
      * @param Arguments $args Arguments
@@ -71,12 +88,6 @@ class ImportLocationsCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->io = $io;
-        $this->citiesTable = TableRegistry::getTableLocator()->get('Cities');
-        $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
-        $this->districtsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
-        $this->schoolsTable = TableRegistry::getTableLocator()->get('Schools');
-        $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
-        $this->statesTable = TableRegistry::getTableLocator()->get('States');
 
         $file = $this->selectFile();
         if (!$file) {
@@ -134,15 +145,7 @@ class ImportLocationsCommand extends Command
             $io->out();
         }
 
-        if ($this->districts) {
-            $io->out('Updating districts...');
-            $this->updateRecords('district');
-        }
-
-        if ($this->schools) {
-            $io->out('Updating schools...');
-            $this->updateRecords('school');
-        }
+        $this->updateRecords();
 
         $this->io->out();
         $this->io->success('Import complete');
@@ -274,23 +277,20 @@ class ImportLocationsCommand extends Command
             'COUNTY NAME' => 'county'
         ];
 
-        /** @var ProgressHelper $progress */
-        $progress = $this->io->helper('Progress');
-        $progress->init([
-            'total' => $lastRow - $firstRow + 1,
-            'width' => 40,
-        ]);
-        $progress->draw();
-
+        $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
         for ($row = $firstRow; $row <= $lastRow; $row++) {
             $progress->increment(1);
             $progress->draw();
 
             $data = $this->getData($row, $firstCol, $lastCol, $columnNames, $fieldMap);
+
+            // Skip ignorable districts
             $data['code'] = Utility::removeLeadingZeros($data['code']);
             if (in_array($data['code'], $ignoredDistrictCodes)) {
                 continue;
             }
+
+            // Get associated model data
             $state = $this->getState($data['state']);
             $county = $this->getCounty($data['county'], $state->id);
             $city = $this->getCity($data['city'], $state->id);
@@ -299,7 +299,7 @@ class ImportLocationsCommand extends Command
                 $this->abort();
             }
 
-            /** @var SchoolDistrict $district */
+            // Prepare update
             $district = $this->getLocation($context, $data['code']);
             $district = $this->districtsTable->patchEntity($district, [
                 'name' => $data['name'],
@@ -308,10 +308,8 @@ class ImportLocationsCommand extends Command
                 'counties' => [$county],
                 'states' => [$state],
             ]);
-
             $errors = $district->getErrors();
             $passesRules = $this->districtsTable->checkRules($district, 'update');
-
             if (empty($errors) && $passesRules) {
                 $districts[] = $district;
                 continue;
@@ -348,14 +346,7 @@ class ImportLocationsCommand extends Command
             'SCHOOL HOMEPAGE' => 'url'
         ];
 
-        /** @var ProgressHelper $progress */
-        $progress = $this->io->helper('Progress');
-        $progress->init([
-            'total' => $lastRow - $firstRow + 1,
-            'width' => 40,
-        ]);
-        $progress->draw();
-
+        $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
         for ($row = $firstRow; $row <= $lastRow; $row++) {
             $progress->increment(1);
             $progress->draw();
@@ -607,32 +598,50 @@ class ImportLocationsCommand extends Command
     /**
      * Save all stored schools/districts
      *
-     * @param string $context Either 'school' or 'district'
      * @return void
      */
-    private function updateRecords($context)
+    private function updateRecords()
     {
-        $entities = $context == 'school' ? $this->schools : $this->districts;
-        $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+        foreach (Context::getContexts() as $context) {
+            $entities = $context == 'school' ? $this->schools : $this->districts;
+            if (!$entities) {
+                continue;
+            }
 
+            $this->io->out("Updating {$context}s...");
+
+            $progress = $this->makeProgressBar(count($entities));
+            $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+            foreach ($entities as $entity) {
+                if (!$table->save($entity)) {
+                    throw new InternalErrorException(
+                        'Error saving district. District data: ' . print_r($entity, true)
+                    );
+                }
+
+                $progress->increment(1);
+                $progress->draw();
+            }
+            $this->io->overwrite(' - Done');
+        }
+    }
+
+    /**
+     * Creates a progress bar, draws it, and returns it
+     *
+     * @param int $total Total number of items to be processed
+     * @return ProgressHelper
+     */
+    private function makeProgressBar($total)
+    {
         /** @var ProgressHelper $progress */
         $progress = $this->io->helper('Progress');
         $progress->init([
-            'total' => count($entities),
+            'total' => $total,
             'width' => 40,
         ]);
         $progress->draw();
 
-        foreach ($entities as $entity) {
-            if (!$table->save($entity)) {
-                throw new InternalErrorException(
-                    'Error saving district. District data: ' . print_r($entity, true)
-                );
-            }
-
-            $progress->increment(1);
-            $progress->draw();
-        }
-        $this->io->overwrite(' - Done');
+        return $progress;
     }
 }
