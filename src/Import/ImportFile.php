@@ -1283,4 +1283,23 @@ class ImportFile
 
         $this->ignoredWorksheets = array_merge($this->ignoredWorksheets, $worksheets);
     }
+
+    /**
+     * Returns an array of all column names (ignoring groupings) for the selected worksheet
+     *
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
+     */
+    public function getColumnNames()
+    {
+        $row = empty($this->getActiveWorksheetProperty('groupings')) ? 1 : 2;
+        $columnNames = [];
+        $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
+        for ($col = 1; $col <= $lastDataCol; $col++) {
+            $columnNames[$col] = $this->getValue($col, $row);
+        }
+
+        return $columnNames;
+    }
 }
