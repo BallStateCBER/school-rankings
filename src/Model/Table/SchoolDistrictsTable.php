@@ -144,4 +144,18 @@ class SchoolDistrictsTable extends Table
 
         return $record->id;
     }
+
+    /**
+     * Returns an array of school district IDOE codes that should be ignored
+     *
+     * These districts are outliers, e.g. don't have an associated geographic location
+     *
+     * @return array
+     */
+    public static function getIgnoredDistrictCodes()
+    {
+        return [
+            '8801' // Community-based Preschools
+        ];
+    }
 }
