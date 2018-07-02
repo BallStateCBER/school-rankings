@@ -45,4 +45,15 @@ class Utility
 
         return $ids;
     }
+
+    /**
+     * Strips out leading zeros from a string
+     *
+     * @param string $string String to remove leading zeros from
+     * @return string
+     */
+    public static function removeLeadingZeros($string)
+    {
+        return ltrim($string, '0');
+    }
 }

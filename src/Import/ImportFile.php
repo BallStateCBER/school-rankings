@@ -2,6 +2,7 @@
 namespace App\Import;
 
 use App\Command\ImportRunCommand;
+use App\Command\Utility;
 use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
@@ -631,7 +632,7 @@ class ImportFile
                     continue;
                 }
                 if ($type == 'districtCode' || $type == 'schoolCode') {
-                    $value = $this->removeLeadingZeros($value);
+                    $value = Utility::removeLeadingZeros($value);
                 }
                 if ($type == 'districtCode' && SchoolDistrict::isDummyCode($value)) {
                     continue;
@@ -646,17 +647,6 @@ class ImportFile
         }
 
         return $locations;
-    }
-
-    /**
-     * Strips out leading zeros from a string
-     *
-     * @param string $string String to remove leading zeros from
-     * @return string
-     */
-    private function removeLeadingZeros($string)
-    {
-        return ltrim($string, '0');
     }
 
     /**
