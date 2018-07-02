@@ -812,11 +812,11 @@ class ImportFile
 
         $log = [
             'district' => [
-                'identifiedCount' => 0,
+                'identifiedList' => [],
                 'addedList' => []
             ],
             'school' => [
-                'identifiedCount' => 0,
+                'identifiedList' => [],
                 'addedList' => []
             ]
         ];
@@ -828,7 +828,7 @@ class ImportFile
                     ->where(['code' => $location['districtCode']])
                     ->first();
                 if ($district) {
-                    $log['district']['identifiedCount']++;
+                    $log['district']['identifiedList'][$district->id] = true;
                 } else {
                     $district = $schoolDistrictsTable->newEntity([
                         'code' => $location['districtCode'],
@@ -849,7 +849,7 @@ class ImportFile
                     ->where(['code' => $location['schoolCode']])
                     ->first();
                 if ($school) {
-                    $log['school']['identifiedCount']++;
+                    $log['school']['identifiedList'][$school->id] = true;
                 } else {
                     $school = $schoolsTable->newEntity([
                         'code' => $location['schoolCode'],
@@ -870,11 +870,12 @@ class ImportFile
 
         $firstLine = true;
         foreach ($log as $context => $contextLog) {
-            if ($contextLog['identifiedCount']) {
+            if ($contextLog['identifiedList']) {
+                $count = count($contextLog['identifiedList']);
                 $msg = sprintf(
                     ' - %s %s identified',
-                    $contextLog['identifiedCount'],
-                    __n($context, "{$context}s", $contextLog['identifiedCount'])
+                    $count,
+                    __n($context, "{$context}s", $count)
                 );
                 if ($firstLine) {
                     $this->shell_io->overwrite($msg);
