@@ -26,6 +26,7 @@ use Exception;
 /**
  * Class ImportLocationsCommand
  * @package App\Command
+ * @property array $locationsAdded
  * @property CitiesTable $citiesTable
  * @property ConsoleIo $io
  * @property CountiesTable $countiesTable
@@ -47,6 +48,13 @@ class ImportLocationsCommand extends Command
     private $files;
     private $importFile;
     private $io;
+    private $locationsAdded = [
+        'schools' => [],
+        'districts' => [],
+        'cities' => [],
+        'counties' => [],
+        'states' => []
+    ];
     private $schools = [];
     private $schoolsTable;
     private $schoolTypesTable;
@@ -121,6 +129,8 @@ class ImportLocationsCommand extends Command
             } elseif ($context == 'school') {
                 $this->prepareSchools();
             }
+
+            $this->reportAddedLocations();
 
             $io->out();
         }
@@ -463,7 +473,7 @@ class ImportLocationsCommand extends Command
             'abbreviation' => $abbreviation
         ]);
         if ($this->statesTable->save($state)) {
-            $this->io->out(' - Added state: ' . $fullName);
+            $this->locationsAdded['states'][] = $fullName;
 
             return $state;
         }
@@ -497,7 +507,7 @@ class ImportLocationsCommand extends Command
 
         $county = $this->countiesTable->newEntity($conditions);
         if ($this->countiesTable->save($county)) {
-            $this->io->out(' - Added county: ' . $name);
+            $this->locationsAdded['counties'][] = $name;
 
             return $county;
         }
@@ -531,7 +541,7 @@ class ImportLocationsCommand extends Command
 
         $city = $this->citiesTable->newEntity($conditions);
         if ($this->citiesTable->save($city)) {
-            $this->io->out(' - Added city: ' . $name);
+            $this->locationsAdded['cities'][] = $name;
 
             return $city;
         }
@@ -562,5 +572,25 @@ class ImportLocationsCommand extends Command
         throw new InternalErrorException(
             'School type cannot be determined from worksheet name ' . $worksheetName
         );
+    }
+
+    /**
+     * Displays data collected in $this->locationsAdded and clears it from that property
+     *
+     * @return void
+     */
+    private function reportAddedLocations()
+    {
+        foreach ($this->locationsAdded as $type => $locations) {
+            if (!$locations) {
+                continue;
+            }
+            $this->io->out(ucwords($type) . ' added:');
+            sort($locations);
+            foreach ($locations as $location) {
+                $this->io->out(' - ' . $location);
+            }
+            $this->locationsAdded[$type] = [];
+        }
     }
 }
