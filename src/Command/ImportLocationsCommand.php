@@ -129,19 +129,29 @@ class ImportLocationsCommand extends Command
             } elseif ($context == 'school') {
                 $this->prepareSchools();
             }
-
             $this->reportAddedLocations();
 
             $io->out();
         }
 
-        /*
+        if ($this->districts) {
+            $io->out('Updating districts...');
+            $this->updateRecords('district');
+        }
+
+        if ($this->schools) {
+            $io->out('Updating schools...');
+            $this->updateRecords('school');
+        }
+
+        $this->io->out();
+        $this->io->success('Import complete');
+
         ImportRunCommand::markFileProcessed($year, $file, $io);
 
         // Free up memory
         $this->importFile->spreadsheet->disconnectWorksheets();
         unset($this->importFile);
-        */
     }
 
     /**
@@ -592,5 +602,37 @@ class ImportLocationsCommand extends Command
             }
             $this->locationsAdded[$type] = [];
         }
+    }
+
+    /**
+     * Save all stored schools/districts
+     *
+     * @param string $context Either 'school' or 'district'
+     * @return void
+     */
+    private function updateRecords($context)
+    {
+        $entities = $context == 'school' ? $this->schools : $this->districts;
+        $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+
+        /** @var ProgressHelper $progress */
+        $progress = $this->io->helper('Progress');
+        $progress->init([
+            'total' => count($entities),
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        foreach ($entities as $entity) {
+            if (!$table->save($entity)) {
+                throw new InternalErrorException(
+                    'Error saving district. District data: ' . print_r($entity, true)
+                );
+            }
+
+            $progress->increment(1);
+            $progress->draw();
+        }
+        $this->io->overwrite(' - Done');
     }
 }
