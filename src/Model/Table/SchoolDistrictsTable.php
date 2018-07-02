@@ -155,7 +155,8 @@ class SchoolDistrictsTable extends Table
     public static function getIgnoredDistrictCodes()
     {
         return [
-            '8801' // Community-based Preschools
+            '8801', // Community-based Preschools
+            '9700' // GQE Retest Site
         ];
     }
 }
