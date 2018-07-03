@@ -396,7 +396,7 @@ class ImportFile
         $value = strtolower($value);
         $value = str_replace([' ', '_', '.', 'idoe'], '', $value);
 
-        return in_array($value, ['school', 'schoolid', 'schid', 'schlid', 'schno']);
+        return in_array($value, ['school', 'schoolid', 'schid', 'schlid', 'schno', 'schl']);
     }
 
     /**
