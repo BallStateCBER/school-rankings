@@ -101,6 +101,11 @@ class SchoolDistrictsTable extends Table
             ->allowEmpty('url');
 
         $validator
+            ->scalar('phone')
+            ->maxLength('phone', 30)
+            ->allowEmpty('phone');
+
+        $validator
             ->scalar('code')
             ->maxLength('code', 255)
             ->requirePresence('code', 'create')

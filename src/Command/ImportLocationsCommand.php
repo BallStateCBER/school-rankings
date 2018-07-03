@@ -274,7 +274,8 @@ class ImportLocationsCommand extends Command
             'CORPORATION HOMEPAGE' => 'url',
             'CITY' => 'city',
             'STATE' => 'state',
-            'COUNTY NAME' => 'county'
+            'COUNTY NAME' => 'county',
+            'PHONE' => 'phone'
         ];
 
         $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
@@ -304,6 +305,7 @@ class ImportLocationsCommand extends Command
             $district = $this->districtsTable->patchEntity($district, [
                 'name' => $data['name'],
                 'url' => $data['url'],
+                'phone' => $data['phone'],
                 'cities' => [$city],
                 'counties' => [$county],
                 'states' => [$state],
