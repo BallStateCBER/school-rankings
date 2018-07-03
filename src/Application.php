@@ -15,7 +15,7 @@
 namespace App;
 
 use App\Command\ImportLocationsCommand;
-use App\Command\ImportRunCommand;
+use App\Command\ImportStatsCommand;
 use App\Command\ImportStatusCommand;
 use App\Command\MetricMergeCommand;
 use App\Command\MetricReparentCommand;
@@ -65,7 +65,7 @@ class Application extends BaseApplication
     {
         $commands->autoDiscover();
 
-        $commands->add('import-run', ImportRunCommand::class);
+        $commands->add('import-stats', ImportStatsCommand::class);
         $commands->add('import-status', ImportStatusCommand::class);
         $commands->add('import-locations', ImportLocationsCommand::class);
         $commands->add('metric-merge', MetricMergeCommand::class);

@@ -14,11 +14,11 @@ use Exception;
 use InvalidArgumentException;
 
 /**
- * Class ImportRunCommand
+ * Class ImportStatsCommand
  * @package App\Command
  * @property ImportFile $importFile
  */
-class ImportRunCommand extends Command
+class ImportStatsCommand extends Command
 {
     private $importFile;
 
@@ -89,7 +89,9 @@ class ImportRunCommand extends Command
     {
         $files = self::getFiles();
         if (!isset($files[$year])) {
-            throw new InvalidArgumentException('No import files found in data' . DS . $year);
+            throw new InvalidArgumentException(
+                'No import files found in data' . DS . 'statistics' . DS . $year
+            );
         }
 
         $fileKeys = range(1, count($files[$year]));
@@ -147,7 +149,7 @@ class ImportRunCommand extends Command
             // Validate parameters
             $files = self::getFiles();
             if (!isset($files[$year])) {
-                $io->error('No import files found in data' . DS . $year);
+                $io->error('No import files found in data' . DS . 'statistics' . DS . $year);
 
                 return;
             }
@@ -163,7 +165,7 @@ class ImportRunCommand extends Command
             $selectedFiles = $fileKey == 'all' ?
                 $files[$year] :
                 [$files[$year][$fileKey - 1]];
-            $dir = ROOT . DS . 'data' . DS . $year . DS;
+            $dir = ROOT . DS . 'data' . DS . 'statistics' . DS . $year . DS;
             foreach ($selectedFiles as $file) {
                 $io->out('Opening ' . $file['filename'] . '...');
                 $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
@@ -246,7 +248,7 @@ class ImportRunCommand extends Command
      */
     private function getYears()
     {
-        $dataPath = ROOT . DS . 'data';
+        $dataPath = ROOT . DS . 'data' . DS . 'statistics';
         $dir = new Folder($dataPath);
         $years = $dir->subdirectories($dir->path, false);
         sort($years);
@@ -263,7 +265,7 @@ class ImportRunCommand extends Command
     {
         /** @var ImportedFilesTable $importedFilesTable */
         $importedFilesTable = TableRegistry::getTableLocator()->get('ImportedFiles');
-        $dataPath = ROOT . DS . 'data';
+        $dataPath = ROOT . DS . 'data' . DS . 'statistics';
         $dir = new Folder($dataPath);
         $subdirs = $dir->subdirectories($dir->path, false);
         $retval = [];

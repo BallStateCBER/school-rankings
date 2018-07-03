@@ -150,7 +150,7 @@ class ImportLocationsCommand extends Command
         $this->io->out();
         $this->io->success('Import complete');
 
-        ImportRunCommand::markFileProcessed($year, $file, $io);
+        ImportStatsCommand::markFileProcessed($year, $file, $io);
 
         // Free up memory
         $this->importFile->spreadsheet->disconnectWorksheets();
@@ -164,7 +164,7 @@ class ImportLocationsCommand extends Command
      */
     private function getDirectory()
     {
-        return ROOT . DS . 'data-location';
+        return ROOT . DS . 'data' . DS . 'locations';
     }
 
     /**
@@ -215,7 +215,7 @@ class ImportLocationsCommand extends Command
 
         $year = substr($substr, 1, strpos($substr, ')') - 1);
 
-        if (!ImportRunCommand::isYear($year)) {
+        if (!ImportStatsCommand::isYear($year)) {
             $this->io->error("$year is not a valid year");
 
             return false;

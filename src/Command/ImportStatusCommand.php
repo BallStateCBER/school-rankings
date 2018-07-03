@@ -48,13 +48,13 @@ class ImportStatusCommand extends Command
     {
         $year = $args->hasArgument('year') ? $args->getArgument('year') : null;
 
-        $files = ImportRunCommand::getFiles();
+        $files = ImportStatsCommand::getFiles();
 
         if ($year) {
             if (isset($files[$year])) {
                 $files = [$year => $files[$year]];
             } else {
-                $io->out('No import files found in data' . DS . $year);
+                $io->out('No import files found in data' . DS . 'statistics' . DS . $year);
 
                 return;
             }
