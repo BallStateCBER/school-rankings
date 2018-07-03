@@ -371,7 +371,7 @@ class MetricsTable extends Table
     }
 
     /**
-     * Returns whether or not the metric specified in $context can have $parentId
+     * Returns whether or not the metric specified in $validationContext can have $parentId
      *
      * @param int $parentId ID of parent metric
      * @param array $validationContext Validation context array
@@ -384,13 +384,18 @@ class MetricsTable extends Table
         if (isset($validationContext['data']['name'])) {
             $name = $validationContext['data']['name'];
         } elseif ($metricId) {
-            $metric = $this->get($metricId);
-            $name = $metric->name;
+            $name = $this->get($metricId)->name;
         } else {
             throw new BadRequestException('Either metric ID or name are required');
         }
 
-        $metricContext = $validationContext['data']['context'];
+        if (isset($validationContext['data']['context'])) {
+            $metricContext = $validationContext['data']['context'];
+        } elseif ($metricId) {
+            $metricContext = $this->get($metricId)->context;
+        } else {
+            throw new BadRequestException('Metric context not provided');
+        }
 
         return !$this->hasNameConflict($metricId, $parentId, $name, $metricContext);
     }
@@ -411,7 +416,13 @@ class MetricsTable extends Table
             $parentId = null;
         }
 
-        $metricContext = $validationContext['data']['context'];
+        if (isset($validationContext['data']['context'])) {
+            $metricContext = $validationContext['data']['context'];
+        } elseif ($metricId) {
+            $metricContext = $this->get($metricId)->context;
+        } else {
+            throw new BadRequestException('Metric context not provided');
+        }
 
         return !$this->hasNameConflict($metricId, $parentId, $name, $metricContext);
     }
