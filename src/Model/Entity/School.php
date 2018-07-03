@@ -13,6 +13,7 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property string $address
  * @property string $url
+ * @property string $phone
  * @property string $code
  * @property FrozenTime $created
  * @property FrozenTime $modified
@@ -43,6 +44,7 @@ class School extends Entity
         'name' => true,
         'address' => true,
         'url' => true,
+        'phone' => true,
         'code' => true,
         'created' => true,
         'modified' => true,

@@ -345,7 +345,8 @@ class ImportLocationsCommand extends Command
             'STATE' => 'state',
             'ZIP' => 'zip',
             'COUNTY NAME' => 'county',
-            'SCHOOL HOMEPAGE' => 'url'
+            'SCHOOL HOMEPAGE' => 'url',
+            'PHONE' => 'phone'
         ];
 
         $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
@@ -386,6 +387,7 @@ class ImportLocationsCommand extends Command
                     $data['zip'] ? " {$data['zip']}" : ''
                 ),
                 'url' => $data['url'],
+                'phone' => $data['phone'],
                 'cities' => [$city],
                 'counties' => [$county],
                 'states' => [$state]
