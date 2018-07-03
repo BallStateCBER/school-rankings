@@ -24,31 +24,31 @@ class StatesTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.states',
         'app.cities',
-        'app.counties',
         'app.cities_counties',
-        'app.rankings',
-        'app.users',
+        'app.counties',
         'app.formulas',
-        'app.school_types',
-        'app.schools',
-        'app.school_districts',
+        'app.grades',
+        'app.ranges',
+        'app.rankings',
+        'app.rankings_cities',
+        'app.rankings_counties',
+        'app.rankings_ranges',
         'app.rankings_school_districts',
+        'app.rankings_states',
+        'app.school_districts',
         'app.school_districts_cities',
         'app.school_districts_counties',
         'app.school_districts_states',
-        'app.statistics',
+        'app.school_types',
+        'app.schools',
         'app.schools_cities',
         'app.schools_counties',
-        'app.school_levels',
-        'app.schools_school_levels',
+        'app.schools_grades',
         'app.schools_states',
-        'app.rankings_cities',
-        'app.rankings_counties',
-        'app.ranges',
-        'app.rankings_ranges',
-        'app.rankings_states'
+        'app.states',
+        'app.statistics',
+        'app.users'
     ];
 
     /**

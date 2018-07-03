@@ -23,7 +23,7 @@ use Cake\ORM\Entity;
  * @property Statistic[] $statistics
  * @property City[] $cities
  * @property County[] $counties
- * @property SchoolLevel[] $school_levels
+ * @property Grade[] $grades
  * @property State[] $states
  */
 class School extends Entity
@@ -53,7 +53,7 @@ class School extends Entity
         'school_statistics' => true,
         'cities' => true,
         'counties' => true,
-        'school_levels' => true,
+        'grades' => true,
         'states' => true
     ];
 }

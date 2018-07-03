@@ -12,14 +12,13 @@ use Cake\ORM\Entity;
  * @property int $formula_id
  * @property int $school_type_id
  * @property bool $for_school_districts
- * @property int $school_level_id
  * @property string $hash
  * @property FrozenTime $created
  *
  * @property User $user
  * @property Formula $formula
  * @property SchoolType $school_type
- * @property SchoolLevel $school_level
+ * @property Grade[] $grades
  * @property City[] $cities
  * @property County[] $counties
  * @property Range[] $ranges
@@ -43,13 +42,12 @@ class Ranking extends Entity
         'formula_id' => true,
         'school_type_id' => true,
         'for_school_districts' => true,
-        'school_level_id' => true,
         'hash' => true,
         'created' => true,
         'user' => true,
         'formula' => true,
         'school_type' => true,
-        'school_level' => true,
+        'grades' => true,
         'cities' => true,
         'counties' => true,
         'ranges' => true,

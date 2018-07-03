@@ -1,22 +1,22 @@
 <?php
 namespace App\Test\TestCase\Model\Table;
 
-use App\Model\Table\SchoolLevelsTable;
+use App\Model\Table\GradesTable;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Model\Table\SchoolLevelsTable Test Case
+ * App\Model\Table\GradesTable Test Case
  */
-class SchoolLevelsTableTest extends TestCase
+class GradesTableTest extends TestCase
 {
 
     /**
      * Test subject
      *
-     * @var \App\Model\Table\SchoolLevelsTable
+     * @var \App\Model\Table\GradesTable
      */
-    public $SchoolLevels;
+    public $Grades;
 
     /**
      * Fixtures
@@ -24,32 +24,32 @@ class SchoolLevelsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.school_levels',
-        'app.rankings',
-        'app.users',
+        'app.cities',
+        'app.cities_counties',
+        'app.counties',
         'app.formulas',
+        'app.grades',
+        'app.metrics',
+        'app.ranges',
+        'app.rankings',
+        'app.rankings_cities',
+        'app.rankings_counties',
+        'app.rankings_ranges',
+        'app.rankings_school_districts',
+        'app.rankings_states',
+        'app.school_districts',
+        'app.school_districts_cities',
+        'app.school_districts_counties',
+        'app.school_districts_states',
         'app.school_types',
         'app.schools',
-        'app.school_districts',
-        'app.metrics',
-        'app.rankings_school_districts',
-        'app.cities',
-        'app.states',
-        'app.counties',
-        'app.cities_counties',
-        'app.rankings_counties',
-        'app.school_districts_counties',
-        'app.schools_counties',
-        'app.rankings_states',
-        'app.school_districts_states',
-        'app.schools_states',
-        'app.rankings_cities',
-        'app.school_districts_cities',
         'app.schools_cities',
+        'app.schools_counties',
+        'app.schools_grades',
+        'app.schools_states',
+        'app.states',
         'app.statistics',
-        'app.schools_school_levels',
-        'app.ranges',
-        'app.rankings_ranges'
+        'app.users'
     ];
 
     /**
@@ -60,8 +60,8 @@ class SchoolLevelsTableTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('SchoolLevels') ? [] : ['className' => SchoolLevelsTable::class];
-        $this->SchoolLevels = TableRegistry::getTableLocator()->get('SchoolLevels', $config);
+        $config = TableRegistry::getTableLocator()->exists('Grades') ? [] : ['className' => GradesTable::class];
+        $this->Grades = TableRegistry::getTableLocator()->get('Grades', $config);
     }
 
     /**
@@ -71,7 +71,7 @@ class SchoolLevelsTableTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->SchoolLevels);
+        unset($this->Grades);
 
         parent::tearDown();
     }

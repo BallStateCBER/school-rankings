@@ -16,7 +16,7 @@ use Cake\Validation\Validator;
  * @property UsersTable|BelongsTo $Users
  * @property FormulasTable|BelongsTo $Formulas
  * @property SchoolTypesTable|BelongsTo $SchoolTypes
- * @property SchoolLevelsTable|BelongsTo $SchoolLevels
+ * @property GradesTable|BelongsTo $Grades
  * @property CitiesTable|BelongsToMany $Cities
  * @property CountiesTable|BelongsToMany $Counties
  * @property RangesTable|BelongsToMany $Ranges
@@ -62,8 +62,10 @@ class RankingsTable extends Table
         $this->belongsTo('SchoolTypes', [
             'foreignKey' => 'school_type_id'
         ]);
-        $this->belongsTo('SchoolLevels', [
-            'foreignKey' => 'school_level_id'
+        $this->belongsToMany('Grades', [
+            'foreignKey' => 'ranking_id',
+            'targetForeignKey' => 'grade_id',
+            'joinTable' => 'rankings_grades'
         ]);
         $this->belongsToMany('Cities', [
             'foreignKey' => 'ranking_id',
@@ -130,7 +132,6 @@ class RankingsTable extends Table
         $rules->add($rules->existsIn(['user_id'], 'Users'));
         $rules->add($rules->existsIn(['formula_id'], 'Formulas'));
         $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
-        $rules->add($rules->existsIn(['school_level_id'], 'SchoolLevels'));
 
         return $rules;
     }

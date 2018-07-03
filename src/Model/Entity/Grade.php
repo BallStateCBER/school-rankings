@@ -4,7 +4,7 @@ namespace App\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * SchoolLevel Entity
+ * Grade Entity
  *
  * @property int $id
  * @property string $name
@@ -12,7 +12,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Ranking[] $rankings
  * @property \App\Model\Entity\School[] $schools
  */
-class SchoolLevel extends Entity
+class Grade extends Entity
 {
 
     /**

@@ -4,10 +4,10 @@ namespace App\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * SchoolsSchoolLevelsFixture
+ * SchoolsGradesFixture
  *
  */
-class SchoolsSchoolLevelsFixture extends TestFixture
+class SchoolsGradesFixture extends TestFixture
 {
 
     /**
@@ -19,7 +19,7 @@ class SchoolsSchoolLevelsFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'autoIncrement' => true, 'precision' => null],
         'school_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
-        'school_level_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
+        'grade_id' => ['type' => 'integer', 'length' => 11, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id'], 'length' => []],
         ],
@@ -39,7 +39,7 @@ class SchoolsSchoolLevelsFixture extends TestFixture
         [
             'id' => 1,
             'school_id' => 1,
-            'school_level_id' => 1
+            'grade_id' => 1
         ],
     ];
 }

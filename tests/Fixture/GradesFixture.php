@@ -4,10 +4,10 @@ namespace App\Test\Fixture;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
- * SchoolLevelsFixture
+ * GradesFixture
  *
  */
-class SchoolLevelsFixture extends TestFixture
+class GradesFixture extends TestFixture
 {
 
     /**
@@ -37,7 +37,27 @@ class SchoolLevelsFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
-            'name' => 'Lorem ipsum dolor sit amet'
+            'name' => 'Preschool'
+        ],
+        [
+            'id' => 2,
+            'name' => 'Kindergarten'
         ],
     ];
+
+    /**
+     * Init method
+     *
+     * @return void
+     */
+    public function init()
+    {
+        for ($n = 1; $n <= 12; $n++) {
+            $this->records[] = [
+                'id' => count($this->records) + 1,
+                'name' => 'Grade ' . $n
+            ];
+        }
+        parent::init();
+    }
 }

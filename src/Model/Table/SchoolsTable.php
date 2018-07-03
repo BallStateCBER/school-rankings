@@ -20,7 +20,7 @@ use Cake\Validation\Validator;
  * @property StatisticsTable|HasMany $Statistics
  * @property CitiesTable|BelongsToMany $Cities
  * @property CountiesTable|BelongsToMany $Counties
- * @property SchoolLevelsTable|BelongsToMany $SchoolLevels
+ * @property GradesTable|BelongsToMany $Grades
  * @property StatesTable|BelongsToMany $States
  *
  * @method School get($primaryKey, $options = [])
@@ -71,10 +71,10 @@ class SchoolsTable extends Table
             'targetForeignKey' => 'county_id',
             'joinTable' => 'schools_counties'
         ]);
-        $this->belongsToMany('SchoolLevels', [
+        $this->belongsToMany('Grades', [
             'foreignKey' => 'school_id',
-            'targetForeignKey' => 'school_level_id',
-            'joinTable' => 'schools_school_levels'
+            'targetForeignKey' => 'grade_id',
+            'joinTable' => 'schools_grades'
         ]);
         $this->belongsToMany('States', [
             'foreignKey' => 'school_id',

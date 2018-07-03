@@ -38,8 +38,8 @@ class SchoolTypesTableTest extends TestCase
         'app.statistics',
         'app.schools_cities',
         'app.schools_counties',
-        'app.school_levels',
-        'app.schools_school_levels',
+        'app.grades',
+        'app.schools_grades',
         'app.schools_states'
     ];
 

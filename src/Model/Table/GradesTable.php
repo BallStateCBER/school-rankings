@@ -1,7 +1,7 @@
 <?php
 namespace App\Model\Table;
 
-use App\Model\Entity\SchoolLevel;
+use App\Model\Entity\Grade;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
@@ -9,20 +9,20 @@ use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * SchoolLevels Model
+ * Grades Model
  *
  * @property RankingsTable|HasMany $Rankings
  * @property SchoolsTable|BelongsToMany $Schools
  *
- * @method SchoolLevel get($primaryKey, $options = [])
- * @method SchoolLevel newEntity($data = null, array $options = [])
- * @method SchoolLevel[] newEntities(array $data, array $options = [])
- * @method SchoolLevel|bool save(EntityInterface $entity, $options = [])
- * @method SchoolLevel patchEntity(EntityInterface $entity, array $data, array $options = [])
- * @method SchoolLevel[] patchEntities($entities, array $data, array $options = [])
- * @method SchoolLevel findOrCreate($search, callable $callback = null, $options = [])
+ * @method Grade get($primaryKey, $options = [])
+ * @method Grade newEntity($data = null, array $options = [])
+ * @method Grade[] newEntities(array $data, array $options = [])
+ * @method Grade|bool save(EntityInterface $entity, $options = [])
+ * @method Grade patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method Grade[] patchEntities($entities, array $data, array $options = [])
+ * @method Grade findOrCreate($search, callable $callback = null, $options = [])
  */
-class SchoolLevelsTable extends Table
+class GradesTable extends Table
 {
 
     /**
@@ -35,17 +35,19 @@ class SchoolLevelsTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('school_levels');
+        $this->setTable('grades');
         $this->setDisplayField('name');
         $this->setPrimaryKey('id');
 
-        $this->hasMany('Rankings', [
-            'foreignKey' => 'school_level_id'
+        $this->belongsToMany('Rankings', [
+            'foreignKey' => 'grade_id',
+            'targetForeignKey' => 'school_id',
+            'joinTable' => 'rankings_grades'
         ]);
         $this->belongsToMany('Schools', [
-            'foreignKey' => 'school_level_id',
+            'foreignKey' => 'grade_id',
             'targetForeignKey' => 'school_id',
-            'joinTable' => 'schools_school_levels'
+            'joinTable' => 'schools_grades'
         ]);
     }
 
