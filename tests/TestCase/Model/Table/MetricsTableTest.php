@@ -79,6 +79,7 @@ class MetricsTableTest extends TestCase
     {
         $metric = $this->Metrics->newEntity([
             'name' => 'Metric name',
+            'context' => 'school',
             'parent_id' => 999,
             'type' => 'numeric',
             'selectable' => true
@@ -113,6 +114,7 @@ class MetricsTableTest extends TestCase
     {
         $metric = $this->Metrics->newEntity([
             'name' => 'Identical name',
+            'context' => 'school',
             'parent_id' => 1,
             'type' => 'numeric',
             'selectable' => true
