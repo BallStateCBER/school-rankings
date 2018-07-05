@@ -5,11 +5,13 @@ use App\Import\ImportFile;
 use App\Model\Context\Context;
 use App\Model\Entity\City;
 use App\Model\Entity\County;
+use App\Model\Entity\Grade;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\State;
 use App\Model\Table\CitiesTable;
 use App\Model\Table\CountiesTable;
+use App\Model\Table\GradesTable;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\SchoolTypesTable;
@@ -22,6 +24,7 @@ use Cake\Filesystem\Folder;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Cake\Utility\Hash;
 use Exception;
 
 /**
@@ -31,6 +34,8 @@ use Exception;
  * @property CitiesTable $citiesTable
  * @property ConsoleIo $io
  * @property CountiesTable $countiesTable
+ * @property Grade[] $allGrades
+ * @property GradesTable $gradesTable
  * @property ImportFile $importFile
  * @property School[] $schools
  * @property SchoolDistrict[] $districts
@@ -42,11 +47,13 @@ use Exception;
  */
 class ImportLocationsCommand extends Command
 {
+    private $allGrades;
     private $citiesTable;
     private $countiesTable;
     private $districts = [];
     private $districtsTable;
     private $files;
+    private $gradesTable;
     private $importFile;
     private $io;
     private $locationsAdded = [
@@ -69,12 +76,16 @@ class ImportLocationsCommand extends Command
     public function initialize()
     {
         parent::initialize();
+
         $this->citiesTable = TableRegistry::getTableLocator()->get('Cities');
         $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $this->districtsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
+        $this->gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $this->schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
         $this->statesTable = TableRegistry::getTableLocator()->get('States');
+
+        $this->allGrades = $this->gradesTable->getAll();
     }
 
     /**
@@ -306,9 +317,15 @@ class ImportLocationsCommand extends Command
                 'name' => $data['name'],
                 'url' => $data['url'],
                 'phone' => $data['phone'],
-                'cities' => [$city],
-                'counties' => [$county],
-                'states' => [$state],
+                'cities' => [
+                    '_ids' => [$city->id]
+                ],
+                'counties' => [
+                    '_ids' => [$county->id]
+                ],
+                'states' => [
+                    '_ids' => [$state->id]
+                ]
             ]);
             $errors = $district->getErrors();
             $passesRules = $this->districtsTable->checkRules($district, 'update');
@@ -346,7 +363,9 @@ class ImportLocationsCommand extends Command
             'ZIP' => 'zip',
             'COUNTY NAME' => 'county',
             'SCHOOL HOMEPAGE' => 'url',
-            'PHONE' => 'phone'
+            'PHONE' => 'phone',
+            'LOW GRADE 1' => 'low grade',
+            'HIGH GRADE 1' => 'high grade'
         ];
 
         $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
@@ -373,6 +392,7 @@ class ImportLocationsCommand extends Command
             $state = $this->getState($data['state']);
             $county = $this->getCounty($data['county'], $state->id);
             $city = $this->getCity($data['city'], $state->id);
+            $grades = $this->gradesTable->getGradesInRange($data['low grade'], $data['high grade'], $this->allGrades);
 
             // Prepare update
             $school = $this->schoolsTable->patchEntity($school, [
@@ -388,9 +408,18 @@ class ImportLocationsCommand extends Command
                 ),
                 'url' => $data['url'],
                 'phone' => $data['phone'],
-                'cities' => [$city],
-                'counties' => [$county],
-                'states' => [$state]
+                'cities' => [
+                    '_ids' => [$city->id]
+                ],
+                'counties' => [
+                    '_ids' => [$county->id]
+                ],
+                'states' => [
+                    '_ids' => [$state->id]
+                ],
+                'grades' => [
+                    '_ids' => Hash::extract($grades, '{n}.id')
+                ]
             ]);
             $errors = $school->getErrors();
             $passesRules = $this->schoolsTable->checkRules($school, 'update');
