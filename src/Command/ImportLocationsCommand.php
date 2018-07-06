@@ -392,6 +392,10 @@ class ImportLocationsCommand extends Command
             $state = $this->getState($data['state']);
             $county = $this->getCounty($data['county'], $state->id);
             $city = $this->getCity($data['city'], $state->id);
+            if (!$this->citiesTable->Counties->link($city, [$county])) {
+                $this->io->error('Error linking ' . $city->name . ' to ' . $county->name . ' County');
+                $this->abort();
+            }
             $grades = $this->gradesTable->getGradesInRange($data['low grade'], $data['high grade'], $this->allGrades);
 
             // Prepare update
