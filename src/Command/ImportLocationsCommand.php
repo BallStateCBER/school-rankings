@@ -8,6 +8,7 @@ use App\Model\Entity\County;
 use App\Model\Entity\Grade;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
+use App\Model\Entity\SchoolType;
 use App\Model\Entity\State;
 use App\Model\Table\CitiesTable;
 use App\Model\Table\CountiesTable;
@@ -41,6 +42,7 @@ use Exception;
  * @property SchoolDistrict[] $districts
  * @property SchoolDistrictsTable $districtsTable
  * @property SchoolsTable $schoolsTable
+ * @property SchoolType[] $allSchoolTypes
  * @property SchoolTypesTable $schoolTypesTable
  * @property StatesTable $statesTable
  * @property string[] $files
@@ -48,6 +50,7 @@ use Exception;
 class ImportLocationsCommand extends Command
 {
     private $allGrades;
+    private $allSchoolTypes;
     private $citiesTable;
     private $countiesTable;
     private $districts = [];
@@ -86,6 +89,7 @@ class ImportLocationsCommand extends Command
         $this->statesTable = TableRegistry::getTableLocator()->get('States');
 
         $this->allGrades = $this->gradesTable->getAll();
+        $this->allSchoolTypes = $this->schoolTypesTable->getAll();
     }
 
     /**
@@ -387,8 +391,7 @@ class ImportLocationsCommand extends Command
             } else {
                 $district = null;
             }
-            $schoolTypeName = $this->getSchoolType($this->importFile->activeWorksheet);
-            $schoolTypeId = $this->schoolTypesTable->findOrCreate(['name' => $schoolTypeName])->id;
+            $schoolType = $this->getSchoolType($this->importFile->activeWorksheet);
             $state = $this->getState($data['state']);
             $county = $this->getCounty($data['county'], $state->id);
             $city = $this->getCity($data['city'], $state->id);
@@ -397,11 +400,12 @@ class ImportLocationsCommand extends Command
                 $this->abort();
             }
             $grades = $this->gradesTable->getGradesInRange($data['low grade'], $data['high grade'], $this->allGrades);
+            // $schoolType = $this->getSchoolType($this->importFile->activeWorksheet);
 
             // Prepare update
             $school = $this->schoolsTable->patchEntity($school, [
                 'school_district_id' => $district ? $district->id : null,
-                'school_type_id' => $schoolTypeId,
+                'school_type_id' => $schoolType->id,
                 'name' => $data['name'],
                 'address' => sprintf(
                     "%s\n%s, %s%s",
@@ -593,18 +597,18 @@ class ImportLocationsCommand extends Command
      * Returns the name of the school type associated with the specified worksheet name
      *
      * @param string $worksheetName Spreadsheet worksheet name
-     * @return string
+     * @return SchoolType
      */
     private function getSchoolType($worksheetName)
     {
         switch ($worksheetName) {
             case 'PUBLIC':
-                return 'public';
+                return $this->allSchoolTypes['public'];
             case 'NONPUBLIC':
             case 'PRIVATE':
-                return 'private';
+                return $this->allSchoolTypes['private'];
             case 'CHARTER':
-                return 'charter';
+                return $this->allSchoolTypes['charter'];
         }
 
         throw new InternalErrorException(

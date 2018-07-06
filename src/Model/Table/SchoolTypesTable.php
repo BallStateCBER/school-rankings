@@ -3,6 +3,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\SchoolType;
 use Cake\Datasource\EntityInterface;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\Table;
@@ -70,5 +71,51 @@ class SchoolTypesTable extends Table
             ->notEmpty('name');
 
         return $validator;
+    }
+
+    /**
+     * Returns an array of names of school types
+     *
+     * @return array
+     */
+    public static function getNames()
+    {
+        return [
+            'public',
+            'private',
+            'charter'
+        ];
+    }
+
+    /**
+     * Returns an array of grade entities, keyed by their names, creating them if necessary
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        $typeNames = self::getNames();
+        $types = [];
+        foreach ($typeNames as $typeName) {
+            $conditions = ['name' => $typeName];
+            /** @var SchoolType $type */
+            $type = $this->find()
+                ->where($conditions)
+                ->first();
+            if ($type) {
+                $types[$type->name] = $type;
+                continue;
+            }
+
+            $type = $this->newEntity($conditions);
+            if ($this->save($type)) {
+                $types[$type->name] = $type;
+                continue;
+            }
+
+            throw new InternalErrorException('Error saving school type ' . $typeName);
+        }
+
+        return $types;
     }
 }
