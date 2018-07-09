@@ -79,6 +79,7 @@ class CheckLocationsCommand extends Command
     {
         $this->io = $io;
         $this->setup();
+        $this->checkSchoolsWithoutTypes();
         $this->checkSchoolsWithoutDistricts();
         $this->checkDistrictsWithoutSchools();
     }
@@ -109,7 +110,7 @@ class CheckLocationsCommand extends Command
      */
     private function setup()
     {
-        $this->io->out('Collecting schools...');
+        $this->io->out('Collecting data...');
         $progress = $this->makeProgressBar(4);
         $this->allGrades = $this->gradesTable->getAll();
         $progress->increment(1)->draw();
@@ -159,19 +160,12 @@ class CheckLocationsCommand extends Command
             ];
         }
         if ($results) {
-            $this->io->overwrite(sprintf(
-                ' - %s %s found',
-                count($results),
-                __n('school', 'schools', count($results))
-            ));
-            $choice = $this->io->askChoice('List schools?', ['y', 'n'], 'y');
-            if ($choice == 'y') {
-                array_unshift($results, ['Name', 'DoE Code']);
-                $this->io->helper('Table')->output($results);
-            }
-        } else {
-            $this->io->overwrite(' - None found');
+            $this->showResults($results, 'school');
+
+            return;
         }
+
+        $this->io->overwrite(' - None found');
     }
 
     /**
@@ -195,19 +189,65 @@ class CheckLocationsCommand extends Command
                 $district->code
             ];
         }
+
         if ($results) {
-            $this->io->overwrite(sprintf(
-                ' - %s %s found',
-                count($results),
-                __n('district', 'districts', count($results))
-            ));
-            $choice = $this->io->askChoice('List districts?', ['y', 'n'], 'y');
-            if ($choice == 'y') {
-                array_unshift($results, ['Name', 'DoE Code']);
-                $this->io->helper('Table')->output($results);
-            }
-        } else {
-            $this->io->overwrite(' - None found');
+            $this->showResults($results, 'district');
+
+            return;
         }
+
+        $this->io->overwrite(' - None found');
+    }
+
+    /**
+     * Asks the user for input and optionally displays a table of results
+     *
+     * @param array $results Collection of schools or districts
+     * @param string $resultNoun Such as 'school' or 'district'
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function showResults($results, $resultNoun)
+    {
+        $this->io->overwrite(sprintf(
+            ' - %s %s found',
+            count($results),
+            __n($resultNoun, $resultNoun . 's', count($results))
+        ));
+        $choice = $this->io->askChoice("List {$resultNoun}s?", ['y', 'n'], 'y');
+        if ($choice == 'y') {
+            array_unshift($results, ['Name', 'DoE Code']);
+            $this->io->helper('Table')->output($results);
+        }
+    }
+
+    /**
+     * Checks for schools with missing public / private / charter type
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutTypes()
+    {
+        $this->io->out("Checking for schools with missing public/private type...");
+        $progress = $this->makeProgressBar(count($this->schools));
+        $results = [];
+        foreach ($this->schools as $school) {
+            $progress->increment(1)->draw();
+            if ($school->school_type) {
+                continue;
+            }
+            $results[] = [
+                $school->name,
+                $school->code
+            ];
+        }
+        if ($results) {
+            $this->showResults($results, 'school');
+
+            return;
+        }
+
+        $this->io->overwrite(' - None found');
     }
 }
