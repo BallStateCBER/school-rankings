@@ -80,6 +80,8 @@ class CheckLocationsCommand extends Command
         $this->io = $io;
         $this->setup();
         $io->out();
+        $this->checkSchoolsWithoutCodes();
+        $io->out();
         $this->checkSchoolsWithoutTypes();
         $io->out();
         $this->checkSchoolsWithoutGrades();
@@ -349,6 +351,20 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithEmptyField(
             'Checking for schools without addresses...',
             'address'
+        );
+    }
+
+    /**
+     * Checks for schools with missing Indiana Department of Education codes
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutCodes()
+    {
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without DoE codes...',
+            'code'
         );
     }
 }
