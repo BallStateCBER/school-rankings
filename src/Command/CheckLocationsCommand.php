@@ -87,6 +87,12 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithoutDistricts();
         $io->out();
         $this->checkDistrictsWithoutSchools();
+        $io->out();
+        $this->checkSchoolsWithoutCities();
+        $io->out();
+        $this->checkSchoolsWithoutCounties();
+        $io->out();
+        $this->checkSchoolsWithoutStates();
     }
 
     /**
@@ -128,7 +134,8 @@ class CheckLocationsCommand extends Command
                 'SchoolTypes',
                 'Cities',
                 'States',
-                'Grades'
+                'Grades',
+                'Counties'
             ])
             ->all();
         $progress->increment(1)->draw();
@@ -285,5 +292,47 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+    }
+
+    /**
+     * Checks for schools that aren't associated with any cities
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutCities()
+    {
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without cities...',
+            'cities'
+        );
+    }
+
+    /**
+     * Checks for schools that aren't associated with any counties
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutCounties()
+    {
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without counties...',
+            'counties'
+        );
+    }
+
+    /**
+     * Checks for schools that aren't associated with any cities
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutStates()
+    {
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without states...',
+            'states'
+        );
     }
 }
