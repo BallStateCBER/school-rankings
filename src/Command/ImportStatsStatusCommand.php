@@ -7,10 +7,10 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 
 /**
- * Class ImportStatusCommand
+ * Class ImportStatsStatusCommand
  * @package App\Command
  */
-class ImportStatusCommand extends Command
+class ImportStatsStatusCommand extends Command
 {
     /**
      * Initializes the command
