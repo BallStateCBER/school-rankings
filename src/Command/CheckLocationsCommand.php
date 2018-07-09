@@ -231,26 +231,10 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutTypes()
     {
-        $this->io->out("Checking for schools with missing public/private type...");
-        $progress = $this->makeProgressBar(count($this->schools));
-        $results = [];
-        foreach ($this->schools as $school) {
-            $progress->increment(1)->draw();
-            if ($school->school_type) {
-                continue;
-            }
-            $results[] = [
-                $school->name,
-                $school->code
-            ];
-        }
-        if ($results) {
-            $this->showResults($results, 'school');
-
-            return;
-        }
-
-        $this->io->overwrite(' - None found');
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools with missing public/private type...',
+            'school_type'
+        );
     }
 
     /**
@@ -261,12 +245,28 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutGrades()
     {
-        $this->io->out("Checking for schools without grade levels...");
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without grade levels...',
+            'grades'
+        );
+    }
+
+    /**
+     * Generic method for checking for an empty field in $this->schools
+     *
+     * @param string $message Starting message to output
+     * @param string $fieldName Name of field of school object to check for empty status
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithEmptyField($message, $fieldName)
+    {
+        $this->io->out($message);
         $progress = $this->makeProgressBar(count($this->schools));
         $results = [];
         foreach ($this->schools as $school) {
             $progress->increment(1)->draw();
-            if ($school->grades) {
+            if ($school->$fieldName) {
                 continue;
             }
             $results[] = [
