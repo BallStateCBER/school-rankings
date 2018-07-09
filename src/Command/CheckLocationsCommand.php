@@ -246,7 +246,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutTypes()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools with missing public/private type...',
             'school_type'
         );
@@ -260,7 +262,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutGrades()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without grade levels...',
             'grades'
         );
@@ -269,28 +273,30 @@ class CheckLocationsCommand extends Command
     /**
      * Generic method for checking for an empty field in $this->schools
      *
+     * @param array $records Array of either schools or districts
+     * @param string $resultNoun Either 'school' or 'district'
      * @param string $message Starting message to output
      * @param string $fieldName Name of field of school object to check for empty status
      * @throws \Aura\Intl\Exception
      * @return void
      */
-    private function checkSchoolsWithEmptyField($message, $fieldName)
+    private function checkForEmptyField($records, $resultNoun, $message, $fieldName)
     {
         $this->io->out($message);
-        $progress = $this->makeProgressBar(count($this->schools));
+        $progress = $this->makeProgressBar(count($records));
         $results = [];
-        foreach ($this->schools as $school) {
+        foreach ($records as $record) {
             $progress->increment(1)->draw();
-            if ($school->$fieldName) {
+            if ($record->$fieldName) {
                 continue;
             }
             $results[] = [
-                $school->name,
-                $school->code
+                $record->name,
+                $record->code
             ];
         }
         if ($results) {
-            $this->showResults($results, 'school');
+            $this->showResults($results, $resultNoun);
 
             return;
         }
@@ -306,7 +312,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCities()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without cities...',
             'cities'
         );
@@ -320,7 +328,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCounties()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without counties...',
             'counties'
         );
@@ -334,7 +344,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutStates()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without states...',
             'states'
         );
@@ -348,7 +360,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutAddresses()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without addresses...',
             'address'
         );
@@ -362,7 +376,9 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCodes()
     {
-        $this->checkSchoolsWithEmptyField(
+        $this->checkForEmptyField(
+            $this->schools,
+            'school',
             'Checking for schools without DoE codes...',
             'code'
         );
