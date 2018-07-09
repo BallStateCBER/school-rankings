@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Grade;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
@@ -12,6 +13,7 @@ use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\SchoolTypesTable;
 use App\Model\Table\StatesTable;
+use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
@@ -33,6 +35,7 @@ use Cake\Shell\Helper\ProgressHelper;
  * @property SchoolType[] $allSchoolTypes
  * @property SchoolTypesTable $schoolTypesTable
  * @property StatesTable $statesTable
+ * @property StatisticsTable $statsTable
  */
 class CheckLocationsCommand extends Command
 {
@@ -48,6 +51,7 @@ class CheckLocationsCommand extends Command
     private $schoolsTable;
     private $schoolTypesTable;
     private $statesTable;
+    private $statsTable;
 
     /**
      * Initialization method
@@ -65,6 +69,7 @@ class CheckLocationsCommand extends Command
         $this->schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
         $this->statesTable = TableRegistry::getTableLocator()->get('States');
+        $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
     /**
@@ -99,6 +104,16 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithoutStates();
         $io->out();
         $this->checkSchoolsWithoutAddresses();
+        $io->out();
+        $this->checkDistrictsWithoutCities();
+        $io->out();
+        $this->checkDistrictsWithoutCounties();
+        $io->out();
+        $this->checkDistrictsWithoutStates();
+        $io->out();
+        $this->checkSchoolsWithoutStats();
+        $io->out();
+        $this->checkDistrictsWithoutStats();
     }
 
     /**
@@ -136,19 +151,22 @@ class CheckLocationsCommand extends Command
         $this->schools = $this->schoolsTable
             ->find()
             ->contain([
+                'Cities',
+                'Counties',
+                'Grades',
                 'SchoolDistricts',
                 'SchoolTypes',
-                'Cities',
-                'States',
-                'Grades',
-                'Counties'
+                'States'
             ])
             ->all();
         $progress->increment(1)->draw();
         $this->districts = $this->districtsTable
             ->find()
             ->contain([
-                'Schools'
+                'Cities',
+                'Counties',
+                'Schools',
+                'States'
             ])
             ->all();
         $this->io->overwrite(' - Done');
@@ -400,5 +418,111 @@ class CheckLocationsCommand extends Command
             'Checking for districts without DoE codes...',
             'code'
         );
+    }
+
+    /**
+     * Checks for districts that aren't associated with any cities
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkDistrictsWithoutCities()
+    {
+        $this->checkForEmptyField(
+            $this->districts,
+            'district',
+            'Checking for districts without cities...',
+            'cities'
+        );
+    }
+
+    /**
+     * Checks for districts that aren't associated with any counties
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkDistrictsWithoutCounties()
+    {
+        $this->checkForEmptyField(
+            $this->districts,
+            'district',
+            'Checking for districts without counties...',
+            'counties'
+        );
+    }
+
+    /**
+     * Checks for districts that aren't associated with any cities
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkDistrictsWithoutStates()
+    {
+        $this->checkForEmptyField(
+            $this->districts,
+            'district',
+            'Checking for districts without states...',
+            'states'
+        );
+    }
+
+    /**
+     * Checks for any schools/districts with no associated data
+     *
+     * @param string $context Either 'school' or 'district'
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkForNoStats($context)
+    {
+        $this->io->out("Checking for {$context}s without stats...");
+        $records = ($context == 'school') ? $this->schools : $this->districts;
+        $progress = $this->makeProgressBar(count($records));
+        $results = [];
+        foreach ($records as $record) {
+            $progress->increment(1)->draw();
+            $locationField = Context::getLocationField($context);
+            $dataFound = $this->statsTable->exists([
+                $locationField => $record->id
+            ]);
+            if ($dataFound) {
+                continue;
+            }
+            $results[] = [
+                $record->name,
+                $record->code
+            ];
+        }
+        if ($results) {
+            $this->showResults($results, $context);
+
+            return;
+        }
+
+        $this->io->overwrite(' - None found');
+    }
+
+    /**
+     * Checks for schools that aren't associated with any statistical data
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutStats()
+    {
+        $this->checkForNoStats('school');
+    }
+
+    /**
+     * Checks for districts that aren't associated with any statistical data
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkDistrictsWithoutStats()
+    {
+        $this->checkForNoStats('district');
     }
 }
