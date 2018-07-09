@@ -79,9 +79,13 @@ class CheckLocationsCommand extends Command
     {
         $this->io = $io;
         $this->setup();
+        $io->out();
         $this->checkSchoolsWithoutTypes();
+        $io->out();
         $this->checkSchoolsWithoutGrades();
+        $io->out();
         $this->checkSchoolsWithoutDistricts();
+        $io->out();
         $this->checkDistrictsWithoutSchools();
     }
 
