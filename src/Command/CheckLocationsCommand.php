@@ -80,6 +80,7 @@ class CheckLocationsCommand extends Command
         $this->io = $io;
         $this->setup();
         $this->checkSchoolsWithoutTypes();
+        $this->checkSchoolsWithoutGrades();
         $this->checkSchoolsWithoutDistricts();
         $this->checkDistrictsWithoutSchools();
     }
@@ -122,7 +123,8 @@ class CheckLocationsCommand extends Command
                 'SchoolDistricts',
                 'SchoolTypes',
                 'Cities',
-                'States'
+                'States',
+                'Grades'
             ])
             ->all();
         $progress->increment(1)->draw();
@@ -235,6 +237,36 @@ class CheckLocationsCommand extends Command
         foreach ($this->schools as $school) {
             $progress->increment(1)->draw();
             if ($school->school_type) {
+                continue;
+            }
+            $results[] = [
+                $school->name,
+                $school->code
+            ];
+        }
+        if ($results) {
+            $this->showResults($results, 'school');
+
+            return;
+        }
+
+        $this->io->overwrite(' - None found');
+    }
+
+    /**
+     * Checks for schools that aren't associated with any grade levels
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutGrades()
+    {
+        $this->io->out("Checking for schools without grade levels...");
+        $progress = $this->makeProgressBar(count($this->schools));
+        $results = [];
+        foreach ($this->schools as $school) {
+            $progress->increment(1)->draw();
+            if ($school->grades) {
                 continue;
             }
             $results[] = [
