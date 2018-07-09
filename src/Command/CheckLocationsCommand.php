@@ -93,6 +93,8 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithoutCounties();
         $io->out();
         $this->checkSchoolsWithoutStates();
+        $io->out();
+        $this->checkSchoolsWithoutAddresses();
     }
 
     /**
@@ -333,6 +335,20 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithEmptyField(
             'Checking for schools without states...',
             'states'
+        );
+    }
+
+    /**
+     * Checks for schools with missing addresses
+     *
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkSchoolsWithoutAddresses()
+    {
+        $this->checkSchoolsWithEmptyField(
+            'Checking for schools without addresses...',
+            'address'
         );
     }
 }
