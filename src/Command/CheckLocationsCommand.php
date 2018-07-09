@@ -227,7 +227,7 @@ class CheckLocationsCommand extends Command
             count($results),
             __n($resultNoun, $resultNoun . 's', count($results))
         ));
-        $choice = $this->io->askChoice("List {$resultNoun}s?", ['y', 'n'], 'y');
+        $choice = $this->io->askChoice("List {$resultNoun}s?", ['y', 'n'], 'n');
         if ($choice == 'y') {
             array_unshift($results, ['Name', 'DoE Code']);
             $this->io->helper('Table')->output($results);
