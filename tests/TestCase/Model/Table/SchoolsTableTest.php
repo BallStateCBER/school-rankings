@@ -96,4 +96,14 @@ class SchoolsTableTest extends TestCase
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
+
+    /**
+     * Tests that multiple districts with the same code are not allowed
+     *
+     * @return void
+     */
+    public function testSaveFailNonUniqueCode()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
 }
