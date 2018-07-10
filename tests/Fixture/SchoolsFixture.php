@@ -25,6 +25,7 @@ class SchoolsFixture extends TestFixture
         'url' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'phone' => ['type' => 'string', 'length' => 30, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'code' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null, 'collate' => 'utf8mb4_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
+        'closed' => ['type' => 'boolean', 'length' => null, 'null' => false, 'default' => '0', 'comment' => '', 'precision' => null],
         'created' => ['type' => 'datetime', 'length' => null, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null],
         'modified' => ['type' => 'datetime', 'length' => null, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null],
         '_constraints' => [
@@ -52,6 +53,7 @@ class SchoolsFixture extends TestFixture
             'url' => 'Lorem ipsum dolor sit amet',
             'phone' => '(000) 000-0000',
             'code' => 'Lorem ipsum dolor sit amet',
+            'closed' => false,
             'created' => '2018-04-05 20:00:04',
             'modified' => '2018-04-05 20:00:04'
         ],

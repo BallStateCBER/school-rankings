@@ -12,6 +12,7 @@ use Cake\ORM\Entity;
  * @property string $url
  * @property string $phone
  * @property string $code
+ * @property bool $closed
  * @property FrozenTime $created
  * @property FrozenTime $modified
  *
@@ -38,6 +39,7 @@ class SchoolDistrict extends Entity
         'name' => true,
         'url' => true,
         'code' => true,
+        'closed' => true,
         'phone' => true,
         'created' => true,
         'modified' => true,
