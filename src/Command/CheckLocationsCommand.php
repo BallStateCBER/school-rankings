@@ -19,6 +19,7 @@ use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Cake\Utility\Hash;
 
 /**
  * Class CheckLocationsCommand
@@ -114,6 +115,18 @@ class CheckLocationsCommand extends Command
         $this->checkSchoolsWithoutStats();
         $io->out();
         $this->checkDistrictsWithoutStats();
+        $io->out();
+        $this->checkForMultipleGeographies('school', 'cities');
+        $io->out();
+        $this->checkForMultipleGeographies('school', 'counties');
+        $io->out();
+        $this->checkForMultipleGeographies('school', 'states');
+        $io->out();
+        $this->checkForMultipleGeographies('district', 'cities');
+        $io->out();
+        $this->checkForMultipleGeographies('district', 'counties');
+        $io->out();
+        $this->checkForMultipleGeographies('district', 'states');
     }
 
     /**
@@ -241,10 +254,11 @@ class CheckLocationsCommand extends Command
      *
      * @param array $results Collection of schools or districts
      * @param string $resultNoun Such as 'school' or 'district'
-     * @throws \Aura\Intl\Exception
+     * @param array $headers Array of column headers to include in the displayed table
      * @return void
+     * @throws \Aura\Intl\Exception
      */
-    private function showResults($results, $resultNoun)
+    private function showResults($results, $resultNoun, $headers = ['Name', 'DoE Code'])
     {
         $this->io->overwrite(sprintf(
             ' - %s %s found',
@@ -253,7 +267,7 @@ class CheckLocationsCommand extends Command
         ));
         $choice = $this->io->askChoice("List {$resultNoun}s?", ['y', 'n'], 'n');
         if ($choice == 'y') {
-            array_unshift($results, ['Name', 'DoE Code']);
+            array_unshift($results, $headers);
             $this->io->helper('Table')->output($results);
         }
     }
@@ -524,5 +538,40 @@ class CheckLocationsCommand extends Command
     private function checkDistrictsWithoutStats()
     {
         $this->checkForNoStats('district');
+    }
+
+    /**
+     * Checks for any schools/districts associated with multiple cities, counties, etc.
+     *
+     * @param string $context Either 'school' or 'district'
+     * @param string $field e.g. 'cities' or 'counties'
+     * @throws \Aura\Intl\Exception
+     * @return void
+     */
+    private function checkForMultipleGeographies($context, $field)
+    {
+        $this->io->out("Checking for {$context}s associated with multiple $field...");
+        $records = ($context == 'school') ? $this->schools : $this->districts;
+        $progress = $this->makeProgressBar(count($records));
+        $results = [];
+        foreach ($records as $record) {
+            $progress->increment(1)->draw();
+            if (count($record->$field) < 2) {
+                continue;
+            }
+            $results[] = [
+                $record->name,
+                $record->code,
+                implode(', ', Hash::extract($record->$field, '{n}.name'))
+            ];
+        }
+        if ($results) {
+            $headers = ['Name', 'DoE Code', ucwords($field)];
+            $this->showResults($results, $context, $headers);
+
+            return;
+        }
+
+        $this->io->overwrite(' - None found');
     }
 }
