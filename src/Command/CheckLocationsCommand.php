@@ -2,17 +2,10 @@
 namespace App\Command;
 
 use App\Model\Context\Context;
-use App\Model\Entity\Grade;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
-use App\Model\Entity\SchoolType;
-use App\Model\Table\CitiesTable;
-use App\Model\Table\CountiesTable;
-use App\Model\Table\GradesTable;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
-use App\Model\Table\SchoolTypesTable;
-use App\Model\Table\StatesTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
@@ -24,34 +17,20 @@ use Cake\Utility\Hash;
 /**
  * Class CheckLocationsCommand
  * @package App\Command
- * @property CitiesTable $citiesTable
  * @property ConsoleIo $io
- * @property CountiesTable $countiesTable
- * @property Grade[] $allGrades
- * @property GradesTable $gradesTable
  * @property School[] $schools
  * @property SchoolDistrict[] $districts
  * @property SchoolDistrictsTable $districtsTable
  * @property SchoolsTable $schoolsTable
- * @property SchoolType[] $allSchoolTypes
- * @property SchoolTypesTable $schoolTypesTable
- * @property StatesTable $statesTable
  * @property StatisticsTable $statsTable
  */
 class CheckLocationsCommand extends Command
 {
-    private $allGrades;
-    private $allSchoolTypes;
-    private $citiesTable;
-    private $countiesTable;
     private $districts = [];
     private $districtsTable;
-    private $gradesTable;
     private $io;
     private $schools = [];
     private $schoolsTable;
-    private $schoolTypesTable;
-    private $statesTable;
     private $statsTable;
 
     /**
@@ -63,13 +42,8 @@ class CheckLocationsCommand extends Command
     {
         parent::initialize();
 
-        $this->citiesTable = TableRegistry::getTableLocator()->get('Cities');
-        $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $this->districtsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
-        $this->gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $this->schoolsTable = TableRegistry::getTableLocator()->get('Schools');
-        $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
-        $this->statesTable = TableRegistry::getTableLocator()->get('States');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
@@ -85,47 +59,26 @@ class CheckLocationsCommand extends Command
     {
         $this->io = $io;
         $this->setup();
-        $io->out();
         $this->checkSchoolsWithoutCodes();
-        $io->out();
         $this->checkDistrictsWithoutCodes();
-        $io->out();
         $this->checkSchoolsWithoutTypes();
-        $io->out();
         $this->checkSchoolsWithoutGrades();
-        $io->out();
         $this->checkSchoolsWithoutDistricts();
-        $io->out();
         $this->checkDistrictsWithoutSchools();
-        $io->out();
         $this->checkSchoolsWithoutCities();
-        $io->out();
         $this->checkSchoolsWithoutCounties();
-        $io->out();
         $this->checkSchoolsWithoutStates();
-        $io->out();
         $this->checkSchoolsWithoutAddresses();
-        $io->out();
         $this->checkDistrictsWithoutCities();
-        $io->out();
         $this->checkDistrictsWithoutCounties();
-        $io->out();
         $this->checkDistrictsWithoutStates();
-        $io->out();
         $this->checkSchoolsWithoutStats();
-        $io->out();
         $this->checkDistrictsWithoutStats();
-        $io->out();
         $this->checkForMultipleGeographies('school', 'cities');
-        $io->out();
         $this->checkForMultipleGeographies('school', 'counties');
-        $io->out();
         $this->checkForMultipleGeographies('school', 'states');
-        $io->out();
         $this->checkForMultipleGeographies('district', 'cities');
-        $io->out();
         $this->checkForMultipleGeographies('district', 'counties');
-        $io->out();
         $this->checkForMultipleGeographies('district', 'states');
     }
 
@@ -156,11 +109,7 @@ class CheckLocationsCommand extends Command
     private function setup()
     {
         $this->io->out('Collecting data...');
-        $progress = $this->makeProgressBar(4);
-        $this->allGrades = $this->gradesTable->getAll();
-        $progress->increment(1)->draw();
-        $this->allSchoolTypes = $this->schoolTypesTable->getAll();
-        $progress->increment(1)->draw();
+        $progress = $this->makeProgressBar(2);
         $this->schools = $this->schoolsTable
             ->find()
             ->contain([
@@ -216,6 +165,7 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+        $this->io->out();
     }
 
     /**
@@ -247,6 +197,7 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+        $this->io->out();
     }
 
     /**
@@ -270,6 +221,7 @@ class CheckLocationsCommand extends Command
             array_unshift($results, $headers);
             $this->io->helper('Table')->output($results);
         }
+        $this->io->out();
     }
 
     /**
@@ -336,6 +288,7 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+        $this->io->out();
     }
 
     /**
@@ -516,6 +469,7 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+        $this->io->out();
     }
 
     /**
@@ -573,5 +527,6 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->overwrite(' - None found');
+        $this->io->out();
     }
 }
