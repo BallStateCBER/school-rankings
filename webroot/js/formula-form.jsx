@@ -4,12 +4,14 @@ import {Button} from 'reactstrap';
 import uuidv4 from 'uuid/v4';
 import Select from 'react-select';
 import '../../node_modules/react-select/dist/react-select.css';
+import {MetricSelector} from './formula-form-metric-selector.jsx';
+import 'jstree';
 
 class FormulaForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      context: 'school',
+      context: null,
       county: 'bar',
       uuid: FormulaForm.getUuid(),
     };
@@ -40,7 +42,7 @@ class FormulaForm extends React.Component {
     event.preventDefault();
   }
 
-  getCountyOptions() {
+  static getCountyOptions() {
     let selectOptions = [];
     for (let n = 0; n < window.formulaForm.counties.length; n++) {
       let county = window.formulaForm.counties[n];
@@ -49,16 +51,8 @@ class FormulaForm extends React.Component {
         label: county.name,
       });
     }
-    return (
-      <div className="form-group">
-        <label htmlFor="county">
-          County
-        </label>
-        <Select name="county" id="county"
-                value={this.state.county} onChange={this.handleSelectCounty}
-                options={selectOptions} />
-      </div>
-    );
+
+    return selectOptions;
   }
 
   render() {
@@ -87,7 +81,20 @@ class FormulaForm extends React.Component {
             </label>
           </div>
         </div>
-        {this.getCountyOptions()}
+        <div className="form-group">
+          <label htmlFor="county">
+            County
+          </label>
+          <Select name="county" id="county"
+                  value={this.state.county} onChange={this.handleSelectCounty}
+                  options={FormulaForm.getCountyOptions()} clearable={false} />
+        </div>
+        {this.state.context === 'school' &&
+          <MetricSelector context="school" />
+        }
+        {this.state.context === 'district' &&
+          <MetricSelector context="district" />
+        }
         <Button color="primary" onClick={FormulaForm.handleSubmit}
                 ref={this.submitButton}
                 disabled={this.state.submitInProgress}>

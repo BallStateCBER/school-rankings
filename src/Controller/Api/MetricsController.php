@@ -32,7 +32,7 @@ class MetricsController extends AppController
 
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metrics
+            'metrics' => array_values($metrics)
         ]);
     }
 
@@ -55,7 +55,7 @@ class MetricsController extends AppController
 
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metrics
+            'metrics' => array_values($metrics)
         ]);
     }
 

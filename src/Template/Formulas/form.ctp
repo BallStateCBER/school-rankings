@@ -1,6 +1,7 @@
 <?php
-/** @var array $counties */
+    /** @var array $counties */
     $this->Html->script('/dist/js/formula-form.js', ['block' => 'bottom']);
+    $this->Html->css('/jstree/themes/default/style.min.css', ['block' => 'css']);
 ?>
 
 <div id="formula-form"></div>
