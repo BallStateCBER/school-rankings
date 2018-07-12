@@ -26,7 +26,7 @@ class MetricsController extends AppController
             ->where(['context' => 'school'])
             ->toArray();
 
-        if ($this->request->getQuery('only-visible-metrics')) {
+        if ($this->request->getQuery('no-hidden')) {
             $metrics = Metric::removeNotVisible($metrics);
         }
 
@@ -49,7 +49,7 @@ class MetricsController extends AppController
             ->where(['context' => 'district'])
             ->toArray();
 
-        if ($this->request->getQuery('only-visible-metrics')) {
+        if ($this->request->getQuery('no-hidden')) {
             $metrics = Metric::removeNotVisible($metrics);
         }
 
