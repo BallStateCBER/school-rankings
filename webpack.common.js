@@ -9,6 +9,7 @@ module.exports = {
   entry: {
     'main': './webroot/js/main.js',
     'metric-manager': './webroot/js/metric-manager.jsx',
+    'formula-form': './webroot/js/formula-form.jsx',
   },
   output: {
     filename: 'js/[name].js',
@@ -16,6 +17,10 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
       {
         test: /\.scss$/,
         use: ExtractTextPlugin.extract({
