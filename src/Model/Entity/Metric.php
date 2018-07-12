@@ -36,4 +36,24 @@ class Metric extends Entity
     protected $_accessible = [
         '*' => true
     ];
+
+    /**
+     * Takes an array of metrics and returns an array with all visible = false metrics and their descendants removed
+     *
+     * @param array|Metric[] $metrics Collection of metrics
+     * @return array|Metric[]
+     */
+    public static function removeNotVisible($metrics)
+    {
+        foreach ($metrics as $i => $metric) {
+            if (!$metric['visible']) {
+                unset($metrics[$i]);
+                continue;
+            }
+
+            $metrics[$i]['children'] = self::removeNotVisible($metrics[$i]['children']);
+        }
+
+        return $metrics;
+    }
 }

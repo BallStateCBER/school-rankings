@@ -22,11 +22,17 @@ class MetricsController extends AppController
     public function schools()
     {
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metrics = $metricsTable->find('threaded')
+            ->where(['context' => 'school'])
+            ->toArray();
+
+        if ($this->request->getQuery('only-visible-metrics')) {
+            $metrics = Metric::removeNotVisible($metrics);
+        }
+
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metricsTable->find('threaded')
-                ->where(['context' => 'school'])
-                ->toArray()
+            'metrics' => $metrics
         ]);
     }
 
@@ -39,11 +45,17 @@ class MetricsController extends AppController
     public function districts()
     {
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metrics = $metricsTable->find('threaded')
+            ->where(['context' => 'district'])
+            ->toArray();
+
+        if ($this->request->getQuery('only-visible-metrics')) {
+            $metrics = Metric::removeNotVisible($metrics);
+        }
+
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => $metricsTable->find('threaded')
-                ->where(['context' => 'district'])
-                ->toArray()
+            'metrics' => $metrics
         ]);
     }
 
