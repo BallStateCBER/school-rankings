@@ -9,6 +9,7 @@ import fontawesome from '@fortawesome/fontawesome';
 require('@fortawesome/fontawesome-free-solid');
 require('@fortawesome/fontawesome-free-regular');
 import {MetricManagerLegend} from './metric-manager-legend.jsx';
+import {MetricFormatter} from './metric-manager-formatter';
 
 window.jsTreeData = {
   createMetric: {},
@@ -263,7 +264,7 @@ class MetricManager extends React.Component {
   getJsTreeConfig(data) {
     return {
       'core': {
-        'data': MetricManager.formatMetricsForJsTree(data.metrics),
+        'data': MetricFormatter.formatMetricsForJsTree(data.metrics),
         'check_callback': true,
       },
       'plugins': [
@@ -405,42 +406,6 @@ class MetricManager extends React.Component {
     liElement.find('img.loading').remove();
     jstree.enable_node(node);
   };
-
-  static formatMetricsForJsTree(data) {
-    let retval = [];
-
-    data.forEach((metric) => {
-      let jTreeData = {
-        text: metric.name,
-        data: {
-          selectable: Boolean(metric.selectable),
-          type: metric.type,
-          metricId: metric.id,
-          name: metric.name,
-          description: metric.description,
-          visible: metric.visible,
-        },
-        a_attr: {
-          'data-metric-id': metric.id,
-        },
-        li_attr: {
-          'data-selectable': Boolean(metric.selectable) ? 1 : 0,
-          'data-type': metric.type,
-          'data-visible': Boolean(metric.visible) ? 1 : 0,
-          'data-metric-id': metric.id,
-        },
-        icon: Boolean(metric.selectable) ? 'far fa-check-circle' : 'fas fa-ban',
-      };
-      if (metric.children.length > 0) {
-        jTreeData.children = MetricManager.formatMetricsForJsTree(
-            metric.children
-        );
-      }
-      retval.push(jTreeData);
-    });
-
-    return retval;
-  }
 
   static updateNode(node, data) {
     if (data.hasOwnProperty('name')) {
