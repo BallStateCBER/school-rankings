@@ -69,13 +69,13 @@ class MetricModal extends React.Component {
     const parentId = isRoot ? null : parentNode.data.metricId;
     const metricName = this.state.metricName.trim();
     let submitData = {
-      'context': window.metricManager.context,
-      'parentId': parentId,
-      'name': metricName,
-      'description': this.state.metricDescription.trim(),
-      'type': this.state.metricType,
-      'selectable': this.state.metricSelectable,
-      'visible': this.state.metricVisible,
+      context: window.metricManager.context,
+      parentId: parentId,
+      name: metricName,
+      description: this.state.metricDescription.trim(),
+      type: this.state.metricType,
+      selectable: this.state.metricSelectable,
+      visible: this.state.metricVisible,
     };
 
     $.ajax({
@@ -95,12 +95,12 @@ class MetricModal extends React.Component {
 
   handleEdit() {
     const submitData = {
-      'context': window.metricManager.context,
-      'name': this.state.metricName.trim(),
-      'description': this.state.metricDescription.trim(),
-      'type': this.state.metricType,
-      'selectable': this.state.metricSelectable,
-      'visible': this.state.metricVisible,
+      context: window.metricManager.context,
+      name: this.state.metricName.trim(),
+      description: this.state.metricDescription.trim(),
+      type: this.state.metricType,
+      selectable: this.state.metricSelectable,
+      visible: this.state.metricVisible,
     };
 
     $.ajax({

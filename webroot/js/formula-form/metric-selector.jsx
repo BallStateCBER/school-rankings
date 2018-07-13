@@ -57,26 +57,26 @@ class MetricSelector extends React.Component {
 
   static getJsTreeConfig(data) {
     return {
-      'core': {
-        'data': Formatter.formatMetricsForJsTree(data.metrics),
-        'check_callback': true,
+      core: {
+        data: Formatter.formatMetricsForJsTree(data.metrics),
+        check_callback: true,
       },
-      'plugins': [
+      plugins: [
         'checkbox',
         'conditionalselect',
         'search',
         'sort',
         'wholerow',
       ],
-      'checkbox': {
-        'three_state': false,
+      checkbox: {
+        three_state: false,
       },
-      'conditionalselect': function(node) {
+      conditionalselect: function(node) {
         return node.data.selectable;
       },
-      'search': {
-        'show_only_matches': true,
-        'show_only_matches_children': true,
+      search: {
+        show_only_matches: true,
+        show_only_matches_children: true,
       },
     };
   }

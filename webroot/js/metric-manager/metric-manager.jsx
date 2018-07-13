@@ -66,9 +66,9 @@ class MetricManager extends React.Component {
       const newName = node.text;
       const metricId = node.data.metricId;
       const requestData = {
-        'context': context,
-        'metricId': metricId,
-        'name': newName,
+        context: context,
+        metricId: metricId,
+        name: newName,
       };
       this.sendEditRequest(metricId, requestData, jstree, node);
     });
@@ -81,9 +81,9 @@ class MetricManager extends React.Component {
     const context = window.metricManager.context;
     let metricId = node.data.metricId;
     const requestData = {
-      'context': context,
-      'metricId': metricId,
-      'selectable': !selectable,
+      context: context,
+      metricId: metricId,
+      selectable: !selectable,
     };
 
     this.sendEditRequest(metricId, requestData, jstree, node);
@@ -96,9 +96,9 @@ class MetricManager extends React.Component {
     const context = window.metricManager.context;
     const metricId = node.data.metricId;
     const requestData = {
-      'context': context,
-      'metricId': metricId,
-      'type': newType,
+      context: context,
+      metricId: metricId,
+      type: newType,
     };
 
     this.sendEditRequest(metricId, requestData, jstree, node);
@@ -111,9 +111,9 @@ class MetricManager extends React.Component {
     const context = window.metricManager.context;
     const metricId = node.data.metricId;
     const requestData = {
-      'context': context,
-      'metricId': metricId,
-      'visible': newVisible,
+      context: context,
+      metricId: metricId,
+      visible: newVisible,
     };
 
     this.sendEditRequest(metricId, requestData, jstree, node);
@@ -263,39 +263,39 @@ class MetricManager extends React.Component {
 
   getJsTreeConfig(data) {
     return {
-      'core': {
-        'data': Formatter.formatMetricsForJsTree(data.metrics),
-        'check_callback': true,
+      core: {
+        data: Formatter.formatMetricsForJsTree(data.metrics),
+        check_callback: true,
       },
-      'plugins': [
+      plugins: [
         'contextmenu',
         'dnd',
         'sort',
         'state',
         'wholerow',
       ],
-      'contextmenu': {
-        'items': () => {
+      contextmenu: {
+        items: () => {
           return {
             'Create': {
-              'label': 'Create',
-              'title': 'Create a metric in the selected group',
-              'action': (data) => {
+              label: 'Create',
+              title: 'Create a metric in the selected group',
+              action: (data) => {
                 window.jsTreeData.createMetric = data;
                 this.handleCreateModalOpen();
               },
             },
             'Rename': {
-              'label': 'Rename',
-              'title': 'Rename this metric',
-              'action': (data) => {
+              label: 'Rename',
+              title: 'Rename this metric',
+              action: (data) => {
                 this.handleRename(data);
               },
             },
             'Edit': {
-              'label': 'Edit',
-              'title': 'Edit this metric',
-              'action': (data) => {
+              label: 'Edit',
+              title: 'Edit this metric',
+              action: (data) => {
                 const jstree = $('#jstree').jstree(true);
                 const node = jstree.get_node(data.reference);
                 window.jsTreeData.editMetric = node.data;
@@ -304,35 +304,35 @@ class MetricManager extends React.Component {
               },
             },
             'Toggle submenu': {
-              'label': 'Toggle...',
-              'submenu': {
+              label: 'Toggle...',
+              submenu: {
                 'Toggle selectable': {
-                  'label': 'Selectable',
-                  'title': 'Toggle ability to select this metric for rankings',
-                  'action': (data) => {
+                  label: 'Selectable',
+                  title: 'Toggle ability to select this metric for rankings',
+                  action: (data) => {
                     this.handleToggleSelectable(data);
                   },
                 },
                 'Toggle type': {
-                  'label': 'Numeric/boolean',
-                  'title': 'Toggle data type between numeric and boolean',
-                  'action': (data) => {
+                  label: 'Numeric/boolean',
+                  title: 'Toggle data type between numeric and boolean',
+                  action: (data) => {
                     this.handleToggleType(data);
                   },
                 },
                 'Toggle visible': {
-                  'label': 'Visible',
-                  'title': 'Toggle metric visibility for regular users',
-                  'action': (data) => {
+                  label: 'Visible',
+                  title: 'Toggle metric visibility for regular users',
+                  action: (data) => {
                     this.handleToggleVisible(data);
                   },
                 },
               },
             },
             'Delete': {
-              'label': 'Delete',
-              'title': 'Delete this metric',
-              'action': (data) => {
+              label: 'Delete',
+              title: 'Delete this metric',
+              action: (data) => {
                 if (confirm('Delete metric and all associated data?')) {
                   this.handleDelete(data);
                 }
@@ -341,11 +341,11 @@ class MetricManager extends React.Component {
           };
         },
       },
-      'dnd': {
-        'inside_pos': 'last',
-        'large_drop_target': true,
-        'large_drag_target': true,
-        'use_html5': true,
+      dnd: {
+        inside_pos: 'last',
+        large_drop_target: true,
+        large_drag_target: true,
+        use_html5: true,
       },
     };
   }
@@ -368,9 +368,9 @@ class MetricManager extends React.Component {
       url: '/api/metrics/reparent.json',
       dataType: 'json',
       data: {
-        'metricId': movedMetricId,
-        'context': context,
-        'newParentId': parentMetricId,
+        metricId: movedMetricId,
+        context: context,
+        newParentId: parentMetricId,
       },
     }).done((data) => {
       if (data.hasOwnProperty('result') && data.result) {
