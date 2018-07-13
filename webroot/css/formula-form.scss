@@ -5,3 +5,7 @@ li[data-selectable="0"] {
     }
   }
 }
+#jstree {
+  max-height: 300px;
+  overflow: auto;
+}
