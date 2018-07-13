@@ -62,10 +62,18 @@ class MetricSelector extends React.Component {
         'check_callback': true,
       },
       'plugins': [
+        'checkbox',
+        'conditionalselect',
         'search',
         'sort',
         'wholerow',
       ],
+      'checkbox': {
+        'three_state': false,
+      },
+      'conditionalselect': function(node) {
+        return node.data.selectable;
+      },
       'search': {
         'show_only_matches': true,
         'show_only_matches_children': true,
