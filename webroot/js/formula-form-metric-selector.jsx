@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {MetricFormatter} from './metric-manager-formatter';
+import 'jstree';
 
 class MetricSelector extends React.Component {
   constructor(props) {
