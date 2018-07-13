@@ -10,6 +10,7 @@ class MetricSelector extends React.Component {
       errorMsg: '',
       hasError: false,
       loading: false,
+      successfullyLoaded: false,
     };
   }
 
@@ -21,7 +22,23 @@ class MetricSelector extends React.Component {
       url: '/api/metrics/' + this.props.context + 's.json?no-hidden=1',
       dataType: 'json',
     }).done((data) => {
-      $('#jstree').jstree(MetricSelector.getJsTreeConfig(data));
+      // Load jsTree
+      let container = $('#jstree');
+      container.jstree(MetricSelector.getJsTreeConfig(data));
+      this.setState({successfullyLoaded: true});
+
+      // Set up search
+      let search = $('#jstree-search');
+      let timeout = false;
+      search.keyup(function() {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+        timeout = setTimeout(function() {
+          const value = search.val();
+          container.jstree(true).search(value);
+        }, 250);
+      });
     }).fail((jqXHR) => {
       let errorMsg = 'Error loading metrics';
       if (jqXHR.hasOwnProperty('responseJSON')) {
@@ -35,9 +52,6 @@ class MetricSelector extends React.Component {
       });
     }).always(() => {
       this.setState({loading: false});
-      $(document).on('dnd_stop.vakata', (event, data) => {
-        this.handleNodeDrop(data);
-      });
     });
   }
 
@@ -48,9 +62,13 @@ class MetricSelector extends React.Component {
         'check_callback': true,
       },
       'plugins': [
+        'search',
         'sort',
         'wholerow',
       ],
+      'search': {
+        'show_only_matches': true,
+      },
     };
   }
 
@@ -66,6 +84,15 @@ class MetricSelector extends React.Component {
         }
         {this.state.hasError &&
           <p className="text-danger">{this.state.errorMsg}</p>
+        }
+        {this.state.successfullyLoaded &&
+          <div className="form-group" id="jstree-search-container">
+            <label htmlFor="jstree-search" className="sr-only">
+              Search
+            </label>
+            <input type="text" className="form-control" id="jstree-search"
+                   placeholder="Search..."/>
+          </div>
         }
         <div id="jstree"></div>
       </div>
