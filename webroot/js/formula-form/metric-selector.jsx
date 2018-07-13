@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Formatter} from '../metric-manager/formatter.js';
+import {Button} from 'reactstrap';
 import 'jstree';
 
 class MetricSelector extends React.Component {
@@ -14,6 +15,7 @@ class MetricSelector extends React.Component {
       successfullyLoaded: false,
     };
     this.setupClickEvents = this.setupClickEvents.bind(this);
+    this.handleClearMetrics = this.handleClearMetrics.bind(this);
   }
 
   componentDidMount() {
@@ -130,6 +132,11 @@ class MetricSelector extends React.Component {
     };
   }
 
+  handleClearMetrics() {
+    this.setState({selectedMetrics: []});
+    $('#jstree').jstree(true).deselect_all();
+  }
+
   render() {
     return (
       <div>
@@ -144,12 +151,15 @@ class MetricSelector extends React.Component {
           <p className="text-danger">{this.state.errorMsg}</p>
         }
         {this.state.successfullyLoaded &&
-          <div className="form-group" id="jstree-search-container">
+          <div className="input-group" id="jstree-search-container">
             <label htmlFor="jstree-search" className="sr-only">
               Search
             </label>
             <input type="text" className="form-control" id="jstree-search"
                    placeholder="Search..."/>
+            <Button color="secondary" onClick={this.handleClearMetrics}>
+              Clear selections
+            </Button>
           </div>
         }
         <div id="jstree"></div>

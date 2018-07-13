@@ -9,3 +9,8 @@ li[data-selectable="0"] {
   max-height: 300px;
   overflow: auto;
 }
+#jstree-search-container {
+  button {
+    margin-left: 15px;
+  }
+}
