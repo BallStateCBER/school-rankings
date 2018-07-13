@@ -1,6 +1,6 @@
 import React from 'react';
 import 'jstree';
-import '../css/metric-manager.scss';
+import '../../css/metric-manager.scss';
 import ReactDom from 'react-dom';
 import 'bootstrap';
 import {Button} from 'reactstrap';
@@ -8,8 +8,8 @@ import {MetricModal} from './metric-modal.jsx';
 import fontawesome from '@fortawesome/fontawesome';
 require('@fortawesome/fontawesome-free-solid');
 require('@fortawesome/fontawesome-free-regular');
-import {MetricManagerLegend} from './metric-manager-legend.jsx';
-import {MetricFormatter} from './metric-manager-formatter';
+import {Legend} from './legend.jsx';
+import {Formatter} from './formatter.js';
 
 window.jsTreeData = {
   createMetric: {},
@@ -264,7 +264,7 @@ class MetricManager extends React.Component {
   getJsTreeConfig(data) {
     return {
       'core': {
-        'data': MetricFormatter.formatMetricsForJsTree(data.metrics),
+        'data': Formatter.formatMetricsForJsTree(data.metrics),
         'check_callback': true,
       },
       'plugins': [
@@ -463,13 +463,13 @@ class MetricManager extends React.Component {
         }
         <div id="jstree"></div>
         <MetricModal onClose={this.handleCreateModalClose}
-                     isOpen={this.state.openCreateModal} mode="add" />
+               isOpen={this.state.openCreateModal} mode="add" />
         {this.state.openEditModal &&
           <MetricModal onClose={this.handleEditModalClose}
-                       isOpen={this.state.openEditModal} mode="edit"/>
+                 isOpen={this.state.openEditModal} mode="edit"/>
         }
         {! this.state.loading &&
-          <MetricManagerLegend/>
+          <Legend/>
         }
       </div>
     );

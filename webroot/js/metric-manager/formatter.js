@@ -1,4 +1,4 @@
-class MetricFormatter {
+class Formatter {
   static formatMetricsForJsTree(data) {
     let retval = [];
 
@@ -25,7 +25,7 @@ class MetricFormatter {
         icon: Boolean(metric.selectable) ? 'far fa-check-circle' : 'fas fa-ban',
       };
       if (metric.children.length > 0) {
-        jTreeData.children = MetricFormatter.formatMetricsForJsTree(
+        jTreeData.children = Formatter.formatMetricsForJsTree(
             metric.children
         );
       }
@@ -36,4 +36,4 @@ class MetricFormatter {
   }
 }
 
-export {MetricFormatter};
+export {Formatter};

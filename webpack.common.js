@@ -8,8 +8,8 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 module.exports = {
   entry: {
     'main': './webroot/js/main.js',
-    'metric-manager': './webroot/js/metric-manager.jsx',
-    'formula-form': './webroot/js/formula-form.jsx',
+    'metric-manager': './webroot/js/metric-manager/metric-manager.jsx',
+    'formula-form': './webroot/js/formula-form/formula-form.jsx',
   },
   output: {
     filename: 'js/[name].js',

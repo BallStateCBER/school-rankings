@@ -1,6 +1,6 @@
 import React from 'react';
 
-class MetricManagerLegend extends React.Component {
+class Legend extends React.Component {
   static icon(className, label) {
     return (
         <li>
@@ -21,8 +21,8 @@ class MetricManagerLegend extends React.Component {
               Selectable by users
             </h6>
             <ul className="card-text">
-              {MetricManagerLegend.icon('far fa-check-circle', 'Selectable')}
-              {MetricManagerLegend.icon('fas fa-ban', 'Not selectable')}
+              {Legend.icon('far fa-check-circle', 'Selectable')}
+              {Legend.icon('fas fa-ban', 'Not selectable')}
             </ul>
           </section>
 
@@ -31,8 +31,8 @@ class MetricManagerLegend extends React.Component {
               Metric data type
             </h6>
             <ul className="card-text">
-              {MetricManagerLegend.icon('far fa-chart-bar', 'Numeric')}
-              {MetricManagerLegend.icon('far fa-thumbs-up', 'Boolean')}
+              {Legend.icon('far fa-chart-bar', 'Numeric')}
+              {Legend.icon('far fa-thumbs-up', 'Boolean')}
             </ul>
           </section>
 
@@ -41,7 +41,7 @@ class MetricManagerLegend extends React.Component {
               Visible to users
             </h6>
             <ul className="card-text">
-              {MetricManagerLegend.icon(
+              {Legend.icon(
                   'far fa-eye-slash',
                   <span className="metric-hidden">Hidden</span>
               )}
@@ -53,4 +53,4 @@ class MetricManagerLegend extends React.Component {
   }
 }
 
-export {MetricManagerLegend};
+export {Legend};

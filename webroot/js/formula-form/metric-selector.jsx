@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {MetricFormatter} from './metric-manager-formatter';
+import {Formatter} from '../metric-manager/formatter.js';
 import 'jstree';
 
 class MetricSelector extends React.Component {
@@ -58,7 +58,7 @@ class MetricSelector extends React.Component {
   static getJsTreeConfig(data) {
     return {
       'core': {
-        'data': MetricFormatter.formatMetricsForJsTree(data.metrics),
+        'data': Formatter.formatMetricsForJsTree(data.metrics),
         'check_callback': true,
       },
       'plugins': [
