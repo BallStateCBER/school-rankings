@@ -87,7 +87,8 @@ class FormulaForm extends React.Component {
           </label>
           <Select name="county" id="county"
                   value={this.state.county} onChange={this.handleSelectCounty}
-                  options={FormulaForm.getCountyOptions()} clearable={false} />
+                  options={FormulaForm.getCountyOptions()} clearable={false}
+                  required={true} />
         </div>
         {this.state.context === 'school' &&
           <MetricSelector context="school" />
