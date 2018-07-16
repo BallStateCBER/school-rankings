@@ -14,6 +14,7 @@ class Criterion extends React.Component {
           {this.props.name}
           <input type="hidden"
                  name={'criteria[' + this.props.metricId + '][metricId]'}
+                 data-field="metricId"
                  value={this.props.metricId} />
         </div>
     );
