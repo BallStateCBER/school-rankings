@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {Formatter} from '../metric-manager/formatter.js';
 import {Button} from 'reactstrap';
 import 'jstree';
+import {Criterion} from './criterion.jsx';
 
 class MetricSelector extends React.Component {
   constructor(props) {
@@ -163,8 +164,12 @@ class MetricSelector extends React.Component {
           </div>
         }
         <div id="jstree"></div>
-        {this.state.selectedMetrics.map((metric, i) => {
-          return (<p key={i}>{metric.name}</p>);
+        {this.state.selectedMetrics.map((metric) => {
+          return (
+            <Criterion key={metric.metricId} name={metric.name}
+                       metricId={metric.metricId}>
+            </Criterion>
+          );
         })}
       </div>
     );
