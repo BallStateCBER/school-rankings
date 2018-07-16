@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 
 /**
@@ -23,8 +24,11 @@ class FormulasController extends AppController
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $this->set([
             'counties' => $countiesTable->find()
-                ->select(['id', 'name'])
-                ->orderAsc('name')
+                ->select(['Counties.id', 'Counties.name'])
+                ->matching('States', function (Query $q) {
+                    return $q->where(['States.name' => 'Indiana']);
+                })
+                ->orderAsc('Counties.name')
                 ->toArray(),
             'titleForLayout' => 'Create a Ranking Formula'
         ]);
