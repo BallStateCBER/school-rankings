@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {Formatter} from '../metric-manager/formatter.js';
 import {Button} from 'reactstrap';
 import 'jstree';
-import {Criterion} from './criterion.jsx';
 
 class MetricSelector extends React.Component {
   constructor(props) {
@@ -12,11 +11,9 @@ class MetricSelector extends React.Component {
       errorMsg: '',
       hasError: false,
       loading: false,
-      selectedMetrics: [],
       successfullyLoaded: false,
     };
     this.setupClickEvents = this.setupClickEvents.bind(this);
-    this.handleClearMetrics = this.handleClearMetrics.bind(this);
   }
 
   componentDidMount() {
@@ -68,41 +65,11 @@ class MetricSelector extends React.Component {
     let container = $('#jstree');
 
     container.on('select_node.jstree', (node, selected) => {
-      // Ignore non-selectable metrics
-      if (!selected.node.data.selectable) {
-        return;
-      }
-
-      let metric = {
-        metricId: selected.node.data.metricId,
-        dataType: selected.node.data.type,
-        name: selected.node.data.name,
-      };
-
-      // Add parents to metric name
-      for (let i = 0; i < selected.node.parents.length; i++) {
-        const parentId = selected.node.parents[i];
-        if (parentId === '#') {
-          continue;
-        }
-        const jstree = container.jstree(true);
-        const node = jstree.get_node(parentId);
-        metric.name = node.text + ' > ' + metric.name;
-      }
-
-      // Add metric
-      let selectedMetrics = this.state.selectedMetrics;
-      selectedMetrics.push(metric);
-      this.setState({selectedMetrics: selectedMetrics});
+      this.props.handleSelectMetric(node, selected);
     });
 
     container.on('deselect_node.jstree', (node, selected) => {
-      let selectedMetrics = this.state.selectedMetrics;
-      const unselectedMetricId = selected.node.data.metricId;
-      const filteredMetrics = selectedMetrics.filter(
-          (metric) => metric.metricId !== unselectedMetricId
-      );
-      this.setState({selectedMetrics: filteredMetrics});
+      this.props.handleUnselectMetric(node, selected);
     });
   }
 
@@ -133,11 +100,6 @@ class MetricSelector extends React.Component {
     };
   }
 
-  handleClearMetrics() {
-    this.setState({selectedMetrics: []});
-    $('#jstree').jstree(true).deselect_all();
-  }
-
   render() {
     return (
       <div>
@@ -158,19 +120,12 @@ class MetricSelector extends React.Component {
             </label>
             <input type="text" className="form-control" id="jstree-search"
                    placeholder="Search..."/>
-            <Button color="secondary" onClick={this.handleClearMetrics}>
+            <Button color="secondary" onClick={this.props.handleClearMetrics}>
               Clear selections
             </Button>
           </div>
         }
         <div id="jstree"></div>
-        {this.state.selectedMetrics.map((metric) => {
-          return (
-            <Criterion key={metric.metricId} name={metric.name}
-                       metricId={metric.metricId}>
-            </Criterion>
-          );
-        })}
       </div>
     );
   }
@@ -178,6 +133,9 @@ class MetricSelector extends React.Component {
 
 MetricSelector.propTypes = {
   context: PropTypes.string.isRequired,
+  handleClearMetrics: PropTypes.func.isRequired,
+  handleSelectMetric: PropTypes.func.isRequired,
+  handleUnselectMetric: PropTypes.func.isRequired,
 };
 
 export {MetricSelector};

@@ -6,18 +6,24 @@ import Select from 'react-select';
 import '../../../node_modules/react-select/dist/react-select.css';
 import {MetricSelector} from './metric-selector.jsx';
 import '../../css/formula-form.scss';
+import {Criterion} from './criterion.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       context: null,
-      county: 'bar',
+      county: null,
+      criteria: [],
       uuid: FormulaForm.getUuid(),
+      passesValidation: false,
     };
-    FormulaForm.handleSubmit = FormulaForm.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleClearMetrics = this.handleClearMetrics.bind(this);
+    this.handleSelectMetric = this.handleSelectMetric.bind(this);
+    this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
   }
 
   static getUuid() {
@@ -38,8 +44,9 @@ class FormulaForm extends React.Component {
     });
   }
 
-  static handleSubmit(event) {
+  handleSubmit(event) {
     event.preventDefault();
+    this.validate();
   }
 
   static getCountyOptions() {
@@ -55,9 +62,78 @@ class FormulaForm extends React.Component {
     return selectOptions;
   }
 
+  validate() {
+    const context = this.state.context;
+    const county = this.state.county;
+    const criteria = this.state.criteria;
+    if (!context) {
+      alert('Please select either schools or school corporations (districts)');
+      this.setState({passesValidation: false});
+      return;
+    }
+    if (!county) {
+      alert('Please select a county');
+      this.setState({passesValidation: false});
+      return;
+    }
+    if (!criteria.length) {
+      alert('Please select one or more metrics');
+      this.setState({passesValidation: false});
+      return;
+    }
+
+    this.setState({passesValidation: true});
+  }
+
+  handleSelectMetric(node, selected) {
+    // Ignore non-selectable metrics
+    if (!selected.node.data.selectable) {
+      return;
+    }
+
+    let metric = {
+      metricId: selected.node.data.metricId,
+      dataType: selected.node.data.type,
+      name: selected.node.data.name,
+    };
+
+    // Add parents to metric name
+    for (let i = 0; i < selected.node.parents.length; i++) {
+      const parentId = selected.node.parents[i];
+      if (parentId === '#') {
+        continue;
+      }
+      const jstree = $('#jstree').jstree(true);
+      const node = jstree.get_node(parentId);
+      metric.name = node.text + ' > ' + metric.name;
+    }
+
+    // Add criterion
+    const criterion = {
+      metric: metric,
+    };
+    let criteria = this.state.criteria;
+    criteria.push(criterion);
+    this.setState({criteria: criteria});
+  }
+
+  handleUnselectMetric(node, selected) {
+    let criteria = this.state.criteria;
+    const unselectedMetricId = selected.node.data.metricId;
+    const filteredCriteria = criteria.filter(
+        (criterion) => criterion.metric.metricId !== unselectedMetricId
+    );
+    this.setState({criteria: filteredCriteria});
+  }
+
+  handleClearMetrics() {
+    this.setState({criteria: []});
+    $('#jstree').jstree(true).deselect_all();
+  }
+
   render() {
     return (
-      <form onSubmit={FormulaForm.handleSubmit}>
+      <form onSubmit={this.handleSubmit}>
         <div className="form-group">
           <label>
             What would you like to rank?
@@ -90,13 +166,23 @@ class FormulaForm extends React.Component {
                   options={FormulaForm.getCountyOptions()} clearable={false}
                   required={true} />
         </div>
-        {this.state.context === 'school' &&
-          <MetricSelector context="school" />
+        {this.state.context &&
+          <MetricSelector context={this.state.context}
+                          handleSelectMetric={this.handleSelectMetric}
+                          handleUnselectMetric={this.handleUnselectMetric}
+                          handleClearMetrics={this.handleClearMetrics} />
         }
-        {this.state.context === 'district' &&
-          <MetricSelector context="district" />
-        }
-        <Button color="primary" onClick={FormulaForm.handleSubmit}
+        <div id="criteria">
+          {this.state.criteria.map((criterion) => {
+            return (
+                <Criterion key={criterion.metric.metricId}
+                           name={criterion.metric.name}
+                           metricId={criterion.metric.metricId}>
+                </Criterion>
+            );
+          })}
+        </div>
+        <Button color="primary" onClick={this.handleSubmit}
                 ref={this.submitButton}
                 disabled={this.state.submitInProgress}>
           Submit
