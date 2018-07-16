@@ -135,9 +135,11 @@ class FormulaForm extends React.Component {
     return (
       <form onSubmit={this.handleSubmit}>
         <div className="form-group">
-          <label>
-            What would you like to rank?
-          </label>
+          <h3>
+            <label>
+              What would you like to rank?
+            </label>
+          </h3>
           <div className="form-check">
             <input className="form-check-input" type="radio" name="context"
                    id="context-school" value="school"
@@ -157,6 +159,9 @@ class FormulaForm extends React.Component {
             </label>
           </div>
         </div>
+        <h3>
+          Where would you like to search?
+        </h3>
         <div className="form-group">
           <label htmlFor="county">
             County
@@ -172,16 +177,18 @@ class FormulaForm extends React.Component {
                           handleUnselectMetric={this.handleUnselectMetric}
                           handleClearMetrics={this.handleClearMetrics} />
         }
-        <div id="criteria">
-          {this.state.criteria.map((criterion) => {
-            return (
+        {this.state.criteria.length > 0 &&
+          <div id="criteria">
+            {this.state.criteria.map((criterion) => {
+              return (
                 <Criterion key={criterion.metric.metricId}
                            name={criterion.metric.name}
                            metricId={criterion.metric.metricId}>
                 </Criterion>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        }
         <Button color="primary" onClick={this.handleSubmit}
                 ref={this.submitButton}
                 disabled={this.state.submitInProgress}>

@@ -103,6 +103,9 @@ class MetricSelector extends React.Component {
   render() {
     return (
       <div>
+        <h3>
+          How would you like the results to be ranked?
+        </h3>
         {this.state.loading &&
           <span className="loading">
             Loading options...
