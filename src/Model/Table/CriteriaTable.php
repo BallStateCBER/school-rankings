@@ -93,10 +93,8 @@ class CriteriaTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $criteriaTable = $this;
-
         $rules->add(
-            function ($entity, $options) use ($rules, $criteriaTable) {
+            function ($entity, $options) use ($rules) {
                 $rule = $rules->existsIn(['metric_id'], 'Metrics');
 
                 return $rule($entity, $options);
