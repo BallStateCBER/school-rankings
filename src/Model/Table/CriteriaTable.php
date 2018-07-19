@@ -69,7 +69,7 @@ class CriteriaTable extends Table
 
         $validator
             ->scalar('preference')
-            ->maxLength('preference', 255)
+            ->inList('preference', ['high', 'low'])
             ->requirePresence('preference', 'create')
             ->notEmpty('preference');
 
