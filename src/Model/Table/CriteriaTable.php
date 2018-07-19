@@ -72,6 +72,15 @@ class CriteriaTable extends Table
             ->requirePresence('preference', 'create')
             ->notEmpty('preference');
 
+        $validator
+            ->integer('metric_id')
+            ->requirePresence('metric_id', 'create')
+            ->notEmpty('metric_id');
+
+        $validator
+            ->integer('formula_id')
+            ->allowEmpty('formula_id', 'create');
+
         return $validator;
     }
 
