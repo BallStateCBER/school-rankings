@@ -2,6 +2,7 @@
 namespace App\Model\Context;
 
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\TableRegistry;
 use Exception;
 
 /**
@@ -68,5 +69,24 @@ class Context
         }
 
         throw new InternalErrorException('Unrecognized context: ' . $context);
+    }
+
+    /**
+     * @param string $context Either 'school' or 'district'
+     *
+     * @throws Exception
+     * @return \Cake\ORM\Table|bool
+     */
+    public static function getTable($context)
+    {
+        if (!self::isValidOrFail($context)) {
+            return false;
+        }
+
+        if ($context == 'school') {
+            return TableRegistry::getTableLocator()->get('Schools');
+        }
+
+        return TableRegistry::getTableLocator()->get('SchoolDistricts');
     }
 }
