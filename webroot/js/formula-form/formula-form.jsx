@@ -11,6 +11,7 @@ import {Criterion} from './criterion.jsx';
 class FormulaForm extends React.Component {
   constructor(props) {
     super(props);
+    this.formulaId = null;
     this.state = {
       context: null,
       county: null,
@@ -47,16 +48,19 @@ class FormulaForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    if (this.validate()) {
-      this.getRankings();
+    if (!this.validate()) {
+      return;
     }
+
+    this.setState({loadingRankings: true});
+
+    this.processForm();
   }
 
-  getRankings() {
-    this.setState({loadingRankings: true});
-    $.ajax({
+  processForm() {
+    return $.ajax({
       method: 'POST',
-      url: '/api/rankings/generate/',
+      url: '/api/formulas/add/',
       dataType: 'json',
       data: {
         context: this.state.context,
@@ -64,19 +68,42 @@ class FormulaForm extends React.Component {
         criteria: this.state.criteria,
       },
     }).done((data) => {
-      console.log('Success');
-      console.log(data);
-    }).fail((jqXHR) => {
-      let errorMsg = 'Error loading rankings';
-      if (jqXHR.hasOwnProperty('responseJSON')) {
-        if (jqXHR.responseJSON.hasOwnProperty('message')) {
-          errorMsg = jqXHR.responseJSON.message;
-        }
+      if (
+          !data.hasOwnProperty('success') ||
+          !data.hasOwnProperty('id') ||
+          !data.success
+      ) {
+        console.log('Formula success');
+        console.log(data);
+        return;
       }
-      console.log('Error: ' + errorMsg);
-    }).always(() => {
-      this.setState({loadingRankings: false});
+
+      console.log('Formula success');
+      console.log(data);
+      this.formulaId = data.id;
+      this.startRankingJob();
+    }).fail((jqXHR) => {
+      FormulaForm.logApiError(jqXHR);
     });
+  }
+
+  startRankingJob() {
+    if (!this.formulaId) {
+      console.log('Error: Formula ID not found');
+      return;
+    }
+    console.log('Formula ID is ' + this.formulaId);
+    this.setState({loadingRankings: false});
+  }
+
+  static logApiError(jqXHR) {
+    let errorMsg = 'Error loading rankings';
+    if (jqXHR.hasOwnProperty('responseJSON')) {
+      if (jqXHR.responseJSON.hasOwnProperty('message')) {
+        errorMsg = jqXHR.responseJSON.message;
+      }
+    }
+    console.log('Error: ' + errorMsg);
   }
 
   static getCountyOptions() {
