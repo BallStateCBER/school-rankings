@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Formula;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsTo;
@@ -92,7 +93,8 @@ class FormulasTable extends Table
             ->scalar('context')
             ->maxLength('context', 255)
             ->requirePresence('context', 'create')
-            ->notEmpty('context');
+            ->notEmpty('context')
+            ->inList('context', Context::getContexts());
 
         $validator
             ->scalar('hash')
