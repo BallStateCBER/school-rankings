@@ -82,13 +82,11 @@ class FormulasTable extends Table
         $validator
             ->scalar('title')
             ->maxLength('title', 255)
-            ->requirePresence('title', 'create')
-            ->notEmpty('title');
+            ->allowEmpty('title');
 
         $validator
             ->scalar('notes')
-            ->requirePresence('notes', 'create')
-            ->notEmpty('notes');
+            ->allowEmpty('notes');
 
         $validator
             ->scalar('context')
