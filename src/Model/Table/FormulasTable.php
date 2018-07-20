@@ -10,6 +10,7 @@ use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\Utility\Security;
 use Cake\Validation\Validator;
 
 /**
@@ -118,5 +119,15 @@ class FormulasTable extends Table
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
+    }
+
+    /**
+     * Returns a random string to be used as a formula
+     *
+     * @return string
+     */
+    public static function generateHash()
+    {
+        return Security::randomString(8);
     }
 }
