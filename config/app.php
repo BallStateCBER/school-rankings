@@ -354,4 +354,9 @@ return [
     'Session' => [
         'defaults' => 'php',
     ],
+
+    /**
+     * CakePHP Queue Plugin configuration
+     */
+    'Queue' => []
 ];

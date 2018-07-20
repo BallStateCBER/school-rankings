@@ -9,6 +9,7 @@
         "cakephp/cakephp": "3.6.*",
         "cakephp/migrations": "^1.0",
         "cakephp/plugin-installer": "^1.0",
+        "dereuromark/cakephp-queue": "^3.10",
         "josegonzalez/dotenv": "3.*",
         "mobiledetect/mobiledetectlib": "2.*",
         "phpoffice/phpspreadsheet": "^1.2",
