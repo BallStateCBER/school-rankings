@@ -98,7 +98,8 @@ class FormulasTable extends Table
 
         $validator
             ->scalar('hash')
-            ->maxLength('hash', 255)
+            ->minLength('has', 8)
+            ->maxLength('hash', 8)
             ->requirePresence('hash', 'create')
             ->notEmpty('hash');
 
