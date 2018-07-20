@@ -15,8 +15,9 @@ class FormulaForm extends React.Component {
       context: null,
       county: null,
       criteria: [],
-      uuid: FormulaForm.getUuid(),
+      loadingRankings: false,
       passesValidation: false,
+      uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
@@ -46,7 +47,36 @@ class FormulaForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.validate();
+    if (this.validate()) {
+      this.getRankings();
+    }
+  }
+
+  getRankings() {
+    this.setState({loadingRankings: true});
+    $.ajax({
+      method: 'POST',
+      url: '/api/rankings/generate/',
+      dataType: 'json',
+      data: {
+        context: this.state.context,
+        countyId: this.state.county,
+        criteria: this.state.criteria,
+      },
+    }).done((data) => {
+      console.log('Success');
+      console.log(data);
+    }).fail((jqXHR) => {
+      let errorMsg = 'Error loading rankings';
+      if (jqXHR.hasOwnProperty('responseJSON')) {
+        if (jqXHR.responseJSON.hasOwnProperty('message')) {
+          errorMsg = jqXHR.responseJSON.message;
+        }
+      }
+      console.log('Error: ' + errorMsg);
+    }).always(() => {
+      this.setState({loadingRankings: false});
+    });
   }
 
   static getCountyOptions() {
@@ -68,21 +98,18 @@ class FormulaForm extends React.Component {
     const criteria = this.state.criteria;
     if (!context) {
       alert('Please select either schools or school corporations (districts)');
-      this.setState({passesValidation: false});
-      return;
+      return false;
     }
     if (!county) {
       alert('Please select a county');
-      this.setState({passesValidation: false});
-      return;
+      return false;
     }
     if (!criteria.length) {
       alert('Please select one or more metrics');
-      this.setState({passesValidation: false});
-      return;
+      return false;
     }
 
-    this.setState({passesValidation: true});
+    return true;
   }
 
   handleSelectMetric(node, selected) {
@@ -190,10 +217,13 @@ class FormulaForm extends React.Component {
           </div>
         }
         <Button color="primary" onClick={this.handleSubmit}
-                ref={this.submitButton}
-                disabled={this.state.submitInProgress}>
+                disabled={this.state.loadingRankings}>
           Submit
         </Button>
+        {this.state.loadingRankings &&
+          <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
+               className="loading"/>
+        }
       </form>
     );
   }

@@ -1,3 +1,8 @@
+#formula-form {
+  .loading {
+    margin-left: 10px;
+  }
+}
 li[data-selectable="0"] {
   > a {
     i.jstree-checkbox {
@@ -14,3 +19,4 @@ li[data-selectable="0"] {
     margin-left: 15px;
   }
 }
+
