@@ -73,7 +73,7 @@ class FormulaForm extends React.Component {
           !data.hasOwnProperty('id') ||
           !data.success
       ) {
-        console.log('Formula success');
+        console.log('Error creating formula record');
         console.log(data);
         return;
       }
