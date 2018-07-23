@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Entity;
 
 /**
@@ -20,6 +21,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Metric $metric
  * @property \App\Model\Entity\School $school
  * @property \App\Model\Entity\SchoolDistrict $school_district
+ * @property int|float $numeric_value
  */
 class Statistic extends Entity
 {
@@ -70,5 +72,49 @@ class Statistic extends Entity
 
         // Float
         return round((float)$value, 5);
+    }
+
+    /**
+     * Converts non-numeric values (e.g. letter grades and percent values) to ints or floats
+     *
+     * @return float|int
+     */
+    protected function _getNumericValue()
+    {
+        $value = $this->_properties['value'];
+
+        // Grade values
+        switch ($value) {
+            case 'a':
+            case 'A':
+                return 4;
+            case 'b':
+            case 'B':
+                return 3;
+            case 'c':
+            case 'C':
+                return 2;
+            case 'd':
+            case 'D':
+                return 1;
+            case 'f':
+            case 'F':
+                return 0;
+        }
+
+        // Percent values
+        if (strpos($value, '%') == strlen($value) - 1) {
+            $substr = substr($value, 0, -1);
+            if (is_numeric($substr)) {
+                $value = $substr;
+            }
+        }
+
+        if (!is_numeric($value)) {
+            $id = $this->properties['id'];
+            throw new InternalErrorException("Invalid value for statistic #$id: $value");
+        }
+
+        return (float)$value;
     }
 }
