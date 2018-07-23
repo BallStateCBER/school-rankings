@@ -21,6 +21,7 @@ use App\Command\ImportStatsStatusCommand;
 use App\Command\MetricMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
+use App\Shell\RankTestShell;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
 use Cake\Routing\Middleware\AssetMiddleware;
@@ -67,12 +68,13 @@ class Application extends BaseApplication
         $commands->autoDiscover();
 
         $commands->add('check-locations', CheckLocationsCommand::class);
+        $commands->add('import-locations', ImportLocationsCommand::class);
         $commands->add('import-stats', ImportStatsCommand::class);
         $commands->add('import-stats-status', ImportStatsStatusCommand::class);
-        $commands->add('import-locations', ImportLocationsCommand::class);
         $commands->add('metric-merge', MetricMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
+        $commands->add('rank-test', RankTestShell::class);
 
         return $commands;
     }
