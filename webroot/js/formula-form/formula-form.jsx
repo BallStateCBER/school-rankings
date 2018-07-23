@@ -12,6 +12,7 @@ class FormulaForm extends React.Component {
   constructor(props) {
     super(props);
     this.formulaId = null;
+    this.rankingId = null;
     this.state = {
       context: null,
       county: null,
@@ -64,7 +65,6 @@ class FormulaForm extends React.Component {
       dataType: 'json',
       data: {
         context: this.state.context,
-        countyId: this.state.county,
         criteria: this.state.criteria,
       },
     }).done((data) => {
@@ -75,6 +75,7 @@ class FormulaForm extends React.Component {
       ) {
         console.log('Error creating formula record');
         console.log(data);
+        this.setState({loadingRankings: false});
         return;
       }
 
@@ -90,10 +91,39 @@ class FormulaForm extends React.Component {
   startRankingJob() {
     if (!this.formulaId) {
       console.log('Error: Formula ID not found');
+      this.setState({loadingRankings: false});
       return;
     }
     console.log('Formula ID is ' + this.formulaId);
-    this.setState({loadingRankings: false});
+
+    return $.ajax({
+      method: 'POST',
+      url: '/api/rankings/add/',
+      dataType: 'json',
+      data: {
+        countyId: this.state.county,
+        formulaId: this.formulaId,
+      },
+    }).done((data) => {
+      if (
+          !data.hasOwnProperty('success') ||
+          !data.hasOwnProperty('id') ||
+          !data.success
+      ) {
+        console.log('Error creating ranking record');
+        console.log(data);
+        return;
+      }
+
+      console.log('Ranking success');
+      console.log(data);
+      this.rankingId = data.id;
+      console.log('Ranking ID is ' + this.rankingId);
+    }).fail((jqXHR) => {
+      FormulaForm.logApiError(jqXHR);
+    }).always(() => {
+      this.setState({loadingRankings: false});
+    });
   }
 
   static logApiError(jqXHR) {
