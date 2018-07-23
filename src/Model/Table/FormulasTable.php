@@ -122,7 +122,7 @@ class FormulasTable extends Table
     }
 
     /**
-     * Returns a random string to be used as a formula
+     * Returns a random string to be used as an identifier for a formula
      *
      * @return string
      */
