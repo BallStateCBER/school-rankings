@@ -8,6 +8,7 @@ use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\Utility\Security;
 use Cake\Validation\Validator;
 
 /**
@@ -134,5 +135,15 @@ class RankingsTable extends Table
         $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
 
         return $rules;
+    }
+
+    /**
+     * Returns a random string to be used as an identifier for a ranking
+     *
+     * @return string
+     */
+    public static function generateHash()
+    {
+        return Security::randomString(8);
     }
 }
