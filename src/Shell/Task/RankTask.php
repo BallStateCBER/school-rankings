@@ -76,30 +76,12 @@ class RankTask extends Shell
      */
     public function process($rankingId)
     {
-        $this->getIo()->out("Finding ranking #$rankingId...");
-        $this->ranking = $this->rankingsTable->get($rankingId, [
-            'contain' => [
-                'Cities',
-                'Counties',
-                'Formulas',
-                'Formulas.Criteria',
-                'Grades',
-                'Ranges',
-                'SchoolDistricts',
-                'SchoolTypes',
-                'States'
-            ]
-        ]);
-        $this->context = $this->ranking->formula->context;
-        $this->getIo()->out(' - Ranking found');
-
-        $this->getSubjects();
-        $this->getStats();
+        $this->loadRankingRecord($rankingId);
+        $this->loadSubjects();
+        $this->loadStats();
         $this->scoreSubjects();
         $this->groupSubjects();
         $this->rankSubjects();
-
-        $this->getIo()->out();
         $this->outputResults();
 
         return true;
@@ -111,7 +93,7 @@ class RankTask extends Shell
      * @return void
      * @throws \Exception
      */
-    private function getSubjects()
+    private function loadSubjects()
     {
         $this->getIo()->out("Finding {$this->context}s...");
         $subjectTable = Context::getTable($this->context);
@@ -242,7 +224,7 @@ class RankTask extends Shell
      *
      * @return void
      */
-    private function getStats()
+    private function loadStats()
     {
         $this->getIo()->out('Collecting statistics...');
         $this->progress->init([
@@ -345,6 +327,7 @@ class RankTask extends Shell
      */
     private function outputResults()
     {
+        $this->getIo()->out();
         foreach ($this->rankedSubjects as $group => $groupedSubjects) {
             $this->getIo()->out(ucfirst($group) . ':');
             foreach ($groupedSubjects as $rank => $rankedSubjects) {
@@ -355,5 +338,31 @@ class RankTask extends Shell
             }
             $this->getIo()->out();
         }
+    }
+
+    /**
+     * Sets this class's 'ranking' and 'context' properties
+     *
+     * @param int $rankingId ID of record in rankings table
+     * @return void
+     */
+    private function loadRankingRecord($rankingId)
+    {
+        $this->getIo()->out("Finding ranking #$rankingId...");
+        $this->ranking = $this->rankingsTable->get($rankingId, [
+            'contain' => [
+                'Cities',
+                'Counties',
+                'Formulas',
+                'Formulas.Criteria',
+                'Grades',
+                'Ranges',
+                'SchoolDistricts',
+                'SchoolTypes',
+                'States'
+            ]
+        ]);
+        $this->context = $this->ranking->formula->context;
+        $this->getIo()->out(' - Ranking found');
     }
 }
