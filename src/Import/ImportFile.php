@@ -13,6 +13,7 @@ use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\ConsoleIo;
 use Cake\Database\Expression\QueryExpression;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Exception;
@@ -1086,6 +1087,20 @@ class ImportFile
         $this->overwrite = ($input == 'y');
 
         return $this->overwrite;
+    }
+
+    /**
+     * Sets the value of $this->overwrite
+     *
+     * @param bool $overwrite True or false, indicating if existing statistics should be overwritten
+     * @return void
+     */
+    public function setOverwrite($overwrite)
+    {
+        if (is_bool($overwrite)) {
+            $this->overwrite = $overwrite;
+        }
+        throw new InternalErrorException("Value for overwrite property must be boolean");
     }
 
     /**

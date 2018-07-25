@@ -49,8 +49,15 @@ class ImportStatsCommand extends Command
                 'help' => 'Automatically accept all suggested metric names',
                 'boolean' => true
             ]
+        )->addOption(
+            'overwrite',
+            [
+                'help' => 'Automatically overwrite existing statistics',
+                'boolean' => true
+            ]
         )->setEpilog(
-            'Run "import-run all all --auto-metrics" to process all files and accept all suggested metric names'
+            'Run "import-run all all --auto-metrics --overwrite" to process all files, accept all suggested ' .
+            'metric names, and overwrite existing statistics'
         );
 
         return $parser;
@@ -171,6 +178,7 @@ class ImportStatsCommand extends Command
                 $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
                 $this->importFile->read();
                 $this->importFile->acceptMetricSuggestions = $args->getOption('auto-metrics');
+                $this->importFile->setOverwrite($args->getOption('auto-metrics'));
                 if ($this->importFile->getError()) {
                     $io->error($this->importFile->getError());
 
