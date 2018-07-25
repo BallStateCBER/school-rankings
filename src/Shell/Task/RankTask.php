@@ -54,17 +54,15 @@ class RankTask extends Shell
     private $subjects = [];
 
     /**
-     * RankTask constructor
+     * RankTask initialize method
      *
-     * @param ConsoleIo|null $io IO object
-     * @param LocatorInterface|null $locator LocatorInterface object
+     * @return void
      */
-    public function __construct(ConsoleIo $io = null, LocatorInterface $locator = null)
+    public function initialize()
     {
-        parent::__construct($io, $locator);
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
-        $this->progress = $io->helper('Progress');
+        $this->progress = $this->getIo()->helper('Progress');
     }
 
     /**
