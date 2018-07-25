@@ -1126,8 +1126,16 @@ class ImportFile
                 break;
             }
 
+            $location = $this->worksheets[$this->activeWorksheet]['locations'][$row];
             $locationIdKey = ($context == 'school') ? 'schoolId' : 'districtId';
-            $locationId = $this->worksheets[$this->activeWorksheet]['locations'][$row][$locationIdKey];
+
+            /* Skip rows with data but no location ID (like the non-district called "Independent Non-Public Schools"
+             * that sometimes gets included in lists of districts) */
+            if (!isset($location[$locationIdKey])) {
+                break;
+            }
+
+            $locationId = $location[$locationIdKey];
             for ($col = $ws['firstDataCol']; $col <= $ws['totalCols']; $col++) {
                 $progress->increment(1);
                 $progress->draw();
