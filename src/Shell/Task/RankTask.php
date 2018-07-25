@@ -245,6 +245,11 @@ class RankTask extends Shell
         $this->getIo()->overwrite(' - Done');
     }
 
+    /**
+     * Sets the 'score' property for each school/district
+     *
+     * @return void
+     */
     private function scoreSubjects()
     {
         $this->getIo()->out("Scoring {$this->context}s...");
