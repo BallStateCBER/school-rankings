@@ -104,7 +104,7 @@ class Datum
      * @param Cell $cell PhpSpreadsheet cell object
      * @return bool
      */
-    public function isFormula($cell)
+    public static function isFormula($cell)
     {
         return $cell->isFormula();
     }

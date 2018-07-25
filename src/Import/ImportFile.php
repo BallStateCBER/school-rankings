@@ -1140,7 +1140,13 @@ class ImportFile
                 $progress->increment(1);
                 $progress->draw();
 
-                $value = $this->getValue($col, $row);
+                $cell = $this->getCell($col, $row);
+                if (Datum::isFormula($cell)) {
+                    $value = $cell->getCalculatedValue();
+                } else {
+                    $value = $cell->getValue();
+                    $value = is_string($value) ? trim($value) : $value;
+                }
                 $value = Statistic::roundValue($value);
 
                 // Ignore, not a value
