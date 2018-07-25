@@ -22,30 +22,36 @@ use Cake\Utility\Inflector;
 /**
  * Class RankTask
  * @package App\Shell\Task
- * @property RankingsTable $rankingsTable
- * @property Ranking $ranking
+ * @property array $groupedSubjects
+ * @property array $rankedSubjects
  * @property County[] $locations
  * @property Criterion[] $criteria
+ * @property ProgressHelper $progress
+ * @property Ranking $ranking
+ * @property RankingsTable $rankingsTable
  * @property School[]|SchoolDistrict[] $subjects
  * @property StatisticsTable $statsTable
  * @property string $context
- * @property ProgressHelper $progress
- * @property array $groupedSubjects
  */
 class RankTask extends Shell
 {
-    private $rankingsTable;
-    private $ranking;
-    private $subjects = [];
-    private $groupedSubjects = [
-        'fullData' => [],
-        'partialData' => [],
-        'noData' => []
-    ];
-    private $criteria;
-    private $statsTable;
     private $context;
+    private $criteria;
+    private $groupedSubjects = [
+        'full data' => [],
+        'partial data' => [],
+        'no data' => []
+    ];
     private $progress;
+    private $rankedSubjects = [
+        'full data' => [],
+        'partial data' => [],
+        'no data' => []
+    ];
+    private $ranking;
+    private $rankingsTable;
+    private $statsTable;
+    private $subjects = [];
 
     /**
      * RankTask constructor
@@ -91,7 +97,10 @@ class RankTask extends Shell
         $this->getStats();
         $this->scoreSubjects();
         $this->groupSubjects();
-        $this->getRanking();
+        $this->rankSubjects();
+
+        $this->getIo()->out();
+        $this->outputResults();
 
         return true;
     }
@@ -150,21 +159,21 @@ class RankTask extends Shell
         foreach ($this->subjects as $subject) {
             $subjectStatCount = count($subject->statistics);
             if ($subjectStatCount == $metricCount) {
-                $this->groupedSubjects['fullData'][] = $subject;
+                $this->groupedSubjects['full data'][] = $subject;
                 continue;
             }
 
             if ($subjectStatCount > 0) {
-                $this->groupedSubjects['partialData'][] = $subject;
+                $this->groupedSubjects['partial data'][] = $subject;
                 continue;
             }
 
-            $this->groupedSubjects['noData'][] = $subject;
+            $this->groupedSubjects['no data'][] = $subject;
         }
         foreach ($this->groupedSubjects as $group => $subjects) {
             $this->getIo()->out(sprintf(
                 ' - %s: %s',
-                Inflector::humanize(Inflector::underscore($group)),
+                ucfirst($group),
                 count($subjects)
             ));
         }
@@ -173,11 +182,27 @@ class RankTask extends Shell
     /**
      * Returns grouped array of subjects ordered by their rank, according to the current formula
      *
-     * @return array
+     * @return void
      */
-    private function getRanking()
+    private function rankSubjects()
     {
-        return [];
+        $this->getIo()->out("Ranking {$this->context}s...");
+        foreach ($this->groupedSubjects as $group => $subjects) {
+            // Sort by score, creating an array of all schools/districts with each score
+            $sortedSubjects = [];
+            foreach ($subjects as $subject) {
+                $sortedSubjects[$subject->score][] = $subject;
+            }
+            krsort($sortedSubjects);
+
+            $rank = 1;
+            foreach ($sortedSubjects as $score => $subjectsInRank) {
+                shuffle($subjectsInRank);
+                $this->rankedSubjects[$group][$rank] = $subjectsInRank;
+                $rank++;
+            }
+        }
+        $this->getIo()->out(' - Done');
     }
 
     /**
@@ -311,5 +336,24 @@ class RankTask extends Shell
         }
 
         return $allValues ? [min($allValues), max($allValues)] : [null, null];
+    }
+
+    /**
+     * Outputs the final results
+     *
+     * @return void
+     */
+    private function outputResults()
+    {
+        foreach ($this->rankedSubjects as $group => $groupedSubjects) {
+            $this->getIo()->out(ucfirst($group) . ':');
+            foreach ($groupedSubjects as $rank => $rankedSubjects) {
+                $this->getIo()->out($rank);
+                foreach ($rankedSubjects as $subject) {
+                    $this->getIo()->out(" - $subject->name ($subject->score)");
+                }
+            }
+            $this->getIo()->out();
+        }
     }
 }
