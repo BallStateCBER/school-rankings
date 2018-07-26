@@ -17,7 +17,7 @@ class QueueRankTask extends QueueTask
      *
      * @var int
      */
-    public $timeout = 120;
+    public $timeout = (60 * 10);
 
     /**
      * Number of times a failed instance of this task should be restarted before giving up.
