@@ -1099,8 +1099,12 @@ class ImportFile
     {
         if (is_bool($overwrite)) {
             $this->overwrite = $overwrite;
+
+            return;
         }
-        throw new InternalErrorException("Value for overwrite property must be boolean");
+
+        $type = gettype($overwrite);
+        throw new InternalErrorException("Value for overwrite property must be boolean ($type provided)");
     }
 
     /**
@@ -1156,7 +1160,8 @@ class ImportFile
                 $progress->draw();
 
                 $cell = $this->getCell($col, $row);
-                if (Datum::isFormula($cell)) {
+
+                if ($cell->isFormula()) {
                     $value = $cell->getCalculatedValue();
                 } else {
                     $value = $cell->getValue();
@@ -1204,12 +1209,10 @@ class ImportFile
                 // Update
                 if ($this->getOverwrite()) {
                     $statisticsTable->patchEntity($existingStat, ['value' => $value]);
-                    if ($existingStat->getErrors()) {
+                    if ($existingStat->getErrors() || !$statisticsTable->save($existingStat)) {
                         $errors = print_r($existingStat->getErrors(), true);
-                        $this->shell_io->error("Error updating statistic. Details: \n" . $errors);
-                        throw new Exception();
-                    } else {
-                        $statisticsTable->save($existingStat);
+                        $this->shell_io->error("Error details: \n" . $errors);
+                        throw new Exception('Failed to update statistic');
                     }
                     $counts['updated']++;
                 }
