@@ -107,18 +107,22 @@ class FormulaForm extends React.Component {
     }).done((data) => {
       if (
           !data.hasOwnProperty('success') ||
-          !data.hasOwnProperty('id') ||
-          !data.success
+          !data.hasOwnProperty('rankingId') ||
+          !data.hasOwnProperty('jobId') ||
+          !data.success ||
+          !data.rankingId ||
+          !data.jobId
       ) {
         console.log('Error creating ranking record');
         console.log(data);
         return;
       }
 
-      console.log('Ranking success');
+      console.log('Ranking job started');
       console.log(data);
-      this.rankingId = data.id;
+      this.rankingId = data.rankingId;
       console.log('Ranking ID is ' + this.rankingId);
+      console.log('Job ID is ' + data.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     }).always(() => {
