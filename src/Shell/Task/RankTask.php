@@ -71,7 +71,7 @@ class RankTask extends Shell
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->progressHelper = $this->getIo()->helper('Progress');
-        $this->jobsTable = TableRegistry::getTableLocator()->get('QueuedJobs');
+        $this->jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
     }
 
     /**
@@ -89,7 +89,8 @@ class RankTask extends Shell
         $this->scoreSubjects();
         $this->groupSubjects();
         $this->rankSubjects();
-        $this->updateJobProgress(100);
+        $this->updateJobProgress(100, true);
+        $this->updateJobStatus('Done');
         $this->outputResults();
 
         return true;
@@ -421,9 +422,10 @@ class RankTask extends Shell
      * Updates the current queued job's progress percent
      *
      * @param int $progressPercent Progress percent, from 0 to 1
+     * @param bool $forceUpdate If true, update will not be skipped
      * @return void
      */
-    private function updateJobProgress($progressPercent)
+    private function updateJobProgress($progressPercent, $forceUpdate = false)
     {
         // Skip if no job
         if (!$this->jobId) {
@@ -431,13 +433,13 @@ class RankTask extends Shell
         }
 
         // Skip if amount hasn't changed
-        if ($this->progressUpdatePercent == $progressPercent) {
+        if (!$forceUpdate && $this->progressUpdatePercent == $progressPercent) {
             return;
         }
 
         // Skip if too soon
         $now = microtime(true);
-        if ($now - $this->progressUpdateTime < $this->progressUpdateInterval) {
+        if (!$forceUpdate && ($now - $this->progressUpdateTime) < $this->progressUpdateInterval) {
             return;
         }
 
