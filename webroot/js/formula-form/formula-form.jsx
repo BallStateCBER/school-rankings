@@ -13,6 +13,7 @@ class FormulaForm extends React.Component {
     super(props);
     this.formulaId = null;
     this.rankingId = null;
+    this.jobId = null;
     this.state = {
       context: null,
       county: null,
@@ -121,8 +122,10 @@ class FormulaForm extends React.Component {
       console.log('Ranking job started');
       console.log(data);
       this.rankingId = data.rankingId;
+      this.jobId = data.jobId;
       console.log('Ranking ID is ' + this.rankingId);
-      console.log('Job ID is ' + data.jobId);
+      console.log('Job ID is ' + this.jobId);
+      this.startJobMonitor(this.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     }).always(() => {
@@ -287,6 +290,41 @@ class FormulaForm extends React.Component {
         }
       </form>
     );
+  }
+
+  startJobMonitor(jobId) {
+    $.ajax({
+      method: 'GET',
+      url: '/api/rankings/status/',
+      dataType: 'json',
+      data: {
+        jobId: jobId,
+      },
+    }).done((data) => {
+      if (
+          !data.hasOwnProperty('progress') ||
+          !data.hasOwnProperty('status')
+      ) {
+        console.log('Error checking job status');
+        console.log(data);
+        this.setState({loadingRankings: false});
+        return;
+      }
+
+      console.log('Progress: ' + data.progress);
+      console.log('Status: ' + data.status);
+
+      if (data.progress !== 1) {
+        setTimeout(
+            () => {
+              this.startJobMonitor(jobId);
+            },
+            1000
+        );
+      }
+    }).fail((jqXHR) => {
+      FormulaForm.logApiError(jqXHR);
+    });
   }
 }
 
