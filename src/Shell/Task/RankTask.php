@@ -25,7 +25,8 @@ use Queue\Model\Table\QueuedJobsTable;
  * @property array $rankedSubjects
  * @property County[] $locations
  * @property Criterion[] $criteria
- * @property float $lastProgressUpdate
+ * @property float $progressUpdateTime
+ * @property int $progressUpdatePercent
  * @property int|float $progressUpdateInterval
  * @property ProgressHelper $progress
  * @property QueuedJobsTable $jobsTable
@@ -46,7 +47,8 @@ class RankTask extends Shell
     ];
     private $jobId;
     private $jobsTable;
-    private $lastProgressUpdate;
+    private $progressUpdatePercent;
+    private $progressUpdateTime;
     private $progress;
     private $progressUpdateInterval = 1; // seconds
     private $rankedSubjects = [
@@ -418,21 +420,30 @@ class RankTask extends Shell
     /**
      * Updates the current queued job's progress percent
      *
-     * @param int $progress Progress percent, from 1 to 100
+     * @param int $progressPercent Progress percent, from 1 to 100
      * @return void
      */
-    private function updateJobProgress($progress)
+    private function updateJobProgress($progressPercent)
     {
+        // Skip if no job
         if (!$this->jobId) {
             return;
         }
-        $now = microtime(true);
-        if ($now - $this->lastProgressUpdate < $this->progressUpdateInterval) {
+
+        // Skip if amount hasn't changed
+        if ($this->progressUpdatePercent == $progressPercent) {
             return;
         }
 
-        $this->jobsTable->updateProgress($this->jobId, $progress);
-        $this->lastProgressUpdate = $now;
+        // Skip if too soon
+        $now = microtime(true);
+        if ($now - $this->progressUpdateTime < $this->progressUpdateInterval) {
+            return;
+        }
+
+        $this->jobsTable->updateProgress($this->jobId, $progressPercent);
+        $this->progressUpdateTime = $now;
+        $this->progressUpdatePercent = $progressPercent;
     }
 
     /**
