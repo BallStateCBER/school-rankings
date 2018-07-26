@@ -28,7 +28,7 @@ use Queue\Model\Table\QueuedJobsTable;
  * @property float $progressUpdateTime
  * @property int $progressUpdatePercent
  * @property int|float $progressUpdateInterval
- * @property ProgressHelper $progress
+ * @property ProgressHelper $progressHelper
  * @property QueuedJobsTable $jobsTable
  * @property Ranking $ranking
  * @property RankingsTable $rankingsTable
@@ -47,10 +47,10 @@ class RankTask extends Shell
     ];
     private $jobId;
     private $jobsTable;
+    private $progressHelper;
+    private $progressUpdateInterval = 1; // seconds
     private $progressUpdatePercent;
     private $progressUpdateTime;
-    private $progress;
-    private $progressUpdateInterval = 1; // seconds
     private $rankedSubjects = [
         'full data' => [],
         'partial data' => [],
@@ -70,7 +70,7 @@ class RankTask extends Shell
     {
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
-        $this->progress = $this->getIo()->helper('Progress');
+        $this->progressHelper = $this->getIo()->helper('Progress');
         $this->jobsTable = TableRegistry::getTableLocator()->get('QueuedJobs');
     }
 
@@ -109,11 +109,11 @@ class RankTask extends Shell
 
         $subjectTable = Context::getTable($this->context);
         $locations = $this->getLocations();
-        $this->progress->init([
+        $this->progressHelper->init([
             'total' => count($locations),
             'width' => 40,
         ]);
-        $this->progress->draw();
+        $this->progressHelper->draw();
 
         foreach ($locations as $n => $location) {
             $locationTableName = $this->getLocationTableName($location);
@@ -129,8 +129,8 @@ class RankTask extends Shell
                 $this->subjects[$result->id] = $result;
             }
 
-            $this->progress->increment(1);
-            $this->progress->draw();
+            $this->progressHelper->increment(1);
+            $this->progressHelper->draw();
             $overallProgress = $this->getOverallProgress($n, count($locations), 0, 20);
             $this->updateJobProgress($overallProgress);
         }
@@ -258,11 +258,11 @@ class RankTask extends Shell
         $msg = 'Collecting statistics';
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
-        $this->progress->init([
+        $this->progressHelper->init([
             'total' => count($this->subjects),
             'width' => 40,
         ]);
-        $this->progress->draw();
+        $this->progressHelper->draw();
         $criteria = $this->ranking->formula->criteria;
         $metricIds = Hash::extract($criteria, '{n}.metric_id');
         foreach ($this->subjects as $n => &$subject) {
@@ -278,8 +278,8 @@ class RankTask extends Shell
                 ->orderDesc('year');
             $subject->statistics = $query->all();
 
-            $this->progress->increment(1);
-            $this->progress->draw();
+            $this->progressHelper->increment(1);
+            $this->progressHelper->draw();
             $overallProgress = $this->getOverallProgress($n, count($this->subjects), 20, 40);
             $this->updateJobProgress($overallProgress);
         }
@@ -297,11 +297,11 @@ class RankTask extends Shell
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
         $criteria = $this->ranking->formula->criteria;
-        $this->progress->init([
+        $this->progressHelper->init([
             'total' => count($this->subjects) * count($criteria),
             'width' => 40,
         ]);
-        $this->progress->draw();
+        $this->progressHelper->draw();
 
         $outputMsgs = [];
         foreach ($criteria as $criterion) {
@@ -309,8 +309,8 @@ class RankTask extends Shell
             $weight = $criterion->weight;
             list($minValue, $maxValue) = $this->getValueRange($metricId);
             if (!isset($minValue)) {
-                $this->progress->increment(count($this->subjects));
-                $this->progress->draw();
+                $this->progressHelper->increment(count($this->subjects));
+                $this->progressHelper->draw();
                 continue;
             }
             foreach ($this->subjects as $n => &$subject) {
@@ -325,8 +325,8 @@ class RankTask extends Shell
                     $outputMsgs[] = "Metric $metricId score for $subject->name: $metricScore";
                 }
 
-                $this->progress->increment(1);
-                $this->progress->draw();
+                $this->progressHelper->increment(1);
+                $this->progressHelper->draw();
                 $overallProgress = $this->getOverallProgress($n, count($this->subjects), 40, 60);
                 $this->updateJobProgress($overallProgress);
             }
