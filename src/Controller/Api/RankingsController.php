@@ -9,6 +9,8 @@ use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
+use Queue\Model\Entity\QueuedJob;
+use Queue\Model\Table\QueuedJobsTable;
 
 /**
  * Class RankingsController
@@ -60,18 +62,26 @@ class RankingsController extends AppController
             ])
             ->toArray();
 
-        $success = (bool)$this->rankingsTable->save($ranking);
-        if ($success) {
-            $id = $ranking->id;
+        $this->rankingsTable->save($ranking);
+        if ($ranking->id) {
+            $rankingId = $ranking->id;
+            $job = $this->createRankingJob($rankingId);
+            $jobId = $job ? $job->id : null;
         } else {
             $this->logRankingError($ranking);
-            $id = null;
+            $rankingId = null;
+            $jobId = null;
         }
 
         $this->set([
-            '_serialize' => ['id', 'success'],
-            'id' => $id,
-            'success' => $success
+            '_serialize' => [
+                'jobId',
+                'rankingId',
+                'success'
+            ],
+            'jobId' => $jobId,
+            'rankingId' => $rankingId,
+            'success' => (bool)$rankingId && (bool)$jobId
         ]);
     }
 
@@ -97,5 +107,26 @@ class RankingsController extends AppController
             }
             Log::write('error', $errorMsg);
         }
+    }
+
+    /**
+     * Creates a queued job for generating ranking output for the provided ranking record
+     *
+     * @param int $rankingId ID of unprocessed ranking record
+     * @throws \Exception
+     * @return bool|QueuedJob
+     */
+    private function createRankingJob($rankingId)
+    {
+        /** @var QueuedJobsTable $jobsTable */
+        $jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
+
+        return $jobsTable->createJob(
+            'Rank',
+            [
+                'rankingId' => $rankingId
+            ],
+            ['reference' => $rankingId]
+        );
     }
 }
