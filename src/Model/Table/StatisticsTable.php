@@ -107,37 +107,65 @@ class StatisticsTable extends Table
         parent::buildRules($rules);
 
         // Metric must exist
-        $rules->add(function ($entity, $options) use ($rules) {
-            $rule = $rules->existsIn(['metric_id'], 'Metrics');
+        $rules->add(
+            function ($entity, $options) use ($rules) {
+                $rule = $rules->existsIn(['metric_id'], 'Metrics');
 
-            return $rule($entity, $options);
-        });
+                return $rule($entity, $options);
+            },
+            'metricExists',
+            [
+                'errorField' => 'metric_id',
+                'message' => 'Metric not found'
+            ]
+        );
 
         // Either school or district must be specified
-        $rules->add(function ($entity) {
-            return $entity->school_id || $entity->school_district_id;
-        });
+        $rules->add(
+            function ($entity) {
+                return $entity->school_id || $entity->school_district_id;
+            },
+            'subjectSpecified',
+            [
+                'errorField' => 'subject',
+                'message' => 'School/district not specified'
+            ]
+        );
 
         // School must exist
-        $rules->add(function ($entity, $options) use ($rules) {
-            if (!$entity->school_id) {
-                return true;
-            }
-            $rule = $rules->existsIn(['school_id'], 'Schools');
+        $rules->add(
+            function ($entity, $options) use ($rules) {
+                if (!$entity->school_id) {
+                    return true;
+                }
+                $rule = $rules->existsIn(['school_id'], 'Schools');
 
-            return $rule($entity, $options);
-        });
+                return $rule($entity, $options);
+            },
+            'schoolExists',
+            [
+                'errorField' => 'school_id',
+                'message' => 'School not found'
+            ]
+        );
 
         // District must exist
-        $rules->add(function ($entity, $options) use ($rules) {
-            if (!$entity->school_district_id) {
-                return true;
-            }
+        $rules->add(
+            function ($entity, $options) use ($rules) {
+                if (!$entity->school_district_id) {
+                    return true;
+                }
 
-            $rule = $rules->existsIn(['school_district_id'], 'SchoolDistricts');
+                $rule = $rules->existsIn(['school_district_id'], 'SchoolDistricts');
 
-            return $rule($entity, $options);
-        });
+                return $rule($entity, $options);
+            },
+            'districtExists',
+            [
+                'errorField' => 'school_district_id',
+                'message' => 'District not found'
+            ]
+        );
 
         return $rules;
     }
@@ -158,7 +186,13 @@ class StatisticsTable extends Table
 
         /** @var Statistic $statistic */
         $statistic = $this->find()
-            ->select(['id', 'value'])
+            ->select([
+                'id',
+                'value',
+                'school_id',
+                'school_district_id',
+                'metric_id'
+            ])
             ->where([
                 'metric_id' => $metricId,
                 'year' => $year,
