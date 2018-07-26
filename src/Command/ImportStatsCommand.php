@@ -178,7 +178,9 @@ class ImportStatsCommand extends Command
                 $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
                 $this->importFile->read();
                 $this->importFile->acceptMetricSuggestions = $args->getOption('auto-metrics');
-                $this->importFile->setOverwrite($args->getOption('auto-metrics'));
+                if ($args->getOption('overwrite')) {
+                    $this->importFile->setOverwrite(true);
+                }
                 if ($this->importFile->getError()) {
                     $io->error($this->importFile->getError());
 
