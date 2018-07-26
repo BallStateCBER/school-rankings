@@ -25,6 +25,8 @@ use Queue\Model\Table\QueuedJobsTable;
  * @property array $rankedSubjects
  * @property County[] $locations
  * @property Criterion[] $criteria
+ * @property float $lastProgressUpdate
+ * @property int|float $progressUpdateInterval
  * @property ProgressHelper $progress
  * @property QueuedJobsTable $jobsTable
  * @property Ranking $ranking
@@ -44,7 +46,9 @@ class RankTask extends Shell
     ];
     private $jobId;
     private $jobsTable;
+    private $lastProgressUpdate;
     private $progress;
+    private $progressUpdateInterval = 1; // seconds
     private $rankedSubjects = [
         'full data' => [],
         'partial data' => [],
@@ -422,8 +426,13 @@ class RankTask extends Shell
         if (!$this->jobId) {
             return;
         }
+        $now = microtime(true);
+        if ($now - $this->lastProgressUpdate < $this->progressUpdateInterval) {
+            return;
+        }
 
         $this->jobsTable->updateProgress($this->jobId, $progress);
+        $this->lastProgressUpdate = $now;
     }
 
     /**
