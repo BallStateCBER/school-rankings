@@ -27,6 +27,7 @@ use Queue\Model\Table\QueuedJobsTable;
  * @property Criterion[] $criteria
  * @property float $progressUpdatePercent
  * @property float $progressUpdateTime
+ * @property float[] $progressRange
  * @property int|float $progressUpdateInterval
  * @property ProgressHelper $progressHelper
  * @property QueuedJobsTable $jobsTable
@@ -48,6 +49,7 @@ class RankTask extends Shell
     private $jobId;
     private $jobsTable;
     private $progressHelper;
+    private $progressRange = [0, 1];
     private $progressUpdateInterval = 1; // seconds
     private $progressUpdatePercent;
     private $progressUpdateTime;
@@ -83,12 +85,20 @@ class RankTask extends Shell
      */
     public function process($rankingId)
     {
+        $this->setProgressRange(0, 0.05);
         $this->loadRankingRecord($rankingId);
         $this->loadSubjects();
+
+        $this->setProgressRange(0.05, 0.9);
         $this->loadStats();
+
+        $this->setProgressRange(0.9, 0.95);
         $this->scoreSubjects();
+
+        $this->setProgressRange(0.95, 1);
         $this->groupSubjects();
         $this->rankSubjects();
+
         $this->updateJobProgress(1, true);
         $this->updateJobStatus('Done');
         $this->outputResults();
@@ -133,7 +143,7 @@ class RankTask extends Shell
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($step, count($locations), 0, 0.2);
+            $overallProgress = $this->getOverallProgress($step, count($locations));
             $this->updateJobProgress($overallProgress);
             $step++;
         }
@@ -173,7 +183,7 @@ class RankTask extends Shell
 
             $this->groupedSubjects['no data'][] = $subject;
 
-            $overallProgress = $this->getOverallProgress($step, count($this->subjects), 0.6, 0.8);
+            $overallProgress = $this->getOverallProgress($step, count($this->subjects));
             $this->updateJobProgress($overallProgress);
             $step++;
         }
@@ -214,7 +224,7 @@ class RankTask extends Shell
                 $rank++;
             }
 
-            $overallProgress = $this->getOverallProgress($step, count($this->groupedSubjects), 0.8, 1);
+            $overallProgress = $this->getOverallProgress($step, count($this->groupedSubjects));
             $this->updateJobProgress($overallProgress);
             $step++;
         }
@@ -286,7 +296,7 @@ class RankTask extends Shell
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($step, count($this->subjects), 0.2, 0.4);
+            $overallProgress = $this->getOverallProgress($step, count($this->subjects));
             $this->updateJobProgress($overallProgress);
             $step++;
         }
@@ -335,7 +345,7 @@ class RankTask extends Shell
 
                 $this->progressHelper->increment(1);
                 $this->progressHelper->draw();
-                $overallProgress = $this->getOverallProgress($step, count($this->subjects), 0.4, 0.6);
+                $overallProgress = $this->getOverallProgress($step, count($this->subjects));
                 $this->updateJobProgress($overallProgress);
                 $step++;
             }
@@ -483,14 +493,29 @@ class RankTask extends Shell
      *
      * @param int $step Current step number
      * @param int $totalSteps Total number of steps
-     * @param int $rangeStart Beginning of the progress range for the current task
-     * @param int $rangeEnd End of the progress range for the current task
      * @return float
      */
-    private function getOverallProgress($step, $totalSteps, $rangeStart = 0, $rangeEnd = 1)
+    private function getOverallProgress($step, $totalSteps)
     {
+        $rangeStart = $this->progressRange[0];
+        $rangeEnd = $this->progressRange[1];
         $percent = $step / $totalSteps;
 
         return (($rangeEnd - $rangeStart) * $percent) + $rangeStart;
+    }
+
+    /**
+     * Sets the range of overall progress made up by the current task's progress
+     *
+     * For example, if this is set to (0.2, 0.7), then as the current task progresses from 0% to 100% done, the overall
+     * progress should be represented as progressing from 20% to 70% done
+     *
+     * @param float $start Start of the progress range
+     * @param float $end End of the progress range
+     * @return void
+     */
+    private function setProgressRange($start, $end)
+    {
+        $this->progressRange = [$start, $end];
     }
 }
