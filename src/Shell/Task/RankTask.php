@@ -89,7 +89,7 @@ class RankTask extends Shell
         $this->scoreSubjects();
         $this->groupSubjects();
         $this->rankSubjects();
-        $this->updateJobProgress(100, true);
+        $this->updateJobProgress(1, true);
         $this->updateJobStatus('Done');
         $this->outputResults();
 
@@ -132,7 +132,7 @@ class RankTask extends Shell
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($n, count($locations), 0, 0.2);
+            $overallProgress = $this->getOverallProgress($n + 1, count($locations), 0, 0.2);
             $this->updateJobProgress($overallProgress);
         }
 
@@ -170,7 +170,7 @@ class RankTask extends Shell
 
             $this->groupedSubjects['no data'][] = $subject;
 
-            $overallProgress = $this->getOverallProgress($n, count($this->subjects), 0.6, 0.8);
+            $overallProgress = $this->getOverallProgress($n + 1, count($this->subjects), 0.6, 0.8);
             $this->updateJobProgress($overallProgress);
         }
 
@@ -281,7 +281,7 @@ class RankTask extends Shell
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($n, count($this->subjects), 0.2, 0.4);
+            $overallProgress = $this->getOverallProgress($n + 1, count($this->subjects), 0.2, 0.4);
             $this->updateJobProgress($overallProgress);
         }
         $this->getIo()->overwrite(' - Done');
@@ -328,7 +328,7 @@ class RankTask extends Shell
 
                 $this->progressHelper->increment(1);
                 $this->progressHelper->draw();
-                $overallProgress = $this->getOverallProgress($n, count($this->subjects), 0.4, 0.6);
+                $overallProgress = $this->getOverallProgress($n + 1, count($this->subjects), 0.4, 0.6);
                 $this->updateJobProgress($overallProgress);
             }
         }
