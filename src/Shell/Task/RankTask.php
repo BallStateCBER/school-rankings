@@ -471,7 +471,7 @@ class RankTask extends Shell
      *
      * If $rangeStart and $rangeEnd are specified, the result will be in that range.
      * Example: We're on step 30 of 100 in a sub-task that will bring the overall task from 0% to 20% complete,
-     * so getOverallProgress(30, 100, 0, 20) will output 30% of 20, or 6%, output as 0.06
+     * so getOverallProgress(30, 100, 0, .2) will output 30% of 20, or 6%, output as 0.06
      *
      * @param int $step Current step number
      * @param int $totalSteps Total number of steps
