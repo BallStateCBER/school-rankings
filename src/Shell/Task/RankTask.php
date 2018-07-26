@@ -9,15 +9,14 @@ use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
-use Cake\Console\ConsoleIo;
 use Cake\Console\Shell;
 use Cake\Database\Expression\QueryExpression;
-use Cake\ORM\Locator\LocatorInterface;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
+use Queue\Model\Table\QueuedJobsTable;
 
 /**
  * Class RankTask
@@ -27,6 +26,7 @@ use Cake\Utility\Inflector;
  * @property County[] $locations
  * @property Criterion[] $criteria
  * @property ProgressHelper $progress
+ * @property QueuedJobsTable $jobsTable
  * @property Ranking $ranking
  * @property RankingsTable $rankingsTable
  * @property School[]|SchoolDistrict[] $subjects
@@ -42,6 +42,8 @@ class RankTask extends Shell
         'partial data' => [],
         'no data' => []
     ];
+    private $jobId;
+    private $jobsTable;
     private $progress;
     private $rankedSubjects = [
         'full data' => [],
@@ -63,6 +65,7 @@ class RankTask extends Shell
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->progress = $this->getIo()->helper('Progress');
+        $this->jobsTable = TableRegistry::getTableLocator()->get('QueuedJobs');
     }
 
     /**
@@ -80,6 +83,7 @@ class RankTask extends Shell
         $this->scoreSubjects();
         $this->groupSubjects();
         $this->rankSubjects();
+        $this->updateJobProgress(100);
         $this->outputResults();
 
         return true;
@@ -93,7 +97,10 @@ class RankTask extends Shell
      */
     private function loadSubjects()
     {
-        $this->getIo()->out("Finding {$this->context}s...");
+        $msg = "Finding {$this->context}s";
+        $this->getIo()->out("$msg...");
+        $this->updateJobStatus($msg);
+
         $subjectTable = Context::getTable($this->context);
         $locations = $this->getLocations();
         $this->progress->init([
@@ -101,7 +108,8 @@ class RankTask extends Shell
             'width' => 40,
         ]);
         $this->progress->draw();
-        foreach ($locations as $location) {
+
+        foreach ($locations as $n => $location) {
             $locationTableName = $this->getLocationTableName($location);
             $subjects = $subjectTable->find()
                 ->matching($locationTableName, function (Query $q) use ($locationTableName, $location) {
@@ -114,8 +122,11 @@ class RankTask extends Shell
                 $result->score = 0;
                 $this->subjects[$result->id] = $result;
             }
+
             $this->progress->increment(1);
             $this->progress->draw();
+            $overallProgress = $this->getOverallProgress($n, count($locations), 0, 20);
+            $this->updateJobProgress($overallProgress);
         }
 
         $this->getIo()->overwrite(sprintf(
@@ -132,11 +143,13 @@ class RankTask extends Shell
      */
     private function groupSubjects()
     {
-        $this->getIo()->out("Grouping {$this->context}s by data availability...");
+        $msg = "Grouping {$this->context}s by data availability";
+        $this->getIo()->out("$msg...");
+        $this->updateJobStatus($msg);
         $criteria = $this->ranking->formula->criteria;
         $metricCount = count($criteria);
 
-        foreach ($this->subjects as $subject) {
+        foreach ($this->subjects as $n => $subject) {
             $subjectStatCount = count($subject->statistics);
             if ($subjectStatCount == $metricCount) {
                 $this->groupedSubjects['full data'][] = $subject;
@@ -149,7 +162,11 @@ class RankTask extends Shell
             }
 
             $this->groupedSubjects['no data'][] = $subject;
+
+            $overallProgress = $this->getOverallProgress($n, count($this->subjects), 60, 80);
+            $this->updateJobProgress($overallProgress);
         }
+
         foreach ($this->groupedSubjects as $group => $subjects) {
             $this->getIo()->out(sprintf(
                 ' - %s: %s',
@@ -166,7 +183,11 @@ class RankTask extends Shell
      */
     private function rankSubjects()
     {
-        $this->getIo()->out("Ranking {$this->context}s...");
+        $msg = "Ranking {$this->context}s";
+        $this->getIo()->out("$msg...");
+        $this->updateJobStatus($msg);
+
+        $step = 1;
         foreach ($this->groupedSubjects as $group => $subjects) {
             // Sort by score, creating an array of all schools/districts with each score
             $sortedSubjects = [];
@@ -181,6 +202,10 @@ class RankTask extends Shell
                 $this->rankedSubjects[$group][$rank] = $subjectsInRank;
                 $rank++;
             }
+
+            $overallProgress = $this->getOverallProgress($step, count($this->groupedSubjects), 80, 100);
+            $this->updateJobProgress($overallProgress);
+            $step++;
         }
         $this->getIo()->out(' - Done');
     }
@@ -224,7 +249,9 @@ class RankTask extends Shell
      */
     private function loadStats()
     {
-        $this->getIo()->out('Collecting statistics...');
+        $msg = 'Collecting statistics';
+        $this->getIo()->out("$msg...");
+        $this->updateJobStatus($msg);
         $this->progress->init([
             'total' => count($this->subjects),
             'width' => 40,
@@ -232,7 +259,7 @@ class RankTask extends Shell
         $this->progress->draw();
         $criteria = $this->ranking->formula->criteria;
         $metricIds = Hash::extract($criteria, '{n}.metric_id');
-        foreach ($this->subjects as &$subject) {
+        foreach ($this->subjects as $n => &$subject) {
             $query = $this->statsTable->find()
                 ->select(['metric_id', 'value', 'year'])
                 ->where([
@@ -244,8 +271,11 @@ class RankTask extends Shell
                 ->limit(1)
                 ->orderDesc('year');
             $subject->statistics = $query->all();
+
             $this->progress->increment(1);
             $this->progress->draw();
+            $overallProgress = $this->getOverallProgress($n, count($this->subjects), 20, 40);
+            $this->updateJobProgress($overallProgress);
         }
         $this->getIo()->overwrite(' - Done');
     }
@@ -257,14 +287,17 @@ class RankTask extends Shell
      */
     private function scoreSubjects()
     {
-        $this->getIo()->out("Scoring {$this->context}s...");
-        $outputMsgs = [];
+        $msg = "Scoring {$this->context}s";
+        $this->getIo()->out("$msg...");
+        $this->updateJobStatus($msg);
         $criteria = $this->ranking->formula->criteria;
         $this->progress->init([
             'total' => count($this->subjects) * count($criteria),
             'width' => 40,
         ]);
         $this->progress->draw();
+
+        $outputMsgs = [];
         foreach ($criteria as $criterion) {
             $metricId = $criterion->metric_id;
             $weight = $criterion->weight;
@@ -274,7 +307,7 @@ class RankTask extends Shell
                 $this->progress->draw();
                 continue;
             }
-            foreach ($this->subjects as &$subject) {
+            foreach ($this->subjects as $n => &$subject) {
                 /** @var School|SchoolDistrict $subject */
                 foreach ($subject->statistics as $statistic) {
                     if ($statistic->metric_id != $metricId) {
@@ -285,8 +318,11 @@ class RankTask extends Shell
                     $subject->score += $metricScore;
                     $outputMsgs[] = "Metric $metricId score for $subject->name: $metricScore";
                 }
+
                 $this->progress->increment(1);
                 $this->progress->draw();
+                $overallProgress = $this->getOverallProgress($n, count($this->subjects), 40, 60);
+                $this->updateJobProgress($overallProgress);
             }
         }
 
@@ -362,5 +398,69 @@ class RankTask extends Shell
         ]);
         $this->context = $this->ranking->formula->context;
         $this->getIo()->out(' - Ranking found');
+    }
+
+    /**
+     * Setter for the jobId property
+     *
+     * @param int $jobId ID of a queued job record
+     * @return void
+     */
+    public function setJobId($jobId)
+    {
+        $this->jobId = $jobId;
+    }
+
+    /**
+     * Updates the current queued job's progress percent
+     *
+     * @param int $progress Progress percent, from 1 to 100
+     * @return void
+     */
+    private function updateJobProgress($progress)
+    {
+        if (!$this->jobId) {
+            return;
+        }
+
+        $this->jobsTable->updateProgress($this->jobId, $progress);
+    }
+
+    /**
+     * Updates the current queued job's status
+     *
+     * @param string $status Status message
+     * @return void
+     */
+    private function updateJobStatus($status)
+    {
+        if (!$this->jobId) {
+            return;
+        }
+
+        $this->jobsTable->updateAll(
+            ['status' => $status],
+            ['id' => $this->jobId]
+        );
+    }
+
+    /**
+     * Returns a value representing what percent complete a given task is
+     *
+     * If $rangeStart and $rangeEnd are specified, the result will be in that range.
+     * Example: We're on step 30 of 100 in a sub-task that will bring the overall task from 0% to 20% complete,
+     * so getOverallProgress(30, 100, 0, 20) will output 30% of 20, or 6%
+     *
+     * @param int $step Current step number
+     * @param int $totalSteps Total number of steps
+     * @param int $rangeStart Beginning of the progress range for the current task
+     * @param int $rangeEnd End of the progress range for the current task
+     * @return int
+     */
+    private function getOverallProgress($step, $totalSteps, $rangeStart = 0, $rangeEnd = 100)
+    {
+        $percent = $step / $totalSteps;
+
+        return round((($rangeEnd - $rangeStart) * $percent) + $rangeStart);
     }
 }
