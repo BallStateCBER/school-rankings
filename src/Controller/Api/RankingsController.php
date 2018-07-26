@@ -129,4 +129,24 @@ class RankingsController extends AppController
             ['reference' => $rankingId]
         );
     }
+
+    /**
+     * Endpoint for fetching progress and status for the job specified in ?jobId query string
+     *
+     * @return void
+     */
+    public function status()
+    {
+        $jobId = $this->request->getQuery('jobId');
+        $jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
+        $job = $jobsTable->get($jobId);
+        $this->set([
+            '_serialize' => [
+                'progress',
+                'status'
+            ],
+            'progress' => $job->progress,
+            'status' => $job->status
+        ]);
+    }
 }
