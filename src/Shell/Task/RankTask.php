@@ -16,6 +16,7 @@ use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
+use Exception;
 use Queue\Model\Table\QueuedJobsTable;
 
 /**
@@ -71,7 +72,7 @@ class RankTask extends Shell
      *
      * @param int $rankingId ID of ranking record
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function process($rankingId)
     {
@@ -85,9 +86,14 @@ class RankTask extends Shell
         $this->setProgressRange(0.9, 0.95);
         $this->scoreSubjects();
 
-        $this->setProgressRange(0.95, 1);
+        $this->setProgressRange(0.95, 0.96);
         $this->markDataCompleteness();
+
+        $this->setProgressRange(0.96, 0.99);
         $this->rankSubjects();
+
+        $this->setProgressRange(0.99, 1);
+        $this->saveResults();
 
         $this->updateJobProgress(1, true);
         $this->updateJobStatus('Done');
@@ -100,7 +106,7 @@ class RankTask extends Shell
      * Returns either the schools or districts that are associated with the specified locations
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function loadSubjects()
     {
@@ -493,5 +499,37 @@ class RankTask extends Shell
     private function setProgressRange($start, $end)
     {
         $this->progressRange = [$start, $end];
+    }
+
+    /**
+     * Saves the serialized ranks and subject IDs to the ranking record in the database
+     *
+     * @throws Exception
+     * @return void
+     */
+    private function saveResults()
+    {
+        $this->getIo()->out("Saving results...");
+        $this->updateJobStatus('Finalizing');
+
+        $results = [];
+        foreach ($this->rankedSubjects as $rank => $subjectsInRank) {
+            foreach ($subjectsInRank as $subject) {
+                $results[$rank][] = $subject->id;
+            }
+        }
+
+        $this->rankingsTable->patchEntity($this->ranking, [
+            'results' => serialize($results)
+        ]);
+        if ($this->rankingsTable->save($this->ranking)) {
+            $overallProgress = $this->getOverallProgress(1, 1);
+            $this->updateJobProgress($overallProgress);
+            $this->getIo()->out(' - Done');
+
+            return;
+        }
+
+        throw new Exception('Error saving ranking results');
     }
 }
