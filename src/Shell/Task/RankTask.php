@@ -129,6 +129,7 @@ class RankTask extends Shell
                 ->matching($locationTableName, function (Query $q) use ($locationTableName, $location) {
                     return $q->where(["$locationTableName.id" => $location->id]);
                 })
+                ->where(['closed' => false])
                 ->all();
 
             // Use school/district IDs as keys to avoid duplicates
