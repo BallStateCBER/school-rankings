@@ -29,6 +29,7 @@ use Cake\ORM\Entity;
  */
 class School extends Entity
 {
+    use RankableTrait;
 
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().

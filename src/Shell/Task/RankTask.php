@@ -21,7 +21,6 @@ use Queue\Model\Table\QueuedJobsTable;
 /**
  * Class RankTask
  * @package App\Shell\Task
- * @property array $groupedSubjects
  * @property array $rankedSubjects
  * @property County[] $locations
  * @property Criterion[] $criteria
@@ -41,11 +40,6 @@ class RankTask extends Shell
 {
     private $context;
     private $criteria;
-    private $groupedSubjects = [
-        'full data' => [],
-        'partial data' => [],
-        'no data' => []
-    ];
     private $jobId;
     private $jobsTable;
     private $progressHelper;
@@ -53,11 +47,7 @@ class RankTask extends Shell
     private $progressUpdateInterval = 1; // seconds
     private $progressUpdatePercent;
     private $progressUpdateTime;
-    private $rankedSubjects = [
-        'full data' => [],
-        'partial data' => [],
-        'no data' => []
-    ];
+    private $rankedSubjects = [];
     private $ranking;
     private $rankingsTable;
     private $statsTable;
@@ -96,7 +86,7 @@ class RankTask extends Shell
         $this->scoreSubjects();
 
         $this->setProgressRange(0.95, 1);
-        $this->groupSubjects();
+        $this->markDataCompleteness();
         $this->rankSubjects();
 
         $this->updateJobProgress(1, true);
@@ -156,13 +146,13 @@ class RankTask extends Shell
     }
 
     /**
-     * Groups subjects into full data, partial data, and no data categories
+     * Classifies subjects as having full data, partial data, or no data
      *
      * @return void
      */
-    private function groupSubjects()
+    private function markDataCompleteness()
     {
-        $msg = "Grouping {$this->context}s by data availability";
+        $msg = "Analyzing {$this->context}s for data availability";
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
         $criteria = $this->ranking->formula->criteria;
@@ -172,33 +162,23 @@ class RankTask extends Shell
         foreach ($this->subjects as $subject) {
             $subjectStatCount = count($subject->statistics);
             if ($subjectStatCount == $metricCount) {
-                $this->groupedSubjects['full data'][] = $subject;
-                continue;
+                $subject->setDataCompleteness('full');
+            } elseif ($subjectStatCount > 0) {
+                $subject->setDataCompleteness('partial');
+            } else {
+                $subject->setDataCompleteness('empty');
             }
-
-            if ($subjectStatCount > 0) {
-                $this->groupedSubjects['partial data'][] = $subject;
-                continue;
-            }
-
-            $this->groupedSubjects['no data'][] = $subject;
 
             $overallProgress = $this->getOverallProgress($step, count($this->subjects));
             $this->updateJobProgress($overallProgress);
             $step++;
         }
 
-        foreach ($this->groupedSubjects as $group => $subjects) {
-            $this->getIo()->out(sprintf(
-                ' - %s: %s',
-                ucfirst($group),
-                count($subjects)
-            ));
-        }
+        $this->getIo()->overwrite(' - Done');
     }
 
     /**
-     * Returns grouped array of subjects ordered by their rank, according to the current formula
+     * Returns array of subjects ordered by their rank, according to the current formula
      *
      * @return void
      */
@@ -208,26 +188,26 @@ class RankTask extends Shell
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
 
-        $step = 1;
-        foreach ($this->groupedSubjects as $group => $subjects) {
-            // Sort by score, creating an array of all schools/districts with each score
-            $sortedSubjects = [];
-            foreach ($subjects as $subject) {
-                $sortedSubjects[$subject->score][] = $subject;
-            }
-            krsort($sortedSubjects);
-
-            $rank = 1;
-            foreach ($sortedSubjects as $score => $subjectsInRank) {
-                shuffle($subjectsInRank);
-                $this->rankedSubjects[$group][$rank] = $subjectsInRank;
-                $rank++;
-            }
-
-            $overallProgress = $this->getOverallProgress($step, count($this->groupedSubjects));
-            $this->updateJobProgress($overallProgress);
-            $step++;
+        // Sort by score, creating an array of all subjects with each score
+        $sortedSubjects = [];
+        foreach ($this->subjects as $subject) {
+            $key = (int)($subject->score * 1000);
+            $sortedSubjects[$key][] = $subject;
         }
+        krsort($sortedSubjects);
+
+        // Arrange subjects into ranks, with same-rank subjects in random order
+        $rank = 1;
+        foreach ($sortedSubjects as $k => $subjectsInRank) {
+            shuffle($subjectsInRank);
+            $this->rankedSubjects[$rank] = $subjectsInRank;
+            $rank++;
+        }
+
+        // This method runs pretty quickly, so we'll skip incremental progress updates
+        $overallProgress = $this->getOverallProgress(1, 1);
+        $this->updateJobProgress($overallProgress);
+
         $this->getIo()->out(' - Done');
     }
 
@@ -387,15 +367,11 @@ class RankTask extends Shell
     private function outputResults()
     {
         $this->getIo()->out();
-        foreach ($this->rankedSubjects as $group => $groupedSubjects) {
-            $this->getIo()->out(ucfirst($group) . ':');
-            foreach ($groupedSubjects as $rank => $rankedSubjects) {
-                $this->getIo()->out($rank);
-                foreach ($rankedSubjects as $subject) {
-                    $this->getIo()->out(" - $subject->name ($subject->score)");
-                }
+        foreach ($this->rankedSubjects as $rank => $rankedSubjects) {
+            $this->getIo()->out($rank);
+            foreach ($rankedSubjects as $subject) {
+                $this->getIo()->out(" - $subject->name ($subject->score)");
             }
-            $this->getIo()->out();
         }
     }
 
