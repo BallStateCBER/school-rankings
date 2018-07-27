@@ -12,6 +12,7 @@ use Cake\ORM\Entity;
  * @property int $formula_id
  * @property int $school_type_id
  * @property bool $for_school_districts
+ * @property string $results
  * @property string $hash
  * @property FrozenTime $created
  *
@@ -52,6 +53,7 @@ class Ranking extends Entity
         'counties' => true,
         'ranges' => true,
         'school_districts' => true,
-        'states' => true
+        'states' => true,
+        'results' => true
     ];
 }
