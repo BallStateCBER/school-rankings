@@ -26,6 +26,7 @@ trait RankableTrait
      *
      * @param string $dataCompleteness Either full, partial, or empty
      * @return void
+     * @throws InternalErrorException
      */
     public function setDataCompleteness($dataCompleteness)
     {
@@ -39,10 +40,26 @@ trait RankableTrait
     }
 
     /**
+     * Gets the value of the dataCompleteness property
+     *
+     * @return string
+     * @throws InternalErrorException
+     */
+    public function getDataCompleteness()
+    {
+        if ($this->dataCompleteness) {
+            return $this->dataCompleteness;
+        }
+
+        throw new InternalErrorException('School / district data completeness undetermined');
+    }
+
+    /**
      * Sets this entity's score
      *
      * @param int|float $score Score
      * @return void
+     * @throws InternalErrorException
      */
     public function setScore($score)
     {

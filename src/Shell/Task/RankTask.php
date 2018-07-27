@@ -516,7 +516,11 @@ class RankTask extends Shell
         $results = [];
         foreach ($this->rankedSubjects as $rank => $subjectsInRank) {
             foreach ($subjectsInRank as $subject) {
-                $results[$rank][] = $subject->id;
+                /** @var School|SchoolDistrict $subject */
+                $results[$rank][] = [
+                    'id' => $subject->id,
+                    'dataCompleteness' => $subject->getDataCompleteness()
+                ];
             }
         }
 
