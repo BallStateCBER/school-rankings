@@ -7,6 +7,7 @@ import '../../../node_modules/react-select/dist/react-select.css';
 import {MetricSelector} from './metric-selector.jsx';
 import '../../css/formula-form.scss';
 import {Criterion} from './criterion.jsx';
+import {RankingResults} from './ranking-results.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -20,6 +21,7 @@ class FormulaForm extends React.Component {
       criteria: [],
       loadingRankings: false,
       passesValidation: false,
+      results: null,
       uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
@@ -222,76 +224,6 @@ class FormulaForm extends React.Component {
     $('#jstree').jstree(true).deselect_all();
   }
 
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <div className="form-group">
-          <h3>
-            <label>
-              What would you like to rank?
-            </label>
-          </h3>
-          <div className="form-check">
-            <input className="form-check-input" type="radio" name="context"
-                   id="context-school" value="school"
-                   onChange={this.handleChange}
-                   checked={this.state.context === 'school'} />
-            <label className="form-check-label" htmlFor="context-school">
-              Schools
-            </label>
-          </div>
-          <div className="form-check">
-            <input className="form-check-input" type="radio" name="context"
-                   id="context-district" value="district"
-                   onChange={this.handleChange}
-                   checked={this.state.context === 'district'} />
-            <label className="form-check-label" htmlFor="context-district">
-              School corporations (districts)
-            </label>
-          </div>
-        </div>
-        <h3>
-          Where would you like to search?
-        </h3>
-        <div className="form-group">
-          <label htmlFor="county">
-            County
-          </label>
-          <Select name="county" id="county"
-                  value={this.state.county} onChange={this.handleSelectCounty}
-                  options={FormulaForm.getCountyOptions()} clearable={false}
-                  required={true} />
-        </div>
-        {this.state.context &&
-          <MetricSelector context={this.state.context}
-                          handleSelectMetric={this.handleSelectMetric}
-                          handleUnselectMetric={this.handleUnselectMetric}
-                          handleClearMetrics={this.handleClearMetrics} />
-        }
-        {this.state.criteria.length > 0 &&
-          <div id="criteria">
-            {this.state.criteria.map((criterion) => {
-              return (
-                <Criterion key={criterion.metric.metricId}
-                           name={criterion.metric.name}
-                           metricId={criterion.metric.metricId}>
-                </Criterion>
-              );
-            })}
-          </div>
-        }
-        <Button color="primary" onClick={this.handleSubmit}
-                disabled={this.state.loadingRankings}>
-          Submit
-        </Button>
-        {this.state.loadingRankings &&
-          <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
-               className="loading"/>
-        }
-      </form>
-    );
-  }
-
   checkJobProgress(jobId) {
     $.ajax({
       method: 'GET',
@@ -314,6 +246,7 @@ class FormulaForm extends React.Component {
       console.log('Progress: ' + data.progress);
       console.log('Status: ' + data.status);
 
+      // Not finished yet
       if (data.progress !== 1) {
         setTimeout(
             () => {
@@ -321,10 +254,108 @@ class FormulaForm extends React.Component {
             },
             1000
         );
+        return;
       }
+
+      // Job complete
+      this.loadResults();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     });
+  }
+
+  loadResults() {
+    $.ajax({
+      method: 'GET',
+      url: '/api/rankings/get/' + this.rankingId + '.json',
+      dataType: 'json',
+    }).done((data) => {
+      if (!data.hasOwnProperty('results')) {
+        console.log('Error retrieving ranking results');
+        console.log(data);
+        this.setState({loadingRankings: false});
+        return;
+      }
+
+      this.setState({results: data.results});
+    }).fail((jqXHR) => {
+      FormulaForm.logApiError(jqXHR);
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <div className="form-group">
+            <h3>
+              <label>
+                What would you like to rank?
+              </label>
+            </h3>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="context"
+                     id="context-school" value="school"
+                     onChange={this.handleChange}
+                     checked={this.state.context === 'school'} />
+              <label className="form-check-label" htmlFor="context-school">
+                Schools
+              </label>
+            </div>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="context"
+                     id="context-district" value="district"
+                     onChange={this.handleChange}
+                     checked={this.state.context === 'district'} />
+              <label className="form-check-label" htmlFor="context-district">
+                School corporations (districts)
+              </label>
+            </div>
+          </div>
+          <h3>
+            Where would you like to search?
+          </h3>
+          <div className="form-group">
+            <label htmlFor="county">
+              County
+            </label>
+            <Select name="county" id="county"
+                    value={this.state.county} onChange={this.handleSelectCounty}
+                    options={FormulaForm.getCountyOptions()} clearable={false}
+                    required={true} />
+          </div>
+          {this.state.context &&
+          <MetricSelector context={this.state.context}
+                          handleSelectMetric={this.handleSelectMetric}
+                          handleUnselectMetric={this.handleUnselectMetric}
+                          handleClearMetrics={this.handleClearMetrics} />
+          }
+          {this.state.criteria.length > 0 &&
+          <div id="criteria">
+            {this.state.criteria.map((criterion) => {
+              return (
+                  <Criterion key={criterion.metric.metricId}
+                             name={criterion.metric.name}
+                             metricId={criterion.metric.metricId}>
+                  </Criterion>
+              );
+            })}
+          </div>
+          }
+          <Button color="primary" onClick={this.handleSubmit}
+                  disabled={this.state.loadingRankings}>
+            Submit
+          </Button>
+          {this.state.loadingRankings &&
+          <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
+               className="loading"/>
+          }
+        </form>
+        {this.state.results &&
+            <RankingResults results={this.state.results} />
+        }
+      </div>
+    );
   }
 }
 
