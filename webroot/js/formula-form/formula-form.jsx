@@ -8,6 +8,7 @@ import {MetricSelector} from './metric-selector.jsx';
 import '../../css/formula-form.scss';
 import {Criterion} from './criterion.jsx';
 import {RankingResults} from './ranking-results.jsx';
+import {ProgressBar} from './progress-bar.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -21,6 +22,8 @@ class FormulaForm extends React.Component {
       criteria: [],
       loadingRankings: false,
       passesValidation: false,
+      progressPercent: null,
+      progressStatus: null,
       results: null,
       uuid: FormulaForm.getUuid(),
     };
@@ -56,7 +59,12 @@ class FormulaForm extends React.Component {
       return;
     }
 
-    this.setState({loadingRankings: true});
+    this.setState({
+      loadingRankings: true,
+      progressPercent: 0,
+      progressStatus: null,
+      results: null,
+    });
 
     this.processForm();
   }
@@ -130,8 +138,6 @@ class FormulaForm extends React.Component {
       this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
-    }).always(() => {
-      this.setState({loadingRankings: false});
     });
   }
 
@@ -246,6 +252,11 @@ class FormulaForm extends React.Component {
       console.log('Progress: ' + data.progress);
       console.log('Status: ' + data.status);
 
+      this.setState({
+        progressPercent: data.progress * 100,
+        progressStatus: data.status,
+      });
+
       // Not finished yet
       if (data.progress !== 1) {
         setTimeout(
@@ -273,13 +284,14 @@ class FormulaForm extends React.Component {
       if (!data.hasOwnProperty('results')) {
         console.log('Error retrieving ranking results');
         console.log(data);
-        this.setState({loadingRankings: false});
         return;
       }
 
       this.setState({results: data.results});
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
+    }).always(() => {
+      this.setState({loadingRankings: false});
     });
   }
 
@@ -325,34 +337,38 @@ class FormulaForm extends React.Component {
                     required={true} />
           </div>
           {this.state.context &&
-          <MetricSelector context={this.state.context}
-                          handleSelectMetric={this.handleSelectMetric}
-                          handleUnselectMetric={this.handleUnselectMetric}
-                          handleClearMetrics={this.handleClearMetrics} />
+            <MetricSelector context={this.state.context}
+                            handleSelectMetric={this.handleSelectMetric}
+                            handleUnselectMetric={this.handleUnselectMetric}
+                            handleClearMetrics={this.handleClearMetrics} />
           }
           {this.state.criteria.length > 0 &&
-          <div id="criteria">
-            {this.state.criteria.map((criterion) => {
-              return (
+            <div id="criteria">
+              {this.state.criteria.map((criterion) => {
+                return (
                   <Criterion key={criterion.metric.metricId}
                              name={criterion.metric.name}
                              metricId={criterion.metric.metricId}>
                   </Criterion>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           }
           <Button color="primary" onClick={this.handleSubmit}
                   disabled={this.state.loadingRankings}>
             Submit
           </Button>
           {this.state.loadingRankings &&
-          <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
-               className="loading"/>
+            <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
+                 className="loading"/>
           }
         </form>
+        {this.state.loadingRankings &&
+          <ProgressBar percent={this.state.progressPercent}
+                       status={this.state.progressStatus} />
+        }
         {this.state.results &&
-            <RankingResults results={this.state.results} />
+          <RankingResults results={this.state.results} />
         }
       </div>
     );
