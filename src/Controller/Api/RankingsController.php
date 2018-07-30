@@ -2,7 +2,10 @@
 namespace App\Controller\Api;
 
 use App\Controller\AppController;
+use App\Model\Context\Context;
 use App\Model\Entity\Ranking;
+use App\Model\Entity\School;
+use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\RankingsTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
@@ -148,5 +151,56 @@ class RankingsController extends AppController
             'progress' => $job->progress,
             'status' => $job->status
         ]);
+    }
+
+    /**
+     * Fetches the results of a ranking
+     *
+     * @param int $rankingId ID of ranking record
+     * @throws \Exception
+     * @return void
+     */
+    public function get($rankingId)
+    {
+        $ranking = $this->rankingsTable->get($rankingId, [
+            'contain' => [
+                'Formulas'
+            ]
+        ]);
+        if (!$ranking->results) {
+            // TODO: No results yet
+
+            return;
+        }
+
+        $results = unserialize($ranking->results);
+        $hydratedResults = [];
+        $context = $ranking->formula->context;
+        $subjectTable = Context::getTable($context);
+        foreach ($results as $rank => $resultsInRank) {
+            foreach ($resultsInRank as $subject) {
+                /** @var School|SchoolDistrict $hydratedSubject */
+                $hydratedSubject = $subjectTable->find()
+                    ->select([
+                        'name',
+                        'address',
+                        'url',
+                        'phone'
+                    ])
+                    ->where(['id' => $subject['id']])
+                    ->contain(['SchoolTypes', 'Grades'])
+                    ->first();
+
+                if ($hydratedSubject) {
+                    $hydratedSubject->setDataCompleteness($subject['dataCompleteness']);
+                    $hydratedResults[$rank][] = $hydratedSubject;
+                    continue;
+                }
+
+                // TODO: Ranking includes a school/district that wasn't found, should be generating
+            }
+        }
+
+        // TODO: Return $hydratedResults
     }
 }
