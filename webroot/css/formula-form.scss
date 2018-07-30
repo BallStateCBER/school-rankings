@@ -1,3 +1,5 @@
+@import "../bootstrap/css/bootstrap.min.css";
+
 #formula-form {
   .loading {
     margin-left: 10px;
@@ -19,4 +21,12 @@ li[data-selectable="0"] {
     margin-left: 15px;
   }
 }
+table.ranking-results {
+  margin-top: 30px;
 
+  th.rank-number {
+    font-size: 2em;
+    text-align: center;
+    width: 50px;
+  }
+}

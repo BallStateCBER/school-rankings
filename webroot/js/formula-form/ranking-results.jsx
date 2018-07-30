@@ -30,7 +30,7 @@ class RankingResults extends React.Component {
       const rank = this.props.results[i];
       rankRows.push(
           <tr key={rank.rank + '-0'}>
-            <th rowSpan={rank.subjects.length}>
+            <th rowSpan={rank.subjects.length} className="rank-number">
               {rank.rank}
             </th>
             {RankingResults.getResultCell(rank.subjects[0])}
@@ -46,7 +46,7 @@ class RankingResults extends React.Component {
     }
 
     return (
-      <table>
+      <table className="table ranking-results">
         <tbody>
           {rankRows}
         </tbody>
