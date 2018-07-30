@@ -76,6 +76,10 @@ class SchoolDistrictsTable extends Table
             'targetForeignKey' => 'state_id',
             'joinTable' => 'school_districts_states'
         ]);
+        $this->hasMany('RankingResults', [
+            'joinTable' => 'ranking_results_school_districts',
+            'dependent' => true
+        ]);
     }
 
     /**

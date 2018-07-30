@@ -12,7 +12,7 @@ use Cake\ORM\Entity;
  * @property int $formula_id
  * @property int $school_type_id
  * @property bool $for_school_districts
- * @property string $results
+ * @property array $results
  * @property string $hash
  * @property FrozenTime $created
  *
@@ -25,6 +25,8 @@ use Cake\ORM\Entity;
  * @property Range[] $ranges
  * @property SchoolDistrict[] $school_districts
  * @property State[] $states
+ * @property RankingResultsSchool[] $ResultsSchools
+ * @property RankingResultsSchoolDistrict[] $ResultsDistricts
  */
 class Ranking extends Entity
 {
@@ -54,6 +56,25 @@ class Ranking extends Entity
         'ranges' => true,
         'school_districts' => true,
         'states' => true,
-        'results' => true
+        'results_districts' => true,
+        'results_schools' => true
     ];
+
+    /**
+     * Allows 'results' to be used to access whichever is populated between results_schools and results_school_districts
+     *
+     * @return array
+     */
+    protected function _getResults()
+    {
+        if ($this->_properties['results_schools']) {
+            return $this->_properties['results_schools'];
+        }
+
+        if ($this->_properties['results_school_districts']) {
+            return $this->_properties['results_school_districts'];
+        }
+
+        return [];
+    }
 }

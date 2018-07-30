@@ -81,6 +81,10 @@ class SchoolsTable extends Table
             'targetForeignKey' => 'state_id',
             'joinTable' => 'schools_states'
         ]);
+        $this->hasMany('RankingResults', [
+            'joinTable' => 'ranking_results_schools',
+            'dependent' => true
+        ]);
     }
 
     /**

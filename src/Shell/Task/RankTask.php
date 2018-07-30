@@ -514,18 +514,21 @@ class RankTask extends Shell
         $this->updateJobStatus('Finalizing');
 
         $results = [];
+        $locationIdField = Context::getLocationField($this->context);
         foreach ($this->rankedSubjects as $rank => $subjectsInRank) {
             foreach ($subjectsInRank as $subject) {
                 /** @var School|SchoolDistrict $subject */
-                $results[$rank][] = [
-                    'id' => $subject->id,
-                    'dataCompleteness' => $subject->getDataCompleteness()
+                $results[] = [
+                    'rank' => $rank,
+                    $locationIdField => $subject->id,
+                    'data_completeness' => $subject->getDataCompleteness()
                 ];
             }
         }
 
+        $field = $this->context == 'school' ? 'results_schools' : 'results_districts';
         $this->rankingsTable->patchEntity($this->ranking, [
-            'results' => serialize($results)
+            $field => $results
         ]);
         if ($this->rankingsTable->save($this->ranking)) {
             $overallProgress = $this->getOverallProgress(1, 1);
