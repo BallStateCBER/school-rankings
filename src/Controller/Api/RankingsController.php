@@ -2,14 +2,14 @@
 namespace App\Controller\Api;
 
 use App\Controller\AppController;
-use App\Model\Context\Context;
 use App\Model\Entity\Ranking;
-use App\Model\Entity\School;
-use App\Model\Entity\SchoolDistrict;
+use App\Model\Entity\RankingResultsSchool;
+use App\Model\Entity\RankingResultsSchoolDistrict;
 use App\Model\Table\RankingsTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
+use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 use Queue\Model\Entity\QueuedJob;
@@ -162,45 +162,62 @@ class RankingsController extends AppController
      */
     public function get($rankingId)
     {
-        $ranking = $this->rankingsTable->get($rankingId, [
-            'contain' => [
-                'Formulas'
-            ]
+        /** @var Ranking $ranking */
+        $ranking = $this->rankingsTable->find()
+            ->where(['Rankings.id' => $rankingId])
+            ->select([
+                'id'
+            ])
+            ->contain([
+                'ResultsSchools' => [
+                    'Schools' => function (Query $q) {
+                        return $q->select([
+                            'id',
+                            'name',
+                            'address',
+                            'url',
+                            'phone'
+                        ]);
+                    }
+                ],
+                'ResultsDistricts' => [
+                    'SchoolDistricts' => function (Query $q) {
+                        return $q->select([
+                            'id',
+                            'name',
+                            'url',
+                            'phone'
+                        ]);
+                    }
+                ]
+            ])
+            ->first();
+
+        // Group results by rank
+        $groupedResults = [];
+        foreach ($ranking->results as $result) {
+            /** @var RankingResultsSchool|RankingResultsSchoolDistrict $result */
+            $groupedResults[$result->rank][] = $result->toArray();
+        }
+
+        // Randomize results in each rank
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            shuffle($resultsInRank);
+            $groupedResults[$rank] = $resultsInRank;
+        }
+
+        // Convert into numerically-indexed array so it can be passed to a React component
+        $retval = [];
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            $retval[] = [
+                'rank' => $rank,
+                'subjects' => $resultsInRank
+            ];
+        }
+
+        $this->set([
+            '_serialize' => ['results'],
+            'results' => $retval
         ]);
-        if (!$ranking->results) {
-            // TODO: No results yet
-
-            return;
-        }
-
-        $results = unserialize($ranking->results);
-        $hydratedResults = [];
-        $context = $ranking->formula->context;
-        $subjectTable = Context::getTable($context);
-        foreach ($results as $rank => $resultsInRank) {
-            foreach ($resultsInRank as $subject) {
-                /** @var School|SchoolDistrict $hydratedSubject */
-                $hydratedSubject = $subjectTable->find()
-                    ->select([
-                        'name',
-                        'address',
-                        'url',
-                        'phone'
-                    ])
-                    ->where(['id' => $subject['id']])
-                    ->contain(['SchoolTypes', 'Grades'])
-                    ->first();
-
-                if ($hydratedSubject) {
-                    $hydratedSubject->setDataCompleteness($subject['dataCompleteness']);
-                    $hydratedResults[$rank][] = $hydratedSubject;
-                    continue;
-                }
-
-                // TODO: Ranking includes a school/district that wasn't found, should be generating
-            }
-        }
-
-        // TODO: Return $hydratedResults
     }
 }
