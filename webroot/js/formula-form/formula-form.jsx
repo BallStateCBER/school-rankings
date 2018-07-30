@@ -125,7 +125,7 @@ class FormulaForm extends React.Component {
       this.jobId = data.jobId;
       console.log('Ranking ID is ' + this.rankingId);
       console.log('Job ID is ' + this.jobId);
-      this.startJobMonitor(this.jobId);
+      this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     }).always(() => {
@@ -292,7 +292,7 @@ class FormulaForm extends React.Component {
     );
   }
 
-  startJobMonitor(jobId) {
+  checkJobProgress(jobId) {
     $.ajax({
       method: 'GET',
       url: '/api/rankings/status/',
@@ -317,7 +317,7 @@ class FormulaForm extends React.Component {
       if (data.progress !== 1) {
         setTimeout(
             () => {
-              this.startJobMonitor(jobId);
+              this.checkJobProgress(jobId);
             },
             1000
         );
