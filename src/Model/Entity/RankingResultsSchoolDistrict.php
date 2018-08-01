@@ -33,6 +33,7 @@ class RankingResultsSchoolDistrict extends Entity
         'rank' => true,
         'data_completeness' => true,
         'ranking' => true,
-        'school_district' => true
+        'school_district' => true,
+        'statistics' => true
     ];
 }

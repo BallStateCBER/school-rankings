@@ -33,6 +33,7 @@ class RankingResultsSchool extends Entity
         'rank' => true,
         'data_completeness' => true,
         'ranking' => true,
-        'school' => true
+        'school' => true,
+        'statistics' => true
     ];
 }
