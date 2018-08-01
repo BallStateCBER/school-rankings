@@ -275,7 +275,7 @@ class FormulaForm extends React.Component {
             () => {
               this.checkJobProgress(jobId);
             },
-            1000
+            500
         );
         return;
       }
