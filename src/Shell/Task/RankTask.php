@@ -12,6 +12,7 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Shell;
 use Cake\Database\Expression\QueryExpression;
 use Cake\ORM\Query;
+use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
@@ -270,7 +271,7 @@ class RankTask extends Shell
         $step = 1;
         foreach ($this->subjects as &$subject) {
             $query = $this->statsTable->find()
-                ->select(['metric_id', 'value', 'year'])
+                ->select(['id', 'metric_id', 'value', 'year'])
                 ->where([
                     function (QueryExpression $exp) use ($metricIds) {
                         return $exp->in('Statistics.metric_id', $metricIds);
@@ -513,23 +514,34 @@ class RankTask extends Shell
         $this->getIo()->out("Saving results...");
         $this->updateJobStatus('Finalizing');
 
+        // Add school/district info
         $results = [];
         $locationIdField = Context::getLocationField($this->context);
         foreach ($this->rankedSubjects as $rank => $subjectsInRank) {
             foreach ($subjectsInRank as $subject) {
+                /** @var ResultSet $statistics */
+                $statistics = $subject->statistics;
+                $statIds = Hash::extract($statistics->toArray(), '{n}.id');
+
                 /** @var School|SchoolDistrict $subject */
                 $results[] = [
                     'rank' => $rank,
                     $locationIdField => $subject->id,
-                    'data_completeness' => $subject->getDataCompleteness()
+                    'data_completeness' => $subject->getDataCompleteness(),
+                    'statistics' => [
+                        '_ids' => $statIds
+                    ]
                 ];
             }
         }
+        $resultsField = $this->context == 'school' ? 'results_schools' : 'results_districts';
+        $resultsAssociation = $this->context == 'school' ? 'ResultsSchools' : 'ResultsSchoolDistricts';
+        $this->rankingsTable->patchEntity(
+            $this->ranking,
+            [$resultsField => $results],
+            ['associated' => ["$resultsAssociation.Statistics"]]
+        );
 
-        $field = $this->context == 'school' ? 'results_schools' : 'results_districts';
-        $this->rankingsTable->patchEntity($this->ranking, [
-            $field => $results
-        ]);
         if ($this->rankingsTable->save($this->ranking)) {
             $overallProgress = $this->getOverallProgress(1, 1);
             $this->updateJobProgress($overallProgress);
