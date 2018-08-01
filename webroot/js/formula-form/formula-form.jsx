@@ -90,6 +90,11 @@ class FormulaForm extends React.Component {
         return;
       }
 
+      this.setState({
+        progressPercent: 10,
+        progressStatus: 'Preparing calculation',
+      });
+
       console.log('Formula success');
       console.log(data);
       this.formulaId = data.id;
@@ -128,6 +133,11 @@ class FormulaForm extends React.Component {
         console.log(data);
         return;
       }
+
+      this.setState({
+        progressPercent: 20,
+        progressStatus: 'Preparing calculation',
+      });
 
       console.log('Ranking job started');
       console.log(data);
@@ -253,8 +263,10 @@ class FormulaForm extends React.Component {
       console.log('Status: ' + data.status);
 
       this.setState({
-        progressPercent: data.progress * 100,
-        progressStatus: data.status,
+        progressPercent: 20 + (data.progress * 80),
+        progressStatus: data.status
+            ? data.status
+            : 'Starting calculation engine',
       });
 
       // Not finished yet

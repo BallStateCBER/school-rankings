@@ -257,7 +257,7 @@ class RankTask extends Shell
      */
     private function loadStats()
     {
-        $msg = 'Collecting statistics';
+        $msg = 'Analyzing statistical data';
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
         $this->progressHelper->init([

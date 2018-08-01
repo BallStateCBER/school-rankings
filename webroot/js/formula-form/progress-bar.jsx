@@ -7,8 +7,8 @@ class ProgressBar extends React.Component {
   }
 
   render() {
-    const percent = this.props.percent ? this.props.percent : 0;
-    const status = this.props.status ? this.props.status : 'Starting...';
+    const percent = this.props.percent ? Math.round(this.props.percent) : 0;
+    const status = this.props.status ? this.props.status : 'Starting';
 
     return (
       <div className="progress-bar-container">
