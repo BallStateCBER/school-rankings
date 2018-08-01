@@ -33,6 +33,11 @@ class StatisticsTable extends Table
             'foreignKey' => 'school_district_id',
             'joinType' => 'INNER'
         ]);
+        $this->belongsToMany('Rankings', [
+            'foreignKey' => 'statistic_id',
+            'targetForeignKey' => 'ranking_id',
+            'joinTable' => 'ranking_results_statistics'
+        ]);
     }
 
     /**
