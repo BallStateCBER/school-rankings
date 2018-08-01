@@ -200,10 +200,17 @@ class RankingsController extends AppController
             $groupedResults[$result->rank][] = $result->toArray();
         }
 
-        // Randomize results in each rank
+        // Alphabetize results in each rank
         foreach ($groupedResults as $rank => $resultsInRank) {
-            shuffle($resultsInRank);
-            $groupedResults[$rank] = $resultsInRank;
+            $sortedResults = [];
+            foreach ($resultsInRank as $resultInRank) {
+                $context = isset($resultInRank['school']) ? 'school' : 'district';
+                // Combine name and ID in case any two subjects (somehow) have identical names
+                $key = $resultInRank[$context]['name'] . $resultInRank[$context]['id'];
+                $sortedResults[$key] = $resultInRank;
+            }
+            ksort($sortedResults);
+            $groupedResults[$rank] = array_values($sortedResults);
         }
 
         // Convert into numerically-indexed array so it can be passed to a React component
