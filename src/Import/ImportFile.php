@@ -548,7 +548,11 @@ class ImportFile
             }
         }
 
-        throw new Exception('Error: Column ' . $col . ' not captured by any column group');
+        throw new Exception(sprintf(
+            'Error: Column %s of worksheet %s not captured by any column group',
+            $col,
+            $this->activeWorksheet
+        ));
     }
 
     /**
