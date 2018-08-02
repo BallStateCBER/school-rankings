@@ -10,9 +10,7 @@ use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Shell;
-use Cake\Database\Expression\QueryExpression;
 use Cake\ORM\Query;
-use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
@@ -270,17 +268,17 @@ class RankTask extends Shell
         $metricIds = Hash::extract($criteria, '{n}.metric_id');
         $step = 1;
         foreach ($this->subjects as &$subject) {
-            $query = $this->statsTable->find()
-                ->select(['id', 'metric_id', 'value', 'year'])
-                ->where([
-                    function (QueryExpression $exp) use ($metricIds) {
-                        return $exp->in('Statistics.metric_id', $metricIds);
-                    },
-                    Context::getLocationField($this->context) => $subject->id
-                ])
-                ->limit(1)
-                ->orderDesc('year');
-            $subject->statistics = $query->all();
+            $subject->statistics = [];
+            foreach ($metricIds as $metricId) {
+                $query = $this->statsTable->find()
+                    ->select(['id', 'metric_id', 'value', 'year'])
+                    ->where([
+                        'metric_id' => $metricId,
+                        Context::getLocationField($this->context) => $subject->id
+                    ])
+                    ->orderDesc('year');
+                $subject->statistics[] = $query->first();
+            }
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
@@ -519,9 +517,8 @@ class RankTask extends Shell
         $locationIdField = Context::getLocationField($this->context);
         foreach ($this->rankedSubjects as $rank => $subjectsInRank) {
             foreach ($subjectsInRank as $subject) {
-                /** @var ResultSet $statistics */
                 $statistics = $subject->statistics;
-                $statIds = Hash::extract($statistics->toArray(), '{n}.id');
+                $statIds = Hash::extract($statistics, '{n}.id');
 
                 /** @var School|SchoolDistrict $subject */
                 $results[] = [
