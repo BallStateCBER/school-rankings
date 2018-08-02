@@ -380,7 +380,8 @@ class FormulaForm extends React.Component {
                        status={this.state.progressStatus} />
         }
         {this.state.results &&
-          <RankingResults results={this.state.results} />
+          <RankingResults results={this.state.results}
+                          criteria={this.state.criteria} />
         }
       </div>
     );

@@ -1,26 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {SchoolResult} from './school-result.jsx';
-import {DistrictResult} from './district-result.jsx';
+import {ResultSubject} from './result-subject.jsx';
 
 class RankingResults extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  static getResultCell(subject) {
+  getResultCell(subject) {
+    let context = null;
+    let subjectData = null;
     if (subject.hasOwnProperty('school')) {
-      return <SchoolResult data={subject.school}
-                           dataCompleteness={subject.data_completeness} />;
+      context = 'school';
+      subjectData = subject.school;
+    } else if (subject.hasOwnProperty('school_district')) {
+      context = 'district';
+      subjectData = subject.school_district;
+    } else {
+      console.log(
+          'Error: Neither school nor school district found in result'
+      );
+      return;
     }
-    if (subject.hasOwnProperty('school_district')) {
-      return <DistrictResult data={subject.school_district}
-                             dataCompleteness={subject.data_completeness} />;
-    }
-
-    console.log(
-        'Error: Neither school nor school district found in result'
-    );
+    return <ResultSubject subjectData={subjectData}
+                          dataCompleteness={subject.data_completeness}
+                          statistics={subject.statistics}
+                          criteria={this.props.criteria}
+                          context={context} />;
   }
 
   render() {
@@ -33,13 +39,13 @@ class RankingResults extends React.Component {
             <th rowSpan={rank.subjects.length} className="rank-number">
               {rank.rank}
             </th>
-            {RankingResults.getResultCell(rank.subjects[0])}
+            {this.getResultCell(rank.subjects[0])}
           </tr>
       );
       for (let k = 1; k < rank.subjects.length; k++) {
         rankRows.push(
             <tr key={rank.rank + '-' + k}>
-              {RankingResults.getResultCell(rank.subjects[k])}
+              {this.getResultCell(rank.subjects[k])}
             </tr>
         );
       }
@@ -56,6 +62,7 @@ class RankingResults extends React.Component {
 }
 
 RankingResults.propTypes = {
+  criteria: PropTypes.object.isRequired,
   results: PropTypes.array.isRequired,
 };
 
