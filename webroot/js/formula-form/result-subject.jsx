@@ -40,9 +40,10 @@ class ResultSubject extends React.Component {
       const metricId = criterion.metric.metricId;
       const metricName = criterion.metric.name;
       const statisticValue = ResultSubject.getStatValue(statistics, metricId);
+      const key = this.props.subjectData.id + '-stat-' + i;
 
       rows.push(
-        <tr>
+        <tr key={key}>
           <th>{metricName}</th>
           {statisticValue !== false &&
             <td>{statisticValue}</td>
@@ -101,9 +102,9 @@ class ResultSubject extends React.Component {
 
 ResultSubject.propTypes = {
   context: PropTypes.string.isRequired,
-  criteria: PropTypes.object.isRequired,
+  criteria: PropTypes.array.isRequired,
   dataCompleteness: PropTypes.string.isRequired,
-  statistics: PropTypes.object.isRequired,
+  statistics: PropTypes.array.isRequired,
   subjectData: PropTypes.object.isRequired,
 };
 
