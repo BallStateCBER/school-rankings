@@ -270,14 +270,17 @@ class RankTask extends Shell
         foreach ($this->subjects as &$subject) {
             $subject->statistics = [];
             foreach ($metricIds as $metricId) {
-                $query = $this->statsTable->find()
+                $stat = $this->statsTable->find()
                     ->select(['id', 'metric_id', 'value', 'year'])
                     ->where([
                         'metric_id' => $metricId,
                         Context::getLocationField($this->context) => $subject->id
                     ])
-                    ->orderDesc('year');
-                $subject->statistics[] = $query->first();
+                    ->orderDesc('year')
+                    ->first();
+                if ($stat) {
+                    $subject->statistics[] = $stat;
+                }
             }
 
             $this->progressHelper->increment(1);
