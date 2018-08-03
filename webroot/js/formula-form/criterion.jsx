@@ -27,10 +27,6 @@ class Criterion extends React.Component {
         </tr>
     );
   }
-
-  handleRemove() {
-
-  }
 }
 
 Criterion.propTypes = {
