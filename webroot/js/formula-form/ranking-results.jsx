@@ -62,7 +62,7 @@ class RankingResults extends React.Component {
 }
 
 RankingResults.propTypes = {
-  criteria: PropTypes.object.isRequired,
+  criteria: PropTypes.array.isRequired,
   results: PropTypes.array.isRequired,
 };
 
