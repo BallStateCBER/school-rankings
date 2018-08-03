@@ -102,7 +102,7 @@ class MetricSelector extends React.Component {
 
   render() {
     return (
-      <div>
+      <section>
         <h3>
           How would you like the results to be ranked?
         </h3>
@@ -129,7 +129,7 @@ class MetricSelector extends React.Component {
           </div>
         }
         <div id="jstree"></div>
-      </div>
+      </section>
     );
   }
 }
