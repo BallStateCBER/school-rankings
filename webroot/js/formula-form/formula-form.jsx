@@ -313,6 +313,8 @@ class FormulaForm extends React.Component {
         (i) => i.metric.metricId !== metricId
     );
     this.setState({criteria: filteredCriteria});
+    let jstree = $('#jstree').jstree(true);
+    jstree.deselect_node('li[data-metric-id=' + metricId + ']');
   }
 
   render() {
