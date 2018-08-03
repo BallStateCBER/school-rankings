@@ -33,6 +33,7 @@ class FormulaForm extends React.Component {
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
     this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
+    this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
   }
 
   static getUuid() {
@@ -307,11 +308,18 @@ class FormulaForm extends React.Component {
     });
   }
 
+  handleRemoveCriterion(metricId) {
+    const filteredCriteria = this.state.criteria.filter(
+        (i) => i.metric.metricId !== metricId
+    );
+    this.setState({criteria: filteredCriteria});
+  }
+
   render() {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          <div className="form-group">
+          <section className="form-group">
             <h3>
               <label>
                 What would you like to rank?
@@ -335,19 +343,22 @@ class FormulaForm extends React.Component {
                 School corporations (districts)
               </label>
             </div>
-          </div>
-          <h3>
-            Where would you like to search?
-          </h3>
-          <div className="form-group">
-            <label htmlFor="county">
-              County
-            </label>
-            <Select name="county" id="county"
-                    value={this.state.county} onChange={this.handleSelectCounty}
-                    options={FormulaForm.getCountyOptions()} clearable={false}
-                    required={true} />
-          </div>
+          </section>
+          <section>
+            <h3>
+              Where would you like to search?
+            </h3>
+            <div className="form-group">
+              <label htmlFor="county">
+                County
+              </label>
+              <Select name="county" id="county"
+                      value={this.state.county}
+                      onChange={this.handleSelectCounty}
+                      options={FormulaForm.getCountyOptions()} clearable={false}
+                      required={true} />
+            </div>
+          </section>
           {this.state.context &&
             <MetricSelector context={this.state.context}
                             handleSelectMetric={this.handleSelectMetric}
@@ -355,16 +366,28 @@ class FormulaForm extends React.Component {
                             handleClearMetrics={this.handleClearMetrics} />
           }
           {this.state.criteria.length > 0 &&
-            <div id="criteria">
-              {this.state.criteria.map((criterion) => {
-                return (
-                  <Criterion key={criterion.metric.metricId}
-                             name={criterion.metric.name}
-                             metricId={criterion.metric.metricId}>
-                  </Criterion>
-                );
-              })}
-            </div>
+            <section id="criteria">
+              <h3>
+                Selected criteria
+              </h3>
+              <table className="table table-striped">
+                <tbody>
+                  {this.state.criteria.map((criterion) => {
+                    return (
+                      <Criterion key={criterion.metric.metricId}
+                                 name={criterion.metric.name}
+                                 metricId={criterion.metric.metricId}
+                                 onRemove={() => {
+                                   return this.handleRemoveCriterion(
+                                       criterion.metric.metricId
+                                   );
+                                 }}>
+                      </Criterion>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </section>
           }
           <Button color="primary" onClick={this.handleSubmit}
                   disabled={this.state.loadingRankings}>
