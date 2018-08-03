@@ -4,6 +4,10 @@
   .loading {
     margin-left: 10px;
   }
+  section {
+    margin-bottom: 30px;
+    margin-top: 30px;
+  }
 }
 li[data-selectable="0"] {
   > a {
@@ -28,5 +32,15 @@ table.ranking-results {
     font-size: 2em;
     text-align: center;
     width: 50px;
+  }
+}
+#criteria {
+  > div {
+    margin-bottom: 2px;
+    margin-top: 2px;
+    padding: 5px;
+  }
+  .metric-name {
+    font-weight: bold;
   }
 }
