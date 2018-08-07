@@ -238,8 +238,15 @@ class StatisticsTable extends Table
 
         // Percentages
         $hasPercentSign = strpos($value, '%') == strlen($value) - 1;
-        $isNumericPercent = is_numeric(substr($value, 0, -1));
-        if ($hasPercentSign && $isNumericPercent) {
+        if ($hasPercentSign) {
+            $numericSubstring = substr($value, 0, -1);
+            if (!is_numeric($numericSubstring)) {
+                return false;
+            }
+            if ((float)$numericSubstring > 100) {
+                return 'Percent values cannot exceed 100%';
+            }
+
             return true;
         }
 
