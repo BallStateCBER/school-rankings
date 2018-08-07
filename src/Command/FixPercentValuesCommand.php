@@ -124,23 +124,25 @@ class FixPercentValuesCommand extends Command
     private function showMetrics()
     {
         $this->updateResponse = $this->io->askChoice('List metric names?', ['y', 'n'], 'n');
-        if ($this->updateResponse == 'y') {
-            $names = Hash::extract($this->metrics, '{n}.name');
-            $names = array_values(array_unique($names));
-            $count = count($names);
-            for ($n = 0; $n < $count; $n += 50) {
-                for ($i = 0; $i < 50; $i++) {
-                    if (!isset($names[$n + $i])) {
-                        break 2;
-                    }
-                    $name = $names[$n + $i];
-                    $name = str_replace("\n", "\n   ", $name);
-                    $this->io->out(' - ' . $name);
+        if ($this->updateResponse != 'y') {
+            return;
+        }
+
+        $names = Hash::extract($this->metrics, '{n}.name');
+        $names = array_values(array_unique($names));
+        $count = count($names);
+        for ($n = 0; $n < $count; $n += 50) {
+            for ($i = 0; $i < 50; $i++) {
+                if (!isset($names[$n + $i])) {
+                    break 2;
                 }
-                $this->updateResponse = $this->io->askChoice('Show more?', ['y', 'n'], 'y');
-                if ($this->updateResponse == 'n') {
-                    break;
-                }
+                $name = $names[$n + $i];
+                $name = str_replace("\n", "\n   ", $name);
+                $this->io->out(' - ' . $name);
+            }
+            $this->updateResponse = $this->io->askChoice('Show more?', ['y', 'n'], 'y');
+            if ($this->updateResponse == 'n') {
+                break;
             }
         }
     }
@@ -159,8 +161,8 @@ class FixPercentValuesCommand extends Command
             'width' => 40,
         ]);
         $this->progress->draw();
-        $flaggedMetricsCount = 0;
-        $statisticsCount = 0;
+        $this->flaggedMetricsCount = 0;
+        $this->statisticsCount = 0;
         foreach ($this->metrics as &$metric) {
             $metric['statistics'] = $this->statisticsTable->find()
                 ->select(['id', 'value'])
@@ -173,8 +175,8 @@ class FixPercentValuesCommand extends Command
                 ->all();
 
             if ($metric['statistics']) {
-                $flaggedMetricsCount++;
-                $statisticsCount += $metric['statistics']->count();
+                $this->flaggedMetricsCount++;
+                $this->statisticsCount += $metric['statistics']->count();
             }
             $this->progress->increment(1)->draw();
         }
