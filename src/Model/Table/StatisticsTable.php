@@ -246,6 +246,9 @@ class StatisticsTable extends Table
             if ((float)$numericSubstring > 100) {
                 return 'Percent values cannot exceed 100%';
             }
+            if ((float)$numericSubstring < 0) {
+                return 'Percent values cannot be negative';
+            }
 
             return true;
         }
