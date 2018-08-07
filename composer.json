@@ -6,6 +6,7 @@
     "license": "proprietary",
     "require": {
         "php": ">=7.1",
+        "ext-zip": "*",
         "cakephp/cakephp": "3.6.*",
         "cakephp/migrations": "^1.0",
         "cakephp/plugin-installer": "^1.0",
