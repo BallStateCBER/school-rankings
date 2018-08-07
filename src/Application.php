@@ -15,6 +15,7 @@
 namespace App;
 
 use App\Command\CheckLocationsCommand;
+use App\Command\FixPercentValuesCommand;
 use App\Command\ImportLocationsCommand;
 use App\Command\ImportStatsCommand;
 use App\Command\ImportStatsStatusCommand;
@@ -68,6 +69,7 @@ class Application extends BaseApplication
         $commands->autoDiscover();
 
         $commands->add('check-locations', CheckLocationsCommand::class);
+        $commands->add('fix-percent-values', FixPercentValuesCommand::class);
         $commands->add('import-locations', ImportLocationsCommand::class);
         $commands->add('import-stats', ImportStatsCommand::class);
         $commands->add('import-stats-status', ImportStatsStatusCommand::class);
