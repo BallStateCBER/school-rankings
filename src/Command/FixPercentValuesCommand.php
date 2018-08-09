@@ -1,12 +1,15 @@
 <?php
 namespace App\Command;
 
+use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
+use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Database\Expression\QueryExpression;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
@@ -35,6 +38,8 @@ class FixPercentValuesCommand extends Command
     private $statisticsCount;
     private $statisticsTable;
     private $updateResponse;
+    const PERCENT = 'percent';
+    const NONPERCENT = 'non-percent';
 
     /**
      * Fixes statistic values like "0.025" that should be stored as "2.5%"
@@ -62,7 +67,7 @@ class FixPercentValuesCommand extends Command
 
         if ($this->flaggedMetricsCount) {
             $this->io->overwrite(sprintf(
-                ' - %s %s found for %s %s',
+                ' - %s %s found for %s %s that need reformatted',
                 number_format($this->statisticsCount),
                 __n('statistic', 'statistics', $this->statisticsCount),
                 number_format($this->flaggedMetricsCount),
@@ -91,26 +96,25 @@ class FixPercentValuesCommand extends Command
     private function getMetrics()
     {
         $this->io->out('Finding percentage metrics...');
-        $this->metrics = $this->metricsTable->find()
+        $results = $this->metricsTable->find()
             ->select(['id', 'name'])
-            ->where([
-                'OR' => [
-                    function (QueryExpression $exp) {
-                        return $exp->like('name', '%\%%');
-                    },
-                    function (QueryExpression $exp) {
-                        return $exp->like('name', '%percent%');
-                    },
-                    function (QueryExpression $exp) {
-                        return $exp->like('name', '%rate%');
-                    },
-                ]
-            ])
+            ->enableHydration(false)
             ->orderAsc('name')
             ->toArray();
-        $this->metricCount = count($this->metrics);
-        $this->io->out(sprintf(
-            ' - %s %s found',
+        $this->metricCount = count($results);
+        $this->progress->init([
+            'total' => $this->metricCount,
+            'width' => 40,
+        ]);
+        $this->progress->draw();
+        foreach ($results as $metric) {
+            $key = $this->isPercentMetric($metric) ? self::PERCENT : self::NONPERCENT;
+            $this->metrics[$key][] = $metric;
+            $this->progress->increment(1)->draw();
+        }
+
+        $this->io->overwrite(sprintf(
+            ' - Done; %s %s analyzed',
             $this->metricCount,
             __n('metric', 'metrics', $this->metricCount)
         ));
@@ -128,21 +132,25 @@ class FixPercentValuesCommand extends Command
             return;
         }
 
-        $names = Hash::extract($this->metrics, '{n}.name');
-        $names = array_values(array_unique($names));
-        $count = count($names);
-        for ($n = 0; $n < $count; $n += 50) {
-            for ($i = 0; $i < 50; $i++) {
-                if (!isset($names[$n + $i])) {
-                    break 2;
+        foreach ($this->metrics as $key => $metrics) {
+            $this->io->out();
+            $this->io->info(ucwords($key) . ' Metrics');
+            $names = Hash::extract($this->metrics[$key], '{n}.name');
+            $names = array_values(array_unique($names));
+            $count = count($names);
+            for ($n = 0; $n < $count; $n += 50) {
+                for ($i = 0; $i < 50; $i++) {
+                    if (!isset($names[$n + $i])) {
+                        break 2;
+                    }
+                    $name = $names[$n + $i];
+                    $name = str_replace("\n", "\n   ", $name);
+                    $this->io->out(' - ' . $name);
                 }
-                $name = $names[$n + $i];
-                $name = str_replace("\n", "\n   ", $name);
-                $this->io->out(' - ' . $name);
-            }
-            $this->updateResponse = $this->io->askChoice('Show more?', ['y', 'n'], 'y');
-            if ($this->updateResponse == 'n') {
-                break;
+                $this->updateResponse = $this->io->askChoice('Show more?', ['y', 'n'], 'y');
+                if ($this->updateResponse == 'n') {
+                    break;
+                }
             }
         }
     }
@@ -163,22 +171,22 @@ class FixPercentValuesCommand extends Command
         $this->progress->draw();
         $this->flaggedMetricsCount = 0;
         $this->statisticsCount = 0;
-        foreach ($this->metrics as &$metric) {
-            $metric['statistics'] = $this->statisticsTable->find()
-                ->select(['id', 'value', 'school_id', 'school_district_id'])
-                ->where([
-                    'metric_id' => $metric['id'],
-                    function (QueryExpression $exp) {
-                        return $exp->notLike('value', '%\%%');
-                    }
-                ])
-                ->all();
+        foreach ($this->metrics as $key => $metrics) {
+            foreach ($metrics as &$metric) {
+                $metric['statistics'] = $this->statisticsTable->find()
+                    ->select(['id', 'value', 'school_id', 'school_district_id'])
+                    ->where([
+                        'metric_id' => $metric['id'],
+                        $this->getMisformattedCondition($key)
+                    ])
+                    ->all();
 
-            if ($metric['statistics']) {
-                $this->flaggedMetricsCount++;
-                $this->statisticsCount += $metric['statistics']->count();
+                if ($metric['statistics']) {
+                    $this->flaggedMetricsCount++;
+                    $this->statisticsCount += $metric['statistics']->count();
+                }
+                $this->progress->increment(1)->draw();
             }
-            $this->progress->increment(1)->draw();
         }
     }
 
@@ -196,37 +204,102 @@ class FixPercentValuesCommand extends Command
             'width' => 40,
         ]);
         $this->progress->draw();
-        foreach ($this->metrics as $metric) {
-            if (!$metric['statistics']) {
-                continue;
-            }
-
-            foreach ($metric['statistics'] as $statistic) {
-                $this->progress->increment(1)->draw();
-                if (!is_numeric($statistic->value)) {
-                    $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
+        foreach ($this->metrics as $key => $metrics) {
+            foreach ($metrics as $metric) {
+                if (!$metric['statistics']) {
                     continue;
                 }
 
-                $originalValue = $statistic->value;
-                $value = round(($originalValue * 100), 2) . '%';
-                $statistic = $this->statisticsTable->patchEntity($statistic, compact('value'));
-                if ($this->updateResponse == 'dry run') {
-                    if ($statistic->getErrors()) {
-                        $this->io->overwrite('');
-                        $this->io->error('Error updating ' . $originalValue . ' to ' . $value);
-                        print_r($statistic->getErrors());
-                    } else {
-                        $this->io->overwrite('Would update ' . $originalValue . ' to ' . $value);
+                foreach ($metric['statistics'] as $statistic) {
+                    $this->progress->increment(1)->draw();
+                    if (!is_numeric($statistic->value)) {
+                        $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
+                        continue;
                     }
-                } elseif (!$this->statisticsTable->save($statistic)) {
-                    $this->io->overwrite('Error updating statistic. Details: ');
-                    $this->io->out();
-                    print_r($statistic->getErrors());
 
-                    return;
+                    $originalValue = $statistic->value;
+                    $newValue = $this->reformatValue($originalValue, $key);
+                    $statistic = $this->statisticsTable->patchEntity($statistic, compact('newValue'));
+                    if ($this->updateResponse == 'dry run') {
+                        if ($statistic->getErrors()) {
+                            $this->io->overwrite('');
+                            $this->io->error('Error updating ' . $originalValue . ' to ' . $newValue);
+                            print_r($statistic->getErrors());
+                        } else {
+                            $this->io->overwrite('Would update ' . $originalValue . ' to ' . $newValue);
+                        }
+                    } elseif (!$this->statisticsTable->save($statistic)) {
+                        $this->io->overwrite('Error updating statistic. Details: ');
+                        $this->io->out();
+                        print_r($statistic->getErrors());
+
+                        return;
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Returns whether or not the specific metric's statistic values should be styled as percents
+     *
+     * Also populates the "isPercent" cache
+     *
+     * @param array $metric Metric array
+     * @return bool
+     */
+    private function isPercentMetric($metric)
+    {
+        $cacheKey = 'metric-' . $metric['id'] . '-isPercent';
+        $isPercent = Cache::read($cacheKey);
+        if ($isPercent === false) {
+            $isPercent = $this->metricsTable->isPercentMetric($metric['name']);
+            Cache::write($cacheKey, $isPercent);
+        }
+
+        return (bool)$isPercent;
+    }
+
+    /**
+     * Returns a value converted either to or from percent format
+     *
+     * @param mixed $value Value to convert
+     * @param string $key 'percent' or 'non-percent' key
+     * @return string
+     * @throws InternalErrorException
+     */
+    private function reformatValue($value, $key)
+    {
+        if ($key == self::PERCENT) {
+            return Statistic::convertValueToPercent($value);
+        }
+        if ($key == self::NONPERCENT) {
+            return Statistic::convertValueFromPercent($value);
+        }
+
+        throw new InternalErrorException('Invalid percent/nonpercent key');
+    }
+
+    /**
+     * Returns a function to be used as a find condition to retrieve misformatted statistics
+     *
+     * @param string $key 'percent' or 'non-percent' key
+     * @return \Closure
+     * @throws InternalErrorException
+     */
+    private function getMisformattedCondition($key)
+    {
+        if ($key == self::PERCENT) {
+            return function (QueryExpression $exp) {
+                return $exp->notLike('value', '%\%%');
+            };
+        }
+        if ($key == self::NONPERCENT) {
+            return function (QueryExpression $exp) {
+                return $exp->like('value', '%\%%');
+            };
+        }
+
+        throw new InternalErrorException('Invalid percent/nonpercent key');
     }
 }
