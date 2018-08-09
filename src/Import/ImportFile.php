@@ -1163,8 +1163,8 @@ class ImportFile
                 $progress->increment(1);
                 $progress->draw();
 
+                // Find and formal cell value
                 $cell = $this->getCell($col, $row);
-
                 if ($cell->isFormula()) {
                     $value = $cell->getCalculatedValue();
                 } else {
@@ -1172,6 +1172,10 @@ class ImportFile
                     $value = is_string($value) ? trim($value) : $value;
                 }
                 $value = Statistic::roundValue($value);
+                $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
+                if ($this->metricsTable->isPercentMetric($metricId)) {
+                    $value = Statistic::convertValueToPercent($value);
+                }
 
                 // Ignore, not a value
                 if ($datum->isIgnorable($value)) {
@@ -1179,7 +1183,6 @@ class ImportFile
                     continue;
                 }
 
-                $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
                 $existingStat = $statisticsTable->getStatistic($context, $metricId, $locationId, $year);
 
                 // Add

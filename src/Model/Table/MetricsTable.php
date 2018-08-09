@@ -436,4 +436,27 @@ class MetricsTable extends Table
     {
         return ['numeric', 'boolean'];
     }
+
+    /**
+     * Returns true if the metric with the specified ID should have its statistics formatted as percents, e.g. "95.5%"
+     *
+     * @param int $metricId ID of metric record
+     * @return bool
+     */
+    public function isPercentMetric($metricId)
+    {
+        /** @var Metric $metric */
+        $metric = $this->find()
+            ->select(['name'])
+            ->where(['id' => $metricId])
+            ->firstOrFail();
+        $keywords = ['%', 'percent', 'rate'];
+        foreach ($keywords as $keyword) {
+            if (stripos($metric->name, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

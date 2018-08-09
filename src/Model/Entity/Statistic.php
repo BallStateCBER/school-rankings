@@ -103,11 +103,8 @@ class Statistic extends Entity
         }
 
         // Percent values
-        if (strpos($value, '%') == strlen($value) - 1) {
-            $substr = substr($value, 0, -1);
-            if (is_numeric($substr)) {
-                $value = $substr;
-            }
+        if (self::isPercentValue($value)) {
+            $value = substr($value, 0, -1);
         }
 
         if (!is_numeric($value)) {
@@ -116,5 +113,40 @@ class Statistic extends Entity
         }
 
         return (float)$value;
+    }
+
+    /**
+     * Returns TRUE if the specified value is formatted as a percent, e.g. "95.5%"
+     *
+     * @param mixed $value Value to evaluate
+     * @return bool
+     */
+    public static function isPercentValue($value)
+    {
+        if (strpos($value, '%') != strlen($value) - 1) {
+            return false;
+        }
+
+        $substr = substr($value, 0, -1);
+        if (!is_numeric($substr)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Converts a numeric value into a percent value, e.g. 0.9 => "95%"
+     *
+     * @param mixed $value Value to convert
+     * @return string
+     */
+    public static function convertValueToPercent($value)
+    {
+        if (self::isPercentValue($value)) {
+            return $value;
+        }
+
+        return round((float)$value * 100, 2) . '%';
     }
 }
