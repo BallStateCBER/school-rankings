@@ -1163,19 +1163,7 @@ class ImportFile
                 $progress->increment(1);
                 $progress->draw();
 
-                // Find and formal cell value
-                $cell = $this->getCell($col, $row);
-                if ($cell->isFormula()) {
-                    $value = $cell->getCalculatedValue();
-                } else {
-                    $value = $cell->getValue();
-                    $value = is_string($value) ? trim($value) : $value;
-                }
-                $value = Statistic::roundValue($value);
-                $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
-                if ($this->metricsTable->isPercentMetric($metricId)) {
-                    $value = Statistic::convertValueToPercent($value);
-                }
+                $value = $this->getProcessedValue($col, $row);
 
                 // Ignore, not a value
                 if ($datum->isIgnorable($value)) {
@@ -1183,6 +1171,7 @@ class ImportFile
                     continue;
                 }
 
+                $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
                 $existingStat = $statisticsTable->getStatistic($context, $metricId, $locationId, $year);
 
                 // Add
@@ -1234,6 +1223,32 @@ class ImportFile
             $msg = " - $count " . __n('stat ', 'stats ', $count) . $action;
             $this->shell_io->out($msg);
         }
+    }
+
+    /**
+     * Returns a stat value, handling formula evaluation, percent formatting, trimming, and rounding
+     *
+     * @param int $col Column number
+     * @param int $row Column number
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @return mixed
+     */
+    private function getProcessedValue($col, $row)
+    {
+        $cell = $this->getCell($col, $row);
+        if ($cell->isFormula()) {
+            $value = $cell->getCalculatedValue();
+        } else {
+            $value = $cell->getValue();
+            $value = is_string($value) ? trim($value) : $value;
+        }
+        $value = Statistic::roundValue($value);
+        $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
+        if ($this->metricsTable->isPercentMetric($metricId)) {
+            $value = Statistic::convertValueToPercent($value);
+        }
+
+        return $value;
     }
 
     /**
