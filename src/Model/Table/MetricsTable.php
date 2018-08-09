@@ -13,6 +13,7 @@ use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
+use Cake\Utility\Text;
 use Cake\Validation\Validator;
 use Exception;
 
@@ -443,26 +444,38 @@ class MetricsTable extends Table
     /**
      * Returns true if the metric with the specified ID should have its statistics formatted as percents, e.g. "95.5%"
      *
-     * @param int $metricId ID of metric record
+     * @param int|string $metric ID of metric record or record name
      * @return bool
      */
-    public function isPercentMetric($metricId)
+    public function isPercentMetric($metric)
     {
-        return Cache::remember("metric-$metricId-isPercent", function () use ($metricId) {
-            /** @var Metric $metric */
-            $metric = $this->find()
-                ->select(['name'])
-                ->where(['id' => $metricId])
-                ->firstOrFail();
+        if (is_string($metric)) {
+            $metricName = $metric;
             $keywords = ['%', 'percent', 'rate'];
             foreach ($keywords as $keyword) {
-                if (stripos($metric->name, $keyword) !== false) {
+                if (stripos($metricName, $keyword) !== false) {
                     return true;
                 }
             }
 
             return false;
-        });
+        }
+
+        if (is_int($metric)) {
+            $metricId = $metric;
+
+            return Cache::remember("metric-$metricId-isPercent", function () use ($metricId) {
+                /** @var Metric $metric */
+                $metric = $this->find()
+                    ->select(['name'])
+                    ->where(['id' => $metricId])
+                    ->firstOrFail();
+
+                return $this->isPercentMetric($metric->name);
+            });
+        }
+
+        throw new InternalErrorException('Metric parameter must be string or int');
     }
 
     /**
