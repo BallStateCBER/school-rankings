@@ -95,7 +95,7 @@ class Datum
             '#VALUE!'
         ];
 
-        return in_array($value, $ignorableValues);
+        return in_array($value, $ignorableValues, true);
     }
 
     /**
