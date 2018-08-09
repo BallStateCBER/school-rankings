@@ -1205,7 +1205,7 @@ class ImportFile
                 }
 
                 // Ignore, same value
-                if ($existingStat->value == $value) {
+                if ((string)$existingStat->value == (string)$value) {
                     $counts['ignored']++;
                     continue;
                 }
