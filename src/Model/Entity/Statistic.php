@@ -136,7 +136,7 @@ class Statistic extends Entity
     }
 
     /**
-     * Converts a numeric value into a percent value, e.g. 0.9 => "95%"
+     * Converts a numeric value into a percent value, e.g. 0.95 => "95%"
      *
      * @param mixed $value Value to convert
      * @return string
@@ -148,5 +148,27 @@ class Statistic extends Entity
         }
 
         return round((float)$value * 100, 2) . '%';
+    }
+
+    /**
+     * Converts a percent string value to a numeric value, e.g. "95%" => 0.95
+     *
+     * @param mixed $value Value to convert
+     * @return string
+     * @throws InternalErrorException
+     */
+    public static function convertValueFromPercent($value)
+    {
+        if (self::isPercentValue($value)) {
+            $value = (float)substr($value, 0, -1);
+
+            return $value / 100;
+        }
+
+        if (is_numeric($value)) {
+            return $value;
+        }
+
+        throw new InternalErrorException('Cannot convert non-numeric value using convertValueFromPercent()');
     }
 }
