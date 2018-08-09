@@ -237,16 +237,12 @@ class StatisticsTable extends Table
         }
 
         // Percentages
-        $hasPercentSign = strpos($value, '%') == strlen($value) - 1;
-        if ($hasPercentSign) {
-            $numericSubstring = substr($value, 0, -1);
-            if (!is_numeric($numericSubstring)) {
-                return false;
-            }
-            if ((float)$numericSubstring > 100) {
+        if (Statistic::isPercentValue($value)) {
+            $percentAmount = (float)substr($value, 0, -1);
+            if ($percentAmount > 100) {
                 return 'Percent values cannot exceed 100%';
             }
-            if ((float)$numericSubstring < 0) {
+            if ($percentAmount < 0) {
                 return 'Percent values cannot be negative';
             }
 
