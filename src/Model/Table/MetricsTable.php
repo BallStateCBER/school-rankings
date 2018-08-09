@@ -442,10 +442,12 @@ class MetricsTable extends Table
     }
 
     /**
-     * Returns true if the metric with the specified ID should have its statistics formatted as percents, e.g. "95.5%"
+     * Returns 1 if the metric with the specified ID should have its statistics formatted as percents, e.g. "95.5%"
+     *
+     * Returns 1 or 0 because retrieving a cached boolean value FALSE is indistinguishable from a read error
      *
      * @param int|string $metric ID of metric record or record name
-     * @return bool
+     * @return int
      */
     public function isPercentMetric($metric)
     {
@@ -454,11 +456,11 @@ class MetricsTable extends Table
             $keywords = ['%', 'percent', 'rate'];
             foreach ($keywords as $keyword) {
                 if (stripos($metricName, $keyword) !== false) {
-                    return true;
+                    return 1;
                 }
             }
 
-            return false;
+            return 0;
         }
 
         if (is_int($metric)) {
