@@ -165,7 +165,7 @@ class FixPercentValuesCommand extends Command
         $this->statisticsCount = 0;
         foreach ($this->metrics as &$metric) {
             $metric['statistics'] = $this->statisticsTable->find()
-                ->select(['id', 'value'])
+                ->select(['id', 'value', 'school_id', 'school_district_id'])
                 ->where([
                     'metric_id' => $metric['id'],
                     function (QueryExpression $exp) {
