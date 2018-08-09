@@ -3,8 +3,11 @@ namespace App\Model\Table;
 
 use App\Model\Context\Context;
 use App\Model\Entity\Metric;
+use ArrayObject;
+use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
@@ -445,18 +448,34 @@ class MetricsTable extends Table
      */
     public function isPercentMetric($metricId)
     {
-        /** @var Metric $metric */
-        $metric = $this->find()
-            ->select(['name'])
-            ->where(['id' => $metricId])
-            ->firstOrFail();
-        $keywords = ['%', 'percent', 'rate'];
-        foreach ($keywords as $keyword) {
-            if (stripos($metric->name, $keyword) !== false) {
-                return true;
+        return Cache::remember("metric-$metricId-isPercent", function () use ($metricId) {
+            /** @var Metric $metric */
+            $metric = $this->find()
+                ->select(['name'])
+                ->where(['id' => $metricId])
+                ->firstOrFail();
+            $keywords = ['%', 'percent', 'rate'];
+            foreach ($keywords as $keyword) {
+                if (stripos($metric->name, $keyword) !== false) {
+                    return true;
+                }
             }
-        }
 
-        return false;
+            return false;
+        });
+    }
+
+    /**
+     * afterSave callback
+     *
+     * @param Event $event Event object
+     * @param EntityInterface $entity Metric entity
+     * @param ArrayObject $options Save options
+     * @return void
+     */
+    public function afterSave(Event $event, EntityInterface $entity, ArrayObject $options)
+    {
+        $metricId = $entity->id;
+        Cache::delete("metric-$metricId-isPercent");
     }
 }
