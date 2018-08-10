@@ -5,6 +5,7 @@ use App\Controller\AppController;
 use App\Model\Context\Context;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
+use Cake\Cache\Cache;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Exception\NotFoundException;
@@ -21,14 +22,8 @@ class MetricsController extends AppController
      */
     public function schools()
     {
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metrics = $metricsTable->find('threaded')
-            ->where(['context' => 'school'])
-            ->toArray();
-
-        if ($this->request->getQuery('no-hidden')) {
-            $metrics = Metric::removeNotVisible($metrics);
-        }
+        $noHidden = (bool)$this->request->getQuery('no-hidden');
+        $metrics = $this->getMetrics('school', $noHidden);
 
         $this->set([
             '_serialize' => ['metrics'],
@@ -44,19 +39,52 @@ class MetricsController extends AppController
      */
     public function districts()
     {
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metrics = $metricsTable->find('threaded')
-            ->where(['context' => 'district'])
-            ->toArray();
-
-        if ($this->request->getQuery('no-hidden')) {
-            $metrics = Metric::removeNotVisible($metrics);
-        }
+        $noHidden = (bool)$this->request->getQuery('no-hidden');
+        $metrics = $this->getMetrics('district', $noHidden);
 
         $this->set([
             '_serialize' => ['metrics'],
             'metrics' => array_values($metrics)
         ]);
+    }
+
+    /**
+     * Returns an array of metrics
+     *
+     * @param string $context Either 'school' or 'district'
+     * @param bool $noHidden True if visible=0 metrics should be excluded
+     * @return array
+     */
+    private function getMetrics($context, $noHidden)
+    {
+        $cacheKey = $context;
+        if ($noHidden) {
+            $cacheKey .= '-no-hidden';
+        }
+
+        $callable = function () use ($noHidden) {
+            $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+            $metrics = $metricsTable->find('threaded')
+                ->select([
+                    'id',
+                    'name',
+                    'description',
+                    'type',
+                    'parent_id',
+                    'selectable',
+                    'visible'
+                ])
+                ->where(['context' => 'school'])
+                ->toArray();
+
+            if ($noHidden) {
+                $metrics = Metric::removeNotVisible($metrics);
+            }
+
+            return $metrics;
+        };
+
+        return Cache::remember($cacheKey, $callable, 'metrics_api');
     }
 
     /**

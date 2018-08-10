@@ -118,6 +118,14 @@ return [
             'duration' => '+1 years',
             'url' => env('CACHE_CAKEMODEL_URL', null),
         ],
+
+        'metrics_api' => [
+            'className' => 'File',
+            'prefix' => '',
+            'path' => CACHE . 'api/metrics/',
+            'serialize' => true,
+            'duration' => '+1 years'
+        ]
     ],
 
     /**
