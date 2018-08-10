@@ -171,7 +171,7 @@ class FixPercentValuesCommand extends Command
         $this->progress->draw();
         $this->flaggedMetricsCount = 0;
         $this->statisticsCount = 0;
-        foreach ($this->metrics as $key => $metrics) {
+        foreach ($this->metrics as $key => &$metrics) {
             foreach ($metrics as &$metric) {
                 $metric['statistics'] = $this->statisticsTable->find()
                     ->select(['id', 'value', 'school_id', 'school_district_id'])
