@@ -9,6 +9,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Filesystem\Folder;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Exception;
 use InvalidArgumentException;
@@ -21,6 +22,8 @@ use InvalidArgumentException;
 class ImportStatsCommand extends Command
 {
     private $importFile;
+    private $timerTotalStart;
+    private $timerWorksheetStart;
 
     /**
      * Initializes the command
@@ -128,6 +131,7 @@ class ImportStatsCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        $this->timerTotalStart = time();
         $years = $args->hasArgument('year') ? $args->getArgument('year') : null;
         $fileKey = $args->hasArgument('fileKey') ? $args->getArgument('fileKey') : null;
 
@@ -191,6 +195,7 @@ class ImportStatsCommand extends Command
                 $io->out('Analyzing worksheets...');
                 $io->out();
                 foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+                    $this->timerWorksheetStart = time();
                     $io->info('Worksheet: ' . $worksheetName);
                     $io->out('Context: ' . ucwords($worksheetInfo['context']));
                     try {
@@ -210,6 +215,11 @@ class ImportStatsCommand extends Command
 
                         return;
                     }
+                    $duration = Time::createFromTimestamp($this->timerWorksheetStart)->timeAgoInWords();
+                    $io->out(sprintf(
+                        'Worksheet took %s',
+                        str_replace(' ago', '', $duration)
+                    ));
                     $io->out();
                 }
 
@@ -222,6 +232,11 @@ class ImportStatsCommand extends Command
         }
 
         $io->out('Import complete');
+        $duration = Time::createFromTimestamp($this->timerTotalStart)->timeAgoInWords();
+        $io->out(sprintf(
+            'Completed in %s',
+            str_replace(' ago', '', $duration)
+        ));
     }
 
     /**
