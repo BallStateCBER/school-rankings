@@ -45,6 +45,7 @@ class ImportFile
     private $error;
     private $filename;
     private $ignoredWorksheets = [];
+    private $isPercentMetric = [];
     private $metricsTable;
     private $overwrite;
     private $path;
@@ -1244,7 +1245,7 @@ class ImportFile
         }
         $value = Statistic::roundValue($value);
         $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
-        if ($this->metricsTable->isPercentMetric($metricId)) {
+        if ($this->isPercentMetric($metricId)) {
             $value = Statistic::convertValueToPercent($value);
         }
 
@@ -1348,5 +1349,22 @@ class ImportFile
         }
 
         return $columnNames;
+    }
+
+    /**
+     * Returns TRUE if the metric with the specified ID or name should have its statistics formatted as percents
+     *
+     * Caches results locally in the isPercentMetric property
+     *
+     * @param int $metricId ID of metric record
+     * @return bool
+     */
+    private function isPercentMetric($metricId)
+    {
+        if (!isset($this->isPercentMetric[$metricId])) {
+            $this->isPercentMetric[$metricId] = $this->metricsTable->isPercentMetric($metricId);
+        }
+
+        return $this->isPercentMetric[$metricId];
     }
 }
