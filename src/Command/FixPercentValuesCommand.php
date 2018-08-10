@@ -206,7 +206,7 @@ class FixPercentValuesCommand extends Command
         $this->progress->draw();
         foreach ($this->metrics as $key => $metrics) {
             foreach ($metrics as $metric) {
-                if (!$metric['statistics']) {
+                if (!isset($metric['statistics']) || !$metric['statistics']) {
                     continue;
                 }
 
