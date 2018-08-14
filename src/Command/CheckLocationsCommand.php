@@ -74,6 +74,11 @@ class CheckLocationsCommand extends Command
         $this->checkDistrictsWithoutStates();
         $this->checkSchoolsWithoutStats();
         $this->checkDistrictsWithoutStats();
+
+        $this->io->info(
+            'Note: Schools or districts belonging to multiple cities, counties, etc. is not necessarily ' .
+            'indicative of an error.'
+        );
         $this->checkForMultipleGeographies('school', 'cities');
         $this->checkForMultipleGeographies('school', 'counties');
         $this->checkForMultipleGeographies('school', 'states');
@@ -82,7 +87,7 @@ class CheckLocationsCommand extends Command
         $this->checkForMultipleGeographies('district', 'states');
 
         $runFixDistrictAssociations = $this->io->askChoice(
-            'Run fix-district-associations?',
+            'Check for and fix districts with missing cities, counties, etc.?',
             ['y', 'n'],
             'y'
         ) == 'y';
@@ -152,6 +157,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutDistricts()
     {
+        $skip = $this->io->askChoice(
+            'Check for public schools without districts?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->io->out('Checking for public schools without districts...');
         $progress = $this->makeProgressBar(count($this->schools));
         $results = [];
@@ -186,6 +200,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutSchools()
     {
+        $skip = $this->io->askChoice(
+            'Check for districts without schools?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->io->out('Checking for districts without schools...');
         $progress = $this->makeProgressBar(count($this->districts));
         $results = [];
@@ -242,10 +265,19 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutTypes()
     {
+        $skip = $this->io->askChoice(
+            'Check for schools with missing public/private/charter type?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools with missing public/private type...',
+            'Checking for schools with missing public/private/charter type...',
             'school_type'
         );
     }
@@ -258,6 +290,14 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutGrades()
     {
+        $skip = $this->io->askChoice(
+            'Check for schools without grade levels?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -309,6 +349,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCities()
     {
+        $skip = $this->io->askChoice(
+            'Check for schools without cities?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -325,6 +374,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCounties()
     {
+        $skip = $this->io->askChoice(
+                'Check for schools without counties?',
+                ['y', 'n'],
+                'y'
+            ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -341,6 +399,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutStates()
     {
+        $skip = $this->io->askChoice(
+                'Check for schools without states?',
+                ['y', 'n'],
+                'y'
+            ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -357,6 +424,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutAddresses()
     {
+        $skip = $this->io->askChoice(
+                'Check for schools without addresses?',
+                ['y', 'n'],
+                'y'
+            ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -373,6 +449,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCodes()
     {
+        $skip = $this->io->askChoice(
+            'Check for schools without Department of Education codes?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->schools,
             'school',
@@ -389,6 +474,14 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCodes()
     {
+        $skip = $this->io->askChoice(
+            'Check for districts without Department of Education codes?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
         $this->checkForEmptyField(
             $this->districts,
             'district',
@@ -405,6 +498,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCities()
     {
+        $skip = $this->io->askChoice(
+            'Check for districts without cities?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->districts,
             'district',
@@ -421,6 +523,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCounties()
     {
+        $skip = $this->io->askChoice(
+                'Check for districts without counties?',
+                ['y', 'n'],
+                'y'
+            ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->districts,
             'district',
@@ -437,6 +548,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutStates()
     {
+        $skip = $this->io->askChoice(
+                'Check for districts without states?',
+                ['y', 'n'],
+                'y'
+            ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForEmptyField(
             $this->districts,
             'district',
@@ -490,6 +610,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutStats()
     {
+        $skip = $this->io->askChoice(
+            'Check for schools without statistics?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForNoStats('school');
     }
 
@@ -501,6 +630,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutStats()
     {
+        $skip = $this->io->askChoice(
+            'Check for districts without statistics?',
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->checkForNoStats('district');
     }
 
@@ -514,6 +652,15 @@ class CheckLocationsCommand extends Command
      */
     private function checkForMultipleGeographies($context, $field)
     {
+        $skip = $this->io->askChoice(
+            "Check for {$context}s with multiple $field?",
+            ['y', 'n'],
+            'y'
+        ) == 'n';
+        if ($skip) {
+            return;
+        }
+
         $this->io->out("Checking for {$context}s associated with multiple $field...");
         $records = ($context == 'school') ? $this->schools : $this->districts;
         $progress = $this->makeProgressBar(count($records));
