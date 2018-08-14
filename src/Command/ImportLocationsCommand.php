@@ -170,6 +170,16 @@ class ImportLocationsCommand extends Command
         // Free up memory
         $this->importFile->spreadsheet->disconnectWorksheets();
         unset($this->importFile);
+
+        $runCommand = $this->io->askChoice(
+            'Run check-locations command?',
+            ['y', 'n'],
+            'y'
+        ) == 'y';
+        if ($runCommand) {
+            $command = new CheckLocationsCommand();
+            $command->execute($args, $io);
+        }
     }
 
     /**
