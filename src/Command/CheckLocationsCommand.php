@@ -80,6 +80,16 @@ class CheckLocationsCommand extends Command
         $this->checkForMultipleGeographies('district', 'cities');
         $this->checkForMultipleGeographies('district', 'counties');
         $this->checkForMultipleGeographies('district', 'states');
+
+        $runFixDistrictAssociations = $this->io->askChoice(
+            'Run fix-district-associations?',
+            ['y', 'n'],
+            'y'
+        ) == 'y';
+        if ($runFixDistrictAssociations) {
+            $command = new FixDistrictAssociationsCommand();
+            $command->execute($args, $io);
+        }
     }
 
     /**
