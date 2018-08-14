@@ -471,7 +471,6 @@ class MetricsTable extends Table
                 ->firstOrFail();
 
             return $this->isPercentMetric($metric->name);
-
         }
 
         throw new InternalErrorException('Metric parameter must be string or int');
