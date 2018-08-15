@@ -26,7 +26,6 @@ use Cake\Validation\Validator;
  */
 class CheckStatsCommand extends Command
 {
-    private $blankValues;
     private $io;
     private $metricsTable;
     private $pageCount;
@@ -195,28 +194,5 @@ class CheckStatsCommand extends Command
                 }
             }
         }
-    }
-
-    /**
-     * A hack to force validation to be run on the entity
-     *
-     * @param Statistic $stat Statistic entity
-     * @return \Cake\Datasource\EntityInterface|Statistic
-     */
-    private function forceValidation(Statistic &$stat)
-    {
-        $originalValues = $stat->toArray();
-
-        if (!$this->blankValues) {
-            $fieldCount = count($originalValues);
-            $this->blankValues = array_combine(
-                array_keys($originalValues),
-                array_fill(0, $fieldCount, null)
-            );
-        }
-
-        $stat = $this->statsTable->patchEntity($stat, $this->blankValues, ['validate' => false]);
-
-        return $this->statsTable->patchEntity($stat, $originalValues);
     }
 }
