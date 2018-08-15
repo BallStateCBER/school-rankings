@@ -17,10 +17,14 @@ use InvalidArgumentException;
 /**
  * Class ImportStatsCommand
  * @package App\Command
+ * @property array $files
  * @property ImportFile $importFile
+ * @property int $timerTotalStart
+ * @property int $timerWorksheetStart
  */
 class ImportStatsCommand extends Command
 {
+    private $files;
     private $importFile;
     private $timerTotalStart;
     private $timerWorksheetStart;
@@ -97,7 +101,7 @@ class ImportStatsCommand extends Command
      */
     private function selectFileKey($year, $io)
     {
-        $files = self::getFiles();
+        $files = $this->getFiles();
         if (!isset($files[$year])) {
             throw new InvalidArgumentException(
                 'No import files found in data' . DS . 'statistics' . DS . $year
@@ -158,7 +162,7 @@ class ImportStatsCommand extends Command
             }
 
             // Validate parameters
-            $files = self::getFiles();
+            $files = $this->getFiles();
             if (!isset($files[$year])) {
                 $io->error('No import files found in data' . DS . 'statistics' . DS . $year);
 
@@ -223,7 +227,7 @@ class ImportStatsCommand extends Command
                     $io->out();
                 }
 
-                $this->markFileProcessed($year, $file['filename'], $io);
+                self::markFileProcessed($year, $file['filename'], $io);
 
                 // Free up memory
                 $this->importFile->spreadsheet->disconnectWorksheets();
@@ -286,8 +290,12 @@ class ImportStatsCommand extends Command
      *
      * @return array
      */
-    public static function getFiles()
+    public function getFiles()
     {
+        if ($this->files) {
+            return $this->files;
+        }
+
         /** @var ImportedFilesTable $importedFilesTable */
         $importedFilesTable = TableRegistry::getTableLocator()->get('ImportedFiles');
         $dataPath = ROOT . DS . 'data' . DS . 'statistics';
@@ -311,6 +319,8 @@ class ImportStatsCommand extends Command
                 ];
             }
         }
+
+        $this->files = $retval;
 
         return $retval;
     }

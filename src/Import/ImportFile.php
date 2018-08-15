@@ -32,6 +32,7 @@ use ZipArchive;
  * @property ConsoleIo $shell_io
  * @property MetricsTable $metricsTable
  * @property Spreadsheet $spreadsheet
+ * @property SpreadsheetColumnsMetricsTable $spreadsheetColsMetricsTable
  * @property string $filename
  * @property string $path
  * @property string $year
@@ -50,6 +51,7 @@ class ImportFile
     private $overwrite;
     private $path;
     private $shell_io;
+    private $spreadsheetColsMetricsTable;
     private $worksheets;
     private $year;
     public $acceptMetricSuggestions;
@@ -76,6 +78,7 @@ class ImportFile
         $this->filename = $filename;
         $this->shell_io = $io;
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $this->spreadsheetColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
 
         $zip = new ZipArchive();
         $readable = $zip->open($this->path);
@@ -450,6 +453,7 @@ class ImportFile
                 throw new Exception('Error: Grouping row contains values in location identifier column(s)');
             }
         }
+        unset($value);
 
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         $groupings = [];
@@ -465,6 +469,7 @@ class ImportFile
             $groupings[$value] = ['start' => $col];
             $previousGroup = $value;
         }
+        unset($lastDataCol, $value);
 
         if (!$groupings) {
             throw new Exception('Error: Groupings row is blank');
@@ -489,6 +494,7 @@ class ImportFile
         if (!$this->isLocationHeader($col, $row)) {
             throw new Exception('Can\'t find column header row');
         }
+        unset($col);
 
         $dataColumns = [];
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
@@ -504,6 +510,7 @@ class ImportFile
                 'metricId' => $this->getMetricId($colGroup, $colName)
             ];
         }
+        unset($lastDataCol, $colName, $colGroup);
 
         return $dataColumns;
     }
@@ -517,10 +524,7 @@ class ImportFile
      */
     private function getMetricId($colGroup, $colName)
     {
-        /** @var SpreadsheetColumnsMetricsTable $table */
-        $table = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
-
-        return $table->getMetricId([
+        return $this->spreadsheetColsMetricsTable->getMetricId([
             'year' => $this->year,
             'filename' => $this->filename,
             'context' => $this->getActiveWorksheetProperty('context'),
@@ -545,6 +549,8 @@ class ImportFile
 
         foreach ($this->getActiveWorksheetProperty('groupings') as $groupName => $groupInfo) {
             if ($col >= $groupInfo['start'] && $col <= $groupInfo['end']) {
+                unset($groupInfo, $col);
+
                 return $groupName;
             }
         }
@@ -569,6 +575,7 @@ class ImportFile
                 $unknownMetrics[$colNum] = $column;
             }
         }
+        unset($colNum, $column);
 
         return $unknownMetrics;
     }
@@ -607,9 +614,8 @@ class ImportFile
             throw new Exception('Cannot set metric ID; metric ID already set');
         }
 
-        $context = $this->getActiveWorksheetProperty('context');
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        if (!$metricsTable->exists(['id' => $metricId])) {
+        if (!$this->metricsTable->exists(['id' => $metricId])) {
+            $context = $this->getActiveWorksheetProperty('context');
             throw new Exception(ucwords($context) . ' metric ID ' . $metricId . ' not found');
         }
 
@@ -635,22 +641,27 @@ class ImportFile
 
                 $value = $this->getValue($col, $row);
                 if ($value == '') {
+                    unset($value);
                     continue;
                 }
                 if ($type == 'districtCode' || $type == 'schoolCode') {
                     $value = Utility::removeLeadingZeros($value);
                 }
                 if ($type == 'districtCode' && SchoolDistrict::isDummyCode($value)) {
+                    unset($value);
                     continue;
                 }
 
                 $location[$type] = $value;
+                unset($type, $value);
             }
 
             if ($location) {
                 $locations[$row] = $location;
             }
+            unset($location);
         }
+        unset($firstRow, $lastRow, $lastCol, $col);
 
         return $locations;
     }
@@ -666,6 +677,7 @@ class ImportFile
     public function setLocationInfo($rowNum, $var, $val)
     {
         $this->worksheets[$this->activeWorksheet]['locations'][$rowNum][$var] = $val;
+        unset($rowNum, $var, $val);
     }
 
     /**
@@ -707,6 +719,7 @@ class ImportFile
                 }
                 $progress->increment(1);
                 $progress->draw();
+                unset($cell, $value);
             }
         }
 
@@ -730,6 +743,14 @@ class ImportFile
         }
 
         $this->shell_io->overwrite(' - Done');
+        unset(
+            $dataColCount,
+            $dataRowCount,
+            $datum,
+            $invalidData,
+            $progress,
+            $ws
+        );
     }
 
     /**
@@ -746,6 +767,7 @@ class ImportFile
         $unknownMetrics = $this->getUnknownMetrics();
         if (!$unknownMetrics) {
             $this->shell_io->out(' - Done');
+            unset($unknownMetrics);
 
             return;
         }
@@ -783,7 +805,15 @@ class ImportFile
             } catch (\Exception $e) {
                 $this->shell_io->error('Error: ' . $e->getMessage());
             }
+            unset($cleanColName, $metricId, $suggestedName);
         }
+        unset(
+            $context,
+            $count,
+            $filename,
+            $unknownMetrics,
+            $worksheetName
+        );
     }
 
     /**
@@ -872,7 +902,9 @@ class ImportFile
 
             $progress->increment(1);
             $progress->draw();
+            unset($districtId, $district, $schoolId, $school);
         }
+        unset($progress, $schoolDistrictsTable, $schoolsTable);
 
         $firstLine = true;
         foreach ($log as $context => $contextLog) {
@@ -889,6 +921,7 @@ class ImportFile
                 } else {
                     $this->shell_io->out($msg);
                 }
+                unset($count, $msg);
             }
             foreach ($contextLog['addedList'] as $addedRecord) {
                 $msg = sprintf(
@@ -902,8 +935,10 @@ class ImportFile
                 } else {
                     $this->shell_io->out($msg);
                 }
+                unset($msg);
             }
         }
+        unset($context, $firstLine, $log);
     }
 
     /**
@@ -929,12 +964,13 @@ class ImportFile
         // Existing metric ID entered
         if (is_numeric($input)) {
             $metricId = (int)$input;
-            $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-            if (!$metricsTable->exists(['id' => $metricId])) {
+            if (!$this->metricsTable->exists(['id' => $metricId])) {
                 $this->shell_io->error(ucwords($context) . ' metric ID ' . $metricId . ' not found');
+                unset($context, $input, $metricId);
 
                 return $this->getMetricInput($suggestedName, $unknownMetric);
             }
+            unset($context, $input);
 
             return $metricId;
         }
@@ -947,10 +983,12 @@ class ImportFile
             } else {
                 $metricName = $input ?: $suggestedName;
             }
+            unset($input);
 
             return $this->addMetricChain($context, $unknownMetric, $metricName);
         } catch (Exception $e) {
             $this->shell_io->error('Error: ' . $e->getMessage());
+            unset($context, $input);
 
             return $this->getMetricInput($suggestedName, $unknownMetric);
         }
@@ -983,9 +1021,15 @@ class ImportFile
         $finalMetric = $this->addMetric($context, $finalMetric, $parentId);
 
         // Store column info => metric ID information in DB to save time later
-        /** @var SpreadsheetColumnsMetricsTable $ssColsMetricsTable */
-        $ssColsMetricsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
-        $ssColsMetricsTable->add($this, $unknownMetric, $finalMetric->id);
+        $this->spreadsheetColsMetricsTable->add($this, $unknownMetric, $finalMetric->id);
+
+        // Free up memory
+        unset(
+            $metric,
+            $metricParents,
+            $namePart,
+            $parentId
+        );
 
         return $finalMetric->id;
     }
@@ -1018,8 +1062,17 @@ class ImportFile
             ->where($conditions)
             ->first();
         if ($existingMetric) {
+            unset(
+                $conditions,
+                $context,
+                $metricName,
+                $parentId
+            );
+
             return $existingMetric;
         }
+
+        unset($conditions);
 
         // Create new
         return $this->addMetric($context, $metricName, $parentId, false);
@@ -1054,6 +1107,13 @@ class ImportFile
 
         $this->shell_io->out('Metric #' . $metric->id . ' added');
 
+        unset(
+            $context,
+            $metricName,
+            $parentId,
+            $selectable
+        );
+
         return $metric;
     }
 
@@ -1072,6 +1132,7 @@ class ImportFile
                 break;
             }
         }
+        unset($col, $row);
     }
 
     /**
@@ -1133,6 +1194,7 @@ class ImportFile
             'width' => 40,
         ]);
         $progress->draw();
+        unset($dataColCount, $dataRowCount);
 
         $datum = new Datum();
         $context = $this->getContext();
@@ -1186,6 +1248,7 @@ class ImportFile
                         'file' => $this->filename,
                         'contiguous' => true
                     ]);
+                    unset($locationIdField, $metricId);
                     if ($statistic->getErrors()) {
                         $errors = print_r($statistic->getErrors(), true);
                         $this->shell_io->error("Error adding statistic. Details: \n" . $errors);
@@ -1194,12 +1257,15 @@ class ImportFile
                         $statisticsTable->save($statistic);
                     }
                     $counts['added']++;
+                    unset($existingStat, $statistic, $value);
                     continue;
                 }
+                unset($metricId, $statistic);
 
                 // Ignore, same value
                 if ((string)$existingStat->value == (string)$value) {
                     $counts['ignored']++;
+                    unset($existingStat, $value);
                     continue;
                 }
 
@@ -1213,6 +1279,8 @@ class ImportFile
                     }
                     $counts['updated']++;
                 }
+
+                unset($existingStat, $value);
             }
         }
 
@@ -1224,6 +1292,17 @@ class ImportFile
             $msg = " - $count " . __n('stat ', 'stats ', $count) . $action;
             $this->shell_io->out($msg);
         }
+
+        unset(
+            $context,
+            $counts,
+            $datum,
+            $msg,
+            $progress,
+            $statisticsTable,
+            $ws,
+            $year
+        );
     }
 
     /**
@@ -1248,6 +1327,7 @@ class ImportFile
         if ($this->isPercentMetric($metricId)) {
             $value = Statistic::convertValueToPercent($value);
         }
+        unset($cell, $metricId);
 
         return $value;
     }
@@ -1312,6 +1392,15 @@ class ImportFile
             }
         }
 
+        unset(
+            $cleanColumnName,
+            $columnName,
+            $filename,
+            $i,
+            $namePart,
+            $unknownMetric,
+            $worksheetName
+        );
         $nameDelimiter = ' > ';
 
         return implode($nameDelimiter, $suggestedNameParts);
@@ -1347,6 +1436,7 @@ class ImportFile
         for ($col = 1; $col <= $lastDataCol; $col++) {
             $columnNames[$col] = $this->getValue($col, $row);
         }
+        unset($col, $lastDataCol, $row);
 
         return $columnNames;
     }

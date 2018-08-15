@@ -165,7 +165,7 @@ class ImportLocationsCommand extends Command
         $this->io->out();
         $this->io->success('Import complete');
 
-        ImportStatsCommand::markFileProcessed($year, $file, $io);
+        (new ImportStatsCommand())->markFileProcessed($year, $file, $io);
 
         // Free up memory
         $this->importFile->spreadsheet->disconnectWorksheets();
