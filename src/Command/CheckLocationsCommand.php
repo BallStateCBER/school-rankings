@@ -157,12 +157,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutDistricts()
     {
-        $skip = $this->io->askChoice(
-            'Check for public schools without districts?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for public schools without districts?')) {
             return;
         }
 
@@ -200,12 +195,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutSchools()
     {
-        $skip = $this->io->askChoice(
-            'Check for districts without schools?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without schools?')) {
             return;
         }
 
@@ -265,12 +255,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutTypes()
     {
-        $skip = $this->io->askChoice(
-            'Check for schools with missing public/private/charter type?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools with missing public/private/charter type?')) {
             return;
         }
 
@@ -290,12 +275,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutGrades()
     {
-        $skip = $this->io->askChoice(
-            'Check for schools without grade levels?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without grade levels?')) {
             return;
         }
         $this->checkForEmptyField(
@@ -349,12 +329,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCities()
     {
-        $skip = $this->io->askChoice(
-            'Check for schools without cities?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without cities?')) {
             return;
         }
 
@@ -374,12 +349,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCounties()
     {
-        $skip = $this->io->askChoice(
-                'Check for schools without counties?',
-                ['y', 'n'],
-                'y'
-            ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without counties?')) {
             return;
         }
 
@@ -399,12 +369,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutStates()
     {
-        $skip = $this->io->askChoice(
-                'Check for schools without states?',
-                ['y', 'n'],
-                'y'
-            ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without states?')) {
             return;
         }
 
@@ -424,12 +389,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutAddresses()
     {
-        $skip = $this->io->askChoice(
-                'Check for schools without addresses?',
-                ['y', 'n'],
-                'y'
-            ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without addresses?')) {
             return;
         }
 
@@ -449,12 +409,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutCodes()
     {
-        $skip = $this->io->askChoice(
-            'Check for schools without Department of Education codes?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without Department of Education codes?')) {
             return;
         }
 
@@ -474,12 +429,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCodes()
     {
-        $skip = $this->io->askChoice(
-            'Check for districts without Department of Education codes?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without Department of Education codes?')) {
             return;
         }
         $this->checkForEmptyField(
@@ -498,12 +448,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCities()
     {
-        $skip = $this->io->askChoice(
-            'Check for districts without cities?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without cities?')) {
             return;
         }
 
@@ -523,12 +468,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutCounties()
     {
-        $skip = $this->io->askChoice(
-                'Check for districts without counties?',
-                ['y', 'n'],
-                'y'
-            ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without counties?')) {
             return;
         }
 
@@ -548,12 +488,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutStates()
     {
-        $skip = $this->io->askChoice(
-                'Check for districts without states?',
-                ['y', 'n'],
-                'y'
-            ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without states?')) {
             return;
         }
 
@@ -610,12 +545,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkSchoolsWithoutStats()
     {
-        $skip = $this->io->askChoice(
-            'Check for schools without statistics?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for schools without statistics?')) {
             return;
         }
 
@@ -630,12 +560,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutStats()
     {
-        $skip = $this->io->askChoice(
-            'Check for districts without statistics?',
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation('Check for districts without statistics?')) {
             return;
         }
 
@@ -652,12 +577,7 @@ class CheckLocationsCommand extends Command
      */
     private function checkForMultipleGeographies($context, $field)
     {
-        $skip = $this->io->askChoice(
-            "Check for {$context}s with multiple $field?",
-            ['y', 'n'],
-            'y'
-        ) == 'n';
-        if ($skip) {
+        if (!$this->getConfirmation("Check for {$context}s with multiple $field?")) {
             return;
         }
 
@@ -685,5 +605,21 @@ class CheckLocationsCommand extends Command
 
         $this->io->overwrite(' - None found');
         $this->io->out();
+    }
+
+    /**
+     * Displays a message and a prompt for a 'y' or 'n' response and returns TRUE if response is 'y'
+     *
+     * @param string $msg Message to display
+     * @param string $default Default selection (leave blank for 'y')
+     * @return bool
+     */
+    private function getConfirmation($msg, $default = 'y')
+    {
+        return $this->io->askChoice(
+            $msg,
+            ['y', 'n'],
+            $default
+        ) == 'y';
     }
 }
