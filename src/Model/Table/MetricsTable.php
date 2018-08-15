@@ -473,7 +473,9 @@ class MetricsTable extends Table
             return $this->isPercentMetric($metric->name);
         }
 
-        throw new InternalErrorException('Metric parameter must be string or int');
+        throw new InternalErrorException(
+            'Metric parameter must be string or int. Provided: ' . print_r($metric, true)
+        );
     }
 
     /**
