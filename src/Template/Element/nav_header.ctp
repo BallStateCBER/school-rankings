@@ -61,8 +61,7 @@ $isActive = function ($url, \Cake\Http\ServerRequest $request) {
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbar-admin-dropdown">
                     <?php foreach ($adminPages as $label => $url): ?>
-                        <a class="dropdown-item"
-                           href="<?= $url ?>">
+                        <a class="dropdown-item" href="<?= $url ?>">
                             <?= $label ?>
                         </a>
                     <?php endforeach; ?>
