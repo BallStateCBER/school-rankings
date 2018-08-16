@@ -2,7 +2,6 @@ import React from 'react';
 import 'jstree';
 import '../../css/metric-manager.scss';
 import ReactDom from 'react-dom';
-import 'bootstrap';
 import {Button} from 'reactstrap';
 import {MetricModal} from './metric-modal.jsx';
 import fontawesome from '@fortawesome/fontawesome';
