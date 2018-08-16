@@ -14,13 +14,8 @@
  */
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\PagesController;
-use Cake\Core\App;
 use Cake\Core\Configure;
-use Cake\Http\Response;
-use Cake\Http\ServerRequest;
 use Cake\TestSuite\IntegrationTestCase;
-use Cake\View\Exception\MissingTemplateException;
 
 /**
  * PagesControllerTest class
@@ -31,6 +26,7 @@ class PagesControllerTest extends IntegrationTestCase
      * testMultipleGet method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testMultipleGet()
     {
@@ -41,15 +37,15 @@ class PagesControllerTest extends IntegrationTestCase
     }
 
     /**
-     * testDisplay method
+     * Tests that the home page can be loaded
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
-    public function testDisplay()
+    public function testHome()
     {
-        $this->get('/pages/home');
+        $this->get('/');
         $this->assertResponseOk();
-        $this->assertResponseContains('CakePHP');
         $this->assertResponseContains('<html>');
     }
 
@@ -57,6 +53,7 @@ class PagesControllerTest extends IntegrationTestCase
      * Test that missing template renders 404 page in production
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testMissingTemplate()
     {
@@ -71,27 +68,13 @@ class PagesControllerTest extends IntegrationTestCase
      * Test that missing template in debug mode renders missing_template error page
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testMissingTemplateInDebug()
     {
         Configure::write('debug', true);
         $this->get('/pages/not_existing');
 
-        $this->assertResponseFailure();
-        $this->assertResponseContains('Missing Template');
-        $this->assertResponseContains('Stacktrace');
-        $this->assertResponseContains('not_existing.ctp');
-    }
-
-    /**
-     * Test directory traversal protection
-     *
-     * @return void
-     */
-    public function testDirectoryTraversalProtection()
-    {
-        $this->get('/pages/../Layout/ajax');
-        $this->assertResponseCode(403);
-        $this->assertResponseContains('Forbidden');
+        $this->assertResponseError();
     }
 }
