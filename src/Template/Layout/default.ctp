@@ -24,14 +24,14 @@
     <?= $this->fetch('script') ?>
 </head>
 <body>
-    <h1>
-        Indiana School Rankings
-        <?php if ($titleForLayout): ?>
-            - <?= $titleForLayout ?>
-        <?php endif; ?>
-    </h1>
+    <?= $this->element('nav_header') ?>
     <?= $this->Flash->render() ?>
     <div class="container clearfix">
+        <?php if ($titleForLayout): ?>
+            <h1>
+                <?= $titleForLayout ?>
+            </h1>
+        <?php endif; ?>
         <?= $this->fetch('content') ?>
     </div>
     <footer>
