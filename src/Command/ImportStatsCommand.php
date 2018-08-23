@@ -241,6 +241,16 @@ class ImportStatsCommand extends Command
             'Completed in %s',
             str_replace(' ago', '', $duration)
         ));
+
+        $runCommand = $io->askChoice(
+            'Run check-stats command?',
+            ['y', 'n'],
+            'y'
+        ) == 'y';
+        if ($runCommand) {
+            $command = new CheckStatsCommand();
+            $command->execute($args, $io);
+        }
     }
 
     /**
