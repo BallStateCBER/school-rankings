@@ -220,6 +220,10 @@ class CheckStatsCommand extends Command
      */
     private function checkOutOfBoundsPercentages()
     {
+        if (!$this->getConfirmation('Check for out-of-bounds percent stats?')) {
+            return;
+        }
+
         $this->io->out('Finding percentage metrics...');
         $metrics = $this->metricsTable
             ->find('percents')
