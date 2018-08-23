@@ -76,6 +76,10 @@ class CheckStatsCommand extends Command
             if ($runCommand) {
                 $command = new FixPercentValuesCommand();
                 $command->execute($args, $io);
+
+                if ($this->getConfirmation('Re-run check-stats?')) {
+                    $this->execute($args, $io);
+                }
             }
         }
     }
