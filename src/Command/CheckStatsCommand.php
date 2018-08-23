@@ -70,7 +70,8 @@ class CheckStatsCommand extends Command
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
             $runCommand = $this->getConfirmation(
-                'Misformatted percentage stats were formed. Run fix-percent-values?'
+                'Misformatted percentage stats were formed. ' .
+                'This should be fixed, then check-stats should be re-run. Run fix-percent-values?'
             );
             if ($runCommand) {
                 $command = new FixPercentValuesCommand();
@@ -219,6 +220,8 @@ class CheckStatsCommand extends Command
      */
     private function checkOutOfBoundsPercentages()
     {
+        $this->misformattedPercentStatsFound = false;
+
         $this->io->out('Finding percentage metrics...');
         $metrics = $this->metricsTable
             ->find('percents')
@@ -237,13 +240,12 @@ class CheckStatsCommand extends Command
             ' - %s found',
             $metricCount
         ));
-        $this->io->out('Checking for out-of-bounds statistics...');
         $problematicMetrics = [];
+        $this->io->out('Checking for out-of-bounds statistics...');
         $progress = $this->makeProgressBar($metricCount);
-        $this->misformattedPercentStatsFound = false;
-        foreach ($metrics as $metric) {
 
-            // Check for values being formatted like 0.75 instead of 75%
+        foreach ($metrics as $metric) {
+            // Check for misformatted stats and set a flag if found
             if (!$this->misformattedPercentStatsFound) {
                 $count = $this->statsTable->find()
                     ->where(function (QueryExpression $exp) {
@@ -253,25 +255,34 @@ class CheckStatsCommand extends Command
                 $this->misformattedPercentStatsFound = $count > 0;
             }
 
-            $count = $this->statsTable->find()
+            // Find all properly formatted stats (e.g. 75% instead of 0.75)
+            $stats = $this->statsTable->find()
+                ->select(['id', 'value'])
                 ->where([
                     'metric_id' => $metric['id'],
-                    'OR' => [
-                        function (QueryExpression $exp) {
-                            return $exp->gt('value', 1);
-                        },
-                        function (QueryExpression $exp) {
-                            return $exp->lt('value', 0);
-                        }
-                    ]
+                    function (QueryExpression $exp) {
+                        return $exp->like('value', '%\\%');
+                    }
                 ])
-                ->count();
+            ->enableHydration(false)
+            ->toArray();
 
-            if ($count) {
-                $metric['count'] = $count;
-                $problematicMetrics[] = $metric;
+            if (!$stats) {
+                $progress->increment(1)->draw();
+                continue;
             }
 
+            // Count out-of-bounds statistics (ignoring misformatted stats)
+            $metric['count'] = 0;
+            foreach ($stats as $stat) {
+                $value = (float)substr($stat['value'], 0, -1);
+                if (!is_numeric($value) || $value < 0 || $value > 100) {
+                    $metric['count']++;
+                }
+            }
+            if ($metric['count']) {
+                $problematicMetrics[] = $metric;
+            }
             $progress->increment(1)->draw();
         }
 
@@ -281,6 +292,7 @@ class CheckStatsCommand extends Command
             return;
         }
 
+        // Display results
         $problematicMetricCount = count($problematicMetrics);
         $this->io->overwrite(sprintf(
             ' - %s %s found with out-of-bounds percentage statistics',
@@ -290,7 +302,6 @@ class CheckStatsCommand extends Command
         foreach ($problematicMetrics as &$metric) {
             $metric = str_replace("\n", '\\n', $metric);
         }
-
         array_unshift($problematicMetrics, ['ID', 'Metric name', 'OOB stat count']);
         $this->io->helper('Table')->output($problematicMetrics);
     }
