@@ -17,6 +17,7 @@ use Cake\Validation\Validator;
  * Class CheckStatisticsCommand
  * @package App\Command
  * @property array $blankValues
+ * @property bool $misformattedPercentStatsFound
  * @property ConsoleIo $io
  * @property int $pageCount
  * @property int $statsCount
@@ -29,6 +30,7 @@ class CheckStatsCommand extends Command
 {
     private $io;
     private $metricsTable;
+    private $misformattedPercentStatsFound;
     private $pageCount;
     private $statsCount;
     private $statsPageSize = 100;
@@ -64,6 +66,17 @@ class CheckStatsCommand extends Command
         $this->io = $io;
         $this->checkValidation();
         $this->checkOutOfBoundsPercentages();
+
+        if ($this->misformattedPercentStatsFound) {
+            $this->io->out();
+            $runCommand = $this->getConfirmation(
+                'Misformatted percentage stats were formed. Run fix-percent-values?'
+            );
+            if ($runCommand) {
+                $command = new FixPercentValuesCommand();
+                $command->execute($args, $io);
+            }
+        }
     }
 
     /**
@@ -227,7 +240,19 @@ class CheckStatsCommand extends Command
         $this->io->out('Checking for out-of-bounds statistics...');
         $problematicMetrics = [];
         $progress = $this->makeProgressBar($metricCount);
+        $this->misformattedPercentStatsFound = false;
         foreach ($metrics as $metric) {
+
+            // Check for values being formatted like 0.75 instead of 75%
+            if (!$this->misformattedPercentStatsFound) {
+                $count = $this->statsTable->find()
+                    ->where(function (QueryExpression $exp) {
+                        return $exp->notLike('value', '%\\%');
+                    })
+                    ->count();
+                $this->misformattedPercentStatsFound = $count > 0;
+            }
+
             $count = $this->statsTable->find()
                 ->where([
                     'metric_id' => $metric['id'],
@@ -251,7 +276,7 @@ class CheckStatsCommand extends Command
         }
 
         if (!$problematicMetrics) {
-            $this->io->overwrite(' - No problems found');
+            $this->io->overwrite(' - No out-of-bounds stats found');
 
             return;
         }
