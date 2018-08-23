@@ -10,6 +10,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\Event\Event;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
@@ -35,6 +36,8 @@ use Exception;
  */
 class MetricsTable extends Table
 {
+
+    const PERCENT_KEYWORDS = ['%', 'percent', 'rate'];
 
     /**
      * Initialize method
@@ -451,8 +454,7 @@ class MetricsTable extends Table
     {
         if (is_string($metric)) {
             $metricName = $metric;
-            $keywords = ['%', 'percent', 'rate'];
-            foreach ($keywords as $keyword) {
+            foreach (self::PERCENT_KEYWORDS as $keyword) {
                 if (stripos($metricName, $keyword) !== false) {
                     return true;
                 }
@@ -490,5 +492,24 @@ class MetricsTable extends Table
     {
         $metricId = $entity->id;
         Cache::delete("metric-$metricId-isPercent");
+    }
+
+    /**
+     * Custom finder for retrieving percent-style metrics
+     *
+     * @param Query $query Cake ORM query
+     * @return Query
+     */
+    public function findPercents(Query $query)
+    {
+        $conditions = [];
+        foreach (self::PERCENT_KEYWORDS as $keyword) {
+            $keyword = str_replace('%', '\\%', $keyword);
+            $conditions[] = function (QueryExpression $exp) use ($keyword) {
+                return $exp->like('name', "%$keyword%");
+            };
+        }
+
+        return $query->where(['OR' => $conditions]);
     }
 }

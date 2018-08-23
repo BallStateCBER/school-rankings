@@ -7,6 +7,7 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\Database\Expression\QueryExpression;
 use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
@@ -62,6 +63,7 @@ class CheckStatsCommand extends Command
     {
         $this->io = $io;
         $this->checkValidation();
+        $this->checkOutOfBoundsPercentages();
     }
 
     /**
@@ -194,5 +196,67 @@ class CheckStatsCommand extends Command
                 }
             }
         }
+    }
+
+    /**
+     * Checks for percentage-type metrics with values not in the range from 0 to 1
+     *
+     * @return void
+     * @throws \Aura\Intl\Exception
+     */
+    private function checkOutOfBoundsPercentages()
+    {
+        $this->io->out('Finding percentage metrics...');
+        $metrics = $this->metricsTable
+            ->find('percents')
+            ->select(['id', 'name'])
+            ->enableHydration(false)
+            ->toArray();
+
+        if (!$metrics) {
+            $this->io->out(' - None found');
+
+            return;
+        }
+
+        $metricCount = count($metrics);
+        $this->io->out(sprintf(
+            ' - %s found',
+            $metricCount
+        ));
+        $this->io->out('Checking for out-of-bounds statistics...');
+        $problematicMetrics = [];
+        $progress = $this->makeProgressBar($metricCount);
+        foreach ($metrics as $metric) {
+            $count = $this->statsTable->find()
+                ->where([
+                    'metric_id' => $metric['id'],
+                    'OR' => [
+                        function (QueryExpression $exp) {
+                            return $exp->gt('value', 1);
+                        },
+                        function (QueryExpression $exp) {
+                            return $exp->lt('value', 0);
+                        }
+                    ]
+                ])
+                ->count();
+
+            if ($count) {
+                $metric['count'] = $count;
+                $problematicMetrics[] = $metric;
+            }
+
+            $progress->increment(1)->draw();
+        }
+        $problematicMetricCount = count($problematicMetrics);
+        $this->io->overwrite(sprintf(
+            ' - %s %s found with out-of-bounds percentage statistics',
+            $problematicMetricCount,
+            __n('metric', 'metrics', $problematicMetricCount)
+        ));
+
+        array_unshift($problematicMetrics, ['ID', 'Metric name', 'OOB stat count']);
+        $this->io->helper('Table')->output($problematicMetrics);
     }
 }
