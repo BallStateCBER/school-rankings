@@ -249,12 +249,22 @@ class CheckStatsCommand extends Command
 
             $progress->increment(1)->draw();
         }
+
+        if (!$problematicMetrics) {
+            $this->io->overwrite(' - No problems found');
+
+            return;
+        }
+
         $problematicMetricCount = count($problematicMetrics);
         $this->io->overwrite(sprintf(
             ' - %s %s found with out-of-bounds percentage statistics',
             $problematicMetricCount,
             __n('metric', 'metrics', $problematicMetricCount)
         ));
+        foreach ($problematicMetrics as &$metric) {
+            $metric = str_replace("\n", '\\n', $metric);
+        }
 
         array_unshift($problematicMetrics, ['ID', 'Metric name', 'OOB stat count']);
         $this->io->helper('Table')->output($problematicMetrics);
