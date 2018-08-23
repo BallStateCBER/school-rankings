@@ -61,7 +61,7 @@ class CheckStatsCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->io = $io;
-        $this->checkForRuleValidations();
+        $this->checkValidation();
     }
 
     /**
@@ -134,7 +134,7 @@ class CheckStatsCommand extends Command
      * @return void
      * @throws \Aura\Intl\Exception
      */
-    private function checkForRuleValidations()
+    private function checkValidation()
     {
         if (!$this->getConfirmation('Check for application rule / validation errors?')) {
             return;
