@@ -30,7 +30,7 @@ class CheckStatsCommand extends Command
 {
     private $io;
     private $metricsTable;
-    private $misformattedPercentStatsFound;
+    private $misformattedPercentStatsFound = false;
     private $pageCount;
     private $statsCount;
     private $statsPageSize = 100;
@@ -220,8 +220,6 @@ class CheckStatsCommand extends Command
      */
     private function checkOutOfBoundsPercentages()
     {
-        $this->misformattedPercentStatsFound = false;
-
         $this->io->out('Finding percentage metrics...');
         $metrics = $this->metricsTable
             ->find('percents')
