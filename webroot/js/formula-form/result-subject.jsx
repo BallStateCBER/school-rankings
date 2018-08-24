@@ -40,13 +40,23 @@ class ResultSubject extends React.Component {
       const metricId = criterion.metric.metricId;
       const metricName = criterion.metric.name;
       const statisticValue = ResultSubject.getStatValue(statistics, metricId);
+      const statisticYear = ResultSubject.getStatYear(statistics, metricId);
       const key = this.props.subjectData.id + '-stat-' + i;
 
       rows.push(
         <tr key={key}>
-          <th>{metricName}</th>
+          <th>
+            <span className="metric-name">
+              {metricName}
+            </span>
+          </th>
           {statisticValue !== false &&
-            <td>{statisticValue}</td>
+            <td>
+              {statisticValue}
+              <span className="year">
+                {statisticYear}
+              </span>
+            </td>
           }
           {statisticValue === false &&
             <td className="missing-data">
@@ -70,6 +80,16 @@ class ResultSubject extends React.Component {
     for (let i = 0; i < statistics.length; i++) {
       if (statistics[i].metric_id === metricId) {
         return statistics[i].value;
+      }
+    }
+
+    return false;
+  }
+
+  static getStatYear(statistics, metricId) {
+    for (let i = 0; i < statistics.length; i++) {
+      if (statistics[i].metric_id === metricId) {
+        return statistics[i].year;
       }
     }
 
