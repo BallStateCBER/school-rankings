@@ -1098,7 +1098,8 @@ class ImportFile
             'type' => 'numeric',
             'parent_id' => $parentId,
             'selectable' => $selectable,
-            'visible' => true
+            'visible' => true,
+            'is_percent' => false
         ]);
         if (!$this->metricsTable->save($metric)) {
             $msg = 'Cannot add metric ' . $metricName . "\nDetails: " . print_r($metric->getErrors(), true);

@@ -139,6 +139,11 @@ class MetricsTable extends Table
             ->requirePresence('visible', 'create')
             ->notEmpty('visible');
 
+        $validator
+            ->boolean('is_percent')
+            ->requirePresence('is_percent', 'create')
+            ->notEmpty('is_percent');
+
         return $validator;
     }
 
@@ -187,7 +192,8 @@ class MetricsTable extends Table
             'description' => '',
             'selectable' => true,
             'visible' => true,
-            'type' => $type
+            'type' => $type,
+            'is_percent' => false
         ]);
 
         if ($this->save($metric)) {

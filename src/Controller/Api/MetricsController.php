@@ -167,7 +167,8 @@ class MetricsController extends AppController
             'description' => $this->request->getData('description'),
             'type' => $this->request->getData('type'),
             'selectable' => (bool)$selectable,
-            'visible' => (bool)$visible
+            'visible' => (bool)$visible,
+            'is_percent' => false
         ]);
         $result = (bool)$metricsTable->save($metric);
 
