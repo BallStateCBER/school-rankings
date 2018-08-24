@@ -159,6 +159,7 @@ class MetricsController extends AppController
 
         /** @var Metric $metric */
         $selectable = $this->request->getData('selectable');
+        $visible = $this->request->getData('visible');
         $metric = $metricsTable->newEntity([
             'context' => $this->request->getData('context'),
             'name' => $this->request->getData('name'),
@@ -166,7 +167,7 @@ class MetricsController extends AppController
             'description' => $this->request->getData('description'),
             'type' => $this->request->getData('type'),
             'selectable' => (bool)$selectable,
-            'visible' => (bool)$selectable
+            'visible' => (bool)$visible
         ]);
         $result = (bool)$metricsTable->save($metric);
 
