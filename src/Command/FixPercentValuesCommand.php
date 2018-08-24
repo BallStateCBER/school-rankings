@@ -182,7 +182,7 @@ class FixPercentValuesCommand extends Command
 
                     $originalValue = $statistic->value;
                     $newValue = $this->reformatValue($originalValue, $key);
-                    $statistic = $this->statisticsTable->patchEntity($statistic, compact('newValue'));
+                    $statistic = $this->statisticsTable->patchEntity($statistic, ['value' => $newValue]);
                     if ($this->updateResponse == 'dry run') {
                         if ($statistic->getErrors()) {
                             $this->io->overwrite('');
