@@ -70,7 +70,7 @@ class CheckStatsCommand extends Command
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
             $runCommand = $this->getConfirmation(
-                'Misformatted percentage stats were formed. ' .
+                'Misformatted percentage stats were found. ' .
                 'This should be fixed, then check-stats should be re-run. Run fix-percent-values?'
             );
             if ($runCommand) {
