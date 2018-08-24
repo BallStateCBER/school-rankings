@@ -12,7 +12,6 @@ use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
-use Cake\Utility\Hash;
 
 /**
  * Class FixPercentValuesCommand
@@ -57,7 +56,6 @@ class FixPercentValuesCommand extends Command
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
 
         $this->getMetrics();
-        $this->showMetrics();
 
         if (!$this->metrics) {
             return;
@@ -118,41 +116,6 @@ class FixPercentValuesCommand extends Command
             $this->metricCount,
             __n('metric', 'metrics', $this->metricCount)
         ));
-    }
-
-    /**
-     * Optionally shows a list of metrics found
-     *
-     * @return void
-     */
-    private function showMetrics()
-    {
-        $this->updateResponse = $this->io->askChoice('List metric names?', ['y', 'n'], 'n');
-        if ($this->updateResponse != 'y') {
-            return;
-        }
-
-        foreach ($this->metrics as $key => $metrics) {
-            $this->io->out();
-            $this->io->info(ucwords($key) . ' Metrics');
-            $names = Hash::extract($this->metrics[$key], '{n}.name');
-            $names = array_values(array_unique($names));
-            $count = count($names);
-            for ($n = 0; $n < $count; $n += 50) {
-                for ($i = 0; $i < 50; $i++) {
-                    if (!isset($names[$n + $i])) {
-                        break 2;
-                    }
-                    $name = $names[$n + $i];
-                    $name = str_replace("\n", "\n   ", $name);
-                    $this->io->out(' - ' . $name);
-                }
-                $this->updateResponse = $this->io->askChoice('Show more?', ['y', 'n'], 'y');
-                if ($this->updateResponse == 'n') {
-                    break;
-                }
-            }
-        }
     }
 
     /**
