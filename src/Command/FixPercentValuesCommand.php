@@ -93,7 +93,7 @@ class FixPercentValuesCommand extends Command
      */
     private function getMetrics()
     {
-        $this->io->out('Finding percentage metrics...');
+        $this->io->out('Finding metrics...');
         $results = $this->metricsTable->find()
             ->select(['id', 'name'])
             ->enableHydration(false)
