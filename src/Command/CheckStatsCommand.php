@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
@@ -66,8 +67,8 @@ class CheckStatsCommand extends Command
         $this->io = $io;
         $this->checkValidation();
         $this->checkOutOfBoundsPercentages();
-        $this->checkMissingData();
-        $this->checkUnselectableWithData();
+        $this->checkSelectableWithoutStats();
+        $this->checkUnselectableWithStats();
 
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
@@ -320,7 +321,7 @@ class CheckStatsCommand extends Command
      *
      * @return void
      */
-    private function checkMissingData()
+    private function checkSelectableWithoutStats()
     {
         if (!$this->getConfirmation('Check selectable metrics with no statistics?')) {
             return;
@@ -336,11 +337,7 @@ class CheckStatsCommand extends Command
         $progress = $this->makeProgressBar($selectableMetrics->count());
         $metricsWithoutStats = [];
         foreach ($selectableMetrics as $metric) {
-            $count = $this->statsTable
-                ->find()
-                ->where(['metric_id' => $metric->id])
-                ->count();
-            if (!$count) {
+            if (!$this->hasStats($metric->id)) {
                 $metricsWithoutStats[] = $metric;
             }
             $progress->increment(1)->draw();
@@ -357,17 +354,7 @@ class CheckStatsCommand extends Command
             count($metricsWithoutStats)
         ));
 
-        if (!$this->getConfirmation('List results?')) {
-            return;
-        }
-
-        foreach ($metricsWithoutStats as $metric) {
-            $this->io->out(sprintf(
-                ' - %s: %s',
-                $metric->id,
-                $metric->name
-            ));
-        }
+        $this->listMetricResults($metricsWithoutStats);
     }
 
     /**
@@ -375,7 +362,7 @@ class CheckStatsCommand extends Command
      *
      * @return void
      */
-    private function checkUnselectableWithData()
+    private function checkUnselectableWithStats()
     {
         if (!$this->getConfirmation('Check for unselectable metrics with associated statistics?')) {
             return;
@@ -391,11 +378,7 @@ class CheckStatsCommand extends Command
         $progress = $this->makeProgressBar($unselectableMetrics->count());
         $metricsWithStats = [];
         foreach ($unselectableMetrics as $metric) {
-            $count = $this->statsTable
-                ->find()
-                ->where(['metric_id' => $metric->id])
-                ->count();
-            if ($count) {
+            if ($this->hasStats($metric->id)) {
                 $metricsWithStats[] = $metric;
             }
             $progress->increment(1)->draw();
@@ -412,16 +395,41 @@ class CheckStatsCommand extends Command
             count($metricsWithStats)
         ));
 
+        $this->listMetricResults($metricsWithStats);
+    }
+
+    /**
+     * Lists metrics
+     *
+     * @param Metric[] $metrics Array of metrics
+     * @return void
+     */
+    private function listMetricResults(array $metrics)
+    {
         if (!$this->getConfirmation('List results?')) {
             return;
         }
 
-        foreach ($metricsWithStats as $metric) {
+        foreach ($metrics as $metric) {
             $this->io->out(sprintf(
                 ' - %s: %s',
                 $metric->id,
                 $metric->name
             ));
         }
+    }
+
+    /**
+     * Returns a count of statistics associated with a given metric
+     *
+     * @param int $metricId Metric ID
+     * @return bool
+     */
+    private function hasStats($metricId)
+    {
+        return $this->statsTable
+            ->find()
+            ->where(['metric_id' => $metricId])
+            ->count() > 0;
     }
 }
