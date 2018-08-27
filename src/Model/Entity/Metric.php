@@ -16,7 +16,7 @@ use Cake\ORM\Entity;
  * @property int $rght
  * @property bool $selectable
  * @property bool $visible
- * @property bool $is_percent
+ * @property bool|null $is_percent
  * @property \Cake\I18n\FrozenTime $created
  *
  * @property \App\Model\Entity\Metric $parent_metric

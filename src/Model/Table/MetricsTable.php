@@ -142,7 +142,7 @@ class MetricsTable extends Table
         $validator
             ->boolean('is_percent')
             ->requirePresence('is_percent', 'create')
-            ->notEmpty('is_percent');
+            ->allowEmpty('is_percent');
 
         return $validator;
     }
@@ -193,7 +193,7 @@ class MetricsTable extends Table
             'selectable' => true,
             'visible' => true,
             'type' => $type,
-            'is_percent' => false
+            'is_percent' => null
         ]);
 
         if ($this->save($metric)) {
