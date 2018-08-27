@@ -66,6 +66,7 @@ class CheckStatsCommand extends Command
         $this->io = $io;
         $this->checkValidation();
         $this->checkOutOfBoundsPercentages();
+        $this->checkMissingData();
 
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
@@ -311,5 +312,48 @@ class CheckStatsCommand extends Command
         }
         array_unshift($problematicMetrics, ['ID', 'Metric name', 'OOB stat count']);
         $this->io->helper('Table')->output($problematicMetrics);
+    }
+
+    /**
+     * Checks for selectable metrics with no associated data
+     *
+     * @return void
+     */
+    private function checkMissingData()
+    {
+        if (!$this->getConfirmation('Check for missing data?')) {
+            return;
+        }
+
+        $this->io->out('Finding selectable metrics with no associated statistics...');
+        $metrics = $this->metricsTable
+            ->find()
+            ->select(['id', 'name'])
+            ->where(['selectable' => true])
+            ->notMatching('Statistics')
+            ->all();
+
+        if ($metrics->isEmpty()) {
+            $this->io->out(' - None found');
+
+            return;
+        }
+
+        $this->io->out(sprintf(
+            ' - %s found',
+            $metrics->count()
+        ));
+
+        if (!$this->getConfirmation('List results?')) {
+            return;
+        }
+
+        foreach ($metrics as $metric) {
+            $this->io->out(sprintf(
+                ' - %s: %s',
+                $metric->id,
+                $metric->name
+            ));
+        }
     }
 }
