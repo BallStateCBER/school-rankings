@@ -277,4 +277,20 @@ class StatisticsTable extends Table
 
         return true;
     }
+
+    /**
+     * Returns the most recent year for which statistics are found
+     *
+     * @return int
+     */
+    public function getMostRecentYear()
+    {
+        /** @var Statistic $stat */
+        $stat = $this->find()
+            ->select(['year'])
+            ->orderDesc('year')
+            ->first();
+
+        return $stat->year;
+    }
 }

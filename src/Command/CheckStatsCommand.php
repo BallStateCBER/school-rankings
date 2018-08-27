@@ -69,6 +69,7 @@ class CheckStatsCommand extends Command
         $this->checkOutOfBoundsPercentages();
         $this->checkSelectableWithoutStats();
         $this->checkUnselectableWithStats();
+        $this->checkNoStatsInYear($this->statsTable->getMostRecentYear());
 
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
@@ -431,5 +432,54 @@ class CheckStatsCommand extends Command
             ->find()
             ->where(['metric_id' => $metricId])
             ->count() > 0;
+    }
+
+    /**
+     * Checks for selectable metrics with no stats in the most recent year (for which we have stats)
+     *
+     * @param int $year Year
+     * @return void
+     */
+    private function checkNoStatsInYear(int $year)
+    {
+        if (!$this->getConfirmation(
+            "Check for selectable metrics with no stats in the most recent year ($year)?"
+        )) {
+            return;
+        }
+
+        $this->io->out("Finding selectable metrics with no associated statistics in $year...");
+        $selectableMetrics = $this->metricsTable
+            ->find()
+            ->select(['id', 'name'])
+            ->where(['selectable' => true])
+            ->enableHydration(false)
+            ->toArray();
+
+        $progress = $this->makeProgressBar(count($selectableMetrics));
+        $metricsWithoutStats = [];
+        foreach ($selectableMetrics as $metric) {
+            $hasStats = $this->statsTable
+                ->find()
+                ->where(['year' => $year])
+                ->count() > 0;
+            if (!$hasStats) {
+                $metricsWithoutStats[] = $metric;
+            }
+            $progress->increment(1)->draw();
+        }
+
+        if (!$metricsWithoutStats) {
+            $this->io->overwrite(' - None found');
+
+            return;
+        }
+
+        $this->io->overwrite(sprintf(
+            ' - %s found',
+            count($metricsWithoutStats)
+        ));
+
+        $this->listMetricResults($metricsWithoutStats);
     }
 }
