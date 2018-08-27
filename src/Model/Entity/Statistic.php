@@ -171,4 +171,18 @@ class Statistic extends Entity
 
         throw new InternalErrorException('Cannot convert non-numeric value using convertValueFromPercent()');
     }
+
+    /**
+     * Returns this statistic's value formatted as a percent string, e.g. "75.3%"
+     *
+     * @return string
+     */
+    public function getPercentFormattedValue()
+    {
+        if (self::isPercentValue($this->value)) {
+            return $this->value;
+        }
+
+        return self::convertValueToPercent($this->value);
+    }
 }
