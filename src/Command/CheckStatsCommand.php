@@ -67,6 +67,7 @@ class CheckStatsCommand extends Command
         $this->checkValidation();
         $this->checkOutOfBoundsPercentages();
         $this->checkMissingData();
+        $this->checkUnselectableWithData();
 
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
@@ -315,13 +316,13 @@ class CheckStatsCommand extends Command
     }
 
     /**
-     * Checks for selectable metrics with no associated data
+     * Checks for selectable metrics with no associated stats
      *
      * @return void
      */
     private function checkMissingData()
     {
-        if (!$this->getConfirmation('Check for missing data?')) {
+        if (!$this->getConfirmation('Check selectable metrics with no statistics?')) {
             return;
         }
 
@@ -333,19 +334,19 @@ class CheckStatsCommand extends Command
             ->all();
 
         $progress = $this->makeProgressBar($selectableMetrics->count());
-        $metricsWithoutData = [];
+        $metricsWithoutStats = [];
         foreach ($selectableMetrics as $metric) {
             $count = $this->statsTable
                 ->find()
                 ->where(['metric_id' => $metric->id])
                 ->count();
             if (!$count) {
-                $metricsWithoutData[] = $metric;
+                $metricsWithoutStats[] = $metric;
             }
             $progress->increment(1)->draw();
         }
 
-        if (!$metricsWithoutData) {
+        if (!$metricsWithoutStats) {
             $this->io->overwrite(' - None found');
 
             return;
@@ -353,14 +354,69 @@ class CheckStatsCommand extends Command
 
         $this->io->overwrite(sprintf(
             ' - %s found',
-            count($metricsWithoutData)
+            count($metricsWithoutStats)
         ));
 
         if (!$this->getConfirmation('List results?')) {
             return;
         }
 
-        foreach ($metricsWithoutData as $metric) {
+        foreach ($metricsWithoutStats as $metric) {
+            $this->io->out(sprintf(
+                ' - %s: %s',
+                $metric->id,
+                $metric->name
+            ));
+        }
+    }
+
+    /**
+     * Checks for unselectable metrics with associated stats
+     *
+     * @return void
+     */
+    private function checkUnselectableWithData()
+    {
+        if (!$this->getConfirmation('Check for unselectable metrics with associated statistics?')) {
+            return;
+        }
+
+        $this->io->out('Finding selectable metrics with no associated statistics...');
+        $unselectableMetrics = $this->metricsTable
+            ->find()
+            ->select(['id', 'name'])
+            ->where(['selectable' => false])
+            ->all();
+
+        $progress = $this->makeProgressBar($unselectableMetrics->count());
+        $metricsWithStats = [];
+        foreach ($unselectableMetrics as $metric) {
+            $count = $this->statsTable
+                ->find()
+                ->where(['metric_id' => $metric->id])
+                ->count();
+            if ($count) {
+                $metricsWithStats[] = $metric;
+            }
+            $progress->increment(1)->draw();
+        }
+
+        if (!$metricsWithStats) {
+            $this->io->overwrite(' - None found');
+
+            return;
+        }
+
+        $this->io->overwrite(sprintf(
+            ' - %s found',
+            count($metricsWithStats)
+        ));
+
+        if (!$this->getConfirmation('List results?')) {
+            return;
+        }
+
+        foreach ($metricsWithStats as $metric) {
             $this->io->out(sprintf(
                 ' - %s: %s',
                 $metric->id,
