@@ -20,7 +20,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\FrozenTime $created
  *
  * @property \App\Model\Entity\Metric $parent_metric
- * @property \App\Model\Entity\Metric[] $child_metrics
+ * @property \App\Model\Entity\Metric[] $children
  */
 class Metric extends Entity
 {
