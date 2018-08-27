@@ -1,10 +1,11 @@
 <?php
 namespace App\Command;
 
+use App\Model\Context\Context;
+use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
-use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
@@ -16,29 +17,31 @@ use Cake\Shell\Helper\ProgressHelper;
 /**
  * Class FixPercentValuesCommand
  * @package App\Command
+ * @property array $metrics
+ * @property ConsoleIo $io
+ * @property int $flaggedMetricsCount
+ * @property int $metricCount
+ * @property int $statisticsCount
+ * @property int $unclassifiedMetricCount
+ * @property MetricsTable $metricsTable
  * @property ProgressHelper $progress
- * @property int $flaggedMetricsCount;
- * @property ConsoleIo $io;
- * @property int $metricCount;
- * @property array $metrics;
- * @property MetricsTable $metricsTable;
- * @property int $statisticsCount;
- * @property StatisticsTable $statisticsTable;
- * @property string $updateResponse;
+ * @property StatisticsTable $statisticsTable
+ * @property string $updateResponse
  */
 class FixPercentValuesCommand extends Command
 {
-    private $flaggedMetricsCount;
+    const NONPERCENT = 'non-percent';
+    const PERCENT = 'percent';
+    private $flaggedMetricsCount = 0;
     private $io;
-    private $metricCount;
+    private $metricCount = 0;
     private $metrics;
     private $metricsTable;
     private $progress;
-    private $statisticsCount;
+    private $statisticsCount = 0;
     private $statisticsTable;
+    private $unclassifiedMetricCount;
     private $updateResponse;
-    const PERCENT = 'percent';
-    const NONPERCENT = 'non-percent';
 
     /**
      * Fixes statistic values like "0.025" that should be stored as "2.5%"
@@ -56,37 +59,29 @@ class FixPercentValuesCommand extends Command
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
 
         $this->getMetrics();
+        $this->classifyMetrics();
+        $this->saveMetricClassifications();
+        $this->displayClassifiedMetrics();
 
-        if (!$this->metrics) {
-            return;
+        foreach (Context::getContexts() as $context) {
+            $this->findStatistics($context);
+            if ($this->statisticsCount && !$this->updateResponse) {
+                $this->updateResponse = $this->io->askChoice(
+                    'Update misformatted statistics?',
+                    ['y', 'n', 'dry run'],
+                    'y'
+                );
+                if ($this->updateResponse == 'n') {
+                    return;
+                }
+            }
+
+            $this->updateStatistics($context);
         }
-
-        $this->findStatistics();
-
-        if ($this->flaggedMetricsCount) {
-            $this->io->overwrite(sprintf(
-                ' - %s %s found for %s %s that need reformatted',
-                number_format($this->statisticsCount),
-                __n('statistic', 'statistics', $this->statisticsCount),
-                number_format($this->flaggedMetricsCount),
-                __n('metric', 'metrics', $this->flaggedMetricsCount)
-            ));
-        } else {
-            $this->io->overwrite(' - No statistics need updated');
-
-            return;
-        }
-
-        $this->updateResponse = $this->io->askChoice('Update statistics?', ['y', 'n', 'dry run'], 'y');
-        if ($this->updateResponse == 'n') {
-            return;
-        }
-
-        $this->updateStatistics();
     }
 
     /**
-     * Gets metrics whose statistics should be formatted as percentages
+     * Retrieves all metrics
      *
      * @throws \Aura\Intl\Exception
      * @return void
@@ -94,24 +89,24 @@ class FixPercentValuesCommand extends Command
     private function getMetrics()
     {
         $this->io->out('Finding metrics...');
-        $results = $this->metricsTable->find()
-            ->select(['id', 'name'])
-            ->enableHydration(false)
-            ->orderAsc('name')
-            ->toArray();
-        $this->metricCount = count($results);
-        $this->progress->init([
-            'total' => $this->metricCount,
-            'width' => 40,
-        ]);
-        $this->progress->draw();
-        foreach ($results as $metric) {
-            $key = $this->isPercentMetric($metric) ? self::PERCENT : self::NONPERCENT;
-            $this->metrics[$key][] = $metric;
-            $this->progress->increment(1)->draw();
+        foreach (Context::getContexts() as $context) {
+            $this->metrics[$context] = $this->metricsTable
+                ->find('threaded')
+                ->select([
+                    'id',
+                    'name',
+                    'is_percent',
+                    'parent_id',
+                    'type'
+                ])
+                ->where(['context' => $context])
+                ->toArray();
+            $this->metricCount += $this->metricsTable
+                ->find()
+                ->where(['context' => $context])
+                ->count();
         }
-
-        $this->io->overwrite(sprintf(
+        $this->io->out(sprintf(
             ' - Done; %s %s analyzed',
             $this->metricCount,
             __n('metric', 'metrics', $this->metricCount)
@@ -121,148 +116,291 @@ class FixPercentValuesCommand extends Command
     /**
      * Finds incorrectly formatted statistics that should be formatted as percentages
      *
+     * @param string $context 'school' or 'district'
      * @return void
+     * @throws \Aura\Intl\Exception
      */
-    private function findStatistics()
+    private function findStatistics($context)
     {
         $this->io->out();
-        $this->io->out('Finding statistics that need reformatted...');
+        $this->io->out("Finding $context statistics that need reformatted...");
         $this->progress->init([
             'total' => $this->metricCount,
             'width' => 40,
         ]);
         $this->progress->draw();
-        $this->flaggedMetricsCount = 0;
         $this->statisticsCount = 0;
-        foreach ($this->metrics as $key => &$metrics) {
-            foreach ($metrics as &$metric) {
-                $metric['statistics'] = $this->statisticsTable->find()
-                    ->select(['id', 'value', 'school_id', 'school_district_id'])
-                    ->where([
-                        'metric_id' => $metric['id'],
-                        $this->getMisformattedCondition($key)
-                    ])
-                    ->all();
-
-                if ($metric['statistics']) {
-                    $this->flaggedMetricsCount++;
-                    $this->statisticsCount += $metric['statistics']->count();
-                }
-                $this->progress->increment(1)->draw();
-            }
-        }
+        $this->findStatisticsGroup($this->metrics[$context]);
+        $this->io->overwrite(sprintf(
+            ' - Done; %s misformatted %s found',
+            $this->statisticsCount,
+            __n('statistic', 'statistics', $this->statisticsCount)
+        ));
     }
 
     /**
      * Updates statistics (or performs a dry run)
      *
+     * @param string $context 'school' or 'district'
      * @return void
      */
-    private function updateStatistics()
+    private function updateStatistics($context)
     {
         $this->io->out();
-        $this->io->out('Updating statistics...');
+        $this->io->out(
+            'Updating misformatted statistics...' . ($this->updateResponse == 'dry run' ? ' (dry run)' : '')
+        );
         $this->progress->init([
             'total' => $this->statisticsCount,
             'width' => 40,
         ]);
         $this->progress->draw();
-        foreach ($this->metrics as $key => $metrics) {
-            foreach ($metrics as $metric) {
-                if (!isset($metric['statistics']) || !$metric['statistics']) {
+        foreach ($this->metrics[$context] as $metric) {
+            if (!isset($metric['statistics']) || !$metric['statistics']) {
+                continue;
+            }
+
+            foreach ($metric['statistics'] as $statistic) {
+                $this->progress->increment(1)->draw();
+                if (!is_numeric($statistic->value)) {
+                    $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
                     continue;
                 }
 
-                foreach ($metric['statistics'] as $statistic) {
-                    $this->progress->increment(1)->draw();
-                    if (!is_numeric($statistic->value)) {
-                        $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
+                $originalValue = $statistic->value;
+                $newValue = $this->reformatValue($originalValue, $metric['is_percent']);
+                $statistic = $this->statisticsTable->patchEntity($statistic, ['value' => $newValue]);
+                if ($this->updateResponse == 'dry run') {
+                    if ($statistic->getErrors()) {
+                        $this->io->overwrite('');
+                        $this->io->error('Error updating ' . $originalValue . ' to ' . $newValue);
+                        print_r($statistic->getErrors());
                         continue;
                     }
 
-                    $originalValue = $statistic->value;
-                    $newValue = $this->reformatValue($originalValue, $key);
-                    $statistic = $this->statisticsTable->patchEntity($statistic, ['value' => $newValue]);
-                    if ($this->updateResponse == 'dry run') {
-                        if ($statistic->getErrors()) {
-                            $this->io->overwrite('');
-                            $this->io->error('Error updating ' . $originalValue . ' to ' . $newValue);
-                            print_r($statistic->getErrors());
-                        } else {
-                            $this->io->overwrite('Would update ' . $originalValue . ' to ' . $newValue);
-                        }
-                    } elseif (!$this->statisticsTable->save($statistic)) {
-                        $this->io->overwrite('Error updating statistic. Details: ');
-                        $this->io->out();
-                        print_r($statistic->getErrors());
+                    $this->io->overwrite('Would update ' . $originalValue . ' to ' . $newValue);
+                    continue;
+                }
 
-                        return;
-                    }
+                if (!$this->statisticsTable->save($statistic)) {
+                    $this->io->overwrite('Error updating statistic. Details: ');
+                    $this->io->out();
+                    print_r($statistic->getErrors());
+                    break 2;
                 }
             }
         }
-    }
-
-    /**
-     * Returns whether or not the specific metric's statistic values should be styled as percents
-     *
-     * Also populates the "isPercent" cache
-     *
-     * @param array $metric Metric array
-     * @return bool
-     */
-    private function isPercentMetric($metric)
-    {
-        $cacheKey = 'metric-' . $metric['id'] . '-isPercent';
-        $isPercent = Cache::read($cacheKey);
-        if ($isPercent === false) {
-            $isPercent = $this->metricsTable->isPercentMetric($metric['name']);
-            Cache::write($cacheKey, $isPercent);
-        }
-
-        return (bool)$isPercent;
     }
 
     /**
      * Returns a value converted either to or from percent format
      *
      * @param mixed $value Value to convert
-     * @param string $key 'percent' or 'non-percent' key
+     * @param bool $isPercent TRUE if value should be formatted as a percentage
      * @return string
      * @throws InternalErrorException
      */
-    private function reformatValue($value, $key)
+    private function reformatValue($value, $isPercent)
     {
-        if ($key == self::PERCENT) {
+        if ($isPercent === true) {
             return Statistic::convertValueToPercent($value);
         }
-        if ($key == self::NONPERCENT) {
+        if ($isPercent === false) {
             return Statistic::convertValueFromPercent($value);
         }
 
-        throw new InternalErrorException('Invalid percent/nonpercent key');
+        throw new InternalErrorException('Non-boolean value for $isPercent');
     }
 
     /**
      * Returns a function to be used as a find condition to retrieve misformatted statistics
      *
-     * @param string $key 'percent' or 'non-percent' key
+     * @param bool $isPercent TRUE if the statistics SHOULD be percent-formatted
      * @return \Closure
      * @throws InternalErrorException
      */
-    private function getMisformattedCondition($key)
+    private function getMisformattedCondition($isPercent)
     {
-        if ($key == self::PERCENT) {
+        if ($isPercent === true) {
             return function (QueryExpression $exp) {
                 return $exp->notLike('value', '%\%%');
             };
         }
-        if ($key == self::NONPERCENT) {
+        if ($isPercent === false) {
             return function (QueryExpression $exp) {
                 return $exp->like('value', '%\%%');
             };
         }
 
-        throw new InternalErrorException('Invalid percent/nonpercent key');
+        throw new InternalErrorException('Non-boolean $isPercent value');
+    }
+
+    /**
+     * Sets the value of is_percent for each metric if it's currently null
+     *
+     * @return void
+     * @throws \Aura\Intl\Exception
+     */
+    private function classifyMetrics()
+    {
+        $this->io->out('Classifying metrics with undetermined is_percent status...');
+        $this->progress->init([
+            'total' => $this->metricCount,
+            'width' => 40,
+        ]);
+        $this->progress->draw();
+        foreach (Context::getContexts() as $context) {
+            $this->classifyMetricGroup($this->metrics[$context]);
+        }
+        $this->io->overwrite(sprintf(
+            ' - Done; %s unclassified %s found',
+            $this->unclassifiedMetricCount,
+            __n('metric', 'metrics', $this->unclassifiedMetricCount)
+        ));
+    }
+
+    /**
+     * Sets is_percent for each metric it's null, then runs the same process on each metric's children
+     *
+     * @param Metric[] $metrics Threaded group of metrics
+     * @param bool $parentIsPercent Reflects the is_percent value of this group's parent
+     * @return void
+     */
+    private function classifyMetricGroup(&$metrics, $parentIsPercent = false)
+    {
+        foreach ($metrics as $metric) {
+            $this->progress->increment(1)->draw();
+            if (!isset($metric->is_percent)) {
+                $isPercent = $parentIsPercent || $this->metricsTable->isPercentMetric($metric->name);
+                $this->metricsTable->patchEntity($metric, ['is_percent' => $isPercent]);
+                $this->unclassifiedMetricCount++;
+            }
+            if ($metric->children) {
+                $this->classifyMetricGroup($metric->children, $metric->is_percent);
+            }
+        }
+    }
+
+    /**
+     * Displays a nested list of metrics and their is_percent status
+     *
+     * @param Metric[] $metrics Threaded group of metrics
+     * @param int $indent Indentation level
+     * @return void
+     */
+    private function displayMetricGroup($metrics, $indent = 1)
+    {
+        foreach ($metrics as $metric) {
+            $msg = sprintf(
+                '%s- %s',
+                str_repeat(' ', $indent),
+                str_replace("\n", ' - ', $metric->name)
+            );
+            if ($metric->is_percent) {
+                $this->io->success($msg);
+            } else {
+                $this->io->out($msg);
+            }
+
+            if ($metric->children) {
+                $this->displayMetricGroup($metric->children, $indent + 2);
+            }
+        }
+    }
+
+    /**
+     * Displays a message and a prompt for a 'y' or 'n' response and returns TRUE if response is 'y'
+     *
+     * @param string $msg Message to display
+     * @param string $default Default selection (leave blank for 'y')
+     * @return bool
+     */
+    private function getConfirmation($msg, $default = 'y')
+    {
+        return $this->io->askChoice(
+            $msg,
+            ['y', 'n'],
+            $default
+        ) == 'y';
+    }
+
+    /**
+     * Populates each metric's statistics field with misformatted stats and runs the command on each metric's children
+     *
+     * @param Metric[] $metrics Group of metrics
+     * @return void
+     */
+    private function findStatisticsGroup(&$metrics)
+    {
+        foreach ($metrics as &$metric) {
+            $this->progress->increment(1)->draw();
+            $metric->statistics = $this->statisticsTable->find()
+                ->select(['id', 'value', 'school_id', 'school_district_id'])
+                ->where([
+                    'metric_id' => $metric->id,
+                    $this->getMisformattedCondition($metric->is_percent)
+                ])
+                ->all();
+
+            if ($metric->statistics) {
+                $this->flaggedMetricsCount++;
+                $this->statisticsCount += $metric->statistics->count();
+            }
+
+            if ($metric->children) {
+                $this->findStatisticsGroup($metric->children);
+            }
+        }
+    }
+
+    /**
+     * Displays a tree structure of all metrics, with percentage metrics colored green
+     *
+     * @return void
+     */
+    private function displayClassifiedMetrics()
+    {
+        foreach (Context::getContexts() as $context) {
+            if ($this->getConfirmation("Show classified $context metrics? (Percent metrics will be in green)")) {
+                $this->displayMetricGroup($this->metrics[$context]);
+            }
+        }
+    }
+
+    private function saveMetricClassifications()
+    {
+        if (!$this->unclassifiedMetricCount) {
+            return;
+        }
+        if (!$this->getConfirmation('Update is_percent metric fields in database?')) {
+            return;
+        }
+
+        $this->progress->init([
+            'total' => $this->metricCount,
+            'width' => 40,
+        ]);
+        $this->progress->draw();
+        foreach (Context::getContexts() as $context) {
+            $this->saveMetricClassificationsGroup($this->metrics[$context]);
+        }
+        $this->io->overwrite(' - Done');
+    }
+
+    /**
+     * @param Metric[] $metrics Group of metrics
+     * @return void
+     */
+    private function saveMetricClassificationsGroup($metrics)
+    {
+        foreach ($metrics as $metric) {
+            $this->progress->increment(1)->draw();
+            if ($metric->isDirty('is_percent')) {
+                $this->metricsTable->save($metric);
+            }
+            if ($metric->children) {
+                $this->saveMetricClassificationsGroup($metric->children);
+            }
+        }
     }
 }
