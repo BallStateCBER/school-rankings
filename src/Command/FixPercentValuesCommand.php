@@ -156,11 +156,11 @@ class FixPercentValuesCommand extends Command
         ]);
         $this->progress->draw();
         foreach ($this->metrics[$context] as $metric) {
-            if (!isset($metric['statistics']) || !$metric['statistics']) {
+            if (!isset($metric->statistics) || !$metric->statistics) {
                 continue;
             }
 
-            foreach ($metric['statistics'] as $statistic) {
+            foreach ($metric->statistics as $statistic) {
                 $this->progress->increment(1)->draw();
                 if (!is_numeric($statistic->value)) {
                     $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
@@ -168,7 +168,7 @@ class FixPercentValuesCommand extends Command
                 }
 
                 $originalValue = $statistic->value;
-                $newValue = $this->reformatValue($originalValue, $metric['is_percent']);
+                $newValue = $this->reformatValue($originalValue, $metric->is_percent);
                 $statistic = $this->statisticsTable->patchEntity($statistic, ['value' => $newValue]);
                 if ($this->updateResponse == 'dry run') {
                     if ($statistic->getErrors()) {
