@@ -326,29 +326,41 @@ class CheckStatsCommand extends Command
         }
 
         $this->io->out('Finding selectable metrics with no associated statistics...');
-        $metrics = $this->metricsTable
+        $selectableMetrics = $this->metricsTable
             ->find()
             ->select(['id', 'name'])
             ->where(['selectable' => true])
-            ->notMatching('Statistics')
             ->all();
 
-        if ($metrics->isEmpty()) {
-            $this->io->out(' - None found');
+        $progress = $this->makeProgressBar($selectableMetrics->count());
+        $metricsWithoutData = [];
+        foreach ($selectableMetrics as $metric) {
+            $count = $this->statsTable
+                ->find()
+                ->where(['metric_id' => $metric->id])
+                ->count();
+            if (!$count) {
+                $metricsWithoutData[] = $metric;
+            }
+            $progress->increment(1)->draw();
+        }
+
+        if (!$metricsWithoutData) {
+            $this->io->overwrite(' - None found');
 
             return;
         }
 
-        $this->io->out(sprintf(
+        $this->io->overwrite(sprintf(
             ' - %s found',
-            $metrics->count()
+            count($metricsWithoutData)
         ));
 
         if (!$this->getConfirmation('List results?')) {
             return;
         }
 
-        foreach ($metrics as $metric) {
+        foreach ($metricsWithoutData as $metric) {
             $this->io->out(sprintf(
                 ' - %s: %s',
                 $metric->id,
