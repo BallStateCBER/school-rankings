@@ -367,6 +367,11 @@ class FixPercentValuesCommand extends Command
         }
     }
 
+    /**
+     * Updates all dirty metrics in the database
+     *
+     * @return void
+     */
     private function saveMetricClassifications()
     {
         if (!$this->unclassifiedMetricCount) {
@@ -388,6 +393,8 @@ class FixPercentValuesCommand extends Command
     }
 
     /**
+     * Updates a group of metrics in the database
+     *
      * @param Metric[] $metrics Group of metrics
      * @return void
      */
