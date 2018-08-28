@@ -329,16 +329,12 @@ class CheckStatsCommand extends Command
         }
 
         $this->io->out('Finding selectable metrics with no associated statistics...');
-        $selectableMetrics = $this->metricsTable
-            ->find()
-            ->select(['id', 'name'])
-            ->where(['selectable' => true])
-            ->all();
+        $selectableMetrics = $this->getSelectableMetrics();
 
-        $progress = $this->makeProgressBar($selectableMetrics->count());
+        $progress = $this->makeProgressBar(count($selectableMetrics));
         $metricsWithoutStats = [];
         foreach ($selectableMetrics as $metric) {
-            if (!$this->hasStats($metric->id)) {
+            if (!$this->hasStats($metric['id'])) {
                 $metricsWithoutStats[] = $metric;
             }
             $progress->increment(1)->draw();
@@ -370,16 +366,12 @@ class CheckStatsCommand extends Command
         }
 
         $this->io->out('Finding selectable metrics with no associated statistics...');
-        $unselectableMetrics = $this->metricsTable
-            ->find()
-            ->select(['id', 'name'])
-            ->where(['selectable' => false])
-            ->all();
+        $unselectableMetrics = $this->getSelectableMetrics(false);
 
-        $progress = $this->makeProgressBar($unselectableMetrics->count());
+        $progress = $this->makeProgressBar(count($unselectableMetrics));
         $metricsWithStats = [];
         foreach ($unselectableMetrics as $metric) {
-            if ($this->hasStats($metric->id)) {
+            if ($this->hasStats($metric['id'])) {
                 $metricsWithStats[] = $metric;
             }
             $progress->increment(1)->draw();
@@ -414,8 +406,8 @@ class CheckStatsCommand extends Command
         foreach ($metrics as $metric) {
             $this->io->out(sprintf(
                 ' - %s: %s',
-                $metric->id,
-                $metric->name
+                $metric['id'],
+                $metric['name']
             ));
         }
     }
@@ -449,12 +441,7 @@ class CheckStatsCommand extends Command
         }
 
         $this->io->out("Finding selectable metrics with no associated statistics in $year...");
-        $selectableMetrics = $this->metricsTable
-            ->find()
-            ->select(['id', 'name'])
-            ->where(['selectable' => true])
-            ->enableHydration(false)
-            ->toArray();
+        $selectableMetrics = $this->getSelectableMetrics();
 
         $progress = $this->makeProgressBar(count($selectableMetrics));
         $metricsWithoutStats = [];
@@ -481,5 +468,21 @@ class CheckStatsCommand extends Command
         ));
 
         $this->listMetricResults($metricsWithoutStats);
+    }
+
+    /**
+     * Returns a simple array of selectable metrics (or unselectable if $selectable is FALSE)
+     *
+     * @param bool $selectable Set to FALSE to get unselectable metrics
+     * @return array
+     */
+    private function getSelectableMetrics($selectable = true)
+    {
+        return $this->metricsTable
+            ->find()
+            ->select(['id', 'name'])
+            ->where(['selectable' => $selectable])
+            ->enableHydration(false)
+            ->toArray();
     }
 }
