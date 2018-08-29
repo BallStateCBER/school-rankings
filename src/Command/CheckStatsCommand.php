@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
@@ -70,6 +71,7 @@ class CheckStatsCommand extends Command
         $this->checkSelectableWithoutStats();
         $this->checkUnselectableWithStats();
         $this->checkNoStatsInYear($this->statsTable->getMostRecentYear());
+        $this->recoverMetricTrees();
 
         if ($this->misformattedPercentStatsFound) {
             $this->io->out();
@@ -484,5 +486,29 @@ class CheckStatsCommand extends Command
             ->where(['selectable' => $selectable])
             ->enableHydration(false)
             ->toArray();
+    }
+
+    /**
+     * Fixes any structural errors in metric trees
+     *
+     * @throws \Exception
+     * @return void
+     */
+    private function recoverMetricTrees()
+    {
+        if (!$this->getConfirmation('Recover metric trees? (fixes any structural errors)')) {
+            return;
+        }
+        foreach (Context::getContexts() as $context) {
+            $this->io->out("Recovering tree structure for $context metrics...");
+
+            /** @var MetricsTable $scopedMetricsTable */
+            $scopedMetricsTable = TableRegistry::getTableLocator()->get('Metrics');
+            $scopedMetricsTable->setScope($context);
+            $scopedMetricsTable->recover();
+            unset($scopedMetricsTable);
+
+            $this->io->out(' - Done');
+        }
     }
 }
