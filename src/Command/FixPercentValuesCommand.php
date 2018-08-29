@@ -159,8 +159,9 @@ class FixPercentValuesCommand extends Command
     {
         $this->io->out();
         $this->io->out(sprintf(
-            'Updating %s misformatted statistics... %s',
+            'Updating %s misformatted %s statistics... %s',
             number_format(count($this->metrics[$context])),
+            $context,
             ($this->updateResponse == 'dry run' ? ' (dry run)' : '')
         ));
         $this->progress->init([
