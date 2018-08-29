@@ -108,7 +108,7 @@ class FixPercentValuesCommand extends Command
         }
         $this->io->out(sprintf(
             ' - Done; %s %s analyzed',
-            $this->metricCount,
+            number_format($this->metricCount),
             __n('metric', 'metrics', $this->metricCount)
         ));
     }
@@ -133,7 +133,7 @@ class FixPercentValuesCommand extends Command
         $this->findStatisticsGroup($this->metrics[$context]);
         $this->io->overwrite(sprintf(
             ' - Done; %s misformatted %s found',
-            $this->statisticsCount,
+            number_format($this->statisticsCount),
             __n('statistic', 'statistics', $this->statisticsCount)
         ));
     }
@@ -147,9 +147,11 @@ class FixPercentValuesCommand extends Command
     private function updateStatistics($context)
     {
         $this->io->out();
-        $this->io->out(
-            'Updating misformatted statistics...' . ($this->updateResponse == 'dry run' ? ' (dry run)' : '')
-        );
+        $this->io->out(sprintf(
+            'Updating %s misformatted statistics... %s',
+            number_format(count($this->metrics[$context])),
+            ($this->updateResponse == 'dry run' ? ' (dry run)' : '')
+        ));
         $this->progress->init([
             'total' => $this->statisticsCount,
             'width' => 40,
@@ -254,7 +256,7 @@ class FixPercentValuesCommand extends Command
         }
         $this->io->overwrite(sprintf(
             ' - Done; %s unclassified %s found',
-            $this->unclassifiedMetricCount,
+            number_format($this->unclassifiedMetricCount),
             __n('metric', 'metrics', $this->unclassifiedMetricCount)
         ));
     }
