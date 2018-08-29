@@ -14,7 +14,7 @@ use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
 
 /**
- * Class FixPercentValuesCommand
+ * Class FixDistrictAssociationsCommand
  * @package App\Command
  * @property array $metrics
  * @property ConsoleIo $io
