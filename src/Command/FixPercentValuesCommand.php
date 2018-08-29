@@ -19,7 +19,6 @@ use Cake\Shell\Helper\ProgressHelper;
  * @package App\Command
  * @property array $metrics
  * @property ConsoleIo $io
- * @property int $flaggedMetricsCount
  * @property int $metricCount
  * @property int $statisticsCount
  * @property int $unclassifiedMetricCount
@@ -32,7 +31,6 @@ class FixPercentValuesCommand extends Command
 {
     const NONPERCENT = 'non-percent';
     const PERCENT = 'percent';
-    private $flaggedMetricsCount = 0;
     private $io;
     private $metricCount = 0;
     private $metrics;
@@ -40,7 +38,7 @@ class FixPercentValuesCommand extends Command
     private $progress;
     private $statisticsCount = 0;
     private $statisticsTable;
-    private $unclassifiedMetricCount;
+    private $unclassifiedMetricCount = 0;
     private $updateResponse;
 
     /**
@@ -77,7 +75,20 @@ class FixPercentValuesCommand extends Command
             }
 
             $this->updateStatistics($context);
+            unset($this->metrics[$context]);
         }
+
+        unset(
+            $this->io,
+            $this->metricCount,
+            $this->metrics,
+            $this->metricsTable,
+            $this->progress,
+            $this->statisticsCount,
+            $this->statisticsTable,
+            $this->unclassifiedMetricCount,
+            $this->updateResponse
+        );
     }
 
     /**
@@ -345,14 +356,16 @@ class FixPercentValuesCommand extends Command
                 ->all();
 
             if ($metric->statistics) {
-                $this->flaggedMetricsCount++;
                 $this->statisticsCount += $metric->statistics->count();
             }
 
             if ($metric->children) {
                 $this->findStatisticsGroup($metric->children);
             }
+
+            unset($metric);
         }
+        unset($metrics);
     }
 
     /**
@@ -410,6 +423,8 @@ class FixPercentValuesCommand extends Command
             if ($metric->children) {
                 $this->saveMetricClassificationsGroup($metric->children);
             }
+            unset($metric);
         }
+        unset($metrics);
     }
 }
