@@ -478,7 +478,7 @@ class MetricsTable extends Table
                 ->where(['id' => $metricId])
                 ->firstOrFail();
 
-            return $metric->is_percent;
+            return (bool)$metric->is_percent;
         }
 
         throw new InternalErrorException(
