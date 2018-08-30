@@ -17,29 +17,31 @@ div.jstree {
   }
 }
 li.jstree-node {
-  &[data-type="numeric"] {
-    > a::after {
-      display: none;
-      content: "\f080";
-      font-family: "Font Awesome 5 Regular", monospace;
-    }
-  }
-  &[data-type="boolean"] {
-    > a::after {
-      display: none;
-      content: "\f164";
-      font-family: "Font Awesome 5 Regular", monospace;
-    }
-  }
   &[data-visible="0"] {
-    &::after {
-      color: #666;
-      display: none;
-      content: "\f070";
-      font-family: "Font Awesome 5 Regular", monospace;
-    }
     > a {
       @include metric-hidden;
+      &::after {
+        color: #666;
+        display: none;
+        content: "\f070";
+        font-family: "Font Awesome 5 Regular", monospace;
+      }
+    }
+  }
+  &[data-visible="1"] {
+    &[data-type="numeric"] {
+      > a::after {
+        display: none;
+        content: "\f080";
+        font-family: "Font Awesome 5 Regular", monospace;
+      }
+    }
+    &[data-type="boolean"] {
+      > a::after {
+        display: none;
+        content: "\f164";
+        font-family: "Font Awesome 5 Regular", monospace;
+      }
     }
   }
   > a {
