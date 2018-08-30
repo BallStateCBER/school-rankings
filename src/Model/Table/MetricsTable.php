@@ -474,11 +474,11 @@ class MetricsTable extends Table
 
             /** @var Metric $metric */
             $metric = $this->find()
-                ->select(['name'])
+                ->select(['is_percent'])
                 ->where(['id' => $metricId])
                 ->firstOrFail();
 
-            return $this->isPercentMetric($metric->name);
+            return $metric->is_percent;
         }
 
         throw new InternalErrorException(
