@@ -3,8 +3,6 @@ namespace App\Controller\Api;
 
 use App\Controller\AppController;
 use App\Model\Entity\Ranking;
-use App\Model\Entity\RankingResultsSchool;
-use App\Model\Entity\RankingResultsSchoolDistrict;
 use App\Model\Table\RankingsTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
@@ -172,68 +170,70 @@ class RankingsController extends AppController
                 'school_district_id'
             ]);
         };
+        $containCriteria = function (Query $q) {
+            return $q
+                ->select(['id', 'formula_id'])
+                ->contain([
+                    'Metrics' => function (Query $q) {
+                        return $q->select(['id', 'name']);
+                    }
+                ]);
+        };
+        $containSchools = function (Query $q) {
+            return $q
+                ->select([
+                    'id',
+                    'name',
+                    'address',
+                    'url',
+                    'phone'
+                ]);
+        };
+        $containDistricts = function (Query $q) {
+            return $q
+                ->select([
+                    'id',
+                    'name',
+                    'url',
+                    'phone'
+                ]);
+        };
+        $containFormulas = function (Query $q) use ($containCriteria) {
+            return $q
+                ->select(['id'])
+                ->contain([
+                    'Criteria' => $containCriteria
+                ]);
+        };
+        $containResultsSchools = function (Query $q) use ($containSchools, $containStatistics) {
+            return $q->contain([
+                'Schools' => $containSchools,
+                'Statistics' => $containStatistics
+            ]);
+        };
+        $containResultsDistricts = function (Query $q) use ($containDistricts, $containStatistics) {
+            return $q->contain([
+                'SchoolDistricts' => $containDistricts,
+                'Statistics' => $containStatistics
+            ]);
+        };
 
         /** @var Ranking $ranking */
         $ranking = $this->rankingsTable->find()
             ->where(['Rankings.id' => $rankingId])
-            ->select([
-                'id'
-            ])
+            ->select(['id'])
             ->contain([
-                'Formulas' => function (Query $q) {
-                    return $q
-                        ->select(['id'])
-                        ->contain([
-                            'Criteria' => function (Query $q) {
-                                return $q
-                                    ->select(['id', 'formula_id'])
-                                    ->contain([
-                                        'Metrics' => function (Query $q) {
-                                            return $q
-                                                ->select(['id', 'name']);
-                                        }
-                                    ]);
-                            }
-                        ]);
-                },
-                'ResultsSchools' => function (Query $q) use ($containStatistics) {
-                    return $q->contain([
-                        'Schools' => function (Query $q) {
-                            return $q
-                                ->select([
-                                    'id',
-                                    'name',
-                                    'address',
-                                    'url',
-                                    'phone'
-                                ]);
-                        },
-                        'Statistics' => $containStatistics
-                    ]);
-                },
-                'ResultsDistricts' => function (Query $q) use ($containStatistics) {
-                    return $q->contain([
-                        'SchoolDistricts' => function (Query $q) {
-                            return $q
-                                ->select([
-                                    'id',
-                                    'name',
-                                    'url',
-                                    'phone'
-                                ]);
-                        },
-                        'Statistics' => $containStatistics
-                    ]);
-                }
+                'Formulas' => $containFormulas,
+                'ResultsSchools' => $containResultsSchools,
+                'ResultsDistricts' => $containResultsDistricts
             ])
             ->enableHydration(false)
             ->first();
 
         // Group results by rank
         $groupedResults = [];
-        $results = isset($ranking['results_schools']) ? $ranking['results_schools'] : $ranking['results_districts'];
+        $results = $ranking['results_schools'] ?? $ranking['results_districts'];
         foreach ($results as $result) {
-            /** @var RankingResultsSchool|RankingResultsSchoolDistrict $result */
             $groupedResults[$result['rank']][] = $result;
         }
 
