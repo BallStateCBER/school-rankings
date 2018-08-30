@@ -5,7 +5,6 @@ use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
-use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
@@ -74,10 +73,9 @@ class FixSelectableCommand extends CommonCommand
             ->select(['id', 'name', 'selectable', 'context'])
             ->enableHydration(false)
             ->toArray();
-        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
         $this->io->out(sprintf(
-            ' - Done (took %s)',
-            str_replace(' ago', '', $duration)
+            ' - Done %s',
+            $this->getDuration($start)
         ));
     }
 
@@ -95,10 +93,9 @@ class FixSelectableCommand extends CommonCommand
             $this->hasStats[$metric['id']] = $this->statsTable->exists(['metric_id' => $metric['id']]);
             $this->progress->increment(1)->draw();
         }
-        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
         $this->io->overwrite(sprintf(
-            ' - Done (took %s)',
-            str_replace(' ago', '', $duration)
+            ' - Done %s',
+            $this->getDuration($start)
         ));
     }
 
@@ -122,10 +119,9 @@ class FixSelectableCommand extends CommonCommand
             }
             $this->progress->increment(1)->draw();
         }
-        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
         $this->io->overwrite(sprintf(
-            ' - Done (took %s)',
-            str_replace(' ago', '', $duration)
+            ' - Done %s',
+            $this->getDuration($start)
         ));
 
         foreach ($this->updates as $mode => $metrics) {
@@ -180,10 +176,9 @@ class FixSelectableCommand extends CommonCommand
                 );
             }
         }
-        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
         $this->io->overwrite(sprintf(
-            ' - Done (took %s)',
-            str_replace(' ago', '', $duration)
+            ' - Done %s',
+            $this->getDuration($start)
         ));
 
         // Display table in pages of 50 elements
@@ -205,7 +200,6 @@ class FixSelectableCommand extends CommonCommand
             $page++;
         }
         unset(
-            $duration,
             $page,
             $pageData,
             $perPage,

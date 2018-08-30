@@ -4,6 +4,7 @@ namespace App\Command;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\I18n\Time;
 use Cake\Shell\Helper\ProgressHelper;
 use Exception;
 
@@ -114,5 +115,27 @@ class CommonCommand extends Command
             ['y', 'n'],
             $default
         ) == 'y';
+    }
+
+    /**
+     * Returns a string describing the duration of time elapsed since $start
+     *
+     * @param int $start Timestamp
+     * @return string
+     */
+    protected function getDuration(int $start)
+    {
+        $end = time();
+
+        if ($start == $end) {
+            return '(took < 1 second)';
+        }
+
+        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
+
+        return sprintf(
+            '(took %s)',
+            str_replace(' ago', '', $duration)
+        );
     }
 }
