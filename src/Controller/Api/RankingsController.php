@@ -3,6 +3,8 @@ namespace App\Controller\Api;
 
 use App\Controller\AppController;
 use App\Model\Entity\Ranking;
+use App\Model\Entity\Statistic;
+use App\Model\Table\MetricsTable;
 use App\Model\Table\RankingsTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
@@ -218,7 +220,6 @@ class RankingsController extends AppController
             ]);
         };
 
-        /** @var Ranking $ranking */
         $ranking = $this->rankingsTable->find()
             ->where(['Rankings.id' => $rankingId])
             ->select(['id'])
@@ -229,6 +230,8 @@ class RankingsController extends AppController
             ])
             ->enableHydration(false)
             ->first();
+
+        $ranking = $this->formatPercentageValues($ranking);
 
         // Group results by rank
         $groupedResults = [];
@@ -263,5 +266,42 @@ class RankingsController extends AppController
             '_serialize' => ['results'],
             'results' => $retval
         ]);
+    }
+
+    /**
+     * Ensures that all statistics for percentage-style metrics are formatted correctly
+     *
+     * This makes up for the fact that Indiana Department of Education data formats some percentage stats as
+     * floats (e.g. 0.41) and some as strings (e.g. "41%")
+     *
+     * @param array $ranking Ranking results
+     * @return array
+     */
+    private function formatPercentageValues($ranking)
+    {
+        $metricIsPercent = [];
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+
+        $resultsFields = ['results_districts', 'results_schools'];
+        foreach ($resultsFields as $results) {
+            foreach ($ranking[$results] as &$subject) {
+                foreach ($subject['statistics'] as &$statistic) {
+                    $metricId = $statistic['metric_id'];
+                    if (!isset($metricIsPercent[$metricId])) {
+                        $metricIsPercent[$metricId] = $metricsTable->isPercentMetric($metricId);
+                    }
+                    if (!$metricIsPercent[$metricId]) {
+                        continue;
+                    }
+                    if (Statistic::isPercentValue($statistic['value'])) {
+                        continue;
+                    }
+                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
+                }
+            }
+        }
+
+        return $ranking;
     }
 }
