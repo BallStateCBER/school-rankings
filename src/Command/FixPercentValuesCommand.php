@@ -11,6 +11,7 @@ use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 
@@ -24,6 +25,7 @@ use Cake\Shell\Helper\ProgressHelper;
  * @property int $unclassifiedMetricCount
  * @property MetricsTable $metricsTable
  * @property ProgressHelper $progress
+ * @property ResultSet[] $statistics
  * @property StatisticsTable $statisticsTable
  * @property string $updateResponse
  */
@@ -36,6 +38,7 @@ class FixPercentValuesCommand extends Command
     private $metrics;
     private $metricsTable;
     private $progress;
+    private $statistics;
     private $statisticsCount = 0;
     private $statisticsTable;
     private $unclassifiedMetricCount = 0;
@@ -75,7 +78,10 @@ class FixPercentValuesCommand extends Command
             }
 
             $this->updateStatistics($context);
-            unset($this->metrics[$context]);
+            unset(
+                $this->metrics[$context],
+                $this->statistics
+            );
         }
 
         unset(
@@ -160,7 +166,7 @@ class FixPercentValuesCommand extends Command
         $this->io->out();
         $this->io->out(sprintf(
             'Updating %s misformatted %s statistics... %s',
-            number_format(count($this->metrics[$context])),
+            number_format($this->statisticsCount),
             $context,
             ($this->updateResponse == 'dry run' ? ' (dry run)' : '')
         ));
@@ -169,18 +175,27 @@ class FixPercentValuesCommand extends Command
             'width' => 40,
         ]);
         $this->progress->draw();
-        foreach ($this->metrics[$context] as $metric) {
-            if (!isset($metric->statistics) || !$metric->statistics) {
+        $this->updateStatisticsGroup($this->metrics[$context]);
+    }
+
+    /**
+     * Updates (or performs a dry run) on a group of metrics; called recursively
+     *
+     * @param Metric[] $metrics Group of metrics
+     * @return void
+     */
+    private function updateStatisticsGroup($metrics)
+    {
+        foreach ($metrics as $metric) {
+            if ($metric->children) {
+                $this->updateStatisticsGroup($metric->children);
+            }
+            if (!isset($this->statistics[$metric->id])) {
                 continue;
             }
-
-            foreach ($metric->statistics as $statistic) {
+            foreach ($this->statistics[$metric->id] as $statistic) {
+                /** @var Statistic $statistic */
                 $this->progress->increment(1)->draw();
-                if (!is_numeric($statistic->value)) {
-                    $this->io->overwrite('Skipping non-numeric value ' . $statistic->value);
-                    continue;
-                }
-
                 $originalValue = $statistic->value;
                 $newValue = $this->reformatValue($originalValue, $metric->is_percent);
                 $statistic = $this->statisticsTable->patchEntity($statistic, ['value' => $newValue]);
@@ -192,7 +207,12 @@ class FixPercentValuesCommand extends Command
                         continue;
                     }
 
-                    $this->io->overwrite('Would update ' . $originalValue . ' to ' . $newValue);
+                    $this->io->overwrite(sprintf(
+                        ' - Stat #%s: %s would be updated to %s',
+                        $statistic->id,
+                        $originalValue,
+                        $newValue
+                    ));
                     continue;
                 }
 
@@ -200,7 +220,7 @@ class FixPercentValuesCommand extends Command
                     $this->io->overwrite('Error updating statistic. Details: ');
                     $this->io->out();
                     print_r($statistic->getErrors());
-                    break 2;
+                    $this->abort();
                 }
             }
         }
@@ -344,11 +364,11 @@ class FixPercentValuesCommand extends Command
      * @param Metric[] $metrics Group of metrics
      * @return void
      */
-    private function findStatisticsGroup(&$metrics)
+    private function findStatisticsGroup($metrics)
     {
-        foreach ($metrics as &$metric) {
+        foreach ($metrics as $metric) {
             $this->progress->increment(1)->draw();
-            $metric->statistics = $this->statisticsTable->find()
+            $results = $this->statisticsTable->find()
                 ->select(['id', 'value', 'school_id', 'school_district_id'])
                 ->where([
                     'metric_id' => $metric->id,
@@ -356,8 +376,9 @@ class FixPercentValuesCommand extends Command
                 ])
                 ->all();
 
-            if ($metric->statistics) {
-                $this->statisticsCount += $metric->statistics->count();
+            if (!$results->isEmpty()) {
+                $this->statistics[$metric->id] = $results;
+                $this->statisticsCount += $results->count();
             }
 
             if ($metric->children) {
