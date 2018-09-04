@@ -10,6 +10,7 @@ use App\Model\Table\CriteriaTable;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
+use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -167,6 +168,7 @@ class MetricMergeCommand extends CommonCommand
 
             $this->io->nl();
             $this->deleteMetric();
+            $this->clearCache();
 
             $this->io->success('Merge successful');
         } catch (StopException $e) {
@@ -744,5 +746,18 @@ class MetricMergeCommand extends CommonCommand
             }
             $this->io->out(' - Updated spreadsheet column  #' . $column->id);
         }
+    }
+
+    /**
+     * Clears cached metric information
+     *
+     * @return void
+     */
+    private function clearCache()
+    {
+        $this->io->out('Clearing cache...');
+        Cache::delete($this->context, 'metrics_api');
+        Cache::delete($this->context . '-no-hidden', 'metrics_api');
+        $this->io->out(' - Done');
     }
 }
