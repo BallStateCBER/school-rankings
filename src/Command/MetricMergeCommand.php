@@ -11,7 +11,6 @@ use App\Model\Table\MetricsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
-use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Exception\StopException;
@@ -44,14 +43,13 @@ use Cake\Utility\Hash;
  * @property StatisticsTable $statisticsTable
  * @property string $context
  */
-class MetricMergeCommand extends Command
+class MetricMergeCommand extends CommonCommand
 {
     private $context;
     private $criteriaTable;
     private $criteriaToDelete;
     private $criteriaToMerge;
     private $criteriaToUpdate;
-    private $io;
     private $metricIdsToDelete;
     private $metricIdToRetain;
     private $metricsTable;
@@ -110,11 +108,11 @@ class MetricMergeCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        parent::execute($args, $io);
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
         $this->spreadsheetColumnsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
-        $this->io = $io;
         $this->metricIdsToDelete = Utility::parseMultipleIdString($args->getArgument('metricIdsToDelete'));
         $this->metricIdToRetain = $args->getArgument('metricIdToRetain');
 
@@ -184,7 +182,7 @@ class MetricMergeCommand extends Command
      */
     private function verifyMetrics()
     {
-        $this->io->out('Verifying metrics...', 0);
+        $this->io->out('Verifying metrics...');
         $this->metricsToDelete = [];
 
         try {
@@ -246,15 +244,17 @@ class MetricMergeCommand extends Command
     /**
      * Retrieves the first metric's associated statistics
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function collectStatistics()
     {
-        $this->io->out('Collecting statistics...', 0);
+        $start = time();
+        $this->io->out('Collecting statistics...');
         $locationField = Context::getLocationField($this->context);
         $this->statsToMerge = [];
 
+        $this->makeProgressBar(count($this->metricIdsToDelete));
+        $messages = [];
         foreach ($this->metricIdsToDelete as $metricId) {
             $stats = $this->statisticsTable->find()
                 ->select([
@@ -266,19 +266,29 @@ class MetricMergeCommand extends Command
                 ])
                 ->where(['metric_id' => $metricId])
                 ->toArray();
+            $this->progress->increment(1)->draw();
             if (!$stats) {
-                $this->io->overwrite('No statistics associated with metric #' . $metricId);
+                //$this->io->overwrite('No statistics associated with metric #' . $metricId);
 
                 continue;
             }
 
             $count = count($stats);
-            $this->io->overwrite(
-                $count . __n(' statistic', ' statistics', $count) .
-                ' found for metric #' . $metricId
+            $messages[] = sprintf(
+                '%s %s found for metric #%s',
+                $count,
+                __n('statistic', 'statistics', $count),
+                $metricId
             );
 
             $this->statsToMerge = array_merge($this->statsToMerge, $stats);
+        }
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
+        foreach ($messages as $message) {
+            $this->io->out(' - ' . $message);
         }
     }
 
@@ -290,13 +300,15 @@ class MetricMergeCommand extends Command
      */
     private function checkForStatConflicts()
     {
+        $start = time();
         $locationField = Context::getLocationField($this->context);
-        $this->io->out('Checking for conflicts...', 0);
+        $this->io->out('Checking for conflicts...');
         $this->sortedStats = [
             'noConflict' => [],
             'equalValues' => [],
             'inequalValues' => []
         ];
+        $this->makeProgressBar(count($this->statsToMerge));
         foreach ($this->statsToMerge as $stat) {
             /** @var Statistic $conflictStat */
             $conflictStat = $this->statisticsTable->find()
@@ -307,6 +319,7 @@ class MetricMergeCommand extends Command
                     'metric_id' => $this->metricIdToRetain
                 ])
                 ->first();
+            $this->progress->increment(1)->draw();
             if ($conflictStat) {
                 $key = $conflictStat->value == $stat->value ? 'equalValues' : 'inequalValues';
                 $this->sortedStats[$key][] = $stat->id;
@@ -319,7 +332,11 @@ class MetricMergeCommand extends Command
         $ivCount = count($this->sortedStats['inequalValues']);
         $totalConflicts = $evCount + $ivCount;
         $this->io->overwrite(sprintf(
-            '%s %s found %s',
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
+        $this->io->out(sprintf(
+            ' - %s %s found %s',
             $totalConflicts ? $totalConflicts : 'No',
             __n('conflict', 'conflicts', $totalConflicts),
             $totalConflicts ? '(statistics with matching years and locations for both of these metrics)' : null
@@ -358,13 +375,16 @@ class MetricMergeCommand extends Command
      */
     private function prepareStats()
     {
-        $this->io->out('Preparing stats...', 0);
+        $start = time();
+        $this->io->out('Preparing stats...');
 
         $this->statsToUpdate = [];
         $this->statsToDelete = [];
 
+        $this->makeProgressBar(count($this->statsToMerge));
         /** @var Statistic $stat */
         foreach ($this->statsToMerge as $stat) {
+            $this->progress->increment(1)->draw();
             // Moving
             if (in_array($stat->id, $this->sortedStats['noConflict'])) {
                 $stat = $this->statisticsTable->patchEntity($stat, ['metric_id' => $this->metricIdToRetain]);
@@ -395,7 +415,10 @@ class MetricMergeCommand extends Command
             $this->abort();
         }
 
-        $this->io->overwrite('Stats prepared');
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
     }
 
     /**
@@ -406,10 +429,13 @@ class MetricMergeCommand extends Command
      */
     private function collectCriteria()
     {
-        $this->io->out("\nCollecting formula criteria...", 0);
+        $start = time();
+        $this->io->out("Collecting formula criteria...");
         $context = $this->context;
         $this->criteriaToMerge = [];
 
+        $this->makeProgressBar(count($this->metricIdsToDelete));
+        $messages = [];
         foreach ($this->metricIdsToDelete as $metricId) {
             $criteria = $this->criteriaTable->find()
                 ->select(['id', 'formula_id'])
@@ -418,18 +444,28 @@ class MetricMergeCommand extends Command
                     return $q->where(['Formulas.context' => $context]);
                 })
                 ->toArray();
+            $this->progress->increment(1)->draw();
             if (!$criteria) {
-                $this->io->overwrite('No criteria associated with metric #' . $metricId);
+                $messages[] = 'No criteria associated with metric #' . $metricId;
 
                 continue;
             }
             $count = count($this->criteriaToMerge);
-            $this->io->overwrite(
-                $count . __n(' criterion', ' criteria', $count) .
-                ' found for metric #' . $metricId
+            $messages[] = sprintf(
+                '%s %s found for metric # %s',
+                $count,
+                __n('criterion', 'criteria', $count),
+                $metricId
             );
 
             $this->criteriaToMerge = array_merge($this->criteriaToMerge, $criteria);
+        }
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
+        foreach ($messages as $message) {
+            $this->io->out(' - ' . $message);
         }
     }
 
@@ -441,11 +477,13 @@ class MetricMergeCommand extends Command
      */
     private function checkForCriteriaConflicts()
     {
-        $this->io->out('Checking for conflicts...', 0);
+        $start = time();
+        $this->io->out('Checking for conflicts...');
         $this->sortedCriteria = [
             'noConflict' => [],
             'conflict' => []
         ];
+        $this->makeProgressBar(count($this->criteriaToMerge));
         foreach ($this->criteriaToMerge as $criterion) {
             /** @var Criterion $criterion */
             $conflictCriterion = $this->criteriaTable->find()
@@ -459,6 +497,8 @@ class MetricMergeCommand extends Command
                 ])
                 ->first();
 
+            $this->progress->increment(1)->draw();
+
             if ($conflictCriterion) {
                 $this->sortedCriteria['conflict'][] = $criterion->id;
                 continue;
@@ -466,10 +506,14 @@ class MetricMergeCommand extends Command
 
             $this->sortedCriteria['noConflict'][] = $criterion->id;
         }
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
         $conflictCount = count($this->sortedCriteria['conflict']);
         $noConflictCount = count($this->sortedCriteria['noConflict']);
-        $this->io->overwrite(sprintf(
-            '%s %s found %s',
+        $this->io->out(sprintf(
+            ' - %s %s found %s',
             $conflictCount ? $conflictCount : 'No',
             __n('conflict', 'conflicts', $conflictCount),
             $conflictCount ? '(formulas with both of these metrics)' : null
@@ -499,13 +543,15 @@ class MetricMergeCommand extends Command
      */
     private function mergeStats()
     {
+        $start = time();
         $this->io->out('Merging stats...');
+        $this->makeProgressBar(count($this->statsToUpdate) + count($this->statsToDelete));
         foreach ($this->statsToUpdate as $stat) {
             if (!$this->statisticsTable->save($stat)) {
                 $this->io->error('Error updating statistic #' . $stat->id);
                 $this->abort();
             }
-            $this->io->out(' - Updated stat #' . $stat->id);
+            $this->progress->increment(1)->draw();
         }
 
         foreach ($this->statsToDelete as $stat) {
@@ -513,8 +559,13 @@ class MetricMergeCommand extends Command
                 $this->io->error('Error deleting statistic #' . $stat->id);
                 $this->abort();
             }
-            $this->io->out(' - Deleted stat #' . $stat->id);
+            $this->progress->increment(1)->draw();
         }
+
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
     }
 
     /**
@@ -524,13 +575,17 @@ class MetricMergeCommand extends Command
      */
     private function prepareCriteria()
     {
-        $this->io->out('Preparing criteria...', 0);
+        $start = time();
+        $this->io->out('Preparing criteria...');
 
         $this->criteriaToUpdate = [];
         $this->criteriaToDelete = [];
 
         /** @var Criterion $criterion */
+        $this->makeProgressBar(count($this->criteriaToMerge));
         foreach ($this->criteriaToMerge as $criterion) {
+            $this->progress->increment(1)->draw();
+
             // Moving
             if (in_array($criterion->id, $this->sortedCriteria['noConflict'])) {
                 $criterion = $this->criteriaTable->patchEntity($criterion, ['metric_id' => $this->metricIdToRetain]);
@@ -561,7 +616,10 @@ class MetricMergeCommand extends Command
             $this->abort();
         }
 
-        $this->io->overwrite('Criteria prepared');
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
     }
 
     /**
@@ -571,13 +629,15 @@ class MetricMergeCommand extends Command
      */
     private function mergeCriteria()
     {
+        $start = time();
         $this->io->out('Merging criteria...');
+        $this->makeProgressBar(count($this->criteriaToUpdate) + count($this->criteriaToDelete));
         foreach ($this->criteriaToUpdate as $criterion) {
             if (!$this->criteriaTable->save($criterion)) {
                 $this->io->error('Error updating criterion #' . $criterion->id);
                 $this->abort();
             }
-            $this->io->out(' - Updated criterion #' . $criterion->id);
+            $this->progress->increment(1)->draw();
         }
 
         foreach ($this->criteriaToDelete as $criterion) {
@@ -585,8 +645,13 @@ class MetricMergeCommand extends Command
                 $this->io->error('Error deleting criterion #' . $criterion->id);
                 $this->abort();
             }
-            $this->io->out(' - Deleted criterion #' . $criterion->id);
+            $this->progress->increment(1)->draw();
         }
+
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
     }
 
     /**
@@ -619,7 +684,7 @@ class MetricMergeCommand extends Command
      */
     private function collectSpreadsheetColumns()
     {
-        $this->io->out("\nCollecting import spreadsheet columns...", 0);
+        $this->io->out("Collecting import spreadsheet columns...");
         $this->spreadsheetColumnsToUpdate = $this->spreadsheetColumnsTable->find()
             ->where([
                 function (QueryExpression $exp) {
@@ -631,7 +696,7 @@ class MetricMergeCommand extends Command
         if ($this->spreadsheetColumnsToUpdate) {
             $count = count($this->spreadsheetColumnsToUpdate);
             $this->io->overwrite(sprintf(
-                "%s associated spreadsheet %s found",
+                " - %s associated spreadsheet %s found",
                 $count,
                 __n('column', 'columns', $count)
             ));
