@@ -304,7 +304,7 @@ class MetricMergeCommand extends CommonCommand
     {
         $start = time();
         $locationField = Context::getLocationField($this->context);
-        $this->io->out('Checking for conflicts...');
+        $this->io->out('Checking for stat conflicts...');
         $this->sortedStats = [
             'noConflict' => [],
             'equalValues' => [],
@@ -480,7 +480,7 @@ class MetricMergeCommand extends CommonCommand
     private function checkForCriteriaConflicts()
     {
         $start = time();
-        $this->io->out('Checking for conflicts...');
+        $this->io->out('Checking for criterion conflicts...');
         $this->sortedCriteria = [
             'noConflict' => [],
             'conflict' => []
