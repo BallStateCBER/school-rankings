@@ -62,7 +62,7 @@ class MetricsController extends AppController
             $cacheKey .= '-no-hidden';
         }
 
-        $callable = function () use ($noHidden) {
+        $callable = function () use ($context, $noHidden) {
             $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
             $metrics = $metricsTable->find('threaded')
                 ->select([
@@ -74,7 +74,7 @@ class MetricsController extends AppController
                     'selectable',
                     'visible'
                 ])
-                ->where(['context' => 'school'])
+                ->where(['context' => $context])
                 ->toArray();
 
             if ($noHidden) {
