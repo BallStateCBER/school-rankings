@@ -17,6 +17,7 @@ namespace App;
 use App\Command\CheckLocationsCommand;
 use App\Command\CheckStatsCommand;
 use App\Command\FixDistrictAssociationsCommand;
+use App\Command\FixMetricTreeCommand;
 use App\Command\FixPercentValuesCommand;
 use App\Command\FixSelectableCommand;
 use App\Command\ImportLocationsCommand;
@@ -74,6 +75,7 @@ class Application extends BaseApplication
         $commands->add('check-locations', CheckLocationsCommand::class);
         $commands->add('check-stats', CheckStatsCommand::class);
         $commands->add('fix-district-associations', FixDistrictAssociationsCommand::class);
+        $commands->add('fix-metric-tree', FixMetricTreeCommand::class);
         $commands->add('fix-percent-values', FixPercentValuesCommand::class);
         $commands->add('fix-selectable', FixSelectableCommand::class);
         $commands->add('import-locations', ImportLocationsCommand::class);
