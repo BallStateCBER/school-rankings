@@ -94,7 +94,7 @@ class MetricTreeCleanCommand extends Command
                         $io->out(sprintf(
                             '%s - %s (#%s)',
                             str_repeat('  ', $i),
-                            $metricInPath['name'],
+                            str_replace("\n", ' - ', $metricInPath['name']),
                             $metricInPath['id']
                         ));
                     }
