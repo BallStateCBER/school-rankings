@@ -165,6 +165,15 @@ class MetricsTable extends Table
             'errorField' => 'children'
         ]);
 
+        $rules->addDelete(function ($entity) {
+            return !TableRegistry::getTableLocator()
+                ->get('Statistics')
+                ->exists(['metric_id' => $entity->id]);
+        }, 'cantDeleteWithStatistics', [
+            'message' => 'Cannot delete a metric with statistics',
+            'errorField' => 'statistics'
+        ]);
+
         $rules->addUpdate(function ($entity) {
             return !$this->hasIncompatibleStatistics($entity->type, $entity->id);
         }, 'cantChangeMetricContext', [
