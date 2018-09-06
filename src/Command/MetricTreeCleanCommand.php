@@ -7,6 +7,8 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\Datasource\Exception\RecordNotFoundException;
+use Cake\ORM\Exception\PersistenceFailedException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 
@@ -117,8 +119,20 @@ class MetricTreeCleanCommand extends Command
         $this->progress->draw();
         foreach ($this->removableMetricIds as $context => $metricIds) {
             foreach ($metricIds as $metricId) {
-                $metric = $metricsTable->get($metricId);
-                $metricsTable->delete($metric);
+                try {
+                    $metric = $metricsTable->get($metricId);
+                    $metricsTable->deleteOrFail($metric);
+                } catch (RecordNotFoundException $e) {
+                    $io->error('Cannot delete metric #' . $metricId . '. Metric not found.');
+                    $this->abort();
+                } catch (PersistenceFailedException $e) {
+                    $io->error('Cannot delete metric #' . $metricId . '. Delete operation failed. Details:');
+                    $io->nl();
+                    print_r($e->getMessage());
+                    $io->nl();
+                    print_r($metric->getErrors());
+                    $this->abort();
+                }
                 $this->progress->increment(1);
                 $this->progress->draw();
             }
