@@ -211,7 +211,6 @@ class MetricMergeCommand extends CommonCommand
                 }
 
                 $this->metricsToDelete[] = $metric;
-                $this->context = $metric->context;
             }
 
             $metric = $this->metricsTable->get($this->metricIdToRetain);
@@ -227,7 +226,7 @@ class MetricMergeCommand extends CommonCommand
             $this->metricToRetain = $metric;
         } catch (RecordNotFoundException $e) {
             $this->io->out();
-            $this->io->error(ucwords($this->context) . ' metric #' . $metricId . ' not found');
+            $this->io->error('Metric #' . $metricId . ' not found');
             $this->abort();
         }
 
