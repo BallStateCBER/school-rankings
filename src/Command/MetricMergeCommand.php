@@ -186,11 +186,13 @@ class MetricMergeCommand extends CommonCommand
     {
         $this->io->out('Verifying metrics...');
         $this->metricsToDelete = [];
+        $metricNames = [];
 
         try {
             $metricId = null;
             foreach ($this->metricIdsToDelete as $metricId) {
                 $metric = $this->metricsTable->get($metricId);
+                $metricNames[] = $metric->name;
 
                 // Check to see if we can merge these metrics
                 if ($this->context && $metric->context != $this->context) {
@@ -213,6 +215,7 @@ class MetricMergeCommand extends CommonCommand
             }
 
             $metric = $this->metricsTable->get($this->metricIdToRetain);
+            $metricNames[] = $metric->name;
 
             // Make sure the metric being merged into is valid
             if ($metric->context != $this->context) {
@@ -240,6 +243,15 @@ class MetricMergeCommand extends CommonCommand
         }
         $this->io->out('To be merged into:');
         $displayPath($this->metricToRetain);
+
+        // Display note about all of these metric names matching or not
+        $metricNames = array_unique($metricNames);
+        if (count($metricNames) == 1) {
+            $this->io->success('Metric names match');
+        } else {
+            $this->io->warning('Metric names do not match');
+        }
+
         $this->io->out();
     }
 
@@ -297,7 +309,6 @@ class MetricMergeCommand extends CommonCommand
     /**
      * Checks for collected statistics sharing locations and years with statistics associated with the second metric
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function checkForStatConflicts()
@@ -337,12 +348,15 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
-        $this->io->out(sprintf(
-            ' - %s %s found %s',
-            $totalConflicts ? $totalConflicts : 'No',
-            __n('conflict', 'conflicts', $totalConflicts),
-            $totalConflicts ? '(statistics with matching years and locations for both of these metrics)' : null
-        ));
+        if ($totalConflicts) {
+            $this->io->warning(sprintf(
+                ' - %s %s found (statistics with matching years and locations for both of these metrics)',
+                $totalConflicts,
+                __n('conflict', 'conflicts', $totalConflicts)
+            ));
+        } else {
+            $this->io->success(' - No conflicts found');
+        }
         if ($totalConflicts) {
             if ($evCount) {
                 $this->io->out(sprintf(
