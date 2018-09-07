@@ -204,7 +204,7 @@ class MetricMergeCommand extends CommonCommand
                 if ($hasChildren) {
                     $this->io->out();
                     $this->io->error(
-                        ucwords($this->context) . ' metric #' . $metric .
+                        ucwords($this->context) . ' metric #' . $metric->id .
                         ' cannot be merged while it has child-metrics'
                     );
                     $this->abort();
