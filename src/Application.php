@@ -28,6 +28,7 @@ use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
 use App\Shell\RankTestShell;
+use Cake\Core\Configure;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
 use Cake\Routing\Middleware\AssetMiddleware;
@@ -41,6 +42,22 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  */
 class Application extends BaseApplication
 {
+    /**
+     * Application bootstrap method
+     *
+     * @return void
+     */
+    public function bootstrap()
+    {
+        parent::bootstrap();
+
+        $this->addPlugin('Queue');
+
+        if (Configure::read('debug')) {
+            $this->addPlugin('DebugKit');
+        }
+    }
+
     /**
      * Setup the middleware queue your application will use.
      *
