@@ -24,6 +24,7 @@ use App\Command\ImportLocationsCommand;
 use App\Command\ImportStatsCommand;
 use App\Command\ImportStatsStatusCommand;
 use App\Command\MetricMergeCommand;
+use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
 use App\Shell\RankTestShell;
@@ -82,6 +83,7 @@ class Application extends BaseApplication
         $commands->add('import-stats', ImportStatsCommand::class);
         $commands->add('import-stats-status', ImportStatsStatusCommand::class);
         $commands->add('metric-merge', MetricMergeCommand::class);
+        $commands->add('metric-parent-merge', MetricParentMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
         $commands->add('rank-test', RankTestShell::class);
