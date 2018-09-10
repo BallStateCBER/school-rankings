@@ -787,14 +787,20 @@ class MetricMergeCommand extends CommonCommand
     }
 
     /**
-     * Runs fix-metric-tree command
+     * Recovers tree structure
      *
      * @throws \Exception
      * @return void
      */
     private function fixTree()
     {
-        $arguments = new Arguments([], [], []);
-        (new FixMetricTreeCommand())->execute($arguments, $this->io);
+        $start = time();
+        $this->io->out("Recovering $this->context metric tree...");
+        $this->metricsTable->setScope($this->context);
+        $this->metricsTable->recover();
+        $this->io->overwrite(sprintf(
+            ' - Done %s',
+            $this->getDuration($start)
+        ));
     }
 }
