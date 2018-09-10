@@ -192,6 +192,9 @@ class MetricMergeCommand extends CommonCommand
             $metricId = null;
             foreach ($this->metricIdsToDelete as $metricId) {
                 $metric = $this->metricsTable->get($metricId);
+                if (!$this->context) {
+                    $this->context = $metric->context;
+                }
                 $metricNames[] = $metric->name;
 
                 // Check to see if we can merge these metrics
