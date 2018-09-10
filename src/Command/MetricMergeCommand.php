@@ -169,6 +169,7 @@ class MetricMergeCommand extends CommonCommand
             $this->io->nl();
             $this->deleteMetric();
             $this->clearCache();
+            $this->fixTree();
 
             $this->io->success('Merge successful');
         } catch (StopException $e) {
@@ -775,5 +776,17 @@ class MetricMergeCommand extends CommonCommand
         Cache::delete($this->context, 'metrics_api');
         Cache::delete($this->context . '-no-hidden', 'metrics_api');
         $this->io->out(' - Done');
+    }
+
+    /**
+     * Runs fix-metric-tree command
+     *
+     * @throws \Exception
+     * @return void
+     */
+    private function fixTree()
+    {
+        $arguments = new Arguments([], [], []);
+        (new FixMetricTreeCommand())->execute($arguments, $this->io);
     }
 }

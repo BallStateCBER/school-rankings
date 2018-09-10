@@ -38,6 +38,5 @@ class FixMetricTreeCommand extends CommonCommand
                 $this->getDuration($start)
             ));
         }
-        $io->success('Finished');
     }
 }
