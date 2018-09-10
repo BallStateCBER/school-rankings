@@ -32,6 +32,7 @@ use Cake\Utility\Hash;
  * @property array $statsToDelete
  * @property array $statsToMerge
  * @property array $statsToUpdate
+ * @property bool $abort
  * @property ConsoleIo $io
  * @property CriteriaTable $criteriaTable
  * @property int $metricIdToRetain
@@ -46,6 +47,7 @@ use Cake\Utility\Hash;
  */
 class MetricMergeCommand extends CommonCommand
 {
+    private $abort = false;
     private $context;
     private $criteriaTable;
     private $criteriaToDelete;
@@ -119,6 +121,9 @@ class MetricMergeCommand extends CommonCommand
 
         try {
             $this->verifyMetrics();
+            if ($this->abort) {
+                return;
+            }
 
             $this->collectStatistics();
             if ($this->statsToMerge) {
@@ -253,6 +258,9 @@ class MetricMergeCommand extends CommonCommand
             $this->io->success('Metric names match');
         } else {
             $this->io->warning('Metric names do not match');
+            if (!$this->getConfirmation('Continue?')) {
+                $this->abort = true;
+            }
         }
 
         $this->io->out();
