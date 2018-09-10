@@ -131,14 +131,14 @@ class MetricMergeCommand extends CommonCommand
             $this->collectStatistics();
             if ($this->statsToMerge) {
                 $this->checkForStatConflicts();
-                $this->io->nl();
+                $this->io->out();
                 $this->prepareStats();
             }
 
             $this->collectCriteria();
             if ($this->criteriaToMerge) {
                 $this->checkForCriteriaConflicts();
-                $this->io->nl();
+                $this->io->out();
                 $this->prepareCriteria();
             }
 
@@ -168,21 +168,21 @@ class MetricMergeCommand extends CommonCommand
             Cache::write($this->dbLockKey, true);
 
             if ($this->statsToMerge) {
-                $this->io->nl();
+                $this->io->out();
                 $this->mergeStats();
             }
 
             if ($this->criteriaToMerge) {
-                $this->io->nl();
+                $this->io->out();
                 $this->mergeCriteria();
             }
 
             if ($this->spreadsheetColumnsToUpdate) {
-                $this->io->nl();
+                $this->io->out();
                 $this->updateSpreadsheetColumns();
             }
 
-            $this->io->nl();
+            $this->io->out();
             $this->deleteMetric();
             $this->clearCache();
             $this->fixTree();
