@@ -18,6 +18,7 @@ use Cake\Console\Exception\StopException;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Database\Query;
 use Cake\Datasource\Exception\RecordNotFoundException;
+use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 
@@ -44,6 +45,7 @@ use Cake\Utility\Hash;
  * @property SpreadsheetColumnsMetricsTable $spreadsheetColumnsTable
  * @property StatisticsTable $statisticsTable
  * @property string $context
+ * @property string $dbLockKey
  */
 class MetricMergeCommand extends CommonCommand
 {
@@ -53,6 +55,7 @@ class MetricMergeCommand extends CommonCommand
     private $criteriaToDelete;
     private $criteriaToMerge;
     private $criteriaToUpdate;
+    private $dbLockKey = 'db_lock';
     private $metricIdsToDelete;
     private $metricIdToRetain;
     private $metricsTable;
@@ -156,6 +159,14 @@ class MetricMergeCommand extends CommonCommand
                 return;
             }
 
+            try {
+                $this->waitForDbUnlock();
+            } catch (StopException $e) {
+                return;
+            }
+
+            Cache::write($this->dbLockKey, true);
+
             if ($this->statsToMerge) {
                 $this->io->nl();
                 $this->mergeStats();
@@ -175,6 +186,8 @@ class MetricMergeCommand extends CommonCommand
             $this->deleteMetric();
             $this->clearCache();
             $this->fixTree();
+
+            Cache::write($this->dbLockKey, false);
 
             $this->io->success('Merge successful');
         } catch (StopException $e) {
@@ -802,5 +815,47 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+    }
+
+    /**
+     * Waits for the db_lock cached value to be falsey before allowing the rest of the script to execute
+     *
+     * @param null|int $start Timestamp of when waiting began
+     * @throws StopException
+     * @return bool
+     */
+    private function waitForDbUnlock($start = null)
+    {
+        $start = $start ?? time();
+        $waitDuration = 2; // seconds
+        $waitCycles = 150; // five minutes
+
+        if (!Cache::read($this->dbLockKey)) {
+            return true;
+        }
+
+        $this->io->out('Waiting for other database operations to complete...');
+
+        for ($n = 0; $n < $waitCycles; $n++) {
+            sleep($waitDuration);
+            if (!Cache::read('db_lock')) {
+                return true;
+            }
+        }
+
+        $duration = Time::createFromTimestamp($start)->timeAgoInWords();
+        $continue = $this->getConfirmation(sprintf(
+            'Continue waiting? %s elapsed',
+            str_replace(' ago', '', $duration)
+        ));
+        if ($continue) {
+            return $this->waitForDbUnlock($start);
+        }
+
+        $this->io->out(
+            'If no other merge operations are active, you can run `bin/cake cache clear_all` ' .
+            'to clear the cache and remove the database lock flag'
+        );
+        $this->abort();
     }
 }
