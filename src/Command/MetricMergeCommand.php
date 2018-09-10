@@ -822,7 +822,7 @@ class MetricMergeCommand extends CommonCommand
      *
      * @param null|int $start Timestamp of when waiting began
      * @throws StopException
-     * @return bool
+     * @return null
      */
     private function waitForDbUnlock($start = null)
     {
@@ -831,7 +831,7 @@ class MetricMergeCommand extends CommonCommand
         $waitCycles = 150; // five minutes
 
         if (!Cache::read($this->dbLockKey)) {
-            return true;
+            return null;
         }
 
         $this->io->out('Waiting for other database operations to complete...');
@@ -839,7 +839,7 @@ class MetricMergeCommand extends CommonCommand
         for ($n = 0; $n < $waitCycles; $n++) {
             sleep($waitDuration);
             if (!Cache::read('db_lock')) {
-                return true;
+                return null;
             }
         }
 
@@ -857,5 +857,7 @@ class MetricMergeCommand extends CommonCommand
             'to clear the cache and remove the database lock flag'
         );
         $this->abort();
+
+        return null;
     }
 }
