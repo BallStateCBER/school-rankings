@@ -131,7 +131,6 @@ class MetricMergeCommand extends CommonCommand
             $this->collectStatistics();
             if ($this->statsToMerge) {
                 $this->checkForStatConflicts();
-                $this->io->out();
                 $this->prepareStats();
             }
 
@@ -187,7 +186,7 @@ class MetricMergeCommand extends CommonCommand
             $this->clearCache();
             $this->fixTree();
             $this->unlockDb();
-
+            $this->io->out();
             $this->io->success('Merge successful');
         } catch (StopException $e) {
             return;
@@ -274,8 +273,6 @@ class MetricMergeCommand extends CommonCommand
                 $this->abort = true;
             }
         }
-
-        $this->io->out();
     }
 
     /**
@@ -286,6 +283,7 @@ class MetricMergeCommand extends CommonCommand
     private function collectStatistics()
     {
         $start = time();
+        $this->io->out();
         $this->io->out('Collecting statistics...');
         $locationField = Context::getLocationField($this->context);
         $this->statsToMerge = [];
@@ -338,6 +336,7 @@ class MetricMergeCommand extends CommonCommand
     {
         $start = time();
         $locationField = Context::getLocationField($this->context);
+        $this->io->out();
         $this->io->out('Checking for stat conflicts...');
         $this->sortedStats = [
             'noConflict' => [],
@@ -415,6 +414,7 @@ class MetricMergeCommand extends CommonCommand
     private function prepareStats()
     {
         $start = time();
+        $this->io->out();
         $this->io->out('Preparing stats...');
 
         $this->statsToUpdate = [];
@@ -469,6 +469,7 @@ class MetricMergeCommand extends CommonCommand
     private function collectCriteria()
     {
         $start = time();
+        $this->io->out();
         $this->io->out("Collecting formula criteria...");
         $context = $this->context;
         $this->criteriaToMerge = [];
@@ -723,6 +724,7 @@ class MetricMergeCommand extends CommonCommand
      */
     private function collectSpreadsheetColumns()
     {
+        $this->io->out();
         $this->io->out("Collecting import spreadsheet columns...");
         $this->spreadsheetColumnsToUpdate = $this->spreadsheetColumnsTable->find()
             ->where([
@@ -792,6 +794,7 @@ class MetricMergeCommand extends CommonCommand
      */
     private function clearCache()
     {
+        $this->io->out();
         $this->io->out('Clearing cache...');
         Cache::delete($this->context, 'metrics_api');
         Cache::delete($this->context . '-no-hidden', 'metrics_api');
@@ -807,6 +810,7 @@ class MetricMergeCommand extends CommonCommand
     private function fixTree()
     {
         $start = time();
+        $this->io->out();
         $this->io->out("Recovering $this->context metric tree...");
         $this->metricsTable->setScope($this->context);
         $this->metricsTable->recover();
@@ -833,6 +837,7 @@ class MetricMergeCommand extends CommonCommand
             return null;
         }
 
+        $this->io->out();
         $this->io->out('Waiting for other database operations to complete...');
 
         for ($n = 0; $n < $waitCycles; $n++) {
