@@ -165,7 +165,7 @@ class MetricMergeCommand extends CommonCommand
                 return;
             }
 
-            Cache::write($this->dbLockKey, true);
+            $this->lockDb();
 
             if ($this->statsToMerge) {
                 $this->io->out();
@@ -186,8 +186,7 @@ class MetricMergeCommand extends CommonCommand
             $this->deleteMetric();
             $this->clearCache();
             $this->fixTree();
-
-            Cache::write($this->dbLockKey, false);
+            $this->unlockDb();
 
             $this->io->success('Merge successful');
         } catch (StopException $e) {
@@ -830,7 +829,7 @@ class MetricMergeCommand extends CommonCommand
         $waitDuration = 2; // seconds
         $waitCycles = 150; // five minutes
 
-        if (!Cache::read($this->dbLockKey)) {
+        if (!$this->dbIsLocked()) {
             return null;
         }
 
@@ -838,7 +837,7 @@ class MetricMergeCommand extends CommonCommand
 
         for ($n = 0; $n < $waitCycles; $n++) {
             sleep($waitDuration);
-            if (!Cache::read('db_lock')) {
+            if (!$this->dbIsLocked()) {
                 return null;
             }
         }
@@ -859,5 +858,35 @@ class MetricMergeCommand extends CommonCommand
         $this->abort();
 
         return null;
+    }
+
+    /**
+     * Flags the database as being locked, preventing concurrent merge scripts from updating the database
+     *
+     * @return void
+     */
+    private function lockDb()
+    {
+        Cache::write($this->dbLockKey, true);
+    }
+
+    /**
+     * Removes flag marking database as being locked
+     *
+     * @return void
+     */
+    private function unlockDb()
+    {
+        Cache::write($this->dbLockKey, false);
+    }
+
+    /**
+     * Returns a boolean indicating whether or not the database is currently locked in respect to metric merge scripts
+     *
+     * @return bool
+     */
+    private function dbIsLocked()
+    {
+        return (bool)Cache::read($this->dbLockKey);
     }
 }
