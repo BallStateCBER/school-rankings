@@ -77,21 +77,25 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $statIdToDelete = 3;
 
         $this->assertTrue(
-            $statsTable->exists(['id' => $statIdToDelete])
+            $statsTable->exists(['id' => $statIdToDelete]),
+            'Stat to delete does not exist'
         );
         $this->assertEquals(
             $metricA,
-            $statsTable->get($statIdToUpdate)->metric_id
+            $statsTable->get($statIdToUpdate)->metric_id,
+            'Stat to update doesn\'t have expected metric ID'
         );
 
         $this->exec("metric-merge $metricA $metricB", ['y']);
 
         $this->assertEquals(
             $metricB,
-            $statsTable->get($statIdToUpdate)->metric_id
+            $statsTable->get($statIdToUpdate)->metric_id,
+            'Stat to update was not updated'
         );
         $this->assertFalse(
-            $statsTable->exists(['id' => $statIdToDelete])
+            $statsTable->exists(['id' => $statIdToDelete]),
+            'Stat to delete was not deleted'
         );
     }
 
