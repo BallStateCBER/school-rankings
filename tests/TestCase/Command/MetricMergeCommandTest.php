@@ -86,7 +86,10 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
             'Stat to update doesn\'t have expected metric ID'
         );
 
-        $this->exec("metric-merge $metricA $metricB", ['y']);
+        $this->exec("metric-merge $metricA $metricB", [
+            'y', // Acknowledge metric name mismatch
+            'y' // Confirm merge
+        ]);
 
         $this->assertEquals(
             $metricB,
@@ -126,7 +129,10 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 
         // Execute merge
         try {
-            $this->exec("metric-merge $metricA $metricB", ['y']);
+            $this->exec("metric-merge $metricA $metricB", [
+                'y', // Acknowledge metric name mismatch
+                'y' // Confirm merge
+            ]);
         } catch (StopException $e) {
             print_r($e->getCode());
         }
@@ -159,7 +165,10 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $metricB = 3;
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->assertTrue($metricsTable->exists(['id' => $metricA]));
-        $this->exec("metric-merge $metricA $metricB", ['y']);
+        $this->exec("metric-merge $metricA $metricB", [
+            'y', // Acknowledge metric name mismatch
+            'y' // Confirm merge
+        ]);
         $this->assertFalse($metricsTable->exists(['id' => $metricA]));
     }
 
