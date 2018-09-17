@@ -212,7 +212,7 @@ class MetricMergeCommand extends CommonCommand
                 if (!$this->context) {
                     $this->context = $metric->context;
                 }
-                $metricNames[] = $metric->name;
+                $metricNames[] = strtolower($metric->name);
 
                 // Check to see if we can merge these metrics
                 if ($this->context && $metric->context != $this->context) {
@@ -234,7 +234,7 @@ class MetricMergeCommand extends CommonCommand
             }
 
             $metric = $this->metricsTable->get($this->metricIdToRetain);
-            $metricNames[] = $metric->name;
+            $metricNames[] = strtolower($metric->name);
 
             // Make sure the metric being merged into is valid
             if ($metric->context != $this->context) {
