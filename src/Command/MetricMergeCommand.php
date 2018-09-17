@@ -255,6 +255,7 @@ class MetricMergeCommand extends CommonCommand
         $displayPath = function ($metric) {
             $path = $this->metricsTable->getMetricTreePath($metric->id);
             $pathString = implode(' > ', Hash::extract($path, '{n}.name'));
+            $pathString = str_replace("\n", '\n', $pathString);
             $this->io->out(' - Metric #' . $metric->id . ': ' . $pathString);
         };
         foreach ($this->metricsToDelete as $metric) {
