@@ -128,6 +128,26 @@ class MetricParentMergeCommand extends CommonCommand
     }
 
     /**
+     * Normalizes whitespace and capitalization for a metric name
+     *
+     * Used to prevent differences in whitespace and capitalization from interfering with the matching of names
+     *
+     * @param string $metricName Metric name
+     * @return string
+     */
+    private function normalizeMetricName($metricName)
+    {
+        $metricName = strtolower($metricName);
+        $metricName = str_replace("\n", ' ', $metricName);
+        while (strpos($metricName, '  ') !== false) {
+            $metricName = str_replace('  ', ' ', $metricName);
+        }
+        $metricName = trim($metricName);
+
+        return $metricName;
+    }
+
+    /**
      * Collects information about what merge operations will take place
      *
      * @return void
@@ -141,33 +161,37 @@ class MetricParentMergeCommand extends CommonCommand
         $this->mergeOperations = [];
 
         foreach ($this->parentMetrics['delete']->child_metrics as $childMetric) {
-            $this->mergeOperations[$childMetric->name] = [
+            $normalizedName = $this->normalizeMetricName($childMetric->name);
+            $this->mergeOperations[$normalizedName] = [
                 'delete' => $childMetric->id
             ];
         }
         foreach ($this->parentMetrics['retain']->child_metrics as $childMetric) {
+            $originalName = $childMetric->name;
+            $normalizedName = $this->normalizeMetricName($originalName);
+
             // No match found
-            if (!isset($this->mergeOperations[$childMetric->name]['delete'])) {
+            if (!isset($this->mergeOperations[$normalizedName]['delete'])) {
                 continue;
             }
 
-            $this->mergeOperations[$childMetric->name]['retain'] = $childMetric->id;
+            $this->mergeOperations[$normalizedName]['retain'] = $childMetric->id;
             $this->io->success(sprintf(
                 ' - Metric #%s will be merged into #%s (%s)',
-                $this->mergeOperations[$childMetric->name]['delete'],
-                $this->mergeOperations[$childMetric->name]['retain'],
-                $childMetric->name
+                $this->mergeOperations[$normalizedName]['delete'],
+                $this->mergeOperations[$normalizedName]['retain'],
+                $originalName
             ));
         }
 
-        foreach ($this->mergeOperations as $metricName => $metricIds) {
+        foreach ($this->mergeOperations as $normalizedName => $metricIds) {
             if (!isset($metricIds['retain'])) {
                 $this->io->warning(sprintf(
                     ' - Metric #%s will not be merged (no match found for %s)',
-                    $this->mergeOperations[$metricName]['delete'],
-                    $metricName
+                    $this->mergeOperations[$normalizedName]['delete'],
+                    $normalizedName
                 ));
-                unset($this->mergeOperations[$metricName]);
+                unset($this->mergeOperations[$normalizedName]);
             }
         }
 
