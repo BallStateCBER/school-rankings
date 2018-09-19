@@ -499,7 +499,6 @@ class MetricMergeCommand extends CommonCommand
     /**
      * Collects criteria associated with formulas associated with the first metric
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function collectCriteria()
@@ -559,7 +558,6 @@ class MetricMergeCommand extends CommonCommand
     /**
      * Checks for formulas that include criteria associated with both metrics
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function checkForCriteriaConflicts()
@@ -778,7 +776,6 @@ class MetricMergeCommand extends CommonCommand
     /**
      * Collects the records in SpreadsheetColumnsMetricsTable that need their metric_id fields updated
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function collectSpreadsheetColumns()
