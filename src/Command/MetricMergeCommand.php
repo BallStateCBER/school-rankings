@@ -304,8 +304,6 @@ class MetricMergeCommand extends CommonCommand
                 ->toArray();
             $this->progress->increment(1)->draw();
             if (!$stats) {
-                //$this->io->overwrite('No statistics associated with metric #' . $metricId);
-
                 continue;
             }
 
