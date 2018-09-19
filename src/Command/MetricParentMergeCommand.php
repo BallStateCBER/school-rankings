@@ -74,6 +74,11 @@ class MetricParentMergeCommand extends CommonCommand
         parent::execute($args, $io);
         $this->parentMetricIdToDelete = $args->getArgument('parentMetricIdToDelete');
         $this->parentMetricIdToRetain = $args->getArgument('parentMetricIdToRetain');
+        if ($this->parentMetricIdToDelete == $this->parentMetricIdToRetain) {
+            $this->io->error('Metric IDs are identical');
+
+            return;
+        }
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         $this->getContext();
