@@ -231,6 +231,7 @@ class MetricMergeCommand extends CommonCommand
                 }
 
                 $this->metricsToDelete[] = $metric;
+                unset($hasChildren, $metric);
             }
 
             $metric = $this->metricsTable->get($this->metricIdToRetain);
@@ -257,6 +258,7 @@ class MetricMergeCommand extends CommonCommand
             $pathString = implode(' > ', Hash::extract($path, '{n}.name'));
             $pathString = str_replace("\n", '\n', $pathString);
             $this->io->out(' - Metric #' . $metric->id . ': ' . $pathString);
+            unset($metric, $path, $pathString);
         };
         foreach ($this->metricsToDelete as $metric) {
             $displayPath($metric);
@@ -274,6 +276,12 @@ class MetricMergeCommand extends CommonCommand
                 $this->abort = true;
             }
         }
+        unset(
+            $displayPath,
+            $metric,
+            $metricId,
+            $metricNames
+        );
     }
 
     /**
@@ -304,6 +312,7 @@ class MetricMergeCommand extends CommonCommand
                 ->toArray();
             $this->progress->increment(1)->draw();
             if (!$stats) {
+                unset($stats);
                 continue;
             }
 
@@ -316,6 +325,7 @@ class MetricMergeCommand extends CommonCommand
             );
 
             $this->statsToMerge = array_merge($this->statsToMerge, $stats);
+            unset($count, $stats);
         }
         $this->io->overwrite(sprintf(
             ' - Done %s',
@@ -324,6 +334,11 @@ class MetricMergeCommand extends CommonCommand
         foreach ($messages as $message) {
             $this->io->out(' - ' . $message);
         }
+        unset(
+            $locationField,
+            $messages,
+            $start
+        );
     }
 
     /**
@@ -406,6 +421,14 @@ class MetricMergeCommand extends CommonCommand
                 $this->metricIdToRetain
             ));
         }
+        unset(
+            $evCount,
+            $ivCount,
+            $locationField,
+            $ncCount,
+            $start,
+            $totalConflicts
+        );
     }
 
     /**
@@ -434,6 +457,11 @@ class MetricMergeCommand extends CommonCommand
                 $passesRules = $this->statisticsTable->checkRules($stat, 'update');
                 if (empty($errors) && $passesRules) {
                     $this->statsToUpdate[] = $stat;
+                    unset(
+                        $stat,
+                        $errors,
+                        $passesRules
+                    );
                     continue;
                 }
 
@@ -449,6 +477,11 @@ class MetricMergeCommand extends CommonCommand
             $passesRules = $this->statisticsTable->checkRules($stat, 'delete');
             if ($passesRules) {
                 $this->statsToDelete[] = $stat;
+                unset(
+                    $stat,
+                    $errors,
+                    $passesRules
+                );
                 continue;
             }
 
@@ -460,6 +493,7 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+        unset($start);
     }
 
     /**
@@ -501,6 +535,11 @@ class MetricMergeCommand extends CommonCommand
             );
 
             $this->criteriaToMerge = array_merge($this->criteriaToMerge, $criteria);
+            unset(
+                $count,
+                $criteria,
+                $metricId,
+            );
         }
         $this->io->overwrite(sprintf(
             ' - Done %s',
@@ -509,6 +548,12 @@ class MetricMergeCommand extends CommonCommand
         foreach ($messages as $message) {
             $this->io->out(' - ' . $message);
         }
+        unset(
+            $context,
+            $message,
+            $messages,
+            $start
+        );
     }
 
     /**
@@ -528,8 +573,7 @@ class MetricMergeCommand extends CommonCommand
         $this->makeProgressBar(count($this->criteriaToMerge));
         foreach ($this->criteriaToMerge as $criterion) {
             /** @var Criterion $criterion */
-            $conflictCriterion = $this->criteriaTable->find()
-                ->select(['id'])
+            $hasConflictingCriteria = $this->criteriaTable->find()
                 ->where([
                     function (QueryExpression $exp) use ($criterion) {
                         return $exp->notEq('Criteria.id', $criterion->id);
@@ -537,16 +581,18 @@ class MetricMergeCommand extends CommonCommand
                     'formula_id' => $criterion->formula_id,
                     'metric_id' => $this->metricIdToRetain
                 ])
-                ->first();
+                ->count() > 0;
 
             $this->progress->increment(1)->draw();
 
-            if ($conflictCriterion) {
+            if ($hasConflictingCriteria) {
                 $this->sortedCriteria['conflict'][] = $criterion->id;
+                unset($hasConflictingCriteria);
                 continue;
             }
 
             $this->sortedCriteria['noConflict'][] = $criterion->id;
+            unset($hasConflictingCriteria);
         }
         $this->io->overwrite(sprintf(
             ' - Done %s',
@@ -576,6 +622,11 @@ class MetricMergeCommand extends CommonCommand
                 __n('criterion', 'criteria', $conflictCount)
             ));
         }
+        unset(
+            $conflictCount,
+            $noConflictCount,
+            $start
+        );
     }
 
     /**
@@ -608,6 +659,7 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+        unset($start, $stat);
     }
 
     /**
@@ -636,6 +688,7 @@ class MetricMergeCommand extends CommonCommand
                 $passesRules = $this->criteriaTable->checkRules($criterion, 'update');
                 if (empty($errors) && $passesRules) {
                     $this->criteriaToUpdate[] = $criterion;
+                    unset($errors, $passesRules);
                     continue;
                 }
 
@@ -651,6 +704,7 @@ class MetricMergeCommand extends CommonCommand
             $passesRules = $this->criteriaTable->checkRules($criterion, 'delete');
             if ($passesRules) {
                 $this->criteriaToDelete[] = $criterion;
+                unset($passesRules);
                 continue;
             }
 
@@ -662,6 +716,7 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+        unset($criterion, $start);
     }
 
     /**
@@ -694,6 +749,7 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+        unset($criterion, $start);
     }
 
     /**
@@ -716,6 +772,7 @@ class MetricMergeCommand extends CommonCommand
             $this->io->error('Error deleting metric #' . $metric->id);
             $this->abort();
         }
+        unset($metric);
     }
 
     /**
@@ -746,6 +803,7 @@ class MetricMergeCommand extends CommonCommand
         } else {
             $this->io->overwrite("No associated spreadsheet columns found");
         }
+        unset($count);
     }
 
     /**
@@ -770,6 +828,7 @@ class MetricMergeCommand extends CommonCommand
             $this->io->error($msg);
             $this->abort();
         }
+        unset($msg, $passesRules);
     }
 
     /**
@@ -787,6 +846,7 @@ class MetricMergeCommand extends CommonCommand
             }
             $this->io->out(' - Updated spreadsheet column  #' . $column->id);
         }
+        unset($column);
     }
 
     /**
@@ -820,6 +880,7 @@ class MetricMergeCommand extends CommonCommand
             ' - Done %s',
             $this->getDuration($start)
         ));
+        unset($start);
     }
 
     /**
@@ -845,6 +906,13 @@ class MetricMergeCommand extends CommonCommand
         for ($n = 0; $n < $waitCycles; $n++) {
             sleep($waitDuration);
             if (!$this->dbIsLocked()) {
+                unset(
+                    $n,
+                    $start,
+                    $waitCycles,
+                    $waitDuration
+                );
+
                 return null;
             }
         }
@@ -855,6 +923,14 @@ class MetricMergeCommand extends CommonCommand
             str_replace(' ago', '', $duration)
         ));
         if ($continue) {
+            unset(
+                $continue,
+                $duration,
+                $n,
+                $waitCycles,
+                $waitDuration
+            );
+
             return $this->waitForDbUnlock($start);
         }
 
