@@ -354,6 +354,7 @@ class MetricMergeCommand extends CommonCommand
                     'year' => $stat->year,
                     'metric_id' => $this->metricIdToRetain
                 ])
+                ->enableHydration(false)
                 ->first();
             $this->progress->increment(1)->draw();
             if ($conflictStat) {
