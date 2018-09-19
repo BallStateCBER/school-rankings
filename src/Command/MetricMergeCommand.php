@@ -371,7 +371,7 @@ class MetricMergeCommand extends CommonCommand
                 ->first();
             $this->progress->increment(1)->draw();
             if ($conflictStat) {
-                $key = $conflictStat->value == $stat->value ? 'equalValues' : 'inequalValues';
+                $key = $conflictStat['value'] == $stat->value ? 'equalValues' : 'inequalValues';
                 $this->sortedStats[$key][] = $stat->id;
                 unset($conflictStat, $key);
                 continue;
