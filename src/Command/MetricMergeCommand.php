@@ -358,10 +358,12 @@ class MetricMergeCommand extends CommonCommand
             if ($conflictStat) {
                 $key = $conflictStat->value == $stat->value ? 'equalValues' : 'inequalValues';
                 $this->sortedStats[$key][] = $stat->id;
+                unset($conflictStat, $key);
                 continue;
             }
 
             $this->sortedStats['noConflict'][] = $stat->id;
+            unset($conflictStat);
         }
         $evCount = count($this->sortedStats['equalValues']);
         $ivCount = count($this->sortedStats['inequalValues']);
