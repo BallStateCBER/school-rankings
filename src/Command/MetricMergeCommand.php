@@ -537,7 +537,7 @@ class MetricMergeCommand extends CommonCommand
             unset(
                 $count,
                 $criteria,
-                $metricId,
+                $metricId
             );
         }
         $this->io->overwrite(sprintf(
