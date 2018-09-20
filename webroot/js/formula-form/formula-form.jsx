@@ -321,6 +321,21 @@ class FormulaForm extends React.Component {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
+          <section>
+            <h3>
+              Where would you like to search?
+            </h3>
+            <div className="form-group">
+              <label htmlFor="county">
+                County
+              </label>
+              <Select name="county" id="county"
+                      value={this.state.county}
+                      onChange={this.handleSelectCounty}
+                      options={FormulaForm.getCountyOptions()} clearable={false}
+                      required={true} />
+            </div>
+          </section>
           <section className="form-group">
             <h3>
               <label>
@@ -344,21 +359,6 @@ class FormulaForm extends React.Component {
               <label className="form-check-label" htmlFor="context-district">
                 School corporations (districts)
               </label>
-            </div>
-          </section>
-          <section>
-            <h3>
-              Where would you like to search?
-            </h3>
-            <div className="form-group">
-              <label htmlFor="county">
-                County
-              </label>
-              <Select name="county" id="county"
-                      value={this.state.county}
-                      onChange={this.handleSelectCounty}
-                      options={FormulaForm.getCountyOptions()} clearable={false}
-                      required={true} />
             </div>
           </section>
           {this.state.context &&
