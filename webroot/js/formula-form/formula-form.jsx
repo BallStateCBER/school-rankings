@@ -9,6 +9,7 @@ import '../../css/formula-form.scss';
 import {Criterion} from './criterion.jsx';
 import {RankingResults} from './ranking-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
+import {SchoolTypeSelector} from './school-type-selector.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class FormulaForm extends React.Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
+    this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
     this.handleSelectMetric = this.handleSelectMetric.bind(this);
@@ -52,6 +54,14 @@ class FormulaForm extends React.Component {
     this.setState({
       county: selectedOption ? selectedOption.value : null,
     });
+  }
+
+  handleSelectSchoolTypes(selectedOptions) {
+    this.setState({
+      schoolTypes: selectedOptions,
+    });
+    console.log('School types in form are now:');
+    console.log(selectedOptions);
   }
 
   handleSubmit(event) {
@@ -169,6 +179,19 @@ class FormulaForm extends React.Component {
       selectOptions.push({
         value: county.id,
         label: county.name,
+      });
+    }
+
+    return selectOptions;
+  }
+
+  static getSchoolTypeOptions() {
+    let selectOptions = [];
+    for (let n = 0; n < window.formulaForm.schoolTypes.length; n++) {
+      let schoolType = window.formulaForm.schoolTypes[n];
+      selectOptions.push({
+        id: schoolType.id,
+        name: schoolType.name,
       });
     }
 
@@ -361,6 +384,11 @@ class FormulaForm extends React.Component {
               </label>
             </div>
           </section>
+          {this.state.context === 'school' &&
+              <SchoolTypeSelector
+                  schoolTypes={FormulaForm.getSchoolTypeOptions()}
+                  handleUpdate={this.handleSelectSchoolTypes} />
+          }
           {this.state.context &&
             <MetricSelector context={this.state.context}
                             handleSelectMetric={this.handleSelectMetric}
