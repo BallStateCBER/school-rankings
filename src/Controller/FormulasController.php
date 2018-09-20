@@ -22,6 +22,7 @@ class FormulasController extends AppController
     public function form()
     {
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
+        $schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
         $this->set([
             'counties' => $countiesTable->find()
                 ->select(['Counties.id', 'Counties.name'])
@@ -29,6 +30,10 @@ class FormulasController extends AppController
                     return $q->where(['States.name' => 'Indiana']);
                 })
                 ->orderAsc('Counties.name')
+                ->toArray(),
+            'schoolTypes' => $schoolTypesTable->find()
+                ->select(['id', 'name'])
+                ->all()
                 ->toArray(),
             'titleForLayout' => 'Create a Ranking Formula'
         ]);
