@@ -5,6 +5,7 @@ use App\Model\Entity\Statistic;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Cake\Validation\Validator;
 
 class StatisticsTable extends Table
@@ -164,6 +165,26 @@ class StatisticsTable extends Table
             [
                 'errorField' => 'school_district_id',
                 'message' => 'District not found'
+            ]
+        );
+
+        // Percentages must be between 0 and 100 (or "0%" and "100%")
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $rules->add(
+            function ($entity) use ($metricsTable, $rules) {
+                if (!$metricsTable->isPercentMetric($entity->metric_id)) {
+                    return true;
+                }
+
+                $value = (float)str_replace('%', '', $entity->value);
+
+                return $value >= 0 && $value <= 100;
+            },
+            'percentageInBounds',
+            [
+                'errorField' => 'value',
+                'message' => 'Percentage values must be between 0 and 100%'
             ]
         );
 
