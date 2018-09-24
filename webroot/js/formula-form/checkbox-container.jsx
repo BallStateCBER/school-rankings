@@ -19,6 +19,7 @@ class CheckboxContainer extends React.Component {
     this.setState((prevState) => ({
       checkedItems: prevState.checkedItems.set(item, isChecked),
     }));
+    this.props.handleChange(e);
   }
 
   render() {
@@ -43,6 +44,7 @@ class CheckboxContainer extends React.Component {
 
 CheckboxContainer.propTypes = {
   checkboxes: PropTypes.array.isRequired,
+  handleChange: PropTypes.func.isRequired,
 };
 
 export default CheckboxContainer;
