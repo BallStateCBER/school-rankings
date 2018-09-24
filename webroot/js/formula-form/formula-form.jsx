@@ -27,17 +27,22 @@ class FormulaForm extends React.Component {
       progressPercent: null,
       progressStatus: null,
       results: null,
-      schoolTypes: [],
+      schoolTypes: new Map(),
       uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
+    this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
+    this.handleClearMetrics = this.handleClearMetrics.bind(this);
+    this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
+    this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleClearMetrics = this.handleClearMetrics.bind(this);
-    this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
-    this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
+  }
+
+  componentDidMount() {
+    this.setSchoolTypes();
   }
 
   static getUuid() {
@@ -58,13 +63,12 @@ class FormulaForm extends React.Component {
     });
   }
 
-  handleSelectSchoolTypes(onlyPublic, selectedOptions) {
-    this.setState({
-      onlyPublic: onlyPublic,
-      schoolTypes: selectedOptions,
-    });
-    console.log('School types in form are now:');
-    console.log(selectedOptions);
+  handleChangeOnlyPublic(onlyPublic) {
+    this.setState({onlyPublic: onlyPublic});
+  }
+
+  handleSelectSchoolTypes(schoolTypes) {
+    this.setState({schoolTypes: schoolTypes});
   }
 
   handleSubmit(event) {
@@ -188,17 +192,27 @@ class FormulaForm extends React.Component {
     return selectOptions;
   }
 
-  static getSchoolTypeOptions() {
-    let selectOptions = [];
-    for (let n = 0; n < window.formulaForm.schoolTypes.length; n++) {
-      let schoolType = window.formulaForm.schoolTypes[n];
-      selectOptions.push({
-        id: schoolType.id,
-        name: schoolType.name,
-      });
-    }
+  static capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 
-    return selectOptions;
+  /**
+   * Read school type data from window.formulaForm and load it into state
+   */
+  setSchoolTypes() {
+    let schoolTypes = new Map();
+    for (let n = 0; n < window.formulaForm.schoolTypes.length; n++) {
+      const schoolTypeData = window.formulaForm.schoolTypes[n];
+      const schoolType = {
+        checked: schoolTypeData.name === 'public',
+        id: schoolTypeData.id,
+        name: schoolTypeData.name,
+        key: 'school-type-option-' + n,
+        label: FormulaForm.capitalize(schoolTypeData.name),
+      };
+      schoolTypes.set(schoolType.name, schoolType);
+    }
+    this.setState({schoolTypes: schoolTypes});
   }
 
   validate() {
@@ -389,10 +403,10 @@ class FormulaForm extends React.Component {
           </section>
           {this.state.context === 'school' &&
               <SchoolTypeSelector
-                  schoolTypes={FormulaForm.getSchoolTypeOptions()}
+                  schoolTypes={this.state.schoolTypes}
                   onlyPublic={this.state.onlyPublic}
-                  schoolTypesSelected={this.state.schoolTypes}
-                  handleUpdate={this.handleSelectSchoolTypes} />
+                  handleSelectSchoolTypes={this.handleSelectSchoolTypes}
+                  handleChangeOnlyPublic={this.handleChangeOnlyPublic} />
           }
           {this.state.context &&
             <MetricSelector context={this.state.context}

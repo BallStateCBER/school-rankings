@@ -31,15 +31,15 @@ class CheckboxContainer extends React.Component {
     return (
       <React.Fragment>
         {
-          this.props.checkboxes.map((item) => (
-              <div className="form-check" key={item.key}>
-                <Checkbox name={item.name}
-                          checked={this.state.checkedItems.get(item.name)}
-                          onChange={this.handleChange} id={item.key} />
-                <label className="form-check-label" htmlFor={item.key}>
-                  {item.label}
-                </label>
-              </div>
+          Array.from(this.props.checkboxes.values()).map((item) => (
+            <div className="form-check" key={item.key}>
+              <Checkbox name={item.name}
+                        checked={item.checked}
+                        onChange={this.handleChange} id={item.key}/>
+              <label className="form-check-label" htmlFor={item.key}>
+                {item.label}
+              </label>
+            </div>
           ))
         }
       </React.Fragment>
@@ -48,7 +48,7 @@ class CheckboxContainer extends React.Component {
 }
 
 CheckboxContainer.propTypes = {
-  checkboxes: PropTypes.array.isRequired,
+  checkboxes: PropTypes.object.isRequired,
   handleChange: PropTypes.func.isRequired,
 };
 

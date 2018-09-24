@@ -6,51 +6,33 @@ import CheckboxContainer from './checkbox-container.jsx';
 class SchoolTypeSelector extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      checkedItems: new Map(),
-      onlyPublic: this.props.onlyPublic ? '1' : '0',
-    };
-
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
-  }
-
-  componentDidMount() {
-
+    this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
   }
 
   handleChangeOnlyPublic(event) {
-    const target = event.target;
-    this.setState({onlyPublic: target.value});
-
-    // Send results up to formula form
-    let selections = [];
-    if (target.value === '1') {
-      selections = ['public'];
-    } else {
-      selections = ['todo: pull current selections from CheckboxContainer'];
-    }
-    const onlyPublic = target.value === '1';
-    this.props.handleUpdate(onlyPublic, selections);
+    this.props.handleChangeOnlyPublic(event.target.value === '1');
   }
 
-  static capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  handleSelectSchoolTypes(event) {
+    // Get current set
+    let schoolTypes = this.props.schoolTypes;
+
+    // Update the relevant school type
+    const schoolTypeName = event.target.name;
+    let schoolType = schoolTypes.get(schoolTypeName);
+    schoolType.checked = event.target.checked;
+    schoolTypes.set(schoolTypeName, schoolType);
+
+    // Update parent container
+    this.props.handleSelectSchoolTypes(schoolTypes);
   }
 
   showAllTypes() {
-    let schoolTypeCheckboxes = [];
-    for (let i = 0; i < this.props.schoolTypes.length; i++) {
-      const schoolType = this.props.schoolTypes[i];
-      schoolTypeCheckboxes.push({
-        key: 'school-type-option-' + i,
-        label: SchoolTypeSelector.capitalize(schoolType.name),
-        name: schoolType.name,
-      });
-    }
-
     return (
       <div id="school-type-options-breakdown">
-        <CheckboxContainer checkboxes={schoolTypeCheckboxes} />
+        <CheckboxContainer checkboxes={this.props.schoolTypes}
+                           handleChange={this.handleSelectSchoolTypes} />
       </div>
     );
   }
@@ -65,7 +47,7 @@ class SchoolTypeSelector extends React.Component {
           <input className="form-check-input" type="radio"
                  id="school-types-only-public" name="onlyPublic" value="1"
                  onChange={this.handleChangeOnlyPublic}
-                 checked={this.state.onlyPublic === '1'} />
+                 checked={this.props.onlyPublic} />
           <label className="form-check-label"
                  htmlFor="school-types-only-public">
             Public schools
@@ -74,13 +56,13 @@ class SchoolTypeSelector extends React.Component {
           <input className="form-check-input" type="radio"
                  id="school-types-specified" name="onlyPublic"
                  value="0" onChange={this.handleChangeOnlyPublic}
-                 checked={this.state.onlyPublic === '0'} />
+                 checked={!this.props.onlyPublic} />
           <label className="form-check-label"
                  htmlFor="school-types-specified">
             Other school types (public, private, charter, etc.)
           </label>
         </div>
-        {this.state.onlyPublic === '0' &&
+        {!this.props.onlyPublic &&
           this.showAllTypes()
         }
       </section>
@@ -89,10 +71,10 @@ class SchoolTypeSelector extends React.Component {
 }
 
 SchoolTypeSelector.propTypes = {
-  handleUpdate: PropTypes.func.isRequired,
-  schoolTypes: PropTypes.array.isRequired,
+  handleChangeOnlyPublic: PropTypes.func.isRequired,
+  handleSelectSchoolTypes: PropTypes.func.isRequired,
   onlyPublic: PropTypes.bool.isRequired,
-  schoolTypesSelected: PropTypes.array.isRequired,
+  schoolTypes: PropTypes.object.isRequired,
 };
 
 export {SchoolTypeSelector};
