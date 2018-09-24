@@ -10,6 +10,11 @@ class CheckboxContainer extends React.Component {
       checkedItems: new Map(),
     };
 
+    for (let i = 0; i < this.props.checkboxes.length; i++) {
+      const item = this.props.checkboxes[i];
+      this.state.checkedItems.set(item, item.checked);
+    }
+
     this.handleChange = this.handleChange.bind(this);
   }
 
