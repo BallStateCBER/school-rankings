@@ -22,10 +22,12 @@ class FormulaForm extends React.Component {
       county: null,
       criteria: [],
       loadingRankings: false,
+      onlyPublic: true,
       passesValidation: false,
       progressPercent: null,
       progressStatus: null,
       results: null,
+      schoolTypes: [],
       uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
@@ -56,8 +58,9 @@ class FormulaForm extends React.Component {
     });
   }
 
-  handleSelectSchoolTypes(selectedOptions) {
+  handleSelectSchoolTypes(onlyPublic, selectedOptions) {
     this.setState({
+      onlyPublic: onlyPublic,
       schoolTypes: selectedOptions,
     });
     console.log('School types in form are now:');
@@ -387,6 +390,8 @@ class FormulaForm extends React.Component {
           {this.state.context === 'school' &&
               <SchoolTypeSelector
                   schoolTypes={FormulaForm.getSchoolTypeOptions()}
+                  onlyPublic={this.state.onlyPublic}
+                  schoolTypesSelected={this.state.schoolTypes}
                   handleUpdate={this.handleSelectSchoolTypes} />
           }
           {this.state.context &&

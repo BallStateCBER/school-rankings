@@ -8,7 +8,7 @@ class SchoolTypeSelector extends React.Component {
     super(props);
     this.state = {
       checkedItems: new Map(),
-      onlyPublic: '1',
+      onlyPublic: this.props.onlyPublic ? '1' : '0',
     };
 
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
@@ -29,7 +29,8 @@ class SchoolTypeSelector extends React.Component {
     } else {
       selections = ['todo: pull current selections from CheckboxContainer'];
     }
-    this.props.handleUpdate(selections);
+    const onlyPublic = target.value === '1';
+    this.props.handleUpdate(onlyPublic, selections);
   }
 
   static capitalize(str) {
@@ -90,6 +91,8 @@ class SchoolTypeSelector extends React.Component {
 SchoolTypeSelector.propTypes = {
   handleUpdate: PropTypes.func.isRequired,
   schoolTypes: PropTypes.array.isRequired,
+  onlyPublic: PropTypes.bool.isRequired,
+  schoolTypesSelected: PropTypes.array.isRequired,
 };
 
 export {SchoolTypeSelector};
