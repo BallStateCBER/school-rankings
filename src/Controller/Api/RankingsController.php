@@ -4,8 +4,10 @@ namespace App\Controller\Api;
 use App\Controller\AppController;
 use App\Model\Entity\Ranking;
 use App\Model\Entity\Statistic;
+use App\Model\Table\FormulasTable;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\RankingsTable;
+use App\Model\Table\SchoolTypesTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
@@ -18,11 +20,15 @@ use Queue\Model\Table\QueuedJobsTable;
 /**
  * Class RankingsController
  * @package App\Controller\Api
+ * @property FormulasTable $formulasTable
  * @property RankingsTable $rankingsTable
+ * @property SchoolTypesTable $schoolTypesTable
  */
 class RankingsController extends AppController
 {
+    private $formulasTable;
     private $rankingsTable;
+    private $schoolTypesTable;
 
     /**
      * Initialization method
@@ -32,7 +38,9 @@ class RankingsController extends AppController
     public function initialize()
     {
         parent::initialize();
+        $this->formulasTable = TableRegistry::getTableLocator()->get('Formulas');
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
+        $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
     }
 
     /**
@@ -44,16 +52,19 @@ class RankingsController extends AppController
      */
     public function add()
     {
-        $context = $this->request->getData('context');
+        $formulaId = $this->request->getData('formulaId');
+        $formula = $this->formulasTable->get($formulaId);
+        $context = $formula->context;
 
+        // Create new ranking
         $ranking = $this->rankingsTable->newEntity([
             'user_id' => null,
-            'formula_id' => $this->request->getData('formulaId'),
-            'school_type_id' => null,
+            'formula_id' => $formulaId,
             'for_school_districts' => $context == 'district',
             'hash' => RankingsTable::generateHash()
         ]);
 
+        // Add associations
         $countyIds = [$this->request->getData('countyId')];
         $ranking->counties = TableRegistry::getTableLocator()
             ->get('Counties')
@@ -64,7 +75,19 @@ class RankingsController extends AppController
                 }
             ])
             ->toArray();
+        if ($context == 'school') {
+            $schoolTypeIds = $this->getSchoolTypeIds();
+            $ranking->school_types = $this->schoolTypesTable
+                ->find()
+                ->where([
+                    function (QueryExpression $exp) use ($schoolTypeIds) {
+                        return $exp->in('id', $schoolTypeIds);
+                    }
+                ])
+                ->toArray();
+        }
 
+        // Save ranking
         $this->rankingsTable->save($ranking);
         if ($ranking->id) {
             $rankingId = $ranking->id;
@@ -303,5 +326,30 @@ class RankingsController extends AppController
         }
 
         return $ranking;
+    }
+
+    /**
+     * Returns all schoolType IDs corresponding to the names found in request data
+     *
+     * Or returns a blank array if the current context is not 'school'
+     *
+     * @return array
+     */
+    private function getSchoolTypeIds()
+    {
+        $schoolTypes = $this->request->getData('schoolTypes');
+        if (!$schoolTypes) {
+            throw new BadRequestException('Please specify at least one type of school');
+        }
+
+        $results = $this->schoolTypesTable->find()
+            ->select(['id'])
+            ->where(function (QueryExpression $exp) use ($schoolTypes) {
+                return $exp->in('name', $schoolTypes);
+            })
+            ->enableHydration(false)
+            ->toArray();
+
+        return Hash::extract($results, '{n}.id');
     }
 }
