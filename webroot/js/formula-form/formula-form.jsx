@@ -38,6 +38,8 @@ class FormulaForm extends React.Component {
     this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleToggleAllSchoolTypes
+        = this.handleToggleAllSchoolTypes.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
   }
 
@@ -68,6 +70,30 @@ class FormulaForm extends React.Component {
   }
 
   handleSelectSchoolTypes(schoolTypes) {
+    this.setState({schoolTypes: schoolTypes});
+  }
+
+  handleToggleAllSchoolTypes() {
+    let schoolTypes = this.state.schoolTypes;
+
+    // Set all checkboxes to the opposite of the current majority state
+    let checkedCount = 0;
+    let uncheckedCount = 0;
+    const schoolTypesArray = Array.from(schoolTypes.values());
+    for (let i = 0; i < schoolTypesArray.length; i++) {
+      const schoolType = schoolTypesArray[i];
+      if (schoolType.checked) {
+        checkedCount++;
+      } else {
+        uncheckedCount++;
+      }
+    }
+    const newCheckedState = checkedCount < uncheckedCount;
+
+    schoolTypes.forEach(function(schoolType) {
+      schoolType.checked = newCheckedState;
+    });
+
     this.setState({schoolTypes: schoolTypes});
   }
 
@@ -406,7 +432,8 @@ class FormulaForm extends React.Component {
                   schoolTypes={this.state.schoolTypes}
                   onlyPublic={this.state.onlyPublic}
                   handleSelectSchoolTypes={this.handleSelectSchoolTypes}
-                  handleChangeOnlyPublic={this.handleChangeOnlyPublic} />
+                  handleChangeOnlyPublic={this.handleChangeOnlyPublic}
+                  handleToggleAll={this.handleToggleAllSchoolTypes}/>
           }
           {this.state.context &&
             <MetricSelector context={this.state.context}

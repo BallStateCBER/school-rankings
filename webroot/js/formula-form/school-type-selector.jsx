@@ -2,12 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import 'jstree';
 import CheckboxContainer from './checkbox-container.jsx';
+import {Button} from 'reactstrap';
 
 class SchoolTypeSelector extends React.Component {
   constructor(props) {
     super(props);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
+    this.handleToggleAll = this.handleToggleAll.bind(this);
   }
 
   handleChangeOnlyPublic(event) {
@@ -26,6 +28,10 @@ class SchoolTypeSelector extends React.Component {
 
     // Update parent container
     this.props.handleSelectSchoolTypes(schoolTypes);
+  }
+
+  handleToggleAll() {
+    this.props.handleToggleAll();
   }
 
   render() {
@@ -57,6 +63,10 @@ class SchoolTypeSelector extends React.Component {
           <div id="school-type-options-breakdown">
             <CheckboxContainer checkboxes={this.props.schoolTypes}
                                handleChange={this.handleSelectSchoolTypes} />
+            <Button color="primary" size="sm" outline={true}
+                    onClick={this.handleToggleAll}>
+              Toggle all
+            </Button>
           </div>
         }
       </section>
@@ -67,6 +77,7 @@ class SchoolTypeSelector extends React.Component {
 SchoolTypeSelector.propTypes = {
   handleChangeOnlyPublic: PropTypes.func.isRequired,
   handleSelectSchoolTypes: PropTypes.func.isRequired,
+  handleToggleAll: PropTypes.func.isRequired,
   onlyPublic: PropTypes.bool.isRequired,
   schoolTypes: PropTypes.object.isRequired,
 };
