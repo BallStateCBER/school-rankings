@@ -10,6 +10,7 @@ use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Shell;
+use Cake\Database\Expression\QueryExpression;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
@@ -122,14 +123,24 @@ class RankTask extends Shell
         $this->progressHelper->draw();
 
         $step = 1;
+        $schoolTypeIds = Hash::extract($this->ranking->school_types, '{n}.id');
         foreach ($locations as $location) {
+            // Base query
             $locationTableName = $this->getLocationTableName($location);
-            $subjects = $subjectTable->find()
+            $query = $subjectTable->find()
                 ->matching($locationTableName, function (Query $q) use ($locationTableName, $location) {
                     return $q->where(["$locationTableName.id" => $location->id]);
                 })
-                ->where(['closed' => false])
-                ->all();
+                ->where(['closed' => false]);
+
+            // Limit school types
+            if ($this->context == 'school') {
+                $query->where(function (QueryExpression $exp) use ($schoolTypeIds) {
+                    return $exp->in('school_type_id', $schoolTypeIds);
+                });
+            }
+
+            $subjects = $query->all();
 
             // Use school/district IDs as keys to avoid duplicates
             foreach ($subjects as $result) {
