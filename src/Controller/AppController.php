@@ -17,11 +17,8 @@ class AppController extends Controller
     /**
      * Initialization hook method.
      *
-     * Use this method to add common initialization code like loading components.
-     *
-     * e.g. `$this->loadComponent('Security');`
-     *
      * @return void
+     * @throws \Exception
      */
     public function initialize()
     {
