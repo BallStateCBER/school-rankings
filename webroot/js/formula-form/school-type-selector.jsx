@@ -28,15 +28,6 @@ class SchoolTypeSelector extends React.Component {
     this.props.handleSelectSchoolTypes(schoolTypes);
   }
 
-  showAllTypes() {
-    return (
-      <div id="school-type-options-breakdown">
-        <CheckboxContainer checkboxes={this.props.schoolTypes}
-                           handleChange={this.handleSelectSchoolTypes} />
-      </div>
-    );
-  }
-
   render() {
     return (
       <section id="school-type">
@@ -63,7 +54,10 @@ class SchoolTypeSelector extends React.Component {
           </label>
         </div>
         {!this.props.onlyPublic &&
-          this.showAllTypes()
+          <div id="school-type-options-breakdown">
+            <CheckboxContainer checkboxes={this.props.schoolTypes}
+                               handleChange={this.handleSelectSchoolTypes} />
+          </div>
         }
       </section>
     );
