@@ -60,9 +60,6 @@ class RankingsTable extends Table
             'foreignKey' => 'formula_id',
             'joinType' => 'INNER'
         ]);
-        $this->belongsTo('SchoolTypes', [
-            'foreignKey' => 'school_type_id'
-        ]);
         $this->belongsToMany('Grades', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'grade_id',
@@ -87,6 +84,11 @@ class RankingsTable extends Table
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'school_district_id',
             'joinTable' => 'rankings_school_districts'
+        ]);
+        $this->belongsToMany('SchoolTypes', [
+            'foreignKey' => 'ranking_id',
+            'targetForeignKey' => 'school_type_id',
+            'joinTable' => 'rankings_school_types'
         ]);
         $this->belongsToMany('States', [
             'foreignKey' => 'ranking_id',

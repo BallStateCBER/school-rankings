@@ -10,7 +10,6 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $user_id
  * @property int $formula_id
- * @property int $school_type_id
  * @property bool $for_school_districts
  * @property array $results
  * @property string $hash
@@ -24,6 +23,7 @@ use Cake\ORM\Entity;
  * @property County[] $counties
  * @property Range[] $ranges
  * @property SchoolDistrict[] $school_districts
+ * @property SchoolType[] $school_types
  * @property State[] $states
  * @property RankingResultsSchool[] $ResultsSchools
  * @property RankingResultsSchoolDistrict[] $ResultsDistricts
@@ -43,7 +43,6 @@ class Ranking extends Entity
     protected $_accessible = [
         'user_id' => true,
         'formula_id' => true,
-        'school_type_id' => true,
         'for_school_districts' => true,
         'hash' => true,
         'created' => true,
@@ -55,6 +54,7 @@ class Ranking extends Entity
         'counties' => true,
         'ranges' => true,
         'school_districts' => true,
+        'school_types' => true,
         'states' => true,
         'results_districts' => true,
         'results_schools' => true
