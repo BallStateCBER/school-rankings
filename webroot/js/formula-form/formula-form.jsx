@@ -114,6 +114,10 @@ class FormulaForm extends React.Component {
   }
 
   processForm() {
+    const schoolTypes = this.state.onlyPublic
+        ? ['public']
+        : this.getSelectedSchoolTypes();
+
     return $.ajax({
       method: 'POST',
       url: '/api/formulas/add/',
@@ -121,6 +125,7 @@ class FormulaForm extends React.Component {
       data: {
         context: this.state.context,
         criteria: this.state.criteria,
+        schoolTypes: schoolTypes,
       },
     }).done((data) => {
       if (
@@ -381,6 +386,16 @@ class FormulaForm extends React.Component {
     this.setState({criteria: filteredCriteria});
     let jstree = $('#jstree').jstree(true);
     jstree.deselect_node('li[data-metric-id=' + metricId + ']');
+  }
+
+  getSelectedSchoolTypes() {
+    let selectedSchoolTypes = [];
+    this.state.schoolTypes.forEach(function(schoolType) {
+      if (schoolType.checked) {
+        selectedSchoolTypes.push(schoolType.name);
+      }
+    });
+    return selectedSchoolTypes;
   }
 
   render() {
