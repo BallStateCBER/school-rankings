@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 use App\Controller\AppController;
 use App\Model\Entity\Ranking;
 use App\Model\Entity\Statistic;
+use App\Model\Table\CountiesTable;
 use App\Model\Table\FormulasTable;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\RankingsTable;
@@ -20,13 +21,19 @@ use Queue\Model\Table\QueuedJobsTable;
 /**
  * Class RankingsController
  * @package App\Controller\Api
+ * @property CountiesTable $countiesTable
  * @property FormulasTable $formulasTable
+ * @property MetricsTable $metricsTable
+ * @property QueuedJobsTable $jobsTable
  * @property RankingsTable $rankingsTable
  * @property SchoolTypesTable $schoolTypesTable
  */
 class RankingsController extends AppController
 {
+    private $countiesTable;
     private $formulasTable;
+    private $jobsTable;
+    private $metricsTable;
     private $rankingsTable;
     private $schoolTypesTable;
 
@@ -38,7 +45,10 @@ class RankingsController extends AppController
     public function initialize()
     {
         parent::initialize();
+        $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $this->formulasTable = TableRegistry::getTableLocator()->get('Formulas');
+        $this->jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
+        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
     }
@@ -66,9 +76,7 @@ class RankingsController extends AppController
 
         // Add associations
         $countyIds = [$this->request->getData('countyId')];
-        $ranking->counties = TableRegistry::getTableLocator()
-            ->get('Counties')
-            ->find()
+        $ranking->counties = $this->countiesTable->find()
             ->where([
                 function (QueryExpression $exp) use ($countyIds) {
                     return $exp->in('id', $countyIds);
@@ -144,14 +152,9 @@ class RankingsController extends AppController
      */
     private function createRankingJob($rankingId)
     {
-        /** @var QueuedJobsTable $jobsTable */
-        $jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
-
-        return $jobsTable->createJob(
+        return $this->jobsTable->createJob(
             'Rank',
-            [
-                'rankingId' => $rankingId
-            ],
+            ['rankingId' => $rankingId],
             ['reference' => $rankingId]
         );
     }
@@ -164,8 +167,7 @@ class RankingsController extends AppController
     public function status()
     {
         $jobId = $this->request->getQuery('jobId');
-        $jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
-        $job = $jobsTable->get($jobId);
+        $job = $this->jobsTable->get($jobId);
         $this->set([
             '_serialize' => [
                 'progress',
@@ -184,6 +186,121 @@ class RankingsController extends AppController
      * @return void
      */
     public function get($rankingId)
+    {
+        $containQueries = $this->getContainQueries();
+        $ranking = $this->rankingsTable->find()
+            ->where(['Rankings.id' => $rankingId])
+            ->select(['id'])
+            ->contain([
+                'Formulas' => $containQueries['formulas'],
+                'ResultsSchools' => $containQueries['resultsSchools'],
+                'ResultsDistricts' => $containQueries['resultsDistricts']
+            ])
+            ->enableHydration(false)
+            ->first();
+
+        $ranking = $this->formatPercentageValues($ranking);
+
+        // Group results by rank
+        $groupedResults = [];
+        $results = $ranking['results_schools'] ?? $ranking['results_districts'];
+        foreach ($results as $result) {
+            $groupedResults[$result['rank']][] = $result;
+        }
+
+        // Alphabetize results in each rank
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            $sortedResults = [];
+            foreach ($resultsInRank as $resultInRank) {
+                $context = isset($resultInRank['school']) ? 'school' : 'district';
+                // Combine name and ID in case any two subjects (somehow) have identical names
+                $key = $resultInRank[$context]['name'] . $resultInRank[$context]['id'];
+                $sortedResults[$key] = $resultInRank;
+            }
+            ksort($sortedResults);
+            $groupedResults[$rank] = array_values($sortedResults);
+        }
+
+        // Convert into numerically-indexed array so it can be passed to a React component
+        $retval = [];
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            $retval[] = [
+                'rank' => $rank,
+                'subjects' => $resultsInRank
+            ];
+        }
+
+        $this->set([
+            '_serialize' => ['results'],
+            'results' => $retval
+        ]);
+    }
+
+    /**
+     * Ensures that all statistics for percentage-style metrics are formatted correctly
+     *
+     * This makes up for the fact that Indiana Department of Education data formats some percentage stats as
+     * floats (e.g. 0.41) and some as strings (e.g. "41%")
+     *
+     * @param array $ranking Ranking results
+     * @return array
+     */
+    private function formatPercentageValues($ranking)
+    {
+        $metricIsPercent = [];
+        $resultsFields = ['results_districts', 'results_schools'];
+        foreach ($resultsFields as $results) {
+            foreach ($ranking[$results] as &$subject) {
+                foreach ($subject['statistics'] as &$statistic) {
+                    $metricId = $statistic['metric_id'];
+                    if (!isset($metricIsPercent[$metricId])) {
+                        $metricIsPercent[$metricId] = $this->metricsTable->isPercentMetric($metricId);
+                    }
+                    if (!$metricIsPercent[$metricId]) {
+                        continue;
+                    }
+                    if (Statistic::isPercentValue($statistic['value'])) {
+                        continue;
+                    }
+                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
+                }
+            }
+        }
+
+        return $ranking;
+    }
+
+    /**
+     * Returns all schoolType IDs corresponding to the names found in request data
+     *
+     * Or returns a blank array if the current context is not 'school'
+     *
+     * @return array
+     */
+    private function getSchoolTypeIds()
+    {
+        $schoolTypes = $this->request->getData('schoolTypes');
+        if (!$schoolTypes) {
+            throw new BadRequestException('Please specify at least one type of school');
+        }
+
+        $results = $this->schoolTypesTable->find()
+            ->select(['id'])
+            ->where(function (QueryExpression $exp) use ($schoolTypes) {
+                return $exp->in('name', $schoolTypes);
+            })
+            ->enableHydration(false)
+            ->toArray();
+
+        return Hash::extract($results, '{n}.id');
+    }
+
+    /**
+     * Returns an array of contain queries for use in RankingsController::get()
+     *
+     * @return array
+     */
+    private function getContainQueries()
     {
         $containStatistics = function (Query $q) {
             return $q->select([
@@ -243,113 +360,10 @@ class RankingsController extends AppController
             ]);
         };
 
-        $ranking = $this->rankingsTable->find()
-            ->where(['Rankings.id' => $rankingId])
-            ->select(['id'])
-            ->contain([
-                'Formulas' => $containFormulas,
-                'ResultsSchools' => $containResultsSchools,
-                'ResultsDistricts' => $containResultsDistricts
-            ])
-            ->enableHydration(false)
-            ->first();
-
-        $ranking = $this->formatPercentageValues($ranking);
-
-        // Group results by rank
-        $groupedResults = [];
-        $results = $ranking['results_schools'] ?? $ranking['results_districts'];
-        foreach ($results as $result) {
-            $groupedResults[$result['rank']][] = $result;
-        }
-
-        // Alphabetize results in each rank
-        foreach ($groupedResults as $rank => $resultsInRank) {
-            $sortedResults = [];
-            foreach ($resultsInRank as $resultInRank) {
-                $context = isset($resultInRank['school']) ? 'school' : 'district';
-                // Combine name and ID in case any two subjects (somehow) have identical names
-                $key = $resultInRank[$context]['name'] . $resultInRank[$context]['id'];
-                $sortedResults[$key] = $resultInRank;
-            }
-            ksort($sortedResults);
-            $groupedResults[$rank] = array_values($sortedResults);
-        }
-
-        // Convert into numerically-indexed array so it can be passed to a React component
-        $retval = [];
-        foreach ($groupedResults as $rank => $resultsInRank) {
-            $retval[] = [
-                'rank' => $rank,
-                'subjects' => $resultsInRank
-            ];
-        }
-
-        $this->set([
-            '_serialize' => ['results'],
-            'results' => $retval
-        ]);
-    }
-
-    /**
-     * Ensures that all statistics for percentage-style metrics are formatted correctly
-     *
-     * This makes up for the fact that Indiana Department of Education data formats some percentage stats as
-     * floats (e.g. 0.41) and some as strings (e.g. "41%")
-     *
-     * @param array $ranking Ranking results
-     * @return array
-     */
-    private function formatPercentageValues($ranking)
-    {
-        $metricIsPercent = [];
-        /** @var MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-
-        $resultsFields = ['results_districts', 'results_schools'];
-        foreach ($resultsFields as $results) {
-            foreach ($ranking[$results] as &$subject) {
-                foreach ($subject['statistics'] as &$statistic) {
-                    $metricId = $statistic['metric_id'];
-                    if (!isset($metricIsPercent[$metricId])) {
-                        $metricIsPercent[$metricId] = $metricsTable->isPercentMetric($metricId);
-                    }
-                    if (!$metricIsPercent[$metricId]) {
-                        continue;
-                    }
-                    if (Statistic::isPercentValue($statistic['value'])) {
-                        continue;
-                    }
-                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
-                }
-            }
-        }
-
-        return $ranking;
-    }
-
-    /**
-     * Returns all schoolType IDs corresponding to the names found in request data
-     *
-     * Or returns a blank array if the current context is not 'school'
-     *
-     * @return array
-     */
-    private function getSchoolTypeIds()
-    {
-        $schoolTypes = $this->request->getData('schoolTypes');
-        if (!$schoolTypes) {
-            throw new BadRequestException('Please specify at least one type of school');
-        }
-
-        $results = $this->schoolTypesTable->find()
-            ->select(['id'])
-            ->where(function (QueryExpression $exp) use ($schoolTypes) {
-                return $exp->in('name', $schoolTypes);
-            })
-            ->enableHydration(false)
-            ->toArray();
-
-        return Hash::extract($results, '{n}.id');
+        return [
+            'formulas' => $containFormulas,
+            'resultsSchools' => $containResultsSchools,
+            'resultsDistricts' => $containResultsDistricts
+        ];
     }
 }
