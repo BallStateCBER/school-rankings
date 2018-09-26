@@ -114,10 +114,6 @@ class FormulaForm extends React.Component {
   }
 
   processForm() {
-    const schoolTypes = this.state.onlyPublic
-        ? ['public']
-        : this.getSelectedSchoolTypes();
-
     return $.ajax({
       method: 'POST',
       url: '/api/formulas/add/',
@@ -125,7 +121,6 @@ class FormulaForm extends React.Component {
       data: {
         context: this.state.context,
         criteria: this.state.criteria,
-        schoolTypes: schoolTypes,
       },
     }).done((data) => {
       if (
@@ -159,16 +154,18 @@ class FormulaForm extends React.Component {
       this.setState({loadingRankings: false});
       return;
     }
-    console.log('Formula ID is ' + this.formulaId);
+
+    let data = {
+      countyId: this.state.county,
+      formulaId: this.formulaId,
+      schoolTypes: this.getSelectedSchoolTypes(),
+    };
 
     return $.ajax({
       method: 'POST',
       url: '/api/rankings/add/',
       dataType: 'json',
-      data: {
-        countyId: this.state.county,
-        formulaId: this.formulaId,
-      },
+      data: data,
     }).done((data) => {
       if (
           !data.hasOwnProperty('success') ||
@@ -389,6 +386,14 @@ class FormulaForm extends React.Component {
   }
 
   getSelectedSchoolTypes() {
+    if (this.state.context !== 'school') {
+      return [];
+    }
+
+    if (this.state.onlyPublic) {
+      return ['public'];
+    }
+
     let selectedSchoolTypes = [];
     this.state.schoolTypes.forEach(function(schoolType) {
       if (schoolType.checked) {
