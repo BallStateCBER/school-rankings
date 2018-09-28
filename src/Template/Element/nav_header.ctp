@@ -10,12 +10,14 @@ $pages = [
 ];
 $adminPages = [
     'School Metrics' => Router::url([
+        'plugin' => false,
         'prefix' => 'admin',
         'controller' => 'Metrics',
         'action' => 'index',
         'school'
     ]),
     'District Metrics' => Router::url([
+        'plugin' => false,
         'prefix' => 'admin',
         'controller' => 'Metrics',
         'action' => 'index',
