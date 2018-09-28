@@ -8,7 +8,7 @@ class SchoolTypeSelector extends React.Component {
   constructor(props) {
     super(props);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
-    this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
     this.handleToggleAll = this.handleToggleAll.bind(this);
   }
 
@@ -16,7 +16,7 @@ class SchoolTypeSelector extends React.Component {
     this.props.handleChangeOnlyPublic(event.target.value === '1');
   }
 
-  handleSelectSchoolTypes(event) {
+  handleSelect(event) {
     // Get current set
     let schoolTypes = this.props.schoolTypes;
 
@@ -27,7 +27,7 @@ class SchoolTypeSelector extends React.Component {
     schoolTypes.set(schoolTypeName, schoolType);
 
     // Update parent container
-    this.props.handleSelectSchoolTypes(schoolTypes);
+    this.props.handleSelect(schoolTypes);
   }
 
   handleToggleAll() {
@@ -62,7 +62,7 @@ class SchoolTypeSelector extends React.Component {
         {!this.props.onlyPublic &&
           <div id="school-type-options-breakdown">
             <CheckboxContainer checkboxes={this.props.schoolTypes}
-                               handleChange={this.handleSelectSchoolTypes} />
+                               handleChange={this.handleSelect} />
             <Button color="primary" size="sm" outline={true}
                     onClick={this.handleToggleAll}>
               Toggle all
@@ -76,7 +76,7 @@ class SchoolTypeSelector extends React.Component {
 
 SchoolTypeSelector.propTypes = {
   handleChangeOnlyPublic: PropTypes.func.isRequired,
-  handleSelectSchoolTypes: PropTypes.func.isRequired,
+  handleSelect: PropTypes.func.isRequired,
   handleToggleAll: PropTypes.func.isRequired,
   onlyPublic: PropTypes.bool.isRequired,
   schoolTypes: PropTypes.object.isRequired,

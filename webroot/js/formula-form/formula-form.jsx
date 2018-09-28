@@ -451,7 +451,7 @@ class FormulaForm extends React.Component {
               <SchoolTypeSelector
                   schoolTypes={this.state.schoolTypes}
                   onlyPublic={this.state.onlyPublic}
-                  handleSelectSchoolTypes={this.handleSelectSchoolTypes}
+                  handleSelect={this.handleSelectSchoolTypes}
                   handleChangeOnlyPublic={this.handleChangeOnlyPublic}
                   handleToggleAll={this.handleToggleAllSchoolTypes}/>
           }
