@@ -137,7 +137,11 @@ $config = [
             ],
             'CakeDC/Auth.ApiKey',
             'CakeDC/Auth.RememberMe',
-            'Form',
+            'Form' => [
+                'fields' => [
+                    'username' => 'email'
+                ]
+            ],
         ],
         'authorize' => [
             'CakeDC/Auth.Superuser',
