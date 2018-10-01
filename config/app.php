@@ -318,6 +318,14 @@ return [
             'url' => env('LOG_QUERIES_URL', null),
             'scopes' => ['queriesLog'],
         ],
+        'email' => [
+            'className' => 'Cake\Log\Engine\FileLog',
+            'path' => LOGS,
+            'file' => 'email',
+            'url' => env('LOG_DEBUG_URL', null),
+            'scopes' => false,
+            'levels' => ['notice', 'info', 'debug'],
+        ],
     ],
 
     /**
