@@ -1,6 +1,9 @@
 <?php
 namespace App\Controller;
 
+use CakeDC\Users\Controller\Traits\LoginTrait;
+use CakeDC\Users\Controller\Traits\RegisterTrait;
+
 /**
  * Users Controller
  *
@@ -10,6 +13,9 @@ namespace App\Controller;
  */
 class UsersController extends AppController
 {
+    use LoginTrait;
+    use RegisterTrait;
+
     /**
      * Initialization hook method.
      *
