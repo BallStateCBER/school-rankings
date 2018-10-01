@@ -199,7 +199,11 @@ Type::build('timestamp')
 Configure::write('Users.config', ['users']);
 Plugin::load('CakeDC/Users', ['routes' => true, 'bootstrap' => true]);
 
-// Use Debug email transport when in debug mode
+// Use Debug email transport and email logging when in debug mode
 if (Configure::read('debug')) {
     Configure::write('EmailTransport.default.className', 'Debug');
+    Configure::write('Email.default.log', [
+        'level' => 'info',
+        'scope' => 'email'
+    ]);
 }
