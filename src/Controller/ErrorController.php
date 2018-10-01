@@ -27,10 +27,14 @@ class ErrorController extends AppController
      * Initialization hook method.
      *
      * @return void
+     * @throws \Exception
      */
     public function initialize()
     {
+        parent::initialize();
+
         $this->loadComponent('RequestHandler');
+        $this->Auth->allow();
     }
 
     /**

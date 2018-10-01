@@ -15,6 +15,19 @@ use Cake\Utility\Hash;
 class MetricsController extends AppController
 {
     /**
+     * Initialization hook method.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function initialize()
+    {
+        parent::initialize();
+
+        $this->Auth->allow();
+    }
+
+    /**
      * Returns a tree-structured list of school metrics
      *
      * @return void

@@ -1,13 +1,21 @@
 <?php
 namespace App\Controller;
 
-use Cake\Core\Configure;
-use Cake\Http\Exception\ForbiddenException;
-use Cake\Http\Exception\NotFoundException;
-use Cake\View\Exception\MissingTemplateException;
-
 class PagesController extends AppController
 {
+    /**
+     * Initialization hook method.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function initialize()
+    {
+        parent::initialize();
+
+        $this->Auth->allow();
+    }
+
     /**
      * Home page
      *

@@ -13,6 +13,18 @@ use Cake\ORM\TableRegistry;
  */
 class FormulasController extends AppController
 {
+    /**
+     * Initialization hook method.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function initialize()
+    {
+        parent::initialize();
+
+        $this->Auth->allow();
+    }
 
     /**
      * The form for adding or editing a formula

@@ -24,12 +24,14 @@ class FormulasController extends AppController
      * Initialization method
      *
      * @return void
+     * @throws \Exception
      */
     public function initialize()
     {
         parent::initialize();
         $this->criteriaTable = TableRegistry::getTableLocator()->get('Criteria');
         $this->formulasTable = TableRegistry::getTableLocator()->get('Formulas');
+        $this->Auth->allow();
     }
 
     /**

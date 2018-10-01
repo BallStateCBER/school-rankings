@@ -41,6 +41,7 @@ class RankingsController extends AppController
      * Initialization method
      *
      * @return void
+     * @throws \Exception
      */
     public function initialize()
     {
@@ -51,6 +52,7 @@ class RankingsController extends AppController
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
         $this->schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
+        $this->Auth->allow();
     }
 
     /**
