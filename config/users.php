@@ -52,7 +52,7 @@ $config = [
         ],
         'Tos' => [
             // determines if the user should include tos accepted
-            'required' => true,
+            'required' => false,
         ],
         'Social' => [
             // enable social login
