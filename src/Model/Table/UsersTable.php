@@ -6,7 +6,6 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
-use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
@@ -26,7 +25,7 @@ use Cake\Validation\Validator;
  *
  * @mixin TimestampBehavior
  */
-class UsersTable extends Table
+class UsersTable extends \CakeDC\Users\Model\Table\UsersTable
 {
 
     /**
@@ -64,6 +63,8 @@ class UsersTable extends Table
      */
     public function validationDefault(Validator $validator)
     {
+        $validator = parent::validationDefault($validator);
+
         $validator
             ->integer('id')
             ->allowEmpty('id', 'create');
@@ -91,6 +92,8 @@ class UsersTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
+        $rules = parent::buildRules($rules);
+
         $rules->add($rules->isUnique(['email']));
 
         return $rules;

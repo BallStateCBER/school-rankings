@@ -1,8 +1,6 @@
 <?php
 namespace App\Model\Entity;
 
-use Cake\ORM\Entity;
-
 /**
  * User Entity
  *
@@ -16,34 +14,24 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\Ranking[] $rankings
  * @property \App\Model\Entity\SharedFormula[] $shared_formulas
  */
-class User extends Entity
+class User extends \CakeDC\Users\Model\Entity\User
 {
 
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
-     * Note that when '*' is set to true, this allows all unspecified fields to
-     * be mass assigned. For security purposes, it is advised to set '*' to false
-     * (or remove it), and explicitly make individual fields accessible as needed.
+     * These values are set in \CakeDC\Users\Model\Entity\User
      *
      * @var array
      */
-    protected $_accessible = [
-        'email' => true,
-        'password' => true,
-        'created' => true,
-        'modified' => true,
-        'formulas' => true,
-        'rankings' => true,
-        'shared_formulas' => true
-    ];
+    protected $_accessible;
 
     /**
      * Fields that are excluded from JSON versions of the entity.
      *
+     * These values are set in \CakeDC\Users\Model\Entity\User
+     *
      * @var array
      */
-    protected $_hidden = [
-        'password'
-    ];
+    protected $_hidden;
 }
