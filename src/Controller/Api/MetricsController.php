@@ -149,6 +149,8 @@ class MetricsController extends AppController
 
         $this->throwExceptionOnFail($result, $metric);
 
+        $this->clearCacheForContext($metric->context);
+
         $this->set([
             '_jsonOptions' => JSON_FORCE_OBJECT,
             '_serialize' => ['result'],
@@ -187,6 +189,8 @@ class MetricsController extends AppController
 
         $this->throwExceptionOnFail($result, $metric);
 
+        $this->clearCacheForContext($metric->context);
+
         $this->set([
             '_serialize' => ['message', 'result'],
             'message' => $metric->getErrors() ?
@@ -219,6 +223,8 @@ class MetricsController extends AppController
         $result = (bool)$metricsTable->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);
+
+        $this->clearCacheForContext($metric->context);
 
         $this->set([
             '_jsonOptions' => JSON_FORCE_OBJECT,
@@ -264,6 +270,8 @@ class MetricsController extends AppController
         $result = (bool)$metricsTable->save($metric);
 
         $this->throwExceptionOnFail($result, $metric);
+
+        $this->clearCacheForContext($metric->context);
 
         $this->set([
             '_serialize' => ['message', 'result'],
@@ -318,5 +326,19 @@ class MetricsController extends AppController
         $context = $this->request->getData('context');
 
         return Context::isValidOrFail($context) ? $context : null;
+    }
+
+    /**
+     * Clears all cached metric lists for the provided context
+     *
+     * @param string $context Either school or district
+     * @return void
+     */
+    private function clearCacheForContext(string $context)
+    {
+        foreach (['', '-no-hidden'] as $suffix) {
+            $key = $context . $suffix;
+            Cache::delete($key, 'metrics_api');
+        }
     }
 }
