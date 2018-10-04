@@ -2,7 +2,9 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\User;
+use ArrayObject;
 use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
@@ -97,5 +99,20 @@ class UsersTable extends \CakeDC\Users\Model\Table\UsersTable
         $rules->add($rules->isUnique(['email']));
 
         return $rules;
+    }
+
+    /**
+     * beforeSave callback
+     *
+     * @param Event $event Event object
+     * @param EntityInterface $entity Metric entity
+     * @param ArrayObject $options Save options
+     * @return void
+     */
+    public function beforeSave(Event $event, EntityInterface $entity, ArrayObject $options)
+    {
+        if ($entity->isNew()) {
+            $entity->set('active', true);
+        }
     }
 }
