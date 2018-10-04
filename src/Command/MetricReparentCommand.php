@@ -3,6 +3,7 @@ namespace App\Command;
 
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
+use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
@@ -83,6 +84,8 @@ class MetricReparentCommand extends Command
         if ($this->getConfirmation($io)) {
             $this->reparent($io);
         }
+
+        $this->clearMetricCache($io);
     }
 
     /**
@@ -218,5 +221,21 @@ class MetricReparentCommand extends Command
         }
 
         $io->out('Reparenting complete');
+    }
+
+    /**
+     * Clears all cached metric lists for the current context
+     *
+     * @param ConsoleIo $io Console IO object
+     * @return void
+     */
+    private function clearMetricCache(ConsoleIo $io)
+    {
+        $io->out('Clearing cache');
+        foreach (['', '-no-hidden'] as $suffix) {
+            $key = $this->context . $suffix;
+            Cache::delete($key, 'metrics_api');
+        }
+        $io->success('Done');
     }
 }
