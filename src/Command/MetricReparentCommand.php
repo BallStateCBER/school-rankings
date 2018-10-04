@@ -105,7 +105,6 @@ class MetricReparentCommand extends Command
         } else {
             try {
                 $this->parentMetric = $this->metricsTable->get($this->parentMetricId);
-                $this->context = $this->parentMetric->context;
             } catch (RecordNotFoundException $e) {
                 $io->error('Parent metric not found');
                 $this->abort();
@@ -179,6 +178,9 @@ class MetricReparentCommand extends Command
     private function addChildMetric($childMetricId, ConsoleIo $io)
     {
         $childMetric = $this->metricsTable->get($childMetricId);
+        if (!$this->context) {
+            $this->context = $childMetric->context;
+        }
         $this->metricsTable->patchEntity($childMetric, ['parent_id' => $this->parentMetricId]);
         $errors = $childMetric->getErrors();
         $passesRules = $this->metricsTable->checkRules($childMetric, 'update');
