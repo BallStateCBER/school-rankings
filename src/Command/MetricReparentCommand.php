@@ -101,6 +101,7 @@ class MetricReparentCommand extends Command
         $this->parentMetric = null;
         $this->moveToRoot = false;
         if ($this->parentMetricId == 'root') {
+            $this->parentMetricId = null;
             $this->moveToRoot = true;
         } else {
             try {
