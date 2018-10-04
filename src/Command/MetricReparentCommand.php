@@ -83,9 +83,8 @@ class MetricReparentCommand extends Command
 
         if ($this->getConfirmation($io)) {
             $this->reparent($io);
+            $this->clearMetricCache($io);
         }
-
-        $this->clearMetricCache($io);
     }
 
     /**
