@@ -70,6 +70,15 @@ try {
     exit($e->getMessage() . "\n");
 }
 
+// Use Debug email transport and email logging when in debug mode
+if (Configure::read('debug')) {
+    Configure::write('EmailTransport.default.className', 'Debug');
+    Configure::write('Email.default.log', [
+        'level' => 'info',
+        'scope' => 'email'
+    ]);
+}
+
 /*
  * Load an environment local configuration file.
  * You can use a file like app_local.php to provide local overrides to your
@@ -196,14 +205,5 @@ Type::build('timestamp')
 //Inflector::rules('transliteration', ['/å/' => 'aa']);
 
 // Set up CakeDC/users plugin
-Configure::write('Users.config', ['users']);
-Plugin::load('CakeDC/Users', ['routes' => true, 'bootstrap' => true]);
-
-// Use Debug email transport and email logging when in debug mode
-if (Configure::read('debug')) {
-    Configure::write('EmailTransport.default.className', 'Debug');
-    Configure::write('Email.default.log', [
-        'level' => 'info',
-        'scope' => 'email'
-    ]);
-}
+//Configure::write('Users.config', ['users']);
+//Plugin::load('CakeDC/Users', ['routes' => true, 'bootstrap' => true]);
