@@ -453,8 +453,8 @@ class MetricMergeCommand extends CommonCommand
             if (in_array($stat->id, $this->sortedStats['noConflict'])) {
                 $stat = $this->statisticsTable->patchEntity($stat, ['metric_id' => $this->metricIdToRetain]);
 
-                $errors = $stat->getErrors();
                 $passesRules = $this->statisticsTable->checkRules($stat, 'update');
+                $errors = $stat->getErrors();
                 if (empty($errors) && $passesRules) {
                     $this->statsToUpdate[] = $stat;
                     unset(
