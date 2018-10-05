@@ -17,21 +17,4 @@ namespace App\Model\Entity;
 class User extends \CakeDC\Users\Model\Entity\User
 {
 
-    /**
-     * Fields that can be mass assigned using newEntity() or patchEntity().
-     *
-     * These values are set in \CakeDC\Users\Model\Entity\User
-     *
-     * @var array
-     */
-    protected $_accessible;
-
-    /**
-     * Fields that are excluded from JSON versions of the entity.
-     *
-     * These values are set in \CakeDC\Users\Model\Entity\User
-     *
-     * @var array
-     */
-    protected $_hidden;
 }
