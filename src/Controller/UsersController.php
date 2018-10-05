@@ -42,5 +42,9 @@ class UsersController extends AppController
         $this->request = $this->request->withData('username', $this->request->getData('email'));
 
         $this->pluginRegister();
+
+        // Don't send the password back to the form on error
+        $this->request = $this->request->withData('password', '');
+        $this->request = $this->request->withData('password_confirm', '');
     }
 }
