@@ -45,7 +45,11 @@ Router::defaultRouteClass(DashedRoute::class);
 Router::extensions(['json']);
 
 Router::scope('/', function (RouteBuilder $routes) {
+    // Pages
     $routes->connect('/', ['controller' => 'Pages', 'action' => 'home']);
+
+    // Users
+    $routes->connect('/register', ['controller' => 'Users', 'action' => 'register']);
 
     /**
      * Connect catchall routes for all controllers.
