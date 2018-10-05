@@ -14,7 +14,9 @@ use CakeDC\Users\Controller\Traits\RegisterTrait;
 class UsersController extends AppController
 {
     use LoginTrait;
-    use RegisterTrait;
+    use RegisterTrait {
+        register as public pluginRegister;
+    }
 
     /**
      * Initialization hook method.
@@ -27,5 +29,18 @@ class UsersController extends AppController
         parent::initialize();
 
         $this->Auth->allow();
+    }
+
+    /**
+     * Register page
+     *
+     * @return void
+     */
+    public function register()
+    {
+        // Copy email to username because CakeDC/Users requires a unique, non-blank username
+        $this->request = $this->request->withData('username', $this->request->getData('email'));
+
+        $this->pluginRegister();
     }
 }
