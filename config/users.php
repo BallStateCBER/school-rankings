@@ -26,7 +26,7 @@ $config = [
             // determines if the user should include email
             'required' => true,
             // determines if registration workflow includes email validation
-            'validate' => true,
+            'validate' => false,
         ],
         'Registration' => [
             // determines if the register is enabled
@@ -126,7 +126,7 @@ $config = [
     // default configuration used to auto-load the Auth Component, override to change the way Auth works
     'Auth' => [
         'loginAction' => [
-            'plugin' => 'CakeDC/Users',
+            'plugin' => false,
             'controller' => 'Users',
             'action' => 'login',
             'prefix' => false
