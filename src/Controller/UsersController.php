@@ -13,7 +13,10 @@ use CakeDC\Users\Controller\Traits\RegisterTrait;
  */
 class UsersController extends AppController
 {
-    use LoginTrait;
+    use LoginTrait {
+        login as pluginLogin;
+        logout as pluginLogout;
+    }
     use RegisterTrait {
         register as public pluginRegister;
     }
@@ -46,5 +49,25 @@ class UsersController extends AppController
         // Don't send the password back to the form on error
         $this->request = $this->request->withData('password', '');
         $this->request = $this->request->withData('password_confirm', '');
+    }
+
+    /**
+     * Login page
+     *
+     * @return void
+     */
+    public function login()
+    {
+        $this->pluginLogin();
+    }
+
+    /**
+     * Logout page
+     *
+     * @return void
+     */
+    public function logout()
+    {
+        $this->pluginLogout();
     }
 }
