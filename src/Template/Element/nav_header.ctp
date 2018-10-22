@@ -1,4 +1,8 @@
 <?php
+/**
+ * @var \App\View\AppView $this
+ * @var array $authUser
+ */
 use \Cake\Routing\Router;
 $pages = [
     'Home' => Router::url('/'),
@@ -56,19 +60,21 @@ $isActive = function ($url, \Cake\Http\ServerRequest $request) {
                 </li>
             <?php endforeach; ?>
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbar-admin-dropdown" role="button"
-                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Admin
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbar-admin-dropdown">
-                    <?php foreach ($adminPages as $label => $url): ?>
-                        <a class="dropdown-item" href="<?= $url ?>">
-                            <?= $label ?>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </li>
+            <?php if ($authUser && $authUser['role'] == 'admin'): ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbar-admin-dropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Admin
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbar-admin-dropdown">
+                        <?php foreach ($adminPages as $label => $url): ?>
+                            <a class="dropdown-item" href="<?= $url ?>">
+                                <?= $label ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </li>
+            <?php endif; ?>
         </ul>
     </div>
 </nav>
