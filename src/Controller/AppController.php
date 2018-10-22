@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use Cake\Controller\Controller;
+use Cake\Event\Event;
 
 /**
  * Application Controller
@@ -29,5 +30,16 @@ class AppController extends Controller
         $this->loadComponent('CakeDC/Users.UsersAuth');
 
         $this->set('titleForLayout', null);
+    }
+
+    /**
+     * Before render callback.
+     *
+     * @param \Cake\Event\Event $event The beforeRender event.
+     * @return \Cake\Network\Response|null|void
+     */
+    public function beforeRender(Event $event)
+    {
+        $this->set('authUser', $this->Auth->user());
     }
 }
