@@ -15,10 +15,12 @@
 namespace App\Test\TestCase;
 
 use App\Application;
+use App\Test\Fixture\UsersFixture;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\MiddlewareQueue;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use Cake\Routing\Router;
 use Cake\TestSuite\IntegrationTestCase;
 
 /**
@@ -26,6 +28,29 @@ use Cake\TestSuite\IntegrationTestCase;
  */
 class ApplicationTest extends IntegrationTestCase
 {
+    public $adminUser;
+    public $normalUser;
+
+    /**
+     * Sets up this set of tests
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        $usersFixture = new UsersFixture();
+        $this->normalUser = [
+            'Auth' => [
+                'User' => $usersFixture->records[0]
+            ]
+        ];
+        $this->adminUser = [
+            'Auth' => [
+                'User' => $usersFixture->records[1]
+            ]
+        ];
+    }
 
     /**
      * testMiddleware
@@ -42,5 +67,22 @@ class ApplicationTest extends IntegrationTestCase
         $this->assertInstanceOf(ErrorHandlerMiddleware::class, $middleware->get(0));
         $this->assertInstanceOf(AssetMiddleware::class, $middleware->get(1));
         $this->assertInstanceOf(RoutingMiddleware::class, $middleware->get(2));
+    }
+
+    /**
+     * Asserts that the last request resulted in a redirect to the login page
+     *
+     * @param string $message Failure message
+     * @return void
+     * @throws \PHPUnit\Exception
+     */
+    protected function assertRedirectToLogin($message = '')
+    {
+        $this->assertRedirectContains(Router::url([
+            'plugin' => false,
+            'prefix' => false,
+            'controller' => 'Users',
+            'action' => 'login'
+        ]), $message);
     }
 }
