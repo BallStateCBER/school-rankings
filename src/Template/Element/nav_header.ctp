@@ -75,6 +75,25 @@ $isActive = function ($url, \Cake\Http\ServerRequest $request) {
                     </div>
                 </li>
             <?php endif; ?>
+
+            <?php if ($authUser): ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbar-logged-in-dropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Logged in
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbar-logged-in-dropdown">
+                        <?= $this->Html->link(
+                            'Log out',
+                            [
+                                'controller' => 'Users',
+                                'action' => 'logout'
+                            ],
+                            ['class' => 'dropdown-item']
+                        ) ?>
+                    </div>
+                </li>
+            <?php endif; ?>
         </ul>
     </div>
 </nav>
