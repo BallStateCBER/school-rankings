@@ -2,6 +2,7 @@
 namespace App\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
+use Cake\Utility\Security;
 
 /**
  * UsersFixture
@@ -45,6 +46,21 @@ class UsersFixture extends TestFixture
     ];
     // @codingStandardsIgnoreEnd
 
+    public $records = [
+        [
+            'id' => 1,
+            'username' => 'User',
+            'email' => 'user@example.com',
+            'role' => 'user',
+        ],
+        [
+            'id' => 2,
+            'username' => 'Admin',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+        ],
+    ];
+
     /**
      * Init method
      *
@@ -52,28 +68,29 @@ class UsersFixture extends TestFixture
      */
     public function init()
     {
-        $this->records = [
-            [
-                'id' => 1,
-                'username' => 'Lorem ipsum dolor sit amet',
-                'email' => 'Lorem ipsum dolor sit amet',
-                'password' => 'Lorem ipsum dolor sit amet',
-                'first_name' => 'Lorem ipsum dolor sit amet',
-                'last_name' => 'Lorem ipsum dolor sit amet',
-                'token' => 'Lorem ipsum dolor sit amet',
-                'token_expires' => '2018-10-22 20:09:38',
-                'api_token' => 'Lorem ipsum dolor sit amet',
-                'activation_date' => '2018-10-22 20:09:38',
-                'secret' => 'Lorem ipsum dolor sit amet',
-                'secret_verified' => 1,
-                'tos_date' => '2018-10-22 20:09:38',
-                'active' => 1,
-                'is_superuser' => 1,
-                'role' => 'Lorem ipsum dolor sit amet',
-                'created' => '2018-10-22 20:09:38',
-                'modified' => '2018-10-22 20:09:38'
-            ],
+        $defaultData = [
+            'username' => '',
+            'password' => Security::hash('password'),
+            'first_name' => null,
+            'last_name' => null,
+            'token' => null,
+            'token_expires' => null,
+            'api_token' => null,
+            'activation_date' => null,
+            'secret' => null,
+            'secret_verified' => null,
+            'tos_date' => null,
+            'active' => 1,
+            'is_superuser' => 0,
+            'role' => 'user',
+            'created' => '2018-10-22 20:09:38',
+            'modified' => '2018-10-22 20:09:38'
         ];
+
+        foreach ($this->records as &$record) {
+            $record += $defaultData;
+        }
+
         parent::init();
     }
 }
