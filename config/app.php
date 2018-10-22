@@ -279,7 +279,7 @@ return [
             //'port' => 'non_standard_port_number',
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', null),
-            'database' => env('DB_TEST_DATABASE', 'test_school_rankings'),
+            'database' => env('DB_TEST_DATABASE', 'test'),
             'encoding' => 'utf8mb4',
             'timezone' => 'UTC',
             'cacheMetadata' => true,
