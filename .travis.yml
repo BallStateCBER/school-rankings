@@ -28,7 +28,7 @@ install:
   - if [[ $JSLINT = 1 || $WEBPACK_BUILD = 1 ]]; then npm install; fi
 
 before_script:
-  - if [[ $PHPUNIT = 1 ]]; then sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS test_school_rankings;'"; fi
+  - if [[ $PHPUNIT = 1 ]]; then sh -c "mysql -e 'CREATE DATABASE IF NOT EXISTS test;'"; fi
   - if [[ $PHPUNIT = 1 ]]; then composer run-script post-install-cmd --no-interaction; fi
 
 script:
