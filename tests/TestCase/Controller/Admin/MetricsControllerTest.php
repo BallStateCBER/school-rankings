@@ -95,7 +95,8 @@ class MetricsControllerTest extends ApplicationTest
             ]);
 
             $this->get($url);
-            $this->assertResponseOk();
+            $response = $this->_response->getBody()->__toString();
+            $this->assertResponseOk('Response body: ' . $response);
         }
     }
 }
