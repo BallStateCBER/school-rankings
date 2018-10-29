@@ -91,6 +91,10 @@ class MetricTreeCleanCommand extends Command
             foreach ($this->removableMetricIds as $context => $metricIds) {
                 $io->out();
                 $io->info(ucwords($context) . ' metrics:');
+                if (!$metricIds) {
+                    $io->out(' - None');
+                    break;
+                }
                 foreach ($metricIds as $metricId) {
                     foreach ($metricsTable->getMetricTreePath($metricId) as $i => $metricInPath) {
                         $io->out(sprintf(
