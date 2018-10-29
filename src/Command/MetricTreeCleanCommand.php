@@ -15,7 +15,7 @@ use Cake\Shell\Helper\ProgressHelper;
 /**
  * Class MetricTreeCleanCommand
  * @package App\Command
- * @property int[] $removableMetricIds
+ * @property array $removableMetricIds
  * @property ProgressHelper $progress
  * @property StatisticsTable $statsTable
  */
@@ -85,27 +85,10 @@ class MetricTreeCleanCommand extends Command
             $totalRemovableCount,
             __n('metric', 'metrics', $totalRemovableCount)
         ));
-        $showDetails = $io->askChoice('Show details?', ['y', 'n'], 'n');
 
+        $showDetails = $io->askChoice('Show details?', ['y', 'n'], 'n');
         if ($showDetails == 'y') {
-            foreach ($this->removableMetricIds as $context => $metricIds) {
-                $io->out();
-                $io->info(ucwords($context) . ' metrics:');
-                if (!$metricIds) {
-                    $io->out(' - None');
-                    break;
-                }
-                foreach ($metricIds as $metricId) {
-                    foreach ($metricsTable->getMetricTreePath($metricId) as $i => $metricInPath) {
-                        $io->out(sprintf(
-                            '%s - %s (#%s)',
-                            str_repeat('  ', $i),
-                            str_replace("\n", ' - ', $metricInPath['name']),
-                            $metricInPath['id']
-                        ));
-                    }
-                }
-            }
+            $this->showDetails($io);
         }
 
         $delete = $io->askChoice('Delete metrics?', ['y', 'n'], 'n');
@@ -178,5 +161,36 @@ class MetricTreeCleanCommand extends Command
             'removableMetrics' => $removableMetrics,
             'hasUnremovable' => $hasUnremovable
         ];
+    }
+
+    /**
+     * Shows what metrics will be deleted
+     *
+     * @param ConsoleIo $io Console IO object
+     * @return void
+     */
+    private function showDetails($io)
+    {
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+
+        foreach ($this->removableMetricIds as $context => $metricIds) {
+            $io->out();
+            $io->info(ucwords($context) . ' metrics:');
+            if (!$metricIds) {
+                $io->out(' - None');
+                continue;
+            }
+            foreach ($metricIds as $metricId) {
+                foreach ($metricsTable->getMetricTreePath($metricId) as $i => $metricInPath) {
+                    $io->out(sprintf(
+                        '%s - %s (#%s)',
+                        str_repeat('  ', $i),
+                        str_replace("\n", ' - ', $metricInPath['name']),
+                        $metricInPath['id']
+                    ));
+                }
+            }
+        }
     }
 }
