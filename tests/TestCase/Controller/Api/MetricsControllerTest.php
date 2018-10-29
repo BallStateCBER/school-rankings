@@ -93,8 +93,13 @@ class MetricsControllerTest extends IntegrationTestCase
         $expected = json_encode([
             'message' => 'Success',
             'result' => true
-        ], JSON_PRETTY_PRINT);
-        $this->assertEquals($expected, (string)$this->_response->getBody());
+        ]);
+
+        // Normalize whitespace in response JSON
+        $actual = (string)$this->_response->getBody();
+        $actual = json_encode(json_decode($actual));
+
+        $this->assertEquals($expected, $actual);
     }
 
     /**
