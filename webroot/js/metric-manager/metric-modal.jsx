@@ -85,7 +85,7 @@ class MetricModal extends React.Component {
       url: '/api/metrics/add.json',
       dataType: 'json',
       data: submitData,
-    }).done(() => {
+    }).done((responseData) => {
       const nodeData = {
         text: submitData.name,
         li_attr: {
@@ -94,6 +94,14 @@ class MetricModal extends React.Component {
           'data-visible': submitData.visible ? 1 : 0,
         },
         icon: submitData.selectable ? 'far fa-check-circle' : 'fas fa-ban',
+        data: {
+          description: submitData.description,
+          metricId: responseData.metricId,
+          name: submitData.name,
+          selectable: submitData.selectable,
+          type: submitData.type,
+          visible: submitData.visible,
+        },
       };
       jstree.create_node(parentNode, nodeData);
       this.close();
