@@ -9,6 +9,7 @@ class MetricModal extends React.Component {
     this.close = this.close.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.resetModalState = this.resetModalState.bind(this);
 
     this.submitButton = React.createRef();
 
@@ -59,6 +60,7 @@ class MetricModal extends React.Component {
 
   close() {
     this.props.onClose();
+    this.resetModalState();
   }
 
   handleAdd() {
@@ -131,6 +133,18 @@ class MetricModal extends React.Component {
     } else if (this.props.mode === 'edit') {
       this.handleEdit();
     }
+  }
+
+  resetModalState() {
+      this.setState({
+          metricId: null,
+          metricName: '',
+          metricDescription: '',
+          metricSelectable: true,
+          metricVisible: true,
+          metricType: 'numeric',
+          submitInProgress: false,
+      });
   }
 
   render() {
