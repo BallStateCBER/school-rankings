@@ -173,16 +173,16 @@ class MetricsController extends AppController
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
 
         /** @var Metric $metric */
-        $selectable = $this->request->getData('selectable');
-        $visible = $this->request->getData('visible');
+        $selectable = $this->request->getData('selectable') == 'true';
+        $visible = $this->request->getData('visible') == 'true';
         $metric = $metricsTable->newEntity([
             'context' => $this->request->getData('context'),
             'name' => $this->request->getData('name'),
             'parent_id' => $this->request->getData('parentId'),
             'description' => $this->request->getData('description'),
             'type' => $this->request->getData('type'),
-            'selectable' => (bool)$selectable,
-            'visible' => (bool)$visible,
+            'selectable' => $selectable,
+            'visible' => $visible,
             'is_percent' => null
         ]);
         $result = (bool)$metricsTable->save($metric);
