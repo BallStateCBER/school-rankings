@@ -59,8 +59,8 @@ class MetricModal extends React.Component {
   }
 
   close() {
-    this.props.onClose();
     this.resetModalState();
+    this.props.onClose();
   }
 
   handleAdd() {
