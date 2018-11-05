@@ -86,23 +86,7 @@ class MetricModal extends React.Component {
       dataType: 'json',
       data: submitData,
     }).done((responseData) => {
-      const nodeData = {
-        text: submitData.name,
-        li_attr: {
-          'data-selectable': submitData.selectable,
-          'data-type': submitData.type,
-          'data-visible': submitData.visible ? 1 : 0,
-        },
-        icon: submitData.selectable ? 'far fa-check-circle' : 'fas fa-ban',
-        data: {
-          description: submitData.description,
-          metricId: responseData.metricId,
-          name: submitData.name,
-          selectable: submitData.selectable,
-          type: submitData.type,
-          visible: submitData.visible,
-        },
-      };
+      const nodeData = MetricModal.getNewNodeData(submitData, responseData);
       jstree.create_node(parentNode, nodeData);
       this.close();
     }).fail((jqXHR) => {
@@ -110,6 +94,26 @@ class MetricModal extends React.Component {
       alert(msg);
       this.setState({submitInProgress: false});
     });
+  }
+
+  static getNewNodeData(submitData, responseData) {
+    return {
+      text: submitData.name,
+      li_attr: {
+        'data-selectable': submitData.selectable,
+        'data-type': submitData.type,
+        'data-visible': submitData.visible ? 1 : 0,
+      },
+      icon: submitData.selectable ? 'far fa-check-circle' : 'fas fa-ban',
+      data: {
+        description: submitData.description,
+        metricId: responseData.metricId,
+        name: submitData.name,
+        selectable: submitData.selectable,
+        type: submitData.type,
+        visible: submitData.visible,
+      },
+    };
   }
 
   handleEdit() {
