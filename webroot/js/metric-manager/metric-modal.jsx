@@ -86,7 +86,16 @@ class MetricModal extends React.Component {
       dataType: 'json',
       data: submitData,
     }).done(() => {
-      jstree.create_node(parentNode, metricName);
+      const nodeData = {
+        text: submitData.name,
+        li_attr: {
+          'data-selectable': submitData.selectable,
+          'data-type': submitData.type,
+          'data-visible': submitData.visible ? 1 : 0,
+        },
+        icon: submitData.selectable ? 'far fa-check-circle' : 'fas fa-ban',
+      };
+      jstree.create_node(parentNode, nodeData);
       this.close();
     }).fail((jqXHR) => {
       const msg = jqXHR.responseJSON.message;
