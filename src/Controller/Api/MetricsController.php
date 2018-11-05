@@ -192,11 +192,12 @@ class MetricsController extends AppController
         $this->clearCacheForContext($metric->context);
 
         $this->set([
-            '_serialize' => ['message', 'result'],
+            '_serialize' => ['message', 'result', 'metricId'],
             'message' => $metric->getErrors() ?
                 implode("\n", Hash::flatten($metric->getErrors())) :
                 'Success',
             'result' => $result,
+            'metricId' => $metric->id
         ]);
     }
 
