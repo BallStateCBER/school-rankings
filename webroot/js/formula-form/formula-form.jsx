@@ -139,8 +139,6 @@ class FormulaForm extends React.Component {
         progressStatus: 'Preparing calculation',
       });
 
-      console.log('Formula success');
-      console.log(data);
       this.formulaId = data.id;
       this.startRankingJob();
     }).fail((jqXHR) => {
@@ -178,12 +176,8 @@ class FormulaForm extends React.Component {
         progressStatus: 'Preparing calculation',
       });
 
-      console.log('Ranking job started');
-      console.log(data);
       this.rankingId = data.rankingId;
       this.jobId = data.jobId;
-      console.log('Ranking ID is ' + this.rankingId);
-      console.log('Job ID is ' + this.jobId);
       this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
@@ -329,9 +323,6 @@ class FormulaForm extends React.Component {
         this.setState({loadingRankings: false});
         return;
       }
-
-      console.log('Progress: ' + data.progress);
-      console.log('Status: ' + data.status);
 
       this.setState({
         progressPercent: 20 + (data.progress * 80),
