@@ -38,8 +38,8 @@ class FormulaForm extends React.Component {
     this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleToggleAllSchoolTypes
-        = this.handleToggleAllSchoolTypes.bind(this);
+    this.handleToggleAllSchoolTypes =
+      this.handleToggleAllSchoolTypes.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
   }
 
@@ -167,14 +167,7 @@ class FormulaForm extends React.Component {
       dataType: 'json',
       data: data,
     }).done((data) => {
-      if (
-          !data.hasOwnProperty('success') ||
-          !data.hasOwnProperty('rankingId') ||
-          !data.hasOwnProperty('jobId') ||
-          !data.success ||
-          !data.rankingId ||
-          !data.jobId
-      ) {
+      if (FormulaForm.hasErrorCreatingJob(data)) {
         console.log('Error creating ranking record');
         console.log(data);
         return;
@@ -195,6 +188,15 @@ class FormulaForm extends React.Component {
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     });
+  }
+
+  static hasErrorCreatingJob(data) {
+    return !data.hasOwnProperty('success') ||
+      !data.hasOwnProperty('rankingId') ||
+      !data.hasOwnProperty('jobId') ||
+      !data.success ||
+      !data.rankingId ||
+      !data.jobId;
   }
 
   static logApiError(jqXHR) {
@@ -319,8 +321,8 @@ class FormulaForm extends React.Component {
       },
     }).done((data) => {
       if (
-          !data.hasOwnProperty('progress') ||
-          !data.hasOwnProperty('status')
+        !data.hasOwnProperty('progress') ||
+        !data.hasOwnProperty('status')
       ) {
         console.log('Error checking job status');
         console.log(data);
@@ -378,7 +380,7 @@ class FormulaForm extends React.Component {
 
   handleRemoveCriterion(metricId) {
     const filteredCriteria = this.state.criteria.filter(
-        (i) => i.metric.metricId !== metricId
+      (i) => i.metric.metricId !== metricId
     );
     this.setState({criteria: filteredCriteria});
     let jstree = $('#jstree').jstree(true);
