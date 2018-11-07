@@ -235,8 +235,8 @@ class MetricsControllerTest extends IntegrationTestCase
             'name' => $metricName,
             'context' => 'school',
             'description' => 'Metric description',
-            'selectable' => true,
-            'visible' => true,
+            'selectable' => 'true',
+            'visible' => 'true',
             'parentId' => 1,
             'type' => 'numeric'
         ];
