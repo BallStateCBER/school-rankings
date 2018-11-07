@@ -258,6 +258,37 @@ class MetricsControllerTest extends IntegrationTestCase
     }
 
     /**
+     * Tests successful creation of a hidden and unselectable metric
+     *
+     * @return void
+     * @throws \Exception
+     * @throws \PHPUnit\Exception
+     */
+    public function testCreateHiddenSuccess()
+    {
+        $metricName = 'New hidden metric';
+        $data = [
+            'name' => $metricName,
+            'context' => 'school',
+            'description' => 'Metric description',
+            'selectable' => 'false',
+            'visible' => 'false',
+            'parentId' => 1,
+            'type' => 'numeric'
+        ];
+        $this->post($this->addUrl, $data);
+        $this->assertResponseSuccess();
+
+        /** @var Metric $record */
+        $record = $this->Metrics->find()
+            ->where(['name' => $metricName])
+            ->first();
+        $this->assertInstanceOf('App\\Model\\Entity\\Metric', $record);
+        $this->assertEquals(false, $record->selectable);
+        $this->assertEquals(false, $record->visible);
+    }
+
+    /**
      * Tests failing to create a metric with an invalid parent
      *
      * @return void
