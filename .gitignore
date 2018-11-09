@@ -43,8 +43,3 @@ nbproject/*
 # NPM #
 #######
 /node_modules/*
-
-# Files produced or copied by Webpack #
-#############################
-/webroot/dist/*
-/webroot/jstree/*
