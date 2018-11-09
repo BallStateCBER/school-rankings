@@ -95,6 +95,9 @@ class MetricSelector extends React.Component {
       core: {
         data: Formatter.formatMetricsForJsTree(data.metrics),
         check_callback: true,
+        themes: {
+          icons: false,
+        },
       },
       plugins: [
         'checkbox',
