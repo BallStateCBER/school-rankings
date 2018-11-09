@@ -14,9 +14,26 @@ class MetricSelector extends React.Component {
       successfullyLoaded: false,
     };
     this.setupClickEvents = this.setupClickEvents.bind(this);
+    this.clearMetricTree = this.clearMetricTree.bind(this);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.context !== this.props.context) {
+      this.clearMetricTree();
+      this.loadMetricTree();
+    }
   }
 
   componentDidMount() {
+    this.loadMetricTree();
+  }
+
+  clearMetricTree() {
+    this.setState({successfullyLoaded: false});
+    $('#jstree').jstree(true).destroy();
+  }
+
+  loadMetricTree() {
     this.setState({loading: true});
 
     $.ajax({
