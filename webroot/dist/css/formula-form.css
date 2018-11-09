@@ -11,6 +11,9 @@
   margin-bottom: 30px;
   margin-top: 30px; }
 
+#formula-form .jstree-leaf[data-selectable="0"] {
+  display: none; }
+
 li[data-selectable="0"] > a i.jstree-checkbox {
   display: none; }
 
