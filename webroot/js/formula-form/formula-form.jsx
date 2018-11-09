@@ -41,6 +41,7 @@ class FormulaForm extends React.Component {
     this.handleToggleAllSchoolTypes =
       this.handleToggleAllSchoolTypes.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
+    this.handleChangeContext = this.handleChangeContext.bind(this);
   }
 
   componentDidMount() {
@@ -57,6 +58,10 @@ class FormulaForm extends React.Component {
     const value = target.type === 'checkbox' ? target.checked : target.value;
 
     this.setState({[name]: value});
+
+    if (name === 'context') {
+      this.handleChangeContext();
+    }
   }
 
   handleSelectCounty(selectedOption) {
@@ -394,6 +399,10 @@ class FormulaForm extends React.Component {
       }
     });
     return selectedSchoolTypes;
+  }
+
+  handleChangeContext() {
+    this.setState({criteria: []});
   }
 
   render() {
