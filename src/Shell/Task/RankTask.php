@@ -546,7 +546,7 @@ class RankTask extends Shell
             }
         }
         $resultsField = $this->context == 'school' ? 'results_schools' : 'results_districts';
-        $resultsAssociation = $this->context == 'school' ? 'ResultsSchools' : 'ResultsSchoolDistricts';
+        $resultsAssociation = $this->context == 'school' ? 'RankingResultsSchools' : 'RankingResultsSchoolDistricts';
         $this->rankingsTable->patchEntity(
             $this->ranking,
             [$resultsField => $results],
