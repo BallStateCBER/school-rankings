@@ -205,7 +205,7 @@ class RankingsController extends AppController
 
         // Group results by rank
         $groupedResults = [];
-        $results = $ranking['results_schools'] ?? $ranking['results_districts'];
+        $results = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
         foreach ($results as $result) {
             $groupedResults[$result['rank']][] = $result;
         }
