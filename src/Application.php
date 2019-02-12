@@ -27,6 +27,7 @@ use App\Command\MetricMergeCommand;
 use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
+use App\Command\PopulateElasticsearchCommand;
 use App\Shell\RankTestShell;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
@@ -52,6 +53,7 @@ class Application extends BaseApplication
         parent::bootstrap();
 
         $this->addPlugin('Queue');
+        $this->addPlugin('Cake/ElasticSearch', ['bootstrap' => true]);
 
         if (PHP_SAPI === 'cli') {
             try {
@@ -123,6 +125,7 @@ class Application extends BaseApplication
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
         $commands->add('rank-test', RankTestShell::class);
+        $commands->add('populate-es', PopulateElasticsearchCommand::class);
 
         return $commands;
     }

@@ -10,6 +10,7 @@
         "ext-zip": "*",
         "cakedc/users": "^7.0",
         "cakephp/cakephp": "3.6.*",
+        "cakephp/elastic-search": "@stable",
         "cakephp/migrations": "^1.0",
         "cakephp/plugin-installer": "^1.0",
         "dereuromark/cakephp-queue": "^3.10",
