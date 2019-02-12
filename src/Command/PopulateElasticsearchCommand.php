@@ -53,7 +53,7 @@ class PopulateElasticsearchCommand extends Command
                             'metric_id' => ['type' => 'long'],
                             'school_id' => ['type' => 'long'],
                             'school_district_id' => ['type' => 'long'],
-                            'value' => ['type' => 'text'],
+                            'value' => ['type' => 'keyword'],
                             'year' => ['type' => 'integer']
                         ]
                     ]
