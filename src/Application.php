@@ -28,6 +28,7 @@ use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
 use App\Command\PopulateElasticsearchCommand;
+use App\Command\SpeedTestElasticsearchCommand;
 use App\Shell\RankTestShell;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
@@ -126,6 +127,7 @@ class Application extends BaseApplication
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
         $commands->add('rank-test', RankTestShell::class);
         $commands->add('populate-es', PopulateElasticsearchCommand::class);
+        $commands->add('speed-test-es', SpeedTestElasticsearchCommand::class);
 
         return $commands;
     }
