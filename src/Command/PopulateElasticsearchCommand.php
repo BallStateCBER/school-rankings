@@ -47,7 +47,7 @@ class PopulateElasticsearchCommand extends Command
                     'number_of_shards' => 1
                 ],
                 'mappings' => [
-                    'statistics_test' => [
+                    '_doc' => [
                         'properties' => [
                             'id' => ['type' => 'long'],
                             'metric_id' => ['type' => 'long'],

@@ -22,6 +22,6 @@ class StatisticsIndex extends Index
      */
     public function getType()
     {
-        return 'statistics';
+        return '_doc';
     }
 }
