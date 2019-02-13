@@ -145,6 +145,7 @@ class PopulateElasticsearchCommand extends Command
         $finalTotalSeconds = round($duration);
         $finalTotalMinutes = round($finalTotalSeconds / 60);
         $finalTotalHours = round($finalTotalMinutes / 60);
+        $io->out();
         $io->out("Actual time to import all stats:");
         $io->out(" - $finalTotalSeconds seconds");
         $io->out(" - $finalTotalMinutes minutes");
