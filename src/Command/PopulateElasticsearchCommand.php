@@ -125,15 +125,8 @@ class PopulateElasticsearchCommand extends Command
             if ($offset == 0) {
                 $duration = microtime(true) - $start;
                 $avgSeconds = ($duration / $perPage);
-                $avgMs = round($avgSeconds / 1000, 2);
-                $io->out("Average duration of a write: $avgMs ms");
-                $estTotalSeconds = round($totalStatsCount * $avgSeconds);
-                $estTotalMinutes = round($estTotalSeconds / 60);
-                $estTotalHours = round($estTotalMinutes / 60);
-                $io->out("Estimated time to import all stats:");
-                $io->out(" - $estTotalSeconds seconds");
-                $io->out(" - $estTotalMinutes minutes");
-                $io->out(" - $estTotalHours hours");
+                $estTotalHours = round(($totalStatsCount * $avgSeconds) / 60 / 60, 2);
+                $io->out("Estimated time to import all stats: $estTotalHours hours");
             }
 
             $progress->increment($perPage);
@@ -142,14 +135,9 @@ class PopulateElasticsearchCommand extends Command
 
         // Actual duration
         $duration = microtime(true) - $start;
-        $finalTotalSeconds = round($duration);
-        $finalTotalMinutes = round($finalTotalSeconds / 60);
-        $finalTotalHours = round($finalTotalMinutes / 60);
+        $finalTotalHours = round($duration / 60 / 60, 2);
         $io->out();
-        $io->out("Actual time to import all stats:");
-        $io->out(" - $finalTotalSeconds seconds");
-        $io->out(" - $finalTotalMinutes minutes");
-        $io->out(" - $finalTotalHours hours");
+        $io->out("Actual time to import all stats: $finalTotalHours hours");
 
         $statisticsIndexRegistry->refresh();
         $totalCopiedStats = $statisticsIndex->find()->count();
