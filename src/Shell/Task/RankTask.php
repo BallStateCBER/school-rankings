@@ -7,10 +7,12 @@ use App\Model\Entity\Criterion;
 use App\Model\Entity\Ranking;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
+use App\Model\Entity\Statistic;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Shell;
 use Cake\Database\Expression\QueryExpression;
+use Cake\Datasource\ConnectionManager;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
@@ -55,6 +57,12 @@ class RankTask extends Shell
     private $subjects = [];
 
     /**
+     * Elasticsearch index for statistics
+     * @var \Cake\ElasticSearch\Index
+     */
+    private $statsEsIndex;
+
+    /**
      * RankTask initialize method
      *
      * @return void
@@ -65,6 +73,17 @@ class RankTask extends Shell
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->progressHelper = $this->getIo()->helper('Progress');
         $this->jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
+
+        /**
+         * @var \Cake\ElasticSearch\Datasource\Connection|\Elastica\Client $connection
+         * @var \Elastica\Index $statisticsIndexRegistry
+         * @var \Cake\ElasticSearch\Index $statisticsIndex
+         */
+        $connection = ConnectionManager::get('elastic');
+        $statisticsIndexRegistry = $connection->getIndex('statistics');
+        if ($statisticsIndexRegistry->exists()) {
+            $this->statsEsIndex = \Cake\ElasticSearch\IndexRegistry::get('statistics');
+        }
     }
 
     /**
@@ -281,14 +300,7 @@ class RankTask extends Shell
         foreach ($this->subjects as &$subject) {
             $subject->statistics = [];
             foreach ($metricIds as $metricId) {
-                $stat = $this->statsTable->find()
-                    ->select(['id', 'metric_id', 'value', 'year'])
-                    ->where([
-                        'metric_id' => $metricId,
-                        Context::getLocationField($this->context) => $subject->id
-                    ])
-                    ->orderDesc('year')
-                    ->first();
+                $stat = $this->getStat($metricId, $subject->id);
                 if ($stat) {
                     $subject->statistics[] = $stat;
                 }
@@ -562,5 +574,39 @@ class RankTask extends Shell
         }
 
         throw new Exception('Error saving ranking results');
+    }
+
+    /**
+     * Retrieves a statistic entity
+     *
+     * @param int $metricId Metric ID
+     * @param int $subjectId School ID or school district ID
+     * @return Statistic
+     */
+    private function getStat($metricId, int $subjectId)
+    {
+        $usingElasticsearch = isset($this->statsEsIndex);
+        $dataSource = $usingElasticsearch ? $this->statsEsIndex : $this->statsTable;
+
+        /** @var Statistic $stat */
+        $stat = $dataSource->find()
+            ->select(['id', 'metric_id', 'value', 'year'])
+            ->where([
+                'metric_id' => $metricId,
+                Context::getLocationField($this->context) => $subjectId
+            ])
+            ->order(['year' => 'DESC'])
+            ->first();
+
+        if ($stat && $usingElasticsearch) {
+            $stat = $this->statsTable->newEntity([
+                'id' => $stat->id,
+                'metric_id' => $stat->metric_id,
+                'value' => $stat->value,
+                'year' => $stat->year
+            ]);
+        }
+
+        return $stat;
     }
 }
