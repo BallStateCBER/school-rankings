@@ -93,7 +93,7 @@ class SpeedTestElasticsearchCommand extends Command
             $mysqlDuration = (microtime(true) - $start) / $limit;
             $mysqlMs = round(($mysqlDuration / 1000), 5);
             $estTotalMinutes = round(($queryCount * $mysqlDuration) / 60, 2);
-            $io->out(" - Average query time: $mysqlMs ms");
+            $io->overwrite(" - Average query time: $mysqlMs ms");
             $io->out(" - Estimated time for looking up $queryCount stats: $estTotalMinutes minutes");
         }
 
@@ -119,7 +119,7 @@ class SpeedTestElasticsearchCommand extends Command
         $elasticsearchDuration = (microtime(true) - $start) / $limit;
         $elasticsearchMs = round(($elasticsearchDuration / 1000), 5);
         $estTotalSeconds = round(($queryCount * $elasticsearchDuration), 2);
-        $io->out(" - Average query time: $elasticsearchMs ms");
+        $io->overwrite(" - Average query time: $elasticsearchMs ms");
         $io->out(" - Estimated time for looking up $queryCount stats: $estTotalSeconds seconds");
 
         $metricIds = [5966, 2622];
@@ -149,7 +149,7 @@ class SpeedTestElasticsearchCommand extends Command
             }
         }
         $elasticsearchDuration = microtime(true) - $start;
-        $io->out(sprintf(
+        $io->overwrite(sprintf(
             ' - Actual time for looking up %s stats: %s seconds',
             number_format($queryCount),
             round($elasticsearchDuration, 2)
