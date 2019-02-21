@@ -114,9 +114,6 @@ class ResultSubject extends React.Component {
         </div>
         <div className="col-lg-6">
           {this.getDataCompletenessWarning()}
-          <p>
-            Statistics:
-          </p>
           {this.getStatValues(this.props.statistics)}
         </div>
       </td>
