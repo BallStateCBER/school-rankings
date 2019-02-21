@@ -13,11 +13,15 @@ use Cake\Core\Configure;
             Create an Account
         </legend>
         <?php
-            echo $this->Form->control('email', ['label' => 'Email']);
+            echo $this->Form->control('email', [
+                'label' => 'Email',
+                'required' => true
+            ]);
             echo $this->Form->control('password', ['label' => 'Password']);
             echo $this->Form->control('password_confirm', [
                 'type' => 'password',
-                'label' => 'Confirm password'
+                'label' => 'Confirm password',
+                'required' => true
             ]);
             if (Configure::read('Users.reCaptcha.registration')) {
                 echo $this->User->addReCaptcha();
