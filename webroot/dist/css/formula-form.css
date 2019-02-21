@@ -29,6 +29,8 @@ li[data-selectable="0"] > a i.jstree-checkbox {
 
 table.ranking-results {
   margin-top: 30px; }
+  table.ranking-results thead th {
+    font-size: 1.5rem; }
   table.ranking-results th {
     font-weight: normal; }
     table.ranking-results th.rank-number {

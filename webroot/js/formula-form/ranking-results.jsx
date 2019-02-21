@@ -32,7 +32,7 @@ class RankingResults extends React.Component {
   render() {
     const resultsCount = this.props.results.length;
     if (resultsCount === 0) {
-      const subjects = this.props.context === 'school'
+      const subjectsNotFound = this.props.context === 'school'
         ? 'schools'
         : 'school corporations';
 
@@ -41,7 +41,7 @@ class RankingResults extends React.Component {
             No Results
           </h3>
           <p>
-            No {subjects} were found matching your selected criteria.
+            No {subjectsNotFound} were found matching your selected criteria.
           </p>
         </section>;
     }
@@ -68,6 +68,9 @@ class RankingResults extends React.Component {
     }
 
     const header = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
+    const subjectHeader = this.props.context === 'school'
+      ? 'School'
+      : 'School Corporation';
 
     return (
       <section>
@@ -75,6 +78,14 @@ class RankingResults extends React.Component {
           {header}
         </h3>
         <table className="table ranking-results">
+          <thead>
+            <th>
+              Rank
+            </th>
+            <th>
+              {subjectHeader}
+            </th>
+          </thead>
           <tbody>
             {rankRows}
           </tbody>
