@@ -109,7 +109,7 @@ class ResultSubject extends React.Component {
           {this.props.subjectData.phone} <br />
           <a href={this.props.subjectData.url} target="_blank"
              rel="noopener noreferrer">
-            {this.props.subjectData.url}
+            Visit website
           </a>
         </div>
         <div className="col-lg-6">
