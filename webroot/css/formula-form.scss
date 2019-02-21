@@ -59,6 +59,9 @@ table.ranking-results {
       content: ')';
     }
   }
+  .col-sm-6:first-child {
+    padding-bottom: 30px;
+  }
 }
 #criteria {
   > div {

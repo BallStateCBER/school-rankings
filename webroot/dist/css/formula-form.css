@@ -46,6 +46,8 @@ table.ranking-results {
       content: '('; }
     table.ranking-results .year::after {
       content: ')'; }
+  table.ranking-results .col-sm-6:first-child {
+    padding-bottom: 30px; }
 
 #criteria > div {
   margin-bottom: 2px;

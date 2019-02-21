@@ -98,23 +98,27 @@ class ResultSubject extends React.Component {
 
   render() {
     return (
-      <td key={this.props.subjectData.id}>
-        {this.props.subjectData.name} <br />
-        {this.props.context === 'school' &&
-          <span>
-            {ResultSubject.nl2br(this.props.subjectData.address)}<br />
-          </span>
-        }
-        {this.props.subjectData.phone} <br />
-        <a href={this.props.subjectData.url} target="_blank"
-           rel="noopener noreferrer">
-          {this.props.subjectData.url}
-        </a><br />
-        {this.getDataCompletenessWarning()}
-        <p>
-          Statistics:
-        </p>
-        {this.getStatValues(this.props.statistics)}
+      <td key={this.props.subjectData.id} className="row">
+        <div className="col-lg-6">
+          {this.props.subjectData.name} <br />
+          {this.props.context === 'school' &&
+            <span>
+              {ResultSubject.nl2br(this.props.subjectData.address)}<br />
+            </span>
+          }
+          {this.props.subjectData.phone} <br />
+          <a href={this.props.subjectData.url} target="_blank"
+             rel="noopener noreferrer">
+            {this.props.subjectData.url}
+          </a>
+        </div>
+        <div className="col-lg-6">
+          {this.getDataCompletenessWarning()}
+          <p>
+            Statistics:
+          </p>
+          {this.getStatValues(this.props.statistics)}
+        </div>
       </td>
     );
   }
