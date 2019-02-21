@@ -24,6 +24,9 @@ use Cake\Core\Configure;
             }
         ?>
     </fieldset>
-    <?= $this->Form->button('Register') ?>
+    <?= $this->Form->button(
+        'Register',
+        ['class' => 'btn btn-primary']
+    ) ?>
     <?= $this->Form->end() ?>
 </div>
