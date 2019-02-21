@@ -33,17 +33,23 @@ use Cake\Core\Configure;
                     'checked' => Configure::read('Users.RememberMe.checked')
                 ]);
             }
-            $registrationActive = Configure::read('Users.Registration.active');
-            if ($registrationActive) {
-                echo $this->Html->link(__d('CakeDC/Users', 'Register'), ['action' => 'register']);
-            }
-            echo $this->Html->link(
-                __d('CakeDC/Users', 'Reset Password'),
-                ['action' => 'requestResetPassword']
-            );
         ?>
     </fieldset>
-    <?= implode(' ', $this->User->socialLoginList()); ?>
-    <?= $this->Form->button(__d('CakeDC/Users', 'Login')); ?>
+    <?= implode(' ', $this->User->socialLoginList()) ?>
+    <?= $this->Form->button(
+        __d('CakeDC/Users', 'Login'),
+        ['class' => 'btn btn-primary']
+    ) ?>
     <?= $this->Form->end() ?>
+    <?php
+        $registrationActive = Configure::read('Users.Registration.active');
+        if ($registrationActive) {
+            echo $this->Html->link(__d('CakeDC/Users', 'Register'), ['action' => 'register']);
+            echo '<br />';
+        }
+        echo $this->Html->link(
+            __d('CakeDC/Users', 'Reset Password'),
+            ['action' => 'requestResetPassword']
+        );
+    ?>
 </div>
