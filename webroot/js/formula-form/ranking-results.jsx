@@ -30,6 +30,21 @@ class RankingResults extends React.Component {
   }
 
   render() {
+    if (this.props.results.length === 0) {
+      const subjects = this.props.context === 'school'
+        ? 'schools'
+        : 'school corporations';
+
+      return <section>
+          <h3>
+            No Results
+          </h3>
+          <p>
+            No {subjects} were found matching your selected criteria.
+          </p>
+        </section>;
+    }
+
     let rankRows = [];
 
     for (let i = 0; i < this.props.results.length; i++) {
@@ -64,6 +79,7 @@ class RankingResults extends React.Component {
 RankingResults.propTypes = {
   criteria: PropTypes.array.isRequired,
   results: PropTypes.array.isRequired,
+  context: PropTypes.string.isRequired,
 };
 
 export {RankingResults};

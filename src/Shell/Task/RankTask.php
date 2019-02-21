@@ -289,28 +289,31 @@ class RankTask extends Shell
         $msg = 'Analyzing statistical data';
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
-        $this->progressHelper->init([
-            'total' => count($this->subjects),
-            'width' => 40,
-        ]);
-        $this->progressHelper->draw();
-        $criteria = $this->ranking->formula->criteria;
-        $metricIds = Hash::extract($criteria, '{n}.metric_id');
-        $step = 1;
-        foreach ($this->subjects as &$subject) {
-            $subject->statistics = [];
-            foreach ($metricIds as $metricId) {
-                $stat = $this->getStat($metricId, $subject->id);
-                if ($stat) {
-                    $subject->statistics[] = $stat;
-                }
-            }
-
-            $this->progressHelper->increment(1);
+        $subjectCount = count($this->subjects);
+        if ($subjectCount) {
+            $this->progressHelper->init([
+                'total' => $subjectCount,
+                'width' => 40,
+            ]);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($step, count($this->subjects));
-            $this->updateJobProgress($overallProgress);
-            $step++;
+            $criteria = $this->ranking->formula->criteria;
+            $metricIds = Hash::extract($criteria, '{n}.metric_id');
+            $step = 1;
+            foreach ($this->subjects as &$subject) {
+                $subject->statistics = [];
+                foreach ($metricIds as $metricId) {
+                    $stat = $this->getStat($metricId, $subject->id);
+                    if ($stat) {
+                        $subject->statistics[] = $stat;
+                    }
+                }
+
+                $this->progressHelper->increment(1);
+                $this->progressHelper->draw();
+                $overallProgress = $this->getOverallProgress($step, count($this->subjects));
+                $this->updateJobProgress($overallProgress);
+                $step++;
+            }
         }
         $this->getIo()->overwrite(' - Done');
     }
@@ -325,41 +328,45 @@ class RankTask extends Shell
         $msg = "Scoring {$this->context}s";
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
-        $criteria = $this->ranking->formula->criteria;
-        $this->progressHelper->init([
-            'total' => count($this->subjects) * count($criteria),
-            'width' => 40,
-        ]);
-        $this->progressHelper->draw();
-
         $outputMsgs = [];
-        foreach ($criteria as $criterion) {
-            $metricId = $criterion->metric_id;
-            $weight = $criterion->weight;
-            list($minValue, $maxValue) = $this->getValueRange($metricId);
-            if (!isset($minValue)) {
-                $this->progressHelper->increment(count($this->subjects));
-                $this->progressHelper->draw();
-                continue;
-            }
-            $step = 1;
-            foreach ($this->subjects as &$subject) {
-                /** @var School|SchoolDistrict $subject */
-                foreach ($subject->statistics as $statistic) {
-                    if ($statistic->metric_id != $metricId) {
-                        continue;
-                    }
-                    $value = $statistic->numeric_value;
-                    $metricScore = ($value / $maxValue) * $weight;
-                    $subject->score += $metricScore;
-                    $outputMsgs[] = "Metric $metricId score for $subject->name: $metricScore";
-                }
 
-                $this->progressHelper->increment(1);
-                $this->progressHelper->draw();
-                $overallProgress = $this->getOverallProgress($step, count($this->subjects));
-                $this->updateJobProgress($overallProgress);
-                $step++;
+        $subjectCount = count($this->subjects);
+        if ($subjectCount) {
+            $criteria = $this->ranking->formula->criteria;
+            $this->progressHelper->init([
+                'total' => count($this->subjects) * count($criteria),
+                'width' => 40,
+            ]);
+            $this->progressHelper->draw();
+
+            foreach ($criteria as $criterion) {
+                $metricId = $criterion->metric_id;
+                $weight = $criterion->weight;
+                list($minValue, $maxValue) = $this->getValueRange($metricId);
+                if (!isset($minValue)) {
+                    $this->progressHelper->increment($subjectCount);
+                    $this->progressHelper->draw();
+                    continue;
+                }
+                $step = 1;
+                foreach ($this->subjects as &$subject) {
+                    /** @var School|SchoolDistrict $subject */
+                    foreach ($subject->statistics as $statistic) {
+                        if ($statistic->metric_id != $metricId) {
+                            continue;
+                        }
+                        $value = $statistic->numeric_value;
+                        $metricScore = ($value / $maxValue) * $weight;
+                        $subject->score += $metricScore;
+                        $outputMsgs[] = "Metric $metricId score for $subject->name: $metricScore";
+                    }
+
+                    $this->progressHelper->increment(1);
+                    $this->progressHelper->draw();
+                    $overallProgress = $this->getOverallProgress($step, count($this->subjects));
+                    $this->updateJobProgress($overallProgress);
+                    $step++;
+                }
             }
         }
 
