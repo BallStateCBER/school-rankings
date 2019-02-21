@@ -30,7 +30,8 @@ class RankingResults extends React.Component {
   }
 
   render() {
-    if (this.props.results.length === 0) {
+    const resultsCount = this.props.results.length;
+    if (resultsCount === 0) {
       const subjects = this.props.context === 'school'
         ? 'schools'
         : 'school corporations';
@@ -47,7 +48,7 @@ class RankingResults extends React.Component {
 
     let rankRows = [];
 
-    for (let i = 0; i < this.props.results.length; i++) {
+    for (let i = 0; i < resultsCount; i++) {
       const rank = this.props.results[i];
       rankRows.push(
           <tr key={rank.rank + '-0'}>
@@ -66,12 +67,19 @@ class RankingResults extends React.Component {
       }
     }
 
+    const header = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
+
     return (
-      <table className="table ranking-results">
-        <tbody>
-          {rankRows}
-        </tbody>
-      </table>
+      <section>
+        <h3>
+          {header}
+        </h3>
+        <table className="table ranking-results">
+          <tbody>
+            {rankRows}
+          </tbody>
+        </table>
+      </section>
     );
   }
 }
