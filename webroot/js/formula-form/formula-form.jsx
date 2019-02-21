@@ -424,39 +424,41 @@ class FormulaForm extends React.Component {
                       required={true} />
             </div>
           </section>
-          <section className="form-group">
-            <h3>
-              <label>
-                What would you like to rank?
-              </label>
-            </h3>
-            <div className="form-check">
-              <input className="form-check-input" type="radio" name="context"
-                     id="context-school" value="school"
-                     onChange={this.handleChange}
-                     checked={this.state.context === 'school'} />
-              <label className="form-check-label" htmlFor="context-school">
-                Schools
-              </label>
-            </div>
-            <div className="form-check">
-              <input className="form-check-input" type="radio" name="context"
-                     id="context-district" value="district"
-                     onChange={this.handleChange}
-                     checked={this.state.context === 'district'} />
-              <label className="form-check-label" htmlFor="context-district">
-                School corporations (districts)
-              </label>
-            </div>
-          </section>
-          {this.state.context === 'school' &&
-              <SchoolTypeSelector
-                  schoolTypes={this.state.schoolTypes}
-                  onlyPublic={this.state.onlyPublic}
-                  handleSelect={this.handleSelectSchoolTypes}
-                  handleChangeOnlyPublic={this.handleChangeOnlyPublic}
-                  handleToggleAll={this.handleToggleAllSchoolTypes}/>
-          }
+          <div className="row">
+            <section className="form-group col-sm-6">
+              <h3>
+                <label>
+                  What would you like to rank?
+                </label>
+              </h3>
+              <div className="form-check">
+                <input className="form-check-input" type="radio" name="context"
+                       id="context-school" value="school"
+                       onChange={this.handleChange}
+                       checked={this.state.context === 'school'} />
+                <label className="form-check-label" htmlFor="context-school">
+                  Schools
+                </label>
+              </div>
+              <div className="form-check">
+                <input className="form-check-input" type="radio" name="context"
+                       id="context-district" value="district"
+                       onChange={this.handleChange}
+                       checked={this.state.context === 'district'} />
+                <label className="form-check-label" htmlFor="context-district">
+                  School corporations (districts)
+                </label>
+              </div>
+            </section>
+            {this.state.context === 'school' &&
+                <SchoolTypeSelector
+                    schoolTypes={this.state.schoolTypes}
+                    onlyPublic={this.state.onlyPublic}
+                    handleSelect={this.handleSelectSchoolTypes}
+                    handleChangeOnlyPublic={this.handleChangeOnlyPublic}
+                    handleToggleAll={this.handleToggleAllSchoolTypes}/>
+            }
+          </div>
           {this.state.context &&
             <MetricSelector context={this.state.context}
                             handleSelectMetric={this.handleSelectMetric}

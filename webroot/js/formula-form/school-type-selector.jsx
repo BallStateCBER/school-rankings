@@ -36,7 +36,7 @@ class SchoolTypeSelector extends React.Component {
 
   render() {
     return (
-      <section id="school-type">
+      <section id="school-type col-sm-6">
         <h3>
           What types of schools?
         </h3>
