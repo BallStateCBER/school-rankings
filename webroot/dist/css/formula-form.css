@@ -36,6 +36,8 @@ table.ranking-results {
       font-weight: bold;
       text-align: center;
       width: 50px; }
+  table.ranking-results .school-name {
+    font-size: 1.5rem; }
   table.ranking-results .metric-name {
     font-weight: bold; }
   table.ranking-results .year {
