@@ -13,16 +13,20 @@ class ResultSubject extends React.Component {
     }
 
     let msg = '';
+    let className = '';
     if (dataCompleteness === 'partial') {
       msg = 'Some data unavailable';
+      className = 'alert-warning';
     } else if (dataCompleteness === 'empty') {
       msg = 'No data available';
+      className = 'alert-danger';
     }
+    className = 'data-completeness-warning alert ' + className;
 
     return (
-      <span className="data-completeness-warning">
+      <p className={className}>
         {msg}
-      </span>
+      </p>
     );
   }
 

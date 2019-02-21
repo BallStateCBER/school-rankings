@@ -52,6 +52,8 @@ table.ranking-results {
       content: ')'; }
   table.ranking-results .col-sm-6:first-child {
     padding-bottom: 30px; }
+  table.ranking-results .data-completeness-warning {
+    padding: 0.25rem 1.25rem; }
 
 #criteria > div {
   margin-bottom: 2px;
