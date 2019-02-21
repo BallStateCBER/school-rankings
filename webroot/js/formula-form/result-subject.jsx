@@ -107,7 +107,8 @@ class ResultSubject extends React.Component {
             </span>
           }
           {this.props.subjectData.phone} <br />
-          <a href={this.props.subjectData.url} target="_blank">
+          <a href={this.props.subjectData.url} target="_blank"
+             rel="noopener noreferrer">
             Visit website
           </a>
         </div>
