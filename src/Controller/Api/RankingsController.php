@@ -214,7 +214,7 @@ class RankingsController extends AppController
         foreach ($groupedResults as $rank => $resultsInRank) {
             $sortedResults = [];
             foreach ($resultsInRank as $resultInRank) {
-                $context = isset($resultInRank['school']) ? 'school' : 'district';
+                $context = isset($resultInRank['school']) ? 'school' : 'school_district';
                 // Combine name and ID in case any two subjects (somehow) have identical names
                 $key = $resultInRank[$context]['name'] . $resultInRank[$context]['id'];
                 $sortedResults[$key] = $resultInRank;
