@@ -498,19 +498,38 @@ class ImportFile
 
         $dataColumns = [];
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
+        $invalidMetricIdMsgs = [];
         for ($col = 2; $col <= $lastDataCol; $col++) {
             if ($this->isLocationHeader($col, $row)) {
                 continue;
             }
             $colName = $this->getValue($col, $row);
             $colGroup = $this->getColGroup($col);
+            $metricId = $this->getMetricId($colGroup, $colName);
             $dataColumns[$col] = [
                 'name' => $colName,
                 'group' => $colGroup,
-                'metricId' => $this->getMetricId($colGroup, $colName)
+                'metricId' => $metricId
             ];
+
+            // Check if non-null metric ID is invalid
+            if ($metricId && !$this->metricsTable->exists(['id' => $metricId])) {
+                $invalidMetricIdMsgs[] = sprintf(
+                    "%s > %s > %s (col #%s) corresponds to metric #%s, which doesn't exist",
+                    $this->activeWorksheet,
+                    str_replace("\n", ' ', $colGroup),
+                    str_replace("\n", ' ', $colName),
+                    $col,
+                    $metricId
+                );
+            }
         }
         unset($lastDataCol, $colName, $colGroup);
+
+        // Abort if invalid metric IDs are found
+        if ($invalidMetricIdMsgs) {
+            throw new Exception(implode("\n", $invalidMetricIdMsgs));
+        }
 
         return $dataColumns;
     }
