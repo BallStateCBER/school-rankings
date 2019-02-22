@@ -3,6 +3,7 @@ namespace App\Command;
 
 use App\Model\Context\Context;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SpreadsheetColumnsMetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
@@ -17,13 +18,23 @@ use Cake\Shell\Helper\ProgressHelper;
  * @package App\Command
  * @property array $removableMetricIds
  * @property ProgressHelper $progress
+ * @property SpreadsheetColumnsMetricsTable $spreadsheetColsTable
  * @property StatisticsTable $statsTable
  */
 class MetricTreeCleanCommand extends Command
 {
     private $progress;
     private $removableMetricIds;
+    private $spreadsheetColsTable;
     private $statsTable;
+
+    /**
+     * A flag used to prevent metrics from being deleted if they're associated with spreadshet columns via the
+     * spreadsheet_columns_metrics table
+     *
+     * @var bool
+     */
+    private $protectSpreadsheetMetrics;
 
     /**
      * Removes metrics that have no statistics or children with statistics
@@ -41,9 +52,17 @@ class MetricTreeCleanCommand extends Command
         ));
         $io->out();
 
+        $io->info(wordwrap(
+            'Deleting metrics associated with imported spreadsheet columns may result in those metrics being ' .
+            'recreated or errors being thrown when the file is re-imported'
+        ));
+        $msg = 'Avoid deleting metrics associated with imported spreadsheet columns? (recommended)';
+        $this->protectSpreadsheetMetrics = $io->askChoice($msg, ['y', 'n'], 'y') == 'y';
+
         /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
+        $this->spreadsheetColsTable = TableRegistry::getTableLocator()->get('SpreadsheetColumnsMetrics');
         $this->removableMetricIds = [];
         $totalRemovableCount = 0;
 
@@ -147,8 +166,15 @@ class MetricTreeCleanCommand extends Command
                 $hasUnremovableChildren = $result['hasUnremovable'];
             }
 
+            // Save metric if it has statistics or unremovable children
             if ($hasUnremovableChildren || $this->statsTable->exists(['metric_id' => $metric['id']])) {
                 $hasUnremovable = true;
+
+            // Save metric if it's a protected metric associated with a spreadsheet column
+            } elseif ($this->isProtectedSpreadsheetMetric($metric['id'])) {
+                $hasUnremovable = true;
+
+            // Metric can be removed
             } else {
                 $removableMetrics[] = $metric['id'];
             }
@@ -161,6 +187,21 @@ class MetricTreeCleanCommand extends Command
             'removableMetrics' => $removableMetrics,
             'hasUnremovable' => $hasUnremovable
         ];
+    }
+
+    /**
+     * Returns TRUE if this is a metric associated with a spreadsheet column and should not be deleted
+     *
+     * @param int $metricId Metric ID
+     * @return bool
+     */
+    private function isProtectedSpreadsheetMetric($metricId)
+    {
+        if (!$this->protectSpreadsheetMetrics) {
+            return false;
+        }
+
+        return $this->spreadsheetColsTable->exists(['metric_id' => $metricId]);
     }
 
     /**
