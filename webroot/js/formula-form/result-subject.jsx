@@ -37,6 +37,10 @@ class ResultSubject extends React.Component {
   }
 
   getStatValues(statistics) {
+    if (this.props.dataCompleteness === 'empty') {
+      return null;
+    }
+
     let rows = [];
 
     for (let i = 0; i < this.props.criteria.length; i++) {
