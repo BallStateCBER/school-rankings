@@ -83,7 +83,14 @@ class RankingResults extends React.Component {
               Rank
             </th>
             <th>
-              {subjectHeader}
+              <div className="row">
+                <div className="col-lg-6">
+                  {subjectHeader}
+                </div>
+                <div className="col-lg-6 d-none d-md-block">
+                  Statistics
+                </div>
+              </div>
             </th>
           </thead>
           <tbody>
