@@ -360,6 +360,7 @@ class MetricsTable extends Table
      * @param int $metricId ID of a metric record
      * @return array
      * @throws InternalErrorException
+     * @throws Exception
      */
     public function getMetricTreePath($metricId)
     {
@@ -368,6 +369,14 @@ class MetricsTable extends Table
                 'getMetricTreePath() must be called on a context-specific metric table object'
             );
         }
+
+        /** @var Metric $metric */
+        $metric = $this->find()
+            ->select(['context'])
+            ->where(['id' => $metricId])
+            ->first();
+        $this->setScope($metric->context);
+
         $options = ['for' => $metricId];
         $results = $this->find('path', $options)
             ->select(['id', 'name'])
