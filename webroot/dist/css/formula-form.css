@@ -32,16 +32,17 @@ table.ranking-results {
   table.ranking-results thead th {
     font-size: 1.5rem; }
   table.ranking-results th {
-    font-weight: normal; }
+    font-weight: normal;
+    word-break: normal; }
     table.ranking-results th.rank-number {
       font-size: 2em;
       font-weight: bold;
       text-align: center;
       width: 50px; }
+  table.ranking-results td {
+    word-break: normal; }
   table.ranking-results .school-name {
     font-size: 1.5rem; }
-  table.ranking-results .metric-name {
-    font-weight: bold; }
   table.ranking-results .year {
     color: #666;
     font-size: 80%;

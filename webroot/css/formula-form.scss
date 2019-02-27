@@ -41,6 +41,7 @@ table.ranking-results {
   }
   th {
     font-weight: normal;
+    word-break: normal;
 
     &.rank-number {
       font-size: 2em;
@@ -49,11 +50,11 @@ table.ranking-results {
       width: 50px;
     }
   }
+  td {
+    word-break: normal;
+  }
   .school-name {
     font-size: 1.5rem;
-  }
-  .metric-name {
-    font-weight: bold;
   }
   .year {
     color: #666;
