@@ -87,7 +87,7 @@ class RankingResults extends React.Component {
                 <div className="col-lg-6">
                   {subjectHeader}
                 </div>
-                <div className="col-lg-6 d-none d-md-block">
+                <div className="col-lg-6 d-none d-lg-block">
                   Statistics
                 </div>
               </div>
