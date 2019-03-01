@@ -188,6 +188,13 @@ class MetricMergeCommand extends CommonCommand
             $this->unlockDb();
             $this->io->out();
             $this->io->success('Merge successful');
+
+            if ($this->statsToMerge) {
+                $this->io->info(
+                    'Since statistics were updated, the Elasticsearch statistics index will also need to be ' .
+                    'updated by running the `bin\cake populate-es` command.'
+                );
+            }
         } catch (StopException $e) {
             return;
         }

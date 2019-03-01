@@ -242,6 +242,13 @@ class ImportStatsCommand extends Command
             str_replace(' ago', '', $duration)
         ));
 
+        $io->out();
+        $io->info(
+            'Note: Whenever statistics are updated, the Elasticsearch statistics index will also need to be ' .
+            'updated by running the `bin\cake populate-es` command.'
+        );
+
+        $io->out();
         $runCommand = $io->askChoice(
             'Run check-stats command?',
             ['y', 'n'],

@@ -95,6 +95,12 @@ class FixPercentValuesCommand extends Command
             $this->unclassifiedMetricCount,
             $this->updateResponse
         );
+
+        $io->out();
+        $io->info(
+            'Note: Whenever statistics are updated, the Elasticsearch statistics index will also need to be ' .
+            'updated by running the `bin\cake populate-es` command.'
+        );
     }
 
     /**
