@@ -112,16 +112,23 @@ class ResultSubject extends React.Component {
             <h3 className="school-name">
               {this.props.subjectData.name}
             </h3>
-            {this.props.context === 'school' &&
+            {this.props.context === 'school'
+              && this.props.subjectData.address &&
               <span>
-                {ResultSubject.nl2br(this.props.subjectData.address)}<br />
+                {ResultSubject.nl2br(this.props.subjectData.address)}<br/>
               </span>
             }
-            {this.props.subjectData.phone} <br />
-            <a href={this.props.subjectData.url} target="_blank"
-               rel="noopener noreferrer">
-              Visit website
-            </a>
+            {this.props.subjectData.phone &&
+              <span>
+                {this.props.subjectData.phone} <br />
+              </span>
+            }
+            {this.props.subjectData.url &&
+              <a href={this.props.subjectData.url} target="_blank"
+                 rel="noopener noreferrer">
+                Visit website
+              </a>
+            }
           </div>
           <div className="col-lg-6">
             {this.getDataCompletenessWarning()}
