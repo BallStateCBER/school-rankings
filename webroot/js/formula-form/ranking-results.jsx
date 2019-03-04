@@ -79,19 +79,21 @@ class RankingResults extends React.Component {
         </h3>
         <table className="table ranking-results">
           <thead>
-            <th>
-              Rank
-            </th>
-            <th>
-              <div className="row">
-                <div className="col-lg-6">
-                  {subjectHeader}
+            <tr>
+              <th>
+                Rank
+              </th>
+              <th>
+                <div className="row">
+                  <div className="col-lg-6">
+                    {subjectHeader}
+                  </div>
+                  <div className="col-lg-6 d-none d-lg-block">
+                    Statistics
+                  </div>
                 </div>
-                <div className="col-lg-6 d-none d-lg-block">
-                  Statistics
-                </div>
-              </div>
-            </th>
+              </th>
+            </tr>
           </thead>
           <tbody>
             {rankRows}
