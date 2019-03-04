@@ -16,6 +16,7 @@ namespace App;
 
 use App\Command\CheckLocationsCommand;
 use App\Command\CheckStatsCommand;
+use App\Command\CleanCityCountyCommand;
 use App\Command\FixDistrictAssociationsCommand;
 use App\Command\FixMetricTreeCommand;
 use App\Command\FixPercentValuesCommand;
@@ -114,6 +115,7 @@ class Application extends BaseApplication
 
         $commands->add('check-locations', CheckLocationsCommand::class);
         $commands->add('check-stats', CheckStatsCommand::class);
+        $commands->add('clean-city-county', CleanCityCountyCommand::class);
         $commands->add('fix-district-associations', FixDistrictAssociationsCommand::class);
         $commands->add('fix-metric-tree', FixMetricTreeCommand::class);
         $commands->add('fix-percent-values', FixPercentValuesCommand::class);
@@ -125,8 +127,8 @@ class Application extends BaseApplication
         $commands->add('metric-parent-merge', MetricParentMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
-        $commands->add('rank-test', RankTestShell::class);
         $commands->add('populate-es', PopulateElasticsearchCommand::class);
+        $commands->add('rank-test', RankTestShell::class);
         $commands->add('speed-test-es', SpeedTestElasticsearchCommand::class);
 
         return $commands;
