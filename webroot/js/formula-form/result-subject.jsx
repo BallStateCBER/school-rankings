@@ -8,24 +8,13 @@ class ResultSubject extends React.Component {
 
   getDataCompletenessWarning() {
     const dataCompleteness = this.props.dataCompleteness;
-    if (dataCompleteness === 'full') {
+    if (dataCompleteness !== 'partial') {
       return;
     }
 
-    let msg = '';
-    let className = '';
-    if (dataCompleteness === 'partial') {
-      msg = 'Some data unavailable';
-      className = 'alert-warning';
-    } else if (dataCompleteness === 'empty') {
-      msg = 'No data available';
-      className = 'alert-danger';
-    }
-    className = 'data-completeness-warning alert ' + className;
-
     return (
-      <p className={className}>
-        {msg}
+      <p className="data-completeness-warning alert alert-warning">
+        Some data unavailable
       </p>
     );
   }
