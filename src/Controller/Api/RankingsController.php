@@ -203,17 +203,22 @@ class RankingsController extends AppController
 
         $ranking = $this->formatPercentageValues($ranking);
 
-        // Separate out no-data results
+        // Separate out and sort no-data results
         $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
         $resultsWithoutData = [];
         $resultsWithData = [];
         foreach ($allResults as $i => $result) {
             if ($result['data_completeness'] === 'empty') {
-                $resultsWithoutData[] = $result;
+                $context = isset($result['school']) ? 'school' : 'school_district';
+                // Combine name and ID in case any two subjects (somehow) have identical names
+                $key = $result[$context]['name'] . $result[$context]['id'];
+                $resultsWithoutData[$key] = $result;
             } else {
                 $resultsWithData[] = $result;
             }
         }
+        ksort($resultsWithoutData);
+        $resultsWithoutData = array_values($resultsWithoutData);
 
         // Group results by rank
         $groupedResults = [];
