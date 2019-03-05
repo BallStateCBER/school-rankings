@@ -203,10 +203,21 @@ class RankingsController extends AppController
 
         $ranking = $this->formatPercentageValues($ranking);
 
+        // Separate out no-data results
+        $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
+        $resultsWithoutData = [];
+        $resultsWithData = [];
+        foreach ($allResults as $i => $result) {
+            if ($result['data_completeness'] === 'empty') {
+                $resultsWithoutData[] = $result;
+            } else {
+                $resultsWithData[] = $result;
+            }
+        }
+
         // Group results by rank
         $groupedResults = [];
-        $results = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
-        foreach ($results as $result) {
+        foreach ($resultsWithData as $result) {
             $groupedResults[$result['rank']][] = $result;
         }
 
@@ -224,17 +235,18 @@ class RankingsController extends AppController
         }
 
         // Convert into numerically-indexed array so it can be passed to a React component
-        $retval = [];
+        $indexedResults = [];
         foreach ($groupedResults as $rank => $resultsInRank) {
-            $retval[] = [
+            $indexedResults[] = [
                 'rank' => $rank,
                 'subjects' => $resultsInRank
             ];
         }
 
         $this->set([
-            '_serialize' => ['results'],
-            'results' => $retval
+            '_serialize' => ['noDataResults', 'results'],
+            'results' => $indexedResults,
+            'noDataResults' => $resultsWithoutData
         ]);
     }
 

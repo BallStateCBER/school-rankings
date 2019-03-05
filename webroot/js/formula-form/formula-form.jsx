@@ -10,6 +10,7 @@ import {Criterion} from './criterion.jsx';
 import {RankingResults} from './ranking-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
 import {SchoolTypeSelector} from './school-type-selector.jsx';
+import {NoDataResults} from './no-data-results.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -22,6 +23,7 @@ class FormulaForm extends React.Component {
       county: null,
       criteria: [],
       loadingRankings: false,
+      noDataResults: null,
       onlyPublic: true,
       passesValidation: false,
       progressPercent: null,
@@ -366,7 +368,10 @@ class FormulaForm extends React.Component {
         return;
       }
 
-      this.setState({results: data.results});
+      this.setState({
+        results: data.results,
+        noDataResults: data.noDataResults,
+      });
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
     }).always(() => {
@@ -506,6 +511,12 @@ class FormulaForm extends React.Component {
           <RankingResults results={this.state.results}
                           criteria={this.state.criteria}
                           context={this.state.context} />
+        }
+        {this.state.noDataResults &&
+          <NoDataResults results={this.state.noDataResults}
+                         context={this.state.context}
+                         hasResultsWithData={this.state.results.length > 0}
+                         criteriaCount={this.state.criteria.length} />
         }
       </div>
     );
