@@ -32,7 +32,7 @@ class FixDistrictAssociationsCommand extends Command
     private $schoolsTable;
 
     /**
-     * Fixes statistic values like "0.025" that should be stored as "2.5%"
+     * Checks that each district has the same geographic associations as all of its schools and adds them if missing
      *
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
