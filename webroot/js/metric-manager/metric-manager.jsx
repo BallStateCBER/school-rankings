@@ -393,8 +393,9 @@ class MetricManager extends React.Component {
 
   static showNodeUpdateLoading(jstree, node) {
     let liElement = $('#' + node.id);
-    let img = $('<img src="/jstree/themes/default/throbber.gif" />');
-    img.attr('alt', 'Loading...');
+    let img = $(
+      '<img src="/jstree/themes/default/throbber.gif" alt="Loading..." />'
+    );
     img.addClass('loading');
     liElement.find('a.jstree-anchor').append(img);
     jstree.disable_node(node);
