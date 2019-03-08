@@ -1344,7 +1344,7 @@ class ImportFile
         }
         $value = Statistic::roundValue($value);
         $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
-        if ($this->isPercentMetric($metricId)) {
+        if (is_numeric($value) && $this->isPercentMetric($metricId)) {
             $value = Statistic::convertValueToPercent($value);
         }
         unset($cell, $metricId);
