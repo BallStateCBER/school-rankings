@@ -2,6 +2,7 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Statistic;
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -173,7 +174,15 @@ class StatisticsTable extends Table
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $rules->add(
             function ($entity) use ($metricsTable, $rules) {
-                if (!$metricsTable->isPercentMetric($entity->metric_id)) {
+                try {
+                    $isPercent = $metricsTable->isPercentMetric($entity->metric_id);
+
+                // The associated metric does not exist, which is a violation that has been checked by an earlier rule
+                } catch (RecordNotFoundException $e) {
+                    return true;
+                }
+
+                if (!$isPercent) {
                     return true;
                 }
 
