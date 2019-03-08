@@ -200,8 +200,8 @@ class CheckStatsCommand extends Command
             $progress->increment(1)->draw();
         }
 
-        $this->displayTimeElapsed($start);
         $this->io->out();
+        $this->displayTimeElapsed($start);
         if ($allErrors) {
             $this->io->error(sprintf(
                 '%s %s with errors found',
