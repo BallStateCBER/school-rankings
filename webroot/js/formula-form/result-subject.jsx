@@ -97,7 +97,7 @@ class ResultSubject extends React.Component {
     return (
       <td key={this.props.subjectData.id}>
         <div className="row">
-          <div className="col-lg-6">
+          <div className="col-lg-6 school-info">
             <h3 className="school-name">
               {this.props.subjectData.name}
             </h3>
@@ -119,7 +119,10 @@ class ResultSubject extends React.Component {
               </a>
             }
           </div>
-          <div className="col-lg-6">
+          <div className="col-lg-6 school-stats">
+            <h4 className="d-lg-none">
+              Statistics
+            </h4>
             {this.getDataCompletenessWarning()}
             {this.getStatValues(this.props.statistics)}
           </div>
