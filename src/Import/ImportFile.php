@@ -916,6 +916,7 @@ class ImportFile
                 if ($school) {
                     $log['school']['identifiedList'][$school->id] = true;
                 } else {
+                    $this->checkNewSchoolName($location['schoolName']);
                     $school = $schoolsTable->newEntity([
                         'code' => $location['schoolCode'],
                         'name' => $location['schoolName'],
@@ -1497,5 +1498,39 @@ class ImportFile
     private function hasGroupingRow()
     {
         return !empty($this->getActiveWorksheetProperty('groupings'));
+    }
+
+    /**
+     * Checks the name of a school to be added and displays a confirmation dialogue if it looks like a district name
+     *
+     * Implemented after it was discovered that the Indiana Department of Education occasionally mislabels districts as
+     * schools and vice-versa.
+     *
+     * @param string $schoolName School name
+     * @return void
+     */
+    private function checkNewSchoolName($schoolName)
+    {
+        $districtKeywords = [
+            ' Schools',
+            ' Schs',
+            ' Corp'
+        ];
+        foreach ($districtKeywords as $districtKeyword) {
+            if (stripos($schoolName, $districtKeyword) === false) {
+                continue;
+            }
+
+            $this->shell_io->warning(sprintf(
+                'The school "%s" has a name that looks like a district',
+                $schoolName
+            ));
+            $choice = $this->shell_io->askChoice('Add it to the database as a school anyway?', ['y', 'n'], 'n');
+            if ($choice == 'n') {
+                exit;
+            }
+
+            return;
+        }
     }
 }
