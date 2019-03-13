@@ -489,7 +489,7 @@ class ImportFile
      */
     private function getDataColumns()
     {
-        $row = empty($this->getActiveWorksheetProperty('groupings')) ? 1 : 2;
+        $row = $this->hasGroupingRow() ? 2 : 1;
         $col = 1;
         if (!$this->isLocationHeader($col, $row)) {
             throw new Exception('Can\'t find column header row');
@@ -562,7 +562,7 @@ class ImportFile
      */
     private function getColGroup($col)
     {
-        if (empty($this->getActiveWorksheetProperty('groupings'))) {
+        if (!$this->hasGroupingRow()) {
             return null;
         }
 
@@ -1450,7 +1450,7 @@ class ImportFile
      */
     public function getColumnNames()
     {
-        $row = empty($this->getActiveWorksheetProperty('groupings')) ? 1 : 2;
+        $row = $this->hasGroupingRow() ? 2 : 1;
         $columnNames = [];
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         for ($col = 1; $col <= $lastDataCol; $col++) {
@@ -1476,5 +1476,15 @@ class ImportFile
         }
 
         return $this->isPercentMetric[$metricId];
+    }
+
+    /**
+     * Returns TRUE if the active worksheet has a "groupings" row, which groups together sets of columns
+     *
+     * @return bool
+     */
+    private function hasGroupingRow()
+    {
+        return !empty($this->getActiveWorksheetProperty('groupings'));
     }
 }
