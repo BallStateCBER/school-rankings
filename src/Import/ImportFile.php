@@ -500,9 +500,12 @@ class ImportFile
         $lastDataCol = $this->getActiveWorksheetProperty('totalCols');
         $invalidMetricIdMsgs = [];
         for ($col = 2; $col <= $lastDataCol; $col++) {
+            // Skip if this is a location column
             if ($this->isLocationHeader($col, $row)) {
                 continue;
             }
+
+            // Process statistical data column
             $colName = $this->getValue($col, $row);
             $colGroup = $this->getColGroup($col);
             $metricId = $this->getMetricId($colGroup, $colName);
@@ -649,25 +652,28 @@ class ImportFile
      */
     public function getLocations()
     {
-        $locations = [];
+        // Get variables for iteration
         $firstRow = $this->getActiveWorksheetProperty('firstDataRow');
         $lastRow = $this->getActiveWorksheetProperty('totalRows');
         $lastCol = $this->getActiveWorksheetProperty('firstDataCol') - 1;
+
+        // Iterate through all rows
+        $locations = [];
         for ($row = $firstRow; $row <= $lastRow; $row++) {
+            // Iterate through all columns with location info in this row
             $location = [];
             for ($col = 1; $col <= $lastCol; $col++) {
                 $type = $this->getLocationColumnType($col);
-
                 $value = $this->getValue($col, $row);
-                if ($value == '') {
-                    unset($value);
-                    continue;
-                }
+
                 if ($type == 'districtCode' || $type == 'schoolCode') {
                     $value = Utility::removeLeadingZeros($value);
                 }
-                if ($type == 'districtCode' && SchoolDistrict::isDummyCode($value)) {
-                    unset($value);
+
+                // Skip if this location is blank or a dummy location (e.g. code is "N/A" or "-0999")
+                $isDummyDistrict = $type == 'districtCode' && SchoolDistrict::isDummyCode($value);
+                if ($value == '' || $isDummyDistrict) {
+                    unset($type, $value);
                     continue;
                 }
 
@@ -852,6 +858,8 @@ class ImportFile
         $schoolDistrictsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
         $schoolsTable = TableRegistry::getTableLocator()->get('Schools');
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
+
+        // Note that both districts and schools will be identified if present, regardless of the current context
         $this->shell_io->out(sprintf(
             'Identifying %s...',
             ($context == 'district') ? 'districts' : 'schools'
@@ -876,6 +884,7 @@ class ImportFile
             ]
         ];
         foreach ($this->getLocations() as $rowNum => $location) {
+            // Identify district
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
                 $district = $schoolDistrictsTable->find()
@@ -897,6 +906,7 @@ class ImportFile
                 throw new Exception('District name missing in row ' . $rowNum);
             }
 
+            // Identify school
             $schoolId = null;
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
                 $school = $schoolsTable->find()
@@ -925,6 +935,7 @@ class ImportFile
         }
         unset($progress, $schoolDistrictsTable, $schoolsTable);
 
+        // Report on what's been identified
         $firstLine = true;
         foreach ($log as $context => $contextLog) {
             if ($contextLog['identifiedList']) {
