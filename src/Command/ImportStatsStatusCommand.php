@@ -48,7 +48,7 @@ class ImportStatsStatusCommand extends Command
     {
         $year = $args->hasArgument('year') ? $args->getArgument('year') : null;
 
-        $files = (new ImportStatsCommand())->getFiles();
+        $files = (new ImportStatsCommand())->getAllFiles();
 
         if ($year) {
             if (isset($files[$year])) {

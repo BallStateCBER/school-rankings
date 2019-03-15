@@ -49,7 +49,7 @@ class ImportStatsCommand extends Command
     {
         $parser->addArguments([
             'year' => ['help' => 'The specific year to look up or "all"'],
-            'fileKey' => ['help' => 'The numeric key for the specific file to process, or "all"']
+            'fileKey' => ['help' => 'The numeric key for the specific file to process, "all", or "new"']
         ])->addOption(
             'auto-metrics',
             [
@@ -64,7 +64,9 @@ class ImportStatsCommand extends Command
             ]
         )->setEpilog(
             'Run "import-run all all --auto-metrics --overwrite" to process all files, accept all suggested ' .
-            'metric names, and overwrite existing statistics'
+            'metric names, and overwrite existing statistics.' . "\n\n" .
+            'Run "import-run all new --auto-metrics" to do the ' .
+            'same, but only with files that have not been imported yet.'
         );
 
         return $parser;
@@ -101,7 +103,7 @@ class ImportStatsCommand extends Command
      */
     private function selectFileKey($year, $io)
     {
-        $files = $this->getFiles();
+        $files = $this->getAllFiles();
         if (!isset($files[$year])) {
             throw new InvalidArgumentException(
                 'No import files found in data' . DS . 'statistics' . DS . $year
@@ -118,8 +120,14 @@ class ImportStatsCommand extends Command
             }
             array_unshift($tableData, ['Key', 'File', 'Imported']);
             $io->helper('Table')->output($tableData);
-            $fileKey = $io->ask('Select a file (' . min($fileKeys) . '-' . max($fileKeys) . ') or enter "all":');
-            $validKey = $fileKey == 'all' || (is_numeric($fileKey) && in_array($fileKey, $fileKeys));
+            $fileKey = $io->ask(sprintf(
+                'Select a file (%s-%s) or enter "all" or "new":',
+                min($fileKeys),
+                max($fileKeys)
+            ));
+            $isValidTextKey = in_array($fileKey, ['all', 'new']);
+            $isValidNumericKey = is_numeric($fileKey) && in_array($fileKey, $fileKeys);
+            $validKey = $isValidTextKey || $isValidNumericKey;
         } while (!$validKey);
 
         return (int)$fileKey;
@@ -161,14 +169,16 @@ class ImportStatsCommand extends Command
                 }
             }
 
-            // Validate parameters
-            $files = $this->getFiles();
+            // Check that files exist
+            $files = $this->getAllFiles();
             if (!isset($files[$year])) {
                 $io->error('No import files found in data' . DS . 'statistics' . DS . $year);
 
                 return;
             }
-            if ($fileKey != 'all') {
+
+            // Validate file key
+            if (!in_array($fileKey, ['all', 'new'])) {
                 if (!is_numeric($fileKey) || !isset($files[$year][$fileKey - 1])) {
                     $io->error('Invalid file key');
 
@@ -177,9 +187,7 @@ class ImportStatsCommand extends Command
             }
 
             // Loop through files
-            $selectedFiles = $fileKey == 'all' ?
-                $files[$year] :
-                [$files[$year][$fileKey - 1]];
+            $selectedFiles = $this->getSelectedFiles($year, $fileKey);
             $dir = ROOT . DS . 'data' . DS . 'statistics' . DS . $year . DS;
             foreach ($selectedFiles as $file) {
                 $io->out('Opening ' . $file['filename'] . '...');
@@ -307,7 +315,7 @@ class ImportStatsCommand extends Command
      *
      * @return array
      */
-    public function getFiles()
+    public function getAllFiles()
     {
         if ($this->files) {
             return $this->files;
@@ -351,5 +359,28 @@ class ImportStatsCommand extends Command
     public static function isYear($string)
     {
         return strlen($string) == 4 && is_numeric($string);
+    }
+
+    /**
+     * Returns an array of file info (or an array of arrays of file info) for files applicable to the current parameters
+     *
+     * @param string $year Year
+     * @param string $fileKey A numeric file key, or 'all', or 'new'
+     * @return array
+     */
+    private function getSelectedFiles($year, $fileKey)
+    {
+        $files = $this->getAllFiles();
+
+        switch ($fileKey) {
+            case 'all':
+                return $files[$year];
+            case 'new':
+                return array_filter($files[$year], function ($file) {
+                    return empty($file['imported']);
+                });
+            default:
+                return [$files[$year][$fileKey - 1]];
+        }
     }
 }
