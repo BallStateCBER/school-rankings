@@ -29,6 +29,7 @@ use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
 use App\Command\PopulateElasticsearchCommand;
+use App\Command\PopulateLocationOriginCommand;
 use App\Command\SpeedTestElasticsearchCommand;
 use App\Shell\RankTestShell;
 use Cake\Core\Configure;
@@ -128,6 +129,7 @@ class Application extends BaseApplication
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
         $commands->add('populate-es', PopulateElasticsearchCommand::class);
+        $commands->add('populate-location-origin', PopulateLocationOriginCommand::class);
         $commands->add('rank-test', RankTestShell::class);
         $commands->add('speed-test-es', SpeedTestElasticsearchCommand::class);
 
