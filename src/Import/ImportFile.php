@@ -901,6 +901,7 @@ class ImportFile
                     $schoolDistrictsTable->saveOrFail($district);
                     $log['district']['addedList'][] = "#$district->code: $district->name";
                 }
+                $districtId = $district->id;
                 $this->setLocationInfo($rowNum, 'districtId', $district->id);
             } elseif (isset($location['districtCode'])) {
                 throw new Exception('District name missing in row ' . $rowNum);
