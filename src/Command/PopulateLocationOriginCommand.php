@@ -18,6 +18,7 @@ use Exception;
 /**
  * Class PopulateLocationOriginCommand
  * @package App\Command
+ * @property array $codesAlreadyProcessed
  * @property array $files
  * @property ConsoleIo $io
  * @property ImportFile $importFile
@@ -27,6 +28,10 @@ use Exception;
  */
 class PopulateLocationOriginCommand extends Command
 {
+    private $processedCodes = [
+        'district' => [],
+        'school' => []
+    ];
     private $currentFile;
     private $files;
     private $importFile;
@@ -206,33 +211,41 @@ class PopulateLocationOriginCommand extends Command
         foreach ($locations as $rowNum => $location) {
             // Identify district
             if (isset($location['districtCode'])) {
-                /** @var SchoolDistrict $district */
-                $district = $this->schoolDistrictsTable->find()
-                    ->select(['id', 'name'])
-                    ->where([
-                        'code' => $location['districtCode'],
-                        'origin_file' => ''
-                    ])
-                    ->first();
-                if ($district) {
-                    $this->setDistrictOriginFile($district);
-                    $updatedDistrictCount++;
+                $code = $location['districtCode'];
+                if (!in_array($code, $this->processedCodes['district'])) {
+                    /** @var SchoolDistrict $district */
+                    $district = $this->schoolDistrictsTable->find()
+                        ->select(['id', 'name'])
+                        ->where([
+                            'code' => $code,
+                            'origin_file' => ''
+                        ])
+                        ->first();
+                    if ($district) {
+                        $this->setDistrictOriginFile($district);
+                        $updatedDistrictCount++;
+                    }
+                    $this->processedCodes['district'][] = $code;
                 }
             }
 
             // Identify school
             if (isset($location['schoolCode'])) {
-                /** @var School $school */
-                $school = $this->schoolsTable->find()
-                    ->select(['id', 'name'])
-                    ->where([
-                        'code' => $location['schoolCode'],
-                        'origin_file' => ''
-                    ])
-                    ->first();
-                if ($school) {
-                    $this->setSchoolOriginFile($school);
-                    $updatedSchoolCount++;
+                $code = $location['schoolCode'];
+                if (!in_array($code, $this->processedCodes['school'])) {
+                    /** @var School $school */
+                    $school = $this->schoolsTable->find()
+                        ->select(['id', 'name'])
+                        ->where([
+                            'code' => $code,
+                            'origin_file' => ''
+                        ])
+                        ->first();
+                    if ($school) {
+                        $this->setSchoolOriginFile($school);
+                        $updatedSchoolCount++;
+                    }
+                    $this->processedCodes['school'][] = $code;
                 }
             }
 
