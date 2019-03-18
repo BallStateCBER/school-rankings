@@ -867,8 +867,9 @@ class ImportFile
 
         /** @var ProgressHelper $progress */
         $progress = $this->shell_io->helper('Progress');
+        $locations = $this->getActiveWorksheetProperty('locations');
         $progress->init([
-            'total' => count($this->getLocations()),
+            'total' => count($locations),
             'width' => 40,
         ]);
         $progress->draw();
@@ -883,7 +884,7 @@ class ImportFile
                 'addedList' => []
             ]
         ];
-        foreach ($this->getLocations() as $rowNum => $location) {
+        foreach ($locations as $rowNum => $location) {
             // Identify district
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
