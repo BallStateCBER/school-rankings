@@ -277,8 +277,6 @@ class PopulateLocationOriginCommand extends Command
     private function setDistrictOriginFile($district)
     {
         $this->schoolDistrictsTable->patchEntity($district, ['origin_file' => $this->currentFile]);
-        //$this->io->out(' - Would have set district ' . $district->id . ' origin to ' . $this->currentFile);
-        return;
         if (!$this->schoolDistrictsTable->save($district)) {
             throw new Exception("Error updating district: \n" . print_r($district->getErrors(), true));
         }
@@ -294,8 +292,6 @@ class PopulateLocationOriginCommand extends Command
     private function setSchoolOriginFile($school)
     {
         $this->schoolsTable->patchEntity($school, ['origin_file' => $this->currentFile]);
-        //$this->io->out(' - Would have set school ' . $school->id . ' origin to ' . $this->currentFile);
-        return;
         if (!$this->schoolsTable->save($school)) {
             throw new Exception("Error updating school: \n" . print_r($school->getErrors(), true));
         }
