@@ -71,57 +71,9 @@ class PopulateLocationOriginCommand extends Command
             return;
         }
 
-        $years = $this->getYears();
+        $this->processStatImportFiles();
 
-        foreach ($years as $year) {
-            if (count($years) > 1) {
-                $io->info("----------\n|  $year  |\n----------");
-                $io->out();
-            }
-
-            $files = $this->getAllFiles();
-
-            // Loop through the files in the selected year
-            $dir = ROOT . DS . 'data' . DS . 'statistics' . DS . $year . DS;
-            foreach ($files[$year] as $file) {
-                $this->currentFile = $file['filename'];
-                $io->out('Opening ' . $file['filename'] . '...');
-                $this->importFile = new ImportFile($year, $dir, $file['filename'], $io);
-                $this->importFile->read();
-                if ($this->importFile->getError()) {
-                    $io->error($this->importFile->getError());
-
-                    return;
-                }
-
-                // Read in worksheet info and validate data
-                $io->out('Analyzing worksheets...');
-                $io->out();
-                foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
-                    $io->info('Worksheet: ' . $worksheetName);
-                    try {
-                        $this->importFile->selectWorksheet($worksheetName);
-                        $this->processLocations();
-                    } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
-                        $io->nl();
-                        $io->error($e->getMessage());
-
-                        return;
-                    } catch (Exception $e) {
-                        $io->nl();
-                        $io->error($e->getMessage());
-
-                        return;
-                    }
-                }
-
-                // Free up memory
-                $this->importFile->spreadsheet->disconnectWorksheets();
-                unset($this->importFile);
-
-                $io->out();
-            }
-        }
+        $this->processLocationImportFiles();
 
         $io->success('Finished');
     }
@@ -294,6 +246,137 @@ class PopulateLocationOriginCommand extends Command
         $this->schoolsTable->patchEntity($school, ['origin_file' => $this->currentFile]);
         if (!$this->schoolsTable->save($school)) {
             throw new Exception("Error updating school: \n" . print_r($school->getErrors(), true));
+        }
+    }
+
+    /**
+     * Processes all of the files under /data/locations
+     *
+     * @return void
+     * @throws Exception
+     */
+    private function processLocationImportFiles()
+    {
+        $importLocations = new ImportLocationsCommand();
+        $importLocations->io = $this->io;
+
+        $dataPath = ImportLocationsCommand::getDirectory();
+        $this->files = (new Folder($dataPath))->find();
+        if (!$this->files) {
+            $this->io->out('No files found in ' . $dataPath);
+
+            return;
+        }
+
+        $this->io->out('Processing location import files...');
+        $this->io->out();
+
+        foreach ($this->files as $key => $file) {
+            $this->currentFile = $file;
+            $year = $importLocations->getYearFromFilename($file);
+            if (!$year) {
+                return;
+            }
+
+            $this->io->out("Opening $file...");
+            $this->importFile = new ImportFile($year, $dataPath, $file, $this->io);
+            $this->importFile->ignoreWorksheets(['closed']);
+            if ($this->importFile->getError()) {
+                $this->io->error($this->importFile->getError());
+
+                return;
+            }
+
+            // Read in worksheet info and validate data
+            $this->io->out('Analyzing worksheets...');
+            $this->io->out();
+            $this->importFile->read();
+            foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+                $context = $worksheetInfo['context'];
+                $this->io->info('Worksheet: ' . $worksheetName);
+                $this->io->out('Context: ' . ucwords($context));
+
+                try {
+                    $this->importFile->selectWorksheet($worksheetName);
+                    $this->processLocations();
+                } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                    $this->io->out();
+                    $this->io->error($e->getMessage());
+
+                    return;
+                } catch (Exception $e) {
+                    $this->io->out();
+                    $this->io->error($e->getMessage());
+
+                    return;
+                }
+            }
+
+            $this->io->out();
+
+            // Free up memory
+            $this->importFile->spreadsheet->disconnectWorksheets();
+            unset($this->importFile);
+        }
+    }
+
+    /**
+     * Processes all of the files under /data/statistics/$year
+     *
+     * @return void
+     */
+    private function processStatImportFiles()
+    {
+        $years = $this->getYears();
+
+        foreach ($years as $year) {
+            if (count($years) > 1) {
+                $this->io->info("----------\n|  $year  |\n----------");
+                $this->io->out();
+            }
+
+            $files = $this->getAllFiles();
+
+            // Loop through the files in the selected year
+            $dir = ROOT . DS . 'data' . DS . 'statistics' . DS . $year . DS;
+            foreach ($files[$year] as $file) {
+                $this->currentFile = $file['filename'];
+                $this->io->out('Opening ' . $file['filename'] . '...');
+                $this->importFile = new ImportFile($year, $dir, $file['filename'], $this->io);
+                $this->importFile->read();
+                if ($this->importFile->getError()) {
+                    $this->io->error($this->importFile->getError());
+
+                    return;
+                }
+
+                // Read in worksheet info and validate data
+                $this->io->out('Analyzing worksheets...');
+                $this->io->out();
+                foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
+                    $this->io->info('Worksheet: ' . $worksheetName);
+                    try {
+                        $this->importFile->selectWorksheet($worksheetName);
+                        $this->processLocations();
+                    } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+                        $this->io->out();
+                        $this->io->error($e->getMessage());
+
+                        return;
+                    } catch (Exception $e) {
+                        $this->io->out();
+                        $this->io->error($e->getMessage());
+
+                        return;
+                    }
+                }
+
+                // Free up memory
+                $this->importFile->spreadsheet->disconnectWorksheets();
+                unset($this->importFile);
+
+                $this->io->out();
+            }
         }
     }
 }

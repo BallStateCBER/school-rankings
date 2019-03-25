@@ -58,7 +58,6 @@ class ImportLocationsCommand extends Command
     private $files;
     private $gradesTable;
     private $importFile;
-    private $io;
     private $locationsAdded = [
         'schools' => [],
         'districts' => [],
@@ -70,6 +69,7 @@ class ImportLocationsCommand extends Command
     private $schoolsTable;
     private $schoolTypesTable;
     private $statesTable;
+    public $io;
 
     /**
      * Initialization method
@@ -187,7 +187,7 @@ class ImportLocationsCommand extends Command
      *
      * @return string
      */
-    private function getDirectory()
+    public static function getDirectory()
     {
         return ROOT . DS . 'data' . DS . 'locations';
     }
@@ -197,7 +197,7 @@ class ImportLocationsCommand extends Command
      *
      * @return string|bool
      */
-    private function selectFile()
+    public function selectFile()
     {
         $dataPath = $this->getDirectory();
         $this->files = (new Folder($dataPath))->find();
@@ -228,12 +228,15 @@ class ImportLocationsCommand extends Command
      * @param string $file Filename
      * @return bool|string
      */
-    private function getYearFromFilename($file)
+    public function getYearFromFilename($file)
     {
         $substr = strrchr($file, '(');
 
         if ($substr === false) {
-            $this->io->error("No year found in filename. Please format filename like 'Foo (2018).xlsx'.");
+            $this->io->error(sprintf(
+                "No year found in filename '%s'. Please format filename like 'Foo (2018).xlsx'.",
+                $file
+            ));
 
             return false;
         }
