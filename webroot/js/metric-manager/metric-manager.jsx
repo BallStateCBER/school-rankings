@@ -346,6 +346,12 @@ class MetricManager extends React.Component {
         large_drag_target: true,
         use_html5: true,
       },
+      sort: function(node1, node2) {
+        const metric1 = this.get_node(node1).text;
+        const metric2 = this.get_node(node2).text;
+
+        return metric1 > metric2 ? 1 : -1;
+      },
     };
   }
 
