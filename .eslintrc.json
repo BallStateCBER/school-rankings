@@ -27,6 +27,7 @@
   "rules": {
     "react/jsx-uses-react": "error",
     "react/jsx-uses-vars": "error",
-    "require-jsdoc": "off"
+    "require-jsdoc": "off",
+    "max-len": ["error", {"code": 120}]
   }
 }
