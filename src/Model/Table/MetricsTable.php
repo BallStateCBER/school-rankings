@@ -174,6 +174,15 @@ class MetricsTable extends Table
             'errorField' => 'statistics'
         ]);
 
+        $rules->addDelete(function ($entity) {
+            return !TableRegistry::getTableLocator()
+                ->get('SpreadsheetColumnsMetrics')
+                ->exists(['metric_id' => $entity->id]);
+        }, 'cantDeleteWithSCM', [
+            'message' => 'Cannot delete a metric with associated spreadsheet columns',
+            'errorField' => 'spreadsheet_columns_metrics'
+        ]);
+
         $rules->addUpdate(function ($entity) {
             return !$this->hasIncompatibleStatistics($entity->type, $entity->id);
         }, 'cantChangeMetricContext', [
