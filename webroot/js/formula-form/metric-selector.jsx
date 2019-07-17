@@ -30,7 +30,10 @@ class MetricSelector extends React.Component {
 
   clearMetricTree() {
     this.setState({successfullyLoaded: false});
-    $('#jstree').jstree(true).destroy();
+    let jstree = $('#jstree').jstree(true);
+    if (jstree !== false) {
+      jstree.destroy();
+    }
   }
 
   loadMetricTree() {
