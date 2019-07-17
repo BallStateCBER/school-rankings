@@ -83,5 +83,8 @@
   "sideEffects": [
     "*.css",
     "*.scss"
+  ],
+  "browserslist": [
+    "defaults"
   ]
 }
