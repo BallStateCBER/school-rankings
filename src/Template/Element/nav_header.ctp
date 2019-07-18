@@ -1,9 +1,13 @@
 <?php
 /**
- * @var \App\View\AppView $this
+ * @var AppView $this
  * @var array $authUser
  */
-use \Cake\Routing\Router;
+
+use App\View\AppView;
+use Cake\Http\ServerRequest;
+use Cake\Routing\Router;
+
 $pages = [
     'Home' => Router::url('/'),
     'Formula Form' => Router::url([
@@ -28,7 +32,7 @@ $adminPages = [
         'district'
     ])
 ];
-$isActive = function ($url, \Cake\Http\ServerRequest $request) {
+$isActive = function ($url, ServerRequest $request) {
     return explode('?', $url)[0] == explode('?', $request->getRequestTarget())[0];
 };
 ?>
