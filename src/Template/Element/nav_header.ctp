@@ -33,7 +33,7 @@ $isActive = function ($url, \Cake\Http\ServerRequest $request) {
 };
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light align-items-baseline">
     <h1>
         <a class="navbar-brand" href="<?= $pages['Home'] ?>">
             Indiana School Rankings
