@@ -81,6 +81,10 @@ class FormulasController extends AppController
     private function getCriteria()
     {
         $criteriaData = $this->request->getData('criteria');
+        if (!is_array($criteriaData) || empty($criteriaData)) {
+            return false;
+        }
+
         $criteria = [];
         $criterionError = false;
         foreach ($criteriaData as $criterionData) {
