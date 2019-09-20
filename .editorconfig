@@ -19,5 +19,5 @@ indent_size = 2
 [*.twig]
 insert_final_newline = false
 
-[*.jsx]
+[{*.jsx,*.js}]
 indent_size = 2
