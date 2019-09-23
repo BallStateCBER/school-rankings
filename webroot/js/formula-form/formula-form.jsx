@@ -512,7 +512,7 @@ class FormulaForm extends React.Component {
                           criteria={this.state.criteria}
                           context={this.state.context} />
         }
-        {this.state.noDataResults && this.state.noDataResults.length > 0 &&
+        {this.state.results && this.state.noDataResults && this.state.noDataResults.length > 0 &&
           <NoDataResults results={this.state.noDataResults}
                          context={this.state.context}
                          hasResultsWithData={this.state.results && this.state.results.length > 0}
