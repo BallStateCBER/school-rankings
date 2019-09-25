@@ -25,13 +25,11 @@ class NoDataResults extends React.Component {
     for (let i = 0; i < resultsCount; i++) {
       const subject = this.props.results[i];
       let subjectData = null;
-      if (subject.hasOwnProperty(this.props.context)) {
-        subjectData = subject[this.props.context];
+      const contextKey = this.props.context === 'school' ? 'school' : 'school_district';
+      if (subject.hasOwnProperty(contextKey)) {
+        subjectData = subject[contextKey];
       } else {
-        console.log(
-          'Error: ' + this.props.context +
-          ' information missing from no-data result'
-        );
+        console.log('Error: ' + contextKey + ' information missing from no-data result');
         return;
       }
 
