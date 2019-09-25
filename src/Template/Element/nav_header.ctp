@@ -10,7 +10,7 @@ use Cake\Routing\Router;
 
 $pages = [
     'Home' => Router::url('/'),
-    'Formula Form' => Router::url([
+    'Rank Schools' => Router::url([
         'prefix' => false,
         'controller' => 'Formulas',
         'action' => 'form'
