@@ -8,9 +8,10 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property string $name
+ * @property string $slug
  *
- * @property \App\Model\Entity\Ranking[] $rankings
- * @property \App\Model\Entity\School[] $schools
+ * @property Ranking[] $rankings
+ * @property School[] $schools
  */
 class Grade extends Entity
 {
@@ -26,6 +27,7 @@ class Grade extends Entity
      */
     protected $_accessible = [
         'name' => true,
+        'slug' => true,
         'rankings' => true,
         'schools' => true
     ];

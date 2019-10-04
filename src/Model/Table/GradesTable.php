@@ -70,6 +70,12 @@ class GradesTable extends Table
             ->requirePresence('name', 'create')
             ->notEmpty('name');
 
+        $validator
+            ->scalar('name')
+            ->maxLength('name', 5)
+            ->requirePresence('name', 'create')
+            ->notEmpty('name');
+
         return $validator;
     }
 
