@@ -3,7 +3,6 @@ import ReactDom from 'react-dom';
 import {Button} from 'reactstrap';
 import uuidv4 from 'uuid/v4';
 import Select from 'react-select';
-import '../../../node_modules/react-select/dist/react-select.css';
 import {MetricSelector} from './metric-selector.jsx';
 import '../../css/formula-form.scss';
 import {Criterion} from './criterion.jsx';
