@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
@@ -64,7 +64,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(['webroot/dist/css', 'webroot/dist/js']),
+    new CleanWebpackPlugin(),
     new ExtractTextPlugin('css/[name].css'),
     new webpack.ProvidePlugin({
       '$': 'jquery',
