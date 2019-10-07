@@ -11,6 +11,7 @@ import {RankingResults} from './ranking-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
 import {SchoolTypeSelector} from './school-type-selector.jsx';
 import {NoDataResults} from './no-data-results.jsx';
+import {GradeLevelSelector} from './grade-level-selector.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -19,9 +20,11 @@ class FormulaForm extends React.Component {
     this.rankingId = null;
     this.jobId = null;
     this.state = {
+      allGradeLevels: true,
       context: null,
       county: null,
       criteria: [],
+      gradeLevels: new Map(),
       loadingRankings: false,
       noDataResults: null,
       onlyPublic: true,
@@ -33,6 +36,7 @@ class FormulaForm extends React.Component {
       uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
+    this.handleChangeAllGradeLevels = this.handleChangeAllGradeLevels.bind(this);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
     this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
@@ -42,6 +46,7 @@ class FormulaForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleToggleAllSchoolTypes =
       this.handleToggleAllSchoolTypes.bind(this);
+    this.handleToggleAllGradeLevels = this.handleToggleAllGradeLevels.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
   }
@@ -102,6 +107,38 @@ class FormulaForm extends React.Component {
     });
 
     this.setState({schoolTypes: schoolTypes});
+  }
+
+  handleChangeAllGradeLevels(allGradeLevels) {
+    this.setState({allGradeLevels: allGradeLevels});
+  }
+
+  handleSelectGradeLevels(gradeLevels) {
+    this.setState({gradeLevels: gradeLevels});
+  }
+
+  handleToggleAllGradeLevels() {
+    let gradeLevels = this.state.gradeLevels;
+
+    // Set all checkboxes to the opposite of the current majority state
+    let checkedCount = 0;
+    let uncheckedCount = 0;
+    const gradeLevelsArray = Array.from(gradeLevels.values());
+    for (let i = 0; i < gradeLevelsArray.length; i++) {
+      const gradeLevel = gradeLevelsArray[i];
+      if (gradeLevel.checked) {
+        checkedCount++;
+      } else {
+        uncheckedCount++;
+      }
+    }
+    const newCheckedState = checkedCount < uncheckedCount;
+
+    gradeLevels.forEach(function(gradeLevel) {
+      gradeLevel.checked = newCheckedState;
+    });
+
+    this.setState({gradeLevels: gradeLevels});
   }
 
   handleSubmit(event) {
@@ -244,6 +281,25 @@ class FormulaForm extends React.Component {
       schoolTypes.set(schoolType.name, schoolType);
     }
     this.setState({schoolTypes: schoolTypes});
+  }
+
+  /**
+   * Read grade level data from window.formulaForm and load it into state
+   */
+  setGradeLevels() {
+    let gradeLevels = new Map();
+    for (let n = 0; n < window.formulaForm.gradeLevels.length; n++) {
+      const gradeLevelData = window.formulaForm.gradeLevels[n];
+      const gradeLevel = {
+        checked: false,
+        id: gradeLevelData.id,
+        name: gradeLevelData.slug,
+        key: 'grade-level-option-' + n,
+        label: gradeLevelData.name,
+      };
+      gradeLevels.set(gradeLevel.name, gradeLevel);
+    }
+    this.setState({gradeLevels: gradeLevels});
   }
 
   validate() {
@@ -464,6 +520,16 @@ class FormulaForm extends React.Component {
                     handleToggleAll={this.handleToggleAllSchoolTypes}/>
             }
           </div>
+          {this.state.context === 'school' &&
+            <div className="row">
+              <GradeLevelSelector
+                gradeLevels={this.state.gradeLevels}
+                allGradeLevels={this.state.allGradeLevels}
+                handleSelect={this.handleSelectGradeLevels}
+                handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
+                handleToggleAll={this.handleToggleAllGradeLevels}/>
+            </div>
+          }
           {this.state.context &&
             <MetricSelector context={this.state.context}
                             handleSelectMetric={this.handleSelectMetric}
