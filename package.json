@@ -64,7 +64,8 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-react": "^7.16.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
-    "gulp-eslint": "^6.0.0"
+    "gulp-eslint": "^6.0.0",
+    "postcss-import": "^12.0.1"
   },
   "repository": {
     "type": "",
