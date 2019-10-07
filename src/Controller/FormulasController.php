@@ -35,6 +35,7 @@ class FormulasController extends AppController
     {
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
+        $gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $this->set([
             'counties' => $countiesTable->find()
                 ->select(['Counties.id', 'Counties.name'])
@@ -43,6 +44,7 @@ class FormulasController extends AppController
                 })
                 ->orderAsc('Counties.name')
                 ->toArray(),
+            'gradeLevels' => array_values($gradesTable->getAll()),
             'schoolTypes' => $schoolTypesTable->find()
                 ->select(['id', 'name'])
                 ->all()

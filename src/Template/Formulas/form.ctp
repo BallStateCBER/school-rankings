@@ -1,6 +1,7 @@
 <?php
     /**
      * @var array $counties
+     * @var array $gradeLevels
      * @var array $schoolTypes
      */
     $this->Html->script('/dist/js/formula-form.js', ['block' => 'bottom']);
@@ -13,6 +14,7 @@
 <script>
   window.formulaForm = {
     counties: <?= json_encode($counties) ?>,
-    schoolTypes: <?= json_encode($schoolTypes) ?>
+    schoolTypes: <?= json_encode($schoolTypes) ?>,
+    gradeLevels: <?= json_encode($gradeLevels) ?>
   };
 </script>
