@@ -60,7 +60,7 @@ class SchoolTypeSelector extends React.Component {
           </label>
         </div>
         {!this.props.onlyPublic &&
-          <div id="school-type-options-breakdown">
+          <div id="school-type-options-breakdown" className="options-breakdown">
             <CheckboxContainer checkboxes={this.props.schoolTypes}
                                handleChange={this.handleSelect} />
             <Button color="primary" size="sm" outline={true}

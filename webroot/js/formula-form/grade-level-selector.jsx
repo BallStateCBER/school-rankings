@@ -60,7 +60,7 @@ class GradeLevelSelector extends React.Component {
           </label>
         </div>
         {!this.props.allGradeLevels &&
-          <div id="grade-levels-options-breakdown">
+          <div id="grade-levels-options-breakdown" className="options-breakdown">
             <CheckboxContainer checkboxes={this.props.gradeLevels}
                                handleChange={this.handleSelect} />
             <Button color="primary" size="sm" outline={true}
