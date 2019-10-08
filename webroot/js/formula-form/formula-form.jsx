@@ -52,6 +52,7 @@ class FormulaForm extends React.Component {
 
   componentDidMount() {
     this.setSchoolTypes();
+    this.setGradeLevels();
   }
 
   static getUuid() {
