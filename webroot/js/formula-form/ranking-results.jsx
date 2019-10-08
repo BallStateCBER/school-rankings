@@ -32,45 +32,47 @@ class RankingResults extends React.Component {
   render() {
     const resultsCount = this.props.results.length;
     if (resultsCount === 0) {
-      const subjectsNotFound = this.props.context === 'school'
-        ? 'schools'
-        : 'school corporations';
+      const subjectsNotFound = this.props.context === 'school' ?
+        'schools' :
+        'school corporations';
 
-      return <section>
+      return (
+        <section>
           <h3>
             No Results
           </h3>
           <p>
             No {subjectsNotFound} were found matching your selected criteria.
           </p>
-        </section>;
+        </section>
+      );
     }
 
-    let rankRows = [];
+    const rankRows = [];
 
     for (let i = 0; i < resultsCount; i++) {
       const rank = this.props.results[i];
       rankRows.push(
-          <tr key={rank.rank + '-0'}>
-            <th rowSpan={rank.subjects.length} className="rank-number">
-              {rank.rank}
-            </th>
-            {this.getResultCell(rank.subjects[0])}
-          </tr>
+        <tr key={rank.rank + '-0'}>
+          <th rowSpan={rank.subjects.length} className="rank-number">
+            {rank.rank}
+          </th>
+          {this.getResultCell(rank.subjects[0])}
+        </tr>
       );
       for (let k = 1; k < rank.subjects.length; k++) {
         rankRows.push(
-            <tr key={rank.rank + '-' + k}>
-              {this.getResultCell(rank.subjects[k])}
-            </tr>
+          <tr key={rank.rank + '-' + k}>
+            {this.getResultCell(rank.subjects[k])}
+          </tr>
         );
       }
     }
 
     const header = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
-    const subjectHeader = this.props.context === 'school'
-      ? 'School'
-      : 'School Corporation';
+    const subjectHeader = this.props.context === 'school' ?
+      'School' :
+      'School Corporation';
 
     return (
       <section>

@@ -20,7 +20,7 @@ class NoDataResults extends React.Component {
     const resultsCount = this.props.results.length;
     const isPlural = resultsCount !== 1;
     const subject = this.props.context + (isPlural ? 's' : '');
-    let rows = [];
+    const rows = [];
 
     for (let i = 0; i < resultsCount; i++) {
       const subject = this.props.results[i];

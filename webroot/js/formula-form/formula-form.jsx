@@ -107,7 +107,7 @@ class FormulaForm extends React.Component {
    * @param {string} key
    */
   toggleCollection(key) {
-    let items = this.state[key];
+    const items = this.state[key];
 
     // Set all checkboxes to the opposite of the current majority state
     let checkedCount = 0;
@@ -127,7 +127,7 @@ class FormulaForm extends React.Component {
       item.checked = newCheckedState;
     });
 
-    let stateObject = {};
+    const stateObject = {};
     stateObject[key] = items;
     this.setState(stateObject);
   }
@@ -159,9 +159,9 @@ class FormulaForm extends React.Component {
       },
     }).done((data) => {
       if (
-          !data.hasOwnProperty('success') ||
-          !data.hasOwnProperty('id') ||
-          !data.success
+        !data.hasOwnProperty('success') ||
+        !data.hasOwnProperty('id') ||
+        !data.success
       ) {
         console.log('Error creating formula record');
         console.log(data);
@@ -188,7 +188,7 @@ class FormulaForm extends React.Component {
       return;
     }
 
-    let data = {
+    const data = {
       countyId: this.state.county,
       formulaId: this.formulaId,
       schoolTypes: this.getSelectedSchoolTypes(),
@@ -239,9 +239,9 @@ class FormulaForm extends React.Component {
   }
 
   static getCountyOptions() {
-    let selectOptions = [];
+    const selectOptions = [];
     for (let n = 0; n < window.formulaForm.counties.length; n++) {
-      let county = window.formulaForm.counties[n];
+      const county = window.formulaForm.counties[n];
       selectOptions.push({
         value: county.id,
         label: county.name,
@@ -259,7 +259,7 @@ class FormulaForm extends React.Component {
    * Read school type data from window.formulaForm and load it into state
    */
   setSchoolTypes() {
-    let schoolTypes = new Map();
+    const schoolTypes = new Map();
     for (let n = 0; n < window.formulaForm.schoolTypes.length; n++) {
       const schoolTypeData = window.formulaForm.schoolTypes[n];
       const schoolType = {
@@ -278,7 +278,7 @@ class FormulaForm extends React.Component {
    * Read grade level data from window.formulaForm and load it into state
    */
   setGradeLevels() {
-    let gradeLevels = new Map();
+    const gradeLevels = new Map();
     for (let n = 0; n < window.formulaForm.gradeLevels.length; n++) {
       const gradeLevelData = window.formulaForm.gradeLevels[n];
       const gradeLevel = {
@@ -319,7 +319,7 @@ class FormulaForm extends React.Component {
       return;
     }
 
-    let metric = {
+    const metric = {
       metricId: selected.node.data.metricId,
       dataType: selected.node.data.type,
       name: selected.node.data.name,
@@ -340,16 +340,16 @@ class FormulaForm extends React.Component {
     const criterion = {
       metric: metric,
     };
-    let criteria = this.state.criteria;
+    const criteria = this.state.criteria;
     criteria.push(criterion);
     this.setState({criteria: criteria});
   }
 
   handleUnselectMetric(node, selected) {
-    let criteria = this.state.criteria;
+    const criteria = this.state.criteria;
     const unselectedMetricId = selected.node.data.metricId;
     const filteredCriteria = criteria.filter(
-        (criterion) => criterion.metric.metricId !== unselectedMetricId
+      (criterion) => criterion.metric.metricId !== unselectedMetricId
     );
     this.setState({criteria: filteredCriteria});
   }
@@ -380,18 +380,18 @@ class FormulaForm extends React.Component {
 
       this.setState({
         progressPercent: 20 + (data.progress * 80),
-        progressStatus: data.status
-            ? data.status
-            : 'Starting calculation engine',
+        progressStatus: data.status ?
+          data.status :
+          'Starting calculation engine',
       });
 
       // Not finished yet
       if (data.progress !== 1) {
         setTimeout(
-            () => {
-              this.checkJobProgress(jobId);
-            },
-            500
+          () => {
+            this.checkJobProgress(jobId);
+          },
+          500
         );
         return;
       }
@@ -427,11 +427,9 @@ class FormulaForm extends React.Component {
   }
 
   handleRemoveCriterion(metricId) {
-    const filteredCriteria = this.state.criteria.filter(
-      (i) => i.metric.metricId !== metricId
-    );
+    const filteredCriteria = this.state.criteria.filter((i) => i.metric.metricId !== metricId);
     this.setState({criteria: filteredCriteria});
-    let jstree = $('#jstree').jstree(true);
+    const jstree = $('#jstree').jstree(true);
     jstree.deselect_node('li[data-metric-id=' + metricId + ']');
   }
 
@@ -444,7 +442,7 @@ class FormulaForm extends React.Component {
       return ['public'];
     }
 
-    let selectedSchoolTypes = [];
+    const selectedSchoolTypes = [];
     this.state.schoolTypes.forEach(function(schoolType) {
       if (schoolType.checked) {
         selectedSchoolTypes.push(schoolType.name);
@@ -493,32 +491,33 @@ class FormulaForm extends React.Component {
                 </label>
               </div>
               <div className="form-check">
-                <input className="form-check-input" type="radio" name="context"
-                       id="context-district" value="district"
-                       onChange={this.handleChange}
-                       checked={this.state.context === 'district'} />
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="context"
+                  id="context-district" value="district"
+                  onChange={this.handleChange}
+                  checked={this.state.context === 'district'} />
                 <label className="form-check-label" htmlFor="context-district">
                   School corporations (districts)
                 </label>
               </div>
             </section>
             {this.state.context === 'school' &&
-                <SchoolTypeSelector
-                    schoolTypes={this.state.schoolTypes}
-                    onlyPublic={this.state.onlyPublic}
-                    handleSelect={this.handleSelectSchoolTypes}
-                    handleChangeOnlyPublic={this.handleChangeOnlyPublic}
-                    handleToggleAll={this.handleToggleAllSchoolTypes}/>
+              <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
+                                  onlyPublic={this.state.onlyPublic}
+                                  handleSelect={this.handleSelectSchoolTypes}
+                                  handleChangeOnlyPublic={this.handleChangeOnlyPublic}
+                                  handleToggleAll={this.handleToggleAllSchoolTypes}/>
             }
           </div>
           {this.state.context === 'school' &&
             <div className="row">
-              <GradeLevelSelector
-                gradeLevels={this.state.gradeLevels}
-                allGradeLevels={this.state.allGradeLevels}
-                handleSelect={this.handleSelectGradeLevels}
-                handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
-                handleToggleAll={this.handleToggleAllGradeLevels}/>
+              <GradeLevelSelector gradeLevels={this.state.gradeLevels}
+                                  allGradeLevels={this.state.allGradeLevels}
+                                  handleSelect={this.handleSelectGradeLevels}
+                                  handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
+                                  handleToggleAll={this.handleToggleAllGradeLevels}/>
             </div>
           }
           {this.state.context &&
@@ -583,6 +582,6 @@ class FormulaForm extends React.Component {
 export {FormulaForm};
 
 ReactDom.render(
-    <FormulaForm/>,
-    document.getElementById('formula-form')
+  <FormulaForm/>,
+  document.getElementById('formula-form')
 );

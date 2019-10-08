@@ -18,11 +18,11 @@ class GradeLevelSelector extends React.Component {
 
   handleSelect(event) {
     // Get current set
-    let gradeLevels = this.props.gradeLevels;
+    const gradeLevels = this.props.gradeLevels;
 
     // Update the relevant school type
     const gradeLevelName = event.target.name;
-    let gradeLevel = gradeLevels.get(gradeLevelName);
+    const gradeLevel = gradeLevels.get(gradeLevelName);
     gradeLevel.checked = event.target.checked;
     gradeLevels.set(gradeLevelName, gradeLevel);
 

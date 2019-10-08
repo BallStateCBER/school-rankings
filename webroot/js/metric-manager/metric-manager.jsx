@@ -50,8 +50,8 @@ class MetricManager extends React.Component {
   }
 
   handleRename(data) {
-    let jstree = $.jstree.reference(data.reference);
-    let node = jstree.get_node(data.reference);
+    const jstree = $.jstree.reference(data.reference);
+    const node = jstree.get_node(data.reference);
     const context = window.metricManager.context;
     jstree.edit(node, null, (node, status, cancelled) => {
       if (cancelled) {
@@ -75,11 +75,11 @@ class MetricManager extends React.Component {
   }
 
   handleToggleSelectable(data) {
-    let jstree = $.jstree.reference(data.reference);
-    let node = jstree.get_node(data.reference);
+    const jstree = $.jstree.reference(data.reference);
+    const node = jstree.get_node(data.reference);
     const selectable = node.data.selectable;
     const context = window.metricManager.context;
-    let metricId = node.data.metricId;
+    const metricId = node.data.metricId;
     const requestData = {
       context: context,
       metricId: metricId,
@@ -90,8 +90,8 @@ class MetricManager extends React.Component {
   }
 
   handleToggleType(data) {
-    let jstree = $.jstree.reference(data.reference);
-    let node = jstree.get_node(data.reference);
+    const jstree = $.jstree.reference(data.reference);
+    const node = jstree.get_node(data.reference);
     const newType = node.data.type === 'boolean' ? 'numeric' : 'boolean';
     const context = window.metricManager.context;
     const metricId = node.data.metricId;
@@ -105,8 +105,8 @@ class MetricManager extends React.Component {
   }
 
   handleToggleVisible(data) {
-    let jstree = $.jstree.reference(data.reference);
-    let node = jstree.get_node(data.reference);
+    const jstree = $.jstree.reference(data.reference);
+    const node = jstree.get_node(data.reference);
     const newVisible = !node.data.visible;
     const context = window.metricManager.context;
     const metricId = node.data.metricId;
@@ -179,9 +179,9 @@ class MetricManager extends React.Component {
   }
 
   handleDelete(data) {
-    let jstree = $.jstree.reference(data.reference);
-    let node = jstree.get_node(data.reference);
-    let metricId = node.data.metricId;
+    const jstree = $.jstree.reference(data.reference);
+    const node = jstree.get_node(data.reference);
+    const metricId = node.data.metricId;
 
     if (jstree.is_parent(node)) {
       alert('Cannot delete a metric that has children');
@@ -359,9 +359,9 @@ class MetricManager extends React.Component {
     const movedMetricId = draggedNode.data.metricId;
     const parentNodeId = jstree.get_parent(draggedNode);
     const parentNode = jstree.get_node(parentNodeId);
-    const parentMetricId = parentNode.hasOwnProperty('data')
-      ? parentNode.data.metricId
-      : null;
+    const parentMetricId = parentNode.hasOwnProperty('data') ?
+      parentNode.data.metricId :
+      null;
     const context = window.metricManager.context;
 
     MetricManager.showNodeUpdateLoading(jstree, draggedNode);
@@ -396,8 +396,8 @@ class MetricManager extends React.Component {
   }
 
   static showNodeUpdateLoading(jstree, node) {
-    let liElement = $('#' + node.id);
-    let img = $(
+    const liElement = $('#' + node.id);
+    const img = $(
       '<img src="/jstree/themes/default/throbber.gif" alt="Loading..." />'
     );
     img.addClass('loading');
@@ -406,7 +406,7 @@ class MetricManager extends React.Component {
   };
 
   static showNodeUpdateComplete(jstree, node) {
-    let liElement = $('#' + node.id);
+    const liElement = $('#' + node.id);
     liElement.find('img.loading').remove();
     jstree.enable_node(node);
   };
@@ -425,7 +425,7 @@ class MetricManager extends React.Component {
     if (data.hasOwnProperty('visible')) {
       node.li_attr['data-visible'] = data.visible ? 1 : 0;
     }
-    for (let property in data) {
+    for (const property in data) {
       if ({}.hasOwnProperty.call(data, property)) {
         node.data[property] = data[property];
       }

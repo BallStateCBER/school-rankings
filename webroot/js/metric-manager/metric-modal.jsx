@@ -70,7 +70,7 @@ class MetricModal extends React.Component {
     const parentNode = isRoot ? null : jstree.get_node(data.reference);
     const parentId = isRoot ? null : parentNode.data.metricId;
     const metricName = this.state.metricName.trim();
-    let submitData = {
+    const submitData = {
       context: window.metricManager.context,
       parentId: parentId,
       name: metricName,

@@ -31,7 +31,7 @@ class MetricSelector extends React.Component {
 
   clearMetricTree() {
     this.setState({successfullyLoaded: false});
-    let jstree = $('#jstree').jstree(true);
+    const jstree = $('#jstree').jstree(true);
     if (jstree !== false) {
       jstree.destroy();
     }
@@ -46,7 +46,7 @@ class MetricSelector extends React.Component {
       dataType: 'json',
     }).done((data) => {
       // Load jsTree
-      let container = $('#jstree');
+      const container = $('#jstree');
       container.jstree(MetricSelector.getJsTreeConfig(data));
       this.setState({successfullyLoaded: true});
       this.setupSearch();
@@ -68,9 +68,9 @@ class MetricSelector extends React.Component {
   }
 
   setupSearch() {
-    let search = $('#jstree-search');
+    const search = $('#jstree-search');
     let timeout = false;
-    let container = $('#jstree');
+    const container = $('#jstree');
     search.keyup(function() {
       if (timeout) {
         clearTimeout(timeout);
@@ -83,7 +83,7 @@ class MetricSelector extends React.Component {
   }
 
   setupClickEvents() {
-    let container = $('#jstree');
+    const container = $('#jstree');
 
     container.on('select_node.jstree', (node, selected) => {
       this.props.handleSelectMetric(node, selected);

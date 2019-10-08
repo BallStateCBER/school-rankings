@@ -3,9 +3,9 @@ import React from 'react';
 class Legend extends React.Component {
   static icon(className, label) {
     return (
-        <li>
-          <span className={className}></span> {label}
-        </li>
+      <li>
+        <span className={className}></span> {label}
+      </li>
     );
   }
 
@@ -42,8 +42,8 @@ class Legend extends React.Component {
             </h6>
             <ul className="card-text">
               {Legend.icon(
-                  'far fa-eye-slash',
-                  <span className="metric-hidden">Hidden</span>
+                'far fa-eye-slash',
+                <span className="metric-hidden">Hidden</span>
               )}
             </ul>
           </section>

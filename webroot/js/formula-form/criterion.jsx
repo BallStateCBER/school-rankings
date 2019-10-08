@@ -10,21 +10,21 @@ class Criterion extends React.Component {
 
   render() {
     return (
-        <tr>
-          <td>
-            <button type="button" className="close float-right"
-                    aria-label="Close" onClick={this.props.onRemove}>
-              <span aria-hidden="true">&times;</span>
-            </button>
-            <p className="metric-name">
-              {this.props.name}
-            </p>
-            <input type="hidden"
-                   name={'criteria[' + this.props.metricId + '][metricId]'}
-                   data-field="metricId"
-                   value={this.props.metricId} />
-          </td>
-        </tr>
+      <tr>
+        <td>
+          <button type="button" className="close float-right"
+                  aria-label="Close" onClick={this.props.onRemove}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <p className="metric-name">
+            {this.props.name}
+          </p>
+          <input type="hidden"
+                 name={'criteria[' + this.props.metricId + '][metricId]'}
+                 data-field="metricId"
+                 value={this.props.metricId} />
+        </td>
+      </tr>
     );
   }
 }

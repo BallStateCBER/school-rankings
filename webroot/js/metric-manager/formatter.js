@@ -1,9 +1,9 @@
 class Formatter {
   static formatMetricsForJsTree(data) {
-    let retval = [];
+    const retval = [];
 
     data.forEach((metric) => {
-      let jTreeData = {
+      const jTreeData = {
         text: metric.name,
         data: {
           selectable: Boolean(metric.selectable),

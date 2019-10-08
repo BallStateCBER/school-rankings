@@ -30,7 +30,7 @@ class ResultSubject extends React.Component {
       return null;
     }
 
-    let rows = [];
+    const rows = [];
 
     for (let i = 0; i < this.props.criteria.length; i++) {
       const criterion = this.props.criteria[i];
@@ -101,8 +101,7 @@ class ResultSubject extends React.Component {
             <h3 className="school-name">
               {this.props.subjectData.name}
             </h3>
-            {this.props.context === 'school'
-              && this.props.subjectData.address &&
+            {this.props.context === 'school' && this.props.subjectData.address &&
               <span>
                 {ResultSubject.nl2br(this.props.subjectData.address)}<br/>
               </span>
