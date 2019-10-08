@@ -85,27 +85,7 @@ class FormulaForm extends React.Component {
   }
 
   handleToggleAllSchoolTypes() {
-    let schoolTypes = this.state.schoolTypes;
-
-    // Set all checkboxes to the opposite of the current majority state
-    let checkedCount = 0;
-    let uncheckedCount = 0;
-    const schoolTypesArray = Array.from(schoolTypes.values());
-    for (let i = 0; i < schoolTypesArray.length; i++) {
-      const schoolType = schoolTypesArray[i];
-      if (schoolType.checked) {
-        checkedCount++;
-      } else {
-        uncheckedCount++;
-      }
-    }
-    const newCheckedState = checkedCount < uncheckedCount;
-
-    schoolTypes.forEach(function(schoolType) {
-      schoolType.checked = newCheckedState;
-    });
-
-    this.setState({schoolTypes: schoolTypes});
+    this.toggleCollection('schoolTypes');
   }
 
   handleChangeAllGradeLevels(allGradeLevels) {
@@ -117,15 +97,25 @@ class FormulaForm extends React.Component {
   }
 
   handleToggleAllGradeLevels() {
-    let gradeLevels = this.state.gradeLevels;
+    this.toggleCollection('gradeLevels');
+  }
+
+  /**
+   * Takes the name of a Map of checkbox objects in this.state and sets all values to be the opposite of the current
+   * majority of values
+   *
+   * @param {string} key
+   */
+  toggleCollection(key) {
+    let items = this.state[key];
 
     // Set all checkboxes to the opposite of the current majority state
     let checkedCount = 0;
     let uncheckedCount = 0;
-    const gradeLevelsArray = Array.from(gradeLevels.values());
-    for (let i = 0; i < gradeLevelsArray.length; i++) {
-      const gradeLevel = gradeLevelsArray[i];
-      if (gradeLevel.checked) {
+    const itemsArray = Array.from(items.values());
+    for (let i = 0; i < itemsArray.length; i++) {
+      const item = itemsArray[i];
+      if (item.checked) {
         checkedCount++;
       } else {
         uncheckedCount++;
@@ -133,11 +123,13 @@ class FormulaForm extends React.Component {
     }
     const newCheckedState = checkedCount < uncheckedCount;
 
-    gradeLevels.forEach(function(gradeLevel) {
-      gradeLevel.checked = newCheckedState;
+    items.forEach(function(item) {
+      item.checked = newCheckedState;
     });
 
-    this.setState({gradeLevels: gradeLevels});
+    let stateObject = {};
+    stateObject[key] = items;
+    this.setState(stateObject);
   }
 
   handleSubmit(event) {
