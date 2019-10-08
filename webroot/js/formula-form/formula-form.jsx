@@ -73,7 +73,7 @@ class FormulaForm extends React.Component {
 
   handleSelectCounty(selectedOption) {
     this.setState({
-      county: selectedOption ? selectedOption.value : null,
+      county: selectedOption ? selectedOption : null,
     });
   }
 
@@ -190,7 +190,7 @@ class FormulaForm extends React.Component {
     }
 
     const data = {
-      countyId: this.state.county,
+      countyId: this.state.county.value,
       formulaId: this.formulaId,
       schoolTypes: this.getSelectedSchoolTypes(),
     };
