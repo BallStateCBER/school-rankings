@@ -310,6 +310,10 @@ class FormulaForm extends React.Component {
       alert('Please select one or more metrics');
       return false;
     }
+    if (context === 'school' && this.getSelectedSchoolTypes().length === 0) {
+      alert('Please specify at least one type of school');
+      return false;
+    }
 
     return true;
   }
