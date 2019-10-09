@@ -93,6 +93,55 @@ class ResultSubject extends React.Component {
     return false;
   }
 
+  capitalize(string) {
+    if (typeof string !== 'string') {
+      return string;
+    }
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  /**
+   * Takes the current school's array of grade levels and returns a string describing them
+   *
+   * @return {string}
+   */
+  getDisplayedGradeLevels() {
+    const gradeLevels = this.props.subjectData.grades;
+    if (!Array.isArray(gradeLevels) || gradeLevels.length === 0) {
+      return '';
+    }
+
+    // Collect numbered grades (e.g. Grade 10) and non-numbered grades (e.g. Kindergarten) separately
+    const namedGradeLevels = [];
+    const numberedGradeLevels = [];
+    for (let n = 0; n < gradeLevels.length; n++) {
+      const name = gradeLevels[n].name.toLowerCase();
+      if (name.search('grade') === -1) {
+        namedGradeLevels.push(name);
+        continue;
+      }
+      const gradeNumber = name.replace('grade ', '');
+      numberedGradeLevels.push(gradeNumber);
+    }
+
+    // Shorten a group of grades (9, 10, 11, 12) into a range (9-12), assuming that no school skips any grades
+    const retval = namedGradeLevels;
+    if (numberedGradeLevels.length === 1) {
+      retval.push('grade ' + numberedGradeLevels[0]);
+    } else if (numberedGradeLevels.length > 1) {
+      retval.push('grades ' + Math.min(...numberedGradeLevels) + '-' + Math.max(...numberedGradeLevels));
+    }
+
+    // Add serial commas and "and"
+    if (retval.length > 1) {
+      const lastIndex = retval.length - 1;
+      retval[lastIndex] = 'and ' + retval[lastIndex];
+    }
+    const delimiter = retval.length > 2 ? ', ' : ' ';
+
+    return ' teaching ' + retval.join(delimiter);
+  }
+
   render() {
     return (
       <td key={this.props.subjectData.id}>
@@ -101,22 +150,30 @@ class ResultSubject extends React.Component {
             <h3 className="school-name">
               {this.props.subjectData.name}
             </h3>
+            {this.props.context === 'school' &&
+              <p>
+                {this.capitalize(this.props.subjectData.school_type.name)} school
+                {this.getDisplayedGradeLevels()}
+              </p>
+            }
             {this.props.context === 'school' && this.props.subjectData.address &&
-              <span>
-                {ResultSubject.nl2br(this.props.subjectData.address)}<br/>
-              </span>
+              <p>
+                {ResultSubject.nl2br(this.props.subjectData.address)}
+              </p>
             }
-            {this.props.subjectData.phone &&
-              <span>
-                {this.props.subjectData.phone} <br />
-              </span>
-            }
-            {this.props.subjectData.url &&
-              <a href={this.props.subjectData.url} target="_blank"
-                 rel="noopener noreferrer">
-                Visit website
-              </a>
-            }
+            <p>
+              {this.props.subjectData.phone &&
+                <span>
+                  {this.props.subjectData.phone} <br />
+                </span>
+              }
+              {this.props.subjectData.url &&
+                <a href={this.props.subjectData.url} target="_blank"
+                   rel="noopener noreferrer">
+                  Visit website
+                </a>
+              }
+            </p>
           </div>
           <div className="col-lg-6 school-stats">
             <h4 className="d-lg-none">

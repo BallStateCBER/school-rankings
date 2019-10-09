@@ -361,6 +361,16 @@ class RankingsController extends AppController
                     'address',
                     'url',
                     'phone'
+                ])
+                ->contain([
+                    'Grades' => function (Query $q) {
+                        return $q
+                            ->select(['id', 'name'])
+                            ->orderAsc('Grades.id');
+                    },
+                    'SchoolTypes' => function (Query $q) {
+                        return $q->select(['id', 'name']);
+                    }
                 ]);
         };
         $containDistricts = function (Query $q) {
