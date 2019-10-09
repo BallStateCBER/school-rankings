@@ -143,6 +143,7 @@ class RankTask extends Shell
 
         $step = 1;
         $schoolTypeIds = Hash::extract($this->ranking->school_types, '{n}.id');
+        $gradeLevelIds = Hash::extract($this->ranking->grades, '{n}.id');
         foreach ($locations as $location) {
             // Base query
             $locationTableName = $this->getLocationTableName($location);
@@ -157,6 +158,13 @@ class RankTask extends Shell
                 $query->where(function (QueryExpression $exp) use ($schoolTypeIds) {
                     return $exp->in('school_type_id', $schoolTypeIds);
                 });
+                if ($gradeLevelIds) {
+                    $query->matching('Grades', function (Query $q) use ($gradeLevelIds) {
+                        return $q->where(function (QueryExpression $exp) use ($gradeLevelIds) {
+                            return $exp->in('Grades.id', $gradeLevelIds);
+                        });
+                    });
+                }
             }
 
             $subjects = $query->all();

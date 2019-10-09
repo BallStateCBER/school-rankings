@@ -36,18 +36,18 @@ class FormulaForm extends React.Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevels = this.handleChangeAllGradeLevels.bind(this);
+    this.handleChangeContext = this.handleChangeContext.bind(this);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
     this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
+    this.handleSelectGradeLevels = this.handleSelectGradeLevels.bind(this);
     this.handleSelectMetric = this.handleSelectMetric.bind(this);
     this.handleSelectSchoolTypes = this.handleSelectSchoolTypes.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleToggleAllSchoolTypes =
-      this.handleToggleAllSchoolTypes.bind(this);
     this.handleToggleAllGradeLevels = this.handleToggleAllGradeLevels.bind(this);
+    this.handleToggleAllSchoolTypes = this.handleToggleAllSchoolTypes.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
-    this.handleChangeContext = this.handleChangeContext.bind(this);
   }
 
   componentDidMount() {
@@ -193,6 +193,7 @@ class FormulaForm extends React.Component {
       countyId: this.state.county.value,
       formulaId: this.formulaId,
       schoolTypes: this.getSelectedSchoolTypes(),
+      gradeLevels: this.getSelectedGradeLevels(),
     };
 
     return $.ajax({
@@ -310,9 +311,15 @@ class FormulaForm extends React.Component {
       alert('Please select one or more metrics');
       return false;
     }
-    if (context === 'school' && this.getSelectedSchoolTypes().length === 0) {
-      alert('Please specify at least one type of school');
-      return false;
+    if (context === 'school') {
+      if (!this.state.allGradeLevels && this.getSelectedGradeLevels().length === 0) {
+        alert('Please specify at least one grade level');
+        return false;
+      }
+      if (this.getSelectedSchoolTypes().length === 0) {
+        alert('Please specify at least one type of school');
+        return false;
+      }
     }
 
     return true;
@@ -454,6 +461,20 @@ class FormulaForm extends React.Component {
       }
     });
     return selectedSchoolTypes;
+  }
+
+  getSelectedGradeLevels() {
+    if (this.state.context !== 'school' || this.state.allGradeLevels) {
+      return [];
+    }
+
+    const selectedGradeLevels = [];
+    this.state.gradeLevels.forEach(function(gradeLevel) {
+      if (gradeLevel.checked) {
+        selectedGradeLevels.push(gradeLevel.name);
+      }
+    });
+    return selectedGradeLevels;
   }
 
   handleChangeContext() {

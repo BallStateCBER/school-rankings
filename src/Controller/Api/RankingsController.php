@@ -6,6 +6,7 @@ use App\Model\Entity\Ranking;
 use App\Model\Entity\Statistic;
 use App\Model\Table\CountiesTable;
 use App\Model\Table\FormulasTable;
+use App\Model\Table\GradesTable;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\SchoolTypesTable;
@@ -23,6 +24,7 @@ use Queue\Model\Table\QueuedJobsTable;
  * @package App\Controller\Api
  * @property CountiesTable $countiesTable
  * @property FormulasTable $formulasTable
+ * @property GradesTable $gradeLevelsTable
  * @property MetricsTable $metricsTable
  * @property QueuedJobsTable $jobsTable
  * @property RankingsTable $rankingsTable
@@ -32,6 +34,7 @@ class RankingsController extends AppController
 {
     private $countiesTable;
     private $formulasTable;
+    private $gradeLevelsTable;
     private $jobsTable;
     private $metricsTable;
     private $rankingsTable;
@@ -48,6 +51,7 @@ class RankingsController extends AppController
         parent::initialize();
         $this->countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $this->formulasTable = TableRegistry::getTableLocator()->get('Formulas');
+        $this->gradeLevelsTable = TableRegistry::getTableLocator()->get('Grades');
         $this->jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->rankingsTable = TableRegistry::getTableLocator()->get('Rankings');
@@ -95,6 +99,17 @@ class RankingsController extends AppController
                     }
                 ])
                 ->toArray();
+            $gradeLevelIds = $this->getGradeLevelIds();
+            if ($gradeLevelIds) {
+                $ranking->grades = $this->gradeLevelsTable
+                    ->find()
+                    ->where([
+                        function (QueryExpression $exp) use ($gradeLevelIds) {
+                            return $exp->in('id', $gradeLevelIds);
+                        }
+                    ])
+                    ->toArray();
+            }
         }
 
         // Save ranking
@@ -292,8 +307,6 @@ class RankingsController extends AppController
     /**
      * Returns all schoolType IDs corresponding to the names found in request data
      *
-     * Or returns a blank array if the current context is not 'school'
-     *
      * @return array
      */
     private function getSchoolTypeIds()
@@ -307,6 +320,30 @@ class RankingsController extends AppController
             ->select(['id'])
             ->where(function (QueryExpression $exp) use ($schoolTypes) {
                 return $exp->in('name', $schoolTypes);
+            })
+            ->enableHydration(false)
+            ->toArray();
+
+        return Hash::extract($results, '{n}.id');
+    }
+
+    /**
+     * Returns all grade IDs corresponding to the grade slugs found in request data
+     *
+     * @return array
+     */
+    private function getGradeLevelIds()
+    {
+        $gradeLevels = $this->request->getData('gradeLevels');
+
+        if (!$gradeLevels) {
+            return [];
+        }
+
+        $results = $this->gradeLevelsTable->find()
+            ->select(['id'])
+            ->where(function (QueryExpression $exp) use ($gradeLevels) {
+                return $exp->in('slug', $gradeLevels);
             })
             ->enableHydration(false)
             ->toArray();
