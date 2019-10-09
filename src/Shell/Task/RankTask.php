@@ -13,11 +13,16 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Shell;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\ConnectionManager;
+use Cake\ElasticSearch\Datasource\Connection;
+use Cake\ElasticSearch\Index as ElasticsearchIndex;
+use Cake\ElasticSearch\IndexRegistry;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
+use Elastica\Client;
+use Elastica\Index as ElasticaIndex;
 use Exception;
 use Queue\Model\Table\QueuedJobsTable;
 
@@ -58,7 +63,7 @@ class RankTask extends Shell
 
     /**
      * Elasticsearch index for statistics
-     * @var \Cake\ElasticSearch\Index
+     * @var ElasticsearchIndex
      */
     private $statsEsIndex;
 
@@ -75,14 +80,14 @@ class RankTask extends Shell
         $this->jobsTable = TableRegistry::getTableLocator()->get('Queue.QueuedJobs');
 
         /**
-         * @var \Cake\ElasticSearch\Datasource\Connection|\Elastica\Client $connection
-         * @var \Elastica\Index $statisticsIndexRegistry
-         * @var \Cake\ElasticSearch\Index $statisticsIndex
+         * @var Connection|Client $connection
+         * @var ElasticaIndex $statisticsIndexRegistry
+         * @var ElasticsearchIndex $statisticsIndex
          */
         $connection = ConnectionManager::get('elastic');
         $statisticsIndexRegistry = $connection->getIndex('statistics');
         if ($statisticsIndexRegistry->exists()) {
-            $this->statsEsIndex = \Cake\ElasticSearch\IndexRegistry::get('statistics');
+            $this->statsEsIndex = IndexRegistry::get('statistics');
         }
     }
 
