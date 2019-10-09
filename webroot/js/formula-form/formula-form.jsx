@@ -1,16 +1,17 @@
+import '../../css/formula-form.scss';
 import React from 'react';
 import ReactDom from 'react-dom';
-import {Button} from 'reactstrap';
-import uuidv4 from 'uuid/v4';
 import Select from 'react-select';
-import {MetricSelector} from './metric-selector.jsx';
-import '../../css/formula-form.scss';
+import uuidv4 from 'uuid/v4';
+import {Button} from 'reactstrap';
+import {ContextSelector} from './context-selector.jsx';
 import {Criterion} from './criterion.jsx';
-import {RankingResults} from './ranking-results.jsx';
-import {ProgressBar} from './progress-bar.jsx';
-import {SchoolTypeSelector} from './school-type-selector.jsx';
-import {NoDataResults} from './no-data-results.jsx';
 import {GradeLevelSelector} from './grade-level-selector.jsx';
+import {MetricSelector} from './metric-selector.jsx';
+import {NoDataResults} from './no-data-results.jsx';
+import {ProgressBar} from './progress-bar.jsx';
+import {RankingResults} from './ranking-results.jsx';
+import {SchoolTypeSelector} from './school-type-selector.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -65,10 +66,6 @@ class FormulaForm extends React.Component {
     const value = target.type === 'checkbox' ? target.checked : target.value;
 
     this.setState({[name]: value});
-
-    if (name === 'context') {
-      this.handleChangeContext();
-    }
   }
 
   handleSelectCounty(selectedOption) {
@@ -477,7 +474,8 @@ class FormulaForm extends React.Component {
     return selectedGradeLevels;
   }
 
-  handleChangeContext() {
+  handleChangeContext(event) {
+    this.setState({context: event.target.value});
     this.setState({criteria: []});
   }
 
@@ -501,34 +499,8 @@ class FormulaForm extends React.Component {
             </div>
           </section>
           <div className="row">
-            <section className="form-group col-sm-6">
-              <h3>
-                <label>
-                  What would you like to rank?
-                </label>
-              </h3>
-              <div className="form-check">
-                <input className="form-check-input" type="radio" name="context"
-                       id="context-school" value="school"
-                       onChange={this.handleChange}
-                       checked={this.state.context === 'school'} />
-                <label className="form-check-label" htmlFor="context-school">
-                  Schools
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="context"
-                  id="context-district" value="district"
-                  onChange={this.handleChange}
-                  checked={this.state.context === 'district'} />
-                <label className="form-check-label" htmlFor="context-district">
-                  School corporations (districts)
-                </label>
-              </div>
-            </section>
+            <ContextSelector context={this.state.context}
+                             handleChange={this.handleChangeContext} />
             {this.state.context === 'school' &&
               <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
                                   onlyPublic={this.state.onlyPublic}
