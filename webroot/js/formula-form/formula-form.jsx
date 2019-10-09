@@ -8,9 +8,9 @@ import {ContextSelector} from './selectors/context-selector.jsx';
 import {Criterion} from './criterion.jsx';
 import {GradeLevelSelector} from './selectors/grade-level-selector.jsx';
 import {MetricSelector} from './selectors/metric-selector.jsx';
-import {NoDataResults} from './no-data-results.jsx';
+import {NoDataResults} from './results/no-data-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
-import {RankingResults} from './ranking-results.jsx';
+import {RankingResults} from './results/ranking-results.jsx';
 import {SchoolTypeSelector} from './selectors/school-type-selector.jsx';
 
 class FormulaForm extends React.Component {
