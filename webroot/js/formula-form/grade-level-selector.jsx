@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import 'jstree';
 import CheckboxContainer from './checkbox-container.jsx';
 import {Button} from 'reactstrap';
 
