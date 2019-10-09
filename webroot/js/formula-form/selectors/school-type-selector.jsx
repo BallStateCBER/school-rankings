@@ -20,10 +20,10 @@ class SchoolTypeSelector extends React.Component {
     const schoolTypes = this.props.schoolTypes;
 
     // Update the relevant school type
-    const schoolTypeName = event.target.name;
-    const schoolType = schoolTypes.get(schoolTypeName);
+    const schoolTypeId = event.target.name;
+    const schoolType = schoolTypes.get(schoolTypeId);
     schoolType.checked = event.target.checked;
-    schoolTypes.set(schoolTypeName, schoolType);
+    schoolTypes.set(schoolTypeId, schoolType);
 
     // Update parent container
     this.props.handleSelect(schoolTypes);

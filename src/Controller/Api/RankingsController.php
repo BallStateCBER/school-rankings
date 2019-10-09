@@ -90,26 +90,8 @@ class RankingsController extends AppController
             ])
             ->toArray();
         if ($context == 'school') {
-            $schoolTypeIds = $this->getSchoolTypeIds();
-            $ranking->school_types = $this->schoolTypesTable
-                ->find()
-                ->where([
-                    function (QueryExpression $exp) use ($schoolTypeIds) {
-                        return $exp->in('id', $schoolTypeIds);
-                    }
-                ])
-                ->toArray();
-            $gradeLevelIds = $this->getGradeLevelIds();
-            if ($gradeLevelIds) {
-                $ranking->grades = $this->gradeLevelsTable
-                    ->find()
-                    ->where([
-                        function (QueryExpression $exp) use ($gradeLevelIds) {
-                            return $exp->in('id', $gradeLevelIds);
-                        }
-                    ])
-                    ->toArray();
-            }
+            $ranking->school_types = $this->getSchoolTypes();
+            $ranking->grades = $this->getGradeLevels();
         }
 
         // Save ranking
@@ -305,50 +287,44 @@ class RankingsController extends AppController
     }
 
     /**
-     * Returns all schoolType IDs corresponding to the names found in request data
+     * Returns all schoolType entities corresponding to the IDs found in request data
      *
      * @return array
      */
-    private function getSchoolTypeIds()
+    private function getSchoolTypes()
     {
-        $schoolTypes = $this->request->getData('schoolTypes');
-        if (!$schoolTypes) {
+        $schoolTypeIds = $this->request->getData('schoolTypes');
+        if (!$schoolTypeIds) {
             throw new BadRequestException('Please specify at least one type of school');
         }
 
-        $results = $this->schoolTypesTable->find()
-            ->select(['id'])
-            ->where(function (QueryExpression $exp) use ($schoolTypes) {
-                return $exp->in('name', $schoolTypes);
+        return $this->schoolTypesTable->find()
+            ->select()
+            ->where(function (QueryExpression $exp) use ($schoolTypeIds) {
+                return $exp->in('id', $schoolTypeIds);
             })
-            ->enableHydration(false)
             ->toArray();
-
-        return Hash::extract($results, '{n}.id');
     }
 
     /**
-     * Returns all grade IDs corresponding to the grade slugs found in request data
+     * Returns all grade entities corresponding to the grade IDs found in request data
      *
      * @return array
      */
-    private function getGradeLevelIds()
+    private function getGradeLevels()
     {
-        $gradeLevels = $this->request->getData('gradeLevels');
+        $gradeLevelIds = $this->request->getData('gradeLevels');
 
-        if (!$gradeLevels) {
+        if (!$gradeLevelIds) {
             return [];
         }
 
-        $results = $this->gradeLevelsTable->find()
-            ->select(['id'])
-            ->where(function (QueryExpression $exp) use ($gradeLevels) {
-                return $exp->in('slug', $gradeLevels);
+        return $this->gradeLevelsTable->find()
+            ->select()
+            ->where(function (QueryExpression $exp) use ($gradeLevelIds) {
+                return $exp->in('id', $gradeLevelIds);
             })
-            ->enableHydration(false)
             ->toArray();
-
-        return Hash::extract($results, '{n}.id');
     }
 
     /**

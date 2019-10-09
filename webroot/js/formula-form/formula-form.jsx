@@ -263,8 +263,8 @@ class FormulaForm extends React.Component {
       const schoolTypeData = window.formulaForm.schoolTypes[n];
       const schoolType = {
         checked: schoolTypeData.name === 'public',
-        id: schoolTypeData.id,
-        name: schoolTypeData.name,
+        id: schoolTypeData.id.toString(),
+        name: schoolTypeData.id.toString(),
         key: 'school-type-option-' + n,
         label: FormulaForm.capitalize(schoolTypeData.name),
       };
@@ -282,8 +282,8 @@ class FormulaForm extends React.Component {
       const gradeLevelData = window.formulaForm.gradeLevels[n];
       const gradeLevel = {
         checked: false,
-        id: gradeLevelData.id,
-        name: gradeLevelData.slug,
+        id: gradeLevelData.id.toString(),
+        name: gradeLevelData.id.toString(),
         key: 'grade-level-option-' + n,
         label: gradeLevelData.name,
       };
