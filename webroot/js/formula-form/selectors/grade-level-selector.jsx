@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CheckboxContainer from './checkbox-container.jsx';
+import CheckboxContainer from '../checkbox-container.jsx';
 import {Button} from 'reactstrap';
 
 class GradeLevelSelector extends React.Component {

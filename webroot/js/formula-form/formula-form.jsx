@@ -4,14 +4,14 @@ import ReactDom from 'react-dom';
 import Select from 'react-select';
 import uuidv4 from 'uuid/v4';
 import {Button} from 'reactstrap';
-import {ContextSelector} from './context-selector.jsx';
+import {ContextSelector} from './selectors/context-selector.jsx';
 import {Criterion} from './criterion.jsx';
-import {GradeLevelSelector} from './grade-level-selector.jsx';
-import {MetricSelector} from './metric-selector.jsx';
+import {GradeLevelSelector} from './selectors/grade-level-selector.jsx';
+import {MetricSelector} from './selectors/metric-selector.jsx';
 import {NoDataResults} from './no-data-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
 import {RankingResults} from './ranking-results.jsx';
-import {SchoolTypeSelector} from './school-type-selector.jsx';
+import {SchoolTypeSelector} from './selectors/school-type-selector.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {

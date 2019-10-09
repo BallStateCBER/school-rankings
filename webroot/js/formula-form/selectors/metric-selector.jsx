@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Formatter} from '../metric-manager/formatter.js';
+import {Formatter} from '../../metric-manager/formatter.js';
 import {Button} from 'reactstrap';
 import 'jstree';
-import {MetricSorter} from '../sort/metric-sorter.js';
+import {MetricSorter} from '../../sort/metric-sorter.js';
 
 class MetricSelector extends React.Component {
   constructor(props) {
