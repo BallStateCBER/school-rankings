@@ -8,12 +8,7 @@ class ContextSelector extends React.Component {
 
   render() {
     return (
-      <section className="form-group col-sm-6">
-        <h3>
-          <label>
-            What would you like to rank?
-          </label>
-        </h3>
+      <div>
         <div className="form-check">
           <input className="form-check-input" type="radio" name="context"
                  id="context-school" value="school"
@@ -35,7 +30,7 @@ class ContextSelector extends React.Component {
             School corporations (districts)
           </label>
         </div>
-      </section>
+      </div>
     );
   }
 }

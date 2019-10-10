@@ -483,46 +483,68 @@ class FormulaForm extends React.Component {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          <section>
-            <h3>
-              Where would you like to search?
-            </h3>
-            <div className="form-group">
-              <label htmlFor="county">
-                County
-              </label>
-              <Select name="county" id="county"
-                      value={this.state.county}
-                      onChange={this.handleSelectCounty}
-                      options={FormulaForm.getCountyOptions()} clearable={false}
-                      required={true} />
-            </div>
-          </section>
           <div className="row">
-            <ContextSelector context={this.state.context}
-                             handleChange={this.handleChangeContext} />
-            {this.state.context === 'school' &&
-              <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
-                                  onlyPublic={this.state.onlyPublic}
-                                  handleSelect={this.handleSelectSchoolTypes}
-                                  handleChangeOnlyPublic={this.handleChangeOnlyPublic}
-                                  handleToggleAll={this.handleToggleAllSchoolTypes}/>
+            <section className="form-group col-sm-6">
+              <h3>
+                <label>
+                  What would you like to rank?
+                </label>
+              </h3>
+              <ContextSelector context={this.state.context}
+                               handleChange={this.handleChangeContext} />
+            </section>
+            {this.state.context &&
+              <section className="col-sm-6">
+                <h3>
+                  {this.state.context === 'school' ? 'Schools' : 'School corporations'} in what county?
+                </h3>
+                <div className="form-group">
+                  <label htmlFor="county" className="sr-only">
+                    County
+                  </label>
+                  <Select name="county" id="county"
+                          value={this.state.county}
+                          onChange={this.handleSelectCounty}
+                          options={FormulaForm.getCountyOptions()} clearable={false}
+                          required={true} />
+                </div>
+              </section>
             }
           </div>
           {this.state.context === 'school' &&
             <div className="row">
-              <GradeLevelSelector gradeLevels={this.state.gradeLevels}
-                                  allGradeLevels={this.state.allGradeLevels}
-                                  handleSelect={this.handleSelectGradeLevels}
-                                  handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
-                                  handleToggleAll={this.handleToggleAllGradeLevels}/>
+              <section id="school-type" className="col-sm-6">
+                <h3>
+                  What types of schools?
+                </h3>
+                <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
+                                    onlyPublic={this.state.onlyPublic}
+                                    handleSelect={this.handleSelectSchoolTypes}
+                                    handleChangeOnlyPublic={this.handleChangeOnlyPublic}
+                                    handleToggleAll={this.handleToggleAllSchoolTypes}/>
+              </section>
+              <section id="grade-level" className="form-group col-sm-6">
+                <h3>
+                  Schools teaching what grades?
+                </h3>
+                <GradeLevelSelector gradeLevels={this.state.gradeLevels}
+                                    allGradeLevels={this.state.allGradeLevels}
+                                    handleSelect={this.handleSelectGradeLevels}
+                                    handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
+                                    handleToggleAll={this.handleToggleAllGradeLevels}/>
+              </section>
             </div>
           }
           {this.state.context &&
-            <MetricSelector context={this.state.context}
-                            handleSelectMetric={this.handleSelectMetric}
-                            handleUnselectMetric={this.handleUnselectMetric}
-                            handleClearMetrics={this.handleClearMetrics} />
+            <section>
+              <h3>
+                How would you like the results to be ranked?
+              </h3>
+              <MetricSelector context={this.state.context}
+                              handleSelectMetric={this.handleSelectMetric}
+                              handleUnselectMetric={this.handleUnselectMetric}
+                              handleClearMetrics={this.handleClearMetrics} />
+            </section>
           }
           {this.state.criteria.length > 0 &&
             <section id="criteria">

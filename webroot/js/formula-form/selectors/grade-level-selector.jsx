@@ -35,10 +35,7 @@ class GradeLevelSelector extends React.Component {
 
   render() {
     return (
-      <section id="grade-level" className="form-group col-sm-12">
-        <h3>
-          What grade levels should these schools teach?
-        </h3>
+      <div>
         <div className="form-check">
           <input className="form-check-input" type="radio"
                  id="grade-levels-any" name="allGradeLevels" value="1"
@@ -68,7 +65,7 @@ class GradeLevelSelector extends React.Component {
             </Button>
           </div>
         }
-      </section>
+      </div>
     );
   }
 }

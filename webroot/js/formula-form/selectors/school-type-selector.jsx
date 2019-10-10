@@ -35,10 +35,7 @@ class SchoolTypeSelector extends React.Component {
 
   render() {
     return (
-      <section id="school-type col-sm-6">
-        <h3>
-          What types of schools?
-        </h3>
+      <div>
         <div className="form-check">
           <input className="form-check-input" type="radio"
                  id="school-types-only-public" name="onlyPublic" value="1"
@@ -68,7 +65,7 @@ class SchoolTypeSelector extends React.Component {
             </Button>
           </div>
         }
-      </section>
+      </div>
     );
   }
 }

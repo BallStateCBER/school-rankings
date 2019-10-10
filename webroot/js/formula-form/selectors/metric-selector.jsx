@@ -129,10 +129,7 @@ class MetricSelector extends React.Component {
 
   render() {
     return (
-      <section>
-        <h3>
-          How would you like the results to be ranked?
-        </h3>
+      <div>
         {this.state.loading &&
           <span className="loading">
             Loading options...
@@ -156,7 +153,7 @@ class MetricSelector extends React.Component {
           </div>
         }
         <div id="jstree"></div>
-      </section>
+      </div>
     );
   }
 }
