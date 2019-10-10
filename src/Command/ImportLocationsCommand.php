@@ -412,7 +412,10 @@ class ImportLocationsCommand extends Command
                 $this->io->error('Error linking ' . $city->name . ' to ' . $county->name . ' County');
                 $this->abort();
             }
-            $grades = $this->gradesTable->getGradesInRange($data['low grade'], $data['high grade'], $this->allGrades);
+            $grades = $this->gradesTable->getGradesInRange(
+                ['low' => $data['low grade'], 'high' => $data['high grade']],
+                $this->allGrades
+            );
             // $schoolType = $this->getSchoolType($this->importFile->activeWorksheet);
 
             // Prepare update

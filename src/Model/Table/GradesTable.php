@@ -7,6 +7,7 @@ use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Table;
+use Cake\Utility\Hash;
 use Cake\Validation\Validator;
 
 /**
@@ -101,90 +102,61 @@ class GradesTable extends Table
     }
 
     /**
-     * Returns an array of grade entities, keyed by their names, creating them if necessary
+     * Returns an array of grade entities, keyed by their IDOE abbreviations
      *
      * @return array
      */
     public function getAll()
     {
-        $gradeNames = self::getGradeNames();
-        $grades = [];
-        foreach ($gradeNames as $gradeAbbreviation => $gradeName) {
-            $conditions = ['name' => $gradeName];
-            /** @var Grade $grade */
-            $grade = $this->find()
-                ->where($conditions)
-                ->first();
-            if ($grade) {
-                $grades[$grade->name] = $grade;
-                continue;
-            }
+        $results = $this->find()
+            ->orderAsc('id')
+            ->toArray();
 
-            $grade = $this->newEntity($conditions);
-            if ($this->save($grade)) {
-                $grades[$grade->name] = $grade;
-                continue;
-            }
+        return Hash::combine($results, '{n}.idoe_abbreviation', '{n}');
+    }
 
-            throw new InternalErrorException('Error saving grade ' . $gradeName);
+    /**
+     * Takes an IDOE grade abbreviation and an array of grade entities and returns the matching grade
+     *
+     * @param string $gradeAbbrev IDOE grade abbreviation
+     * @param Grade[] $allGrades Array of all grade entities
+     * @return Grade
+     * @throws InternalErrorException
+     */
+    public function getGradeByIdoeAbbreviation($gradeAbbrev, $allGrades)
+    {
+        foreach ($allGrades as $grade) {
+            if (in_array($grade->idoe_abbreviation, [$gradeAbbrev, '0' . $gradeAbbrev])) {
+                return $grade;
+            }
         }
 
-        return $grades;
+        throw new InternalErrorException('No grade found for abbreviation ' . $gradeAbbrev);
     }
 
     /**
      * Returns an array of all Grade entities in the specified range
      *
-     * @param string $lowGradeName Full name or abbreviation of lowest grade
-     * @param string $highGradeName Full name or abbreviation of highest grade
-     * @param Grade[]|null $allGrades An optional array of all Grade entities
+     * @param string[] $gradeAbbrevs Array with keys 'low' and 'high' and IDOE abbreviation of grades
+     * @param Grade[] $allGrades Array of all grade entities
      * @return array
      * @throws InternalErrorException
      */
-    public function getGradesInRange($lowGradeName, $highGradeName, $allGrades = null)
+    public function getGradesInRange($gradeAbbrevs, $allGrades)
     {
-        $gradeNames = self::getGradeNames();
-        if (!$allGrades) {
-            $allGrades = $this->getAll();
+        // Get grade IDs corresponding to the low and high grade abbreviations
+        $gradeIds = [
+            'low' => null,
+            'high' => null
+        ];
+        foreach ($gradeAbbrevs as $key => $gradeAbbrev) {
+            $grade = $this->getGradeByIdoeAbbreviation($gradeAbbrev, $allGrades);
+            $gradeIds[$key] = $grade->id;
         }
 
-        // Convert from abbreviations to full names
-        $lowGradeName = (string)$lowGradeName;
-        if (!array_key_exists($lowGradeName, $allGrades)) {
-            $lowGradeName = str_replace('0', '', $lowGradeName);
-            if (array_key_exists($lowGradeName, $gradeNames)) {
-                $lowGradeName = $gradeNames[$lowGradeName];
-            } else {
-                throw new InternalErrorException('Unrecognized grade: ' . $lowGradeName);
-            }
-        }
-        $highGradeName = (string)$highGradeName;
-        if (!array_key_exists($highGradeName, $allGrades)) {
-            $highGradeName = str_replace('0', '', $highGradeName);
-            if (array_key_exists($highGradeName, $gradeNames)) {
-                $highGradeName = $gradeNames[$highGradeName];
-            } else {
-                throw new InternalErrorException('Unrecognized grade: ' . $highGradeName);
-            }
-        }
-
-        $grades = [];
-        foreach ($allGrades as $gradeName => $grade) {
-            if ($gradeName == $lowGradeName) {
-                $grades[] = $grade;
-                continue;
-            }
-            if ($gradeName == $highGradeName) {
-                $grades[] = $grade;
-
-                return $grades;
-            }
-
-            if ($grades) {
-                $grades[] = $grade;
-            }
-        }
-
-        return $grades;
+        // Filter out any grades outside of this range of IDs
+        return Hash::filter($allGrades, function ($grade) use ($gradeIds) {
+            return $grade->id < $gradeIds['low'] && $grade->id > $gradeIds['high'];
+        });
     }
 }
