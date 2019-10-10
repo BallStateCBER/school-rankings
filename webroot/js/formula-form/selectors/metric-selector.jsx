@@ -92,6 +92,11 @@ class MetricSelector extends React.Component {
     container.on('deselect_node.jstree', (node, selected) => {
       this.props.handleUnselectMetric(node, selected);
     });
+
+    // Allow single-clicking on a parent metric to expand its children
+    container.on('click', '.jstree-anchor', (event) => {
+      $('#jstree').jstree('toggle_node', $(event.target));
+    });
   }
 
   static getJsTreeConfig(data) {
