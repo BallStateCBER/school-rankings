@@ -5,7 +5,7 @@
  */
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <?= $this->element('analytics') ?>
     <?= $this->Html->charset() ?>
