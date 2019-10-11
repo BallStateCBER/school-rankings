@@ -25,7 +25,6 @@ use Cake\Filesystem\Folder;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
-use Cake\Utility\Hash;
 use Exception;
 
 /**
@@ -413,10 +412,6 @@ class ImportLocationsCommand extends Command
                 $this->io->error('Error linking ' . $city->name . ' to ' . $county->name . ' County');
                 $this->abort();
             }
-            $grades = $this->gradesTable->getGradesInRange(
-                ['low' => $data['low grade'], 'high' => $data['high grade']],
-                $this->allGrades
-            );
             // $schoolType = $this->getSchoolType($this->importFile->activeWorksheet);
 
             // Prepare update
@@ -443,7 +438,7 @@ class ImportLocationsCommand extends Command
                     '_ids' => [$state->id]
                 ],
                 'grades' => [
-                    '_ids' => Hash::extract($grades, '{n}.id')
+                    '_ids' => $this->getGradeIdsInRange($data)
                 ]
             ]);
             $errors = $school->getErrors();
@@ -701,5 +696,28 @@ class ImportLocationsCommand extends Command
         $progress->draw();
 
         return $progress;
+    }
+
+    /**
+     * Returns the IDs of the grade records that match the 'low grade' to 'high grade' range in $data
+     *
+     * @param array $data Array of data from a row of the location data spreadsheet
+     * @return array
+     */
+    private function getGradeIdsInRange(array $data)
+    {
+        $grades = $this->gradesTable->getGradesInRange(
+            [
+                'low' => $data['low grade'],
+                'high' => $data['high grade']
+            ],
+            $this->allGrades
+        );
+        $gradeIds = [];
+        foreach ($grades as $grade) {
+            $gradeIds[] = $grade->id;
+        }
+
+        return $gradeIds;
     }
 }
