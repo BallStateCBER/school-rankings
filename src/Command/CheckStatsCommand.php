@@ -81,6 +81,7 @@ class CheckStatsCommand extends Command
             );
             if ($this->getConfirmation('Run fix-percent-values?')) {
                 $command = new FixPercentValuesCommand();
+                $command->initialize();
                 $command->execute($args, $io);
 
                 $this->io->out();

@@ -93,6 +93,7 @@ class CheckLocationsCommand extends Command
         ) == 'y';
         if ($runFixDistrictAssociations) {
             $command = new FixDistrictAssociationsCommand();
+            $command->initialize();
             $command->execute($args, $io);
         }
     }

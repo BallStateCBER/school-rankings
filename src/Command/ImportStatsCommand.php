@@ -264,6 +264,7 @@ class ImportStatsCommand extends Command
         ) == 'y';
         if ($runCommand) {
             $command = new CheckStatsCommand();
+            $command->initialize();
             $command->execute($args, $io);
         }
     }

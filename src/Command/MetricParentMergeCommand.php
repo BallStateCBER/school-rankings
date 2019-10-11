@@ -247,7 +247,9 @@ class MetricParentMergeCommand extends CommonCommand
                 [],
                 ['metricIdsToDelete', 'metricIdToRetain']
             );
-            (new MetricMergeCommand())->execute($arguments, $this->io);
+            $command = new MetricMergeCommand();
+            $command->initialize();
+            $command->execute($arguments, $this->io);
         }
     }
 }

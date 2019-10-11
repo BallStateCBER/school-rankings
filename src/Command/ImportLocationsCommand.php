@@ -178,6 +178,7 @@ class ImportLocationsCommand extends Command
         ) == 'y';
         if ($runCommand) {
             $command = new CheckLocationsCommand();
+            $command->initialize();
             $command->execute($args, $this->io);
         }
     }
