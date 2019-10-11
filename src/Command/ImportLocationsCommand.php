@@ -412,7 +412,6 @@ class ImportLocationsCommand extends Command
                 $this->io->error('Error linking ' . $city->name . ' to ' . $county->name . ' County');
                 $this->abort();
             }
-            // $schoolType = $this->getSchoolType($this->importFile->activeWorksheet);
 
             // Prepare update
             $school = $this->schoolsTable->patchEntity($school, [
