@@ -156,7 +156,7 @@ class GradesTable extends Table
 
         // Filter out any grades outside of this range of IDs
         return Hash::filter($allGrades, function ($grade) use ($gradeIds) {
-            return $grade->id < $gradeIds['low'] && $grade->id > $gradeIds['high'];
+            return $grade->id >= $gradeIds['low'] && $grade->id <= $gradeIds['high'];
         });
     }
 }
