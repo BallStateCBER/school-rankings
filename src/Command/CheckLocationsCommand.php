@@ -175,7 +175,8 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $school->name,
-                $school->code
+                $school->code,
+                $school->origin_file
             ];
         }
         if ($results) {
@@ -210,7 +211,8 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $district->name,
-                $district->code
+                $district->code,
+                $district->origin_file
             ];
         }
 
@@ -233,7 +235,7 @@ class CheckLocationsCommand extends Command
      * @return void
      * @throws \Aura\Intl\Exception
      */
-    private function showResults($results, $resultNoun, $headers = ['Name', 'DoE Code'])
+    private function showResults($results, $resultNoun, $headers = ['Name', 'DoE Code', 'Origin File'])
     {
         $this->io->overwrite(sprintf(
             ' - %s %s found',
@@ -309,7 +311,8 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $record->name,
-                $record->code
+                $record->code,
+                $record->origin_file
             ];
         }
         if ($results) {
@@ -525,7 +528,8 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $record->name,
-                $record->code
+                $record->code,
+                $record->origin_file
             ];
         }
         if ($results) {
