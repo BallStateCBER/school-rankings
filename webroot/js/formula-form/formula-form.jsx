@@ -448,7 +448,11 @@ class FormulaForm extends React.Component {
     }
 
     if (this.state.onlyPublic) {
-      return ['public'];
+      this.state.schoolTypes.forEach(function(schoolType) {
+        if (schoolType.name === 'public') {
+          return schoolType.id;
+        }
+      });
     }
 
     const selectedSchoolTypes = [];
