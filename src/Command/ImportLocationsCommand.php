@@ -44,6 +44,7 @@ use Exception;
  * @property SchoolType[] $allSchoolTypes
  * @property SchoolTypesTable $schoolTypesTable
  * @property StatesTable $statesTable
+ * @property string $filename
  * @property string[] $files
  */
 class ImportLocationsCommand extends Command
@@ -54,6 +55,7 @@ class ImportLocationsCommand extends Command
     private $countiesTable;
     private $districts = [];
     private $districtsTable;
+    private $filename;
     private $files;
     private $gradesTable;
     private $importFile;
@@ -108,6 +110,7 @@ class ImportLocationsCommand extends Command
             return;
         }
         $io->out($file . ' selected');
+        $this->filename = $file;
 
         $year = $this->getYearFromFilename($file);
         if (!$year) {
@@ -334,6 +337,7 @@ class ImportLocationsCommand extends Command
                 'name' => $data['name'],
                 'url' => $data['url'],
                 'phone' => $data['phone'],
+                'origin_file' => $this->filename,
                 'cities' => [
                     '_ids' => [$city->id]
                 ],
@@ -427,6 +431,7 @@ class ImportLocationsCommand extends Command
                 ),
                 'url' => $data['url'],
                 'phone' => $data['phone'],
+                'origin_file' => $this->filename,
                 'cities' => [
                     '_ids' => [$city->id]
                 ],
