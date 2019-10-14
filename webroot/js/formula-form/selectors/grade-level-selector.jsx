@@ -43,7 +43,7 @@ class GradeLevelSelector extends React.Component {
                  checked={this.props.allGradeLevels} />
           <label className="form-check-label"
                  htmlFor="grade-levels-any">
-            Any (Pre-K through 12th grade)
+            Any (preschool through 12th grade)
           </label>
           <br />
           <input className="form-check-input" type="radio"
