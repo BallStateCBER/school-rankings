@@ -22,12 +22,6 @@ class FormulaForm extends React.Component {
     this.jobId = null;
     this.state = {
       allGradeLevels: true,
-      analyticsPoolEventData: {
-        context: null,
-        geographicArea: null,
-        schoolTypes: 'Public',
-        gradeLevels: null,
-      },
       context: null,
       county: null,
       criteria: [],
@@ -76,71 +70,31 @@ class FormulaForm extends React.Component {
   }
 
   handleSelectCounty(selectedOption) {
-    const selectedCounty = selectedOption ? selectedOption : null;
-    const updatedEventData = this.state.analyticsPoolEventData;
-    updatedEventData.geographicArea = selectedCounty ? selectedCounty.label + ' County, IN' : null;
-    this.setState({
-      analyticsPoolEventData: updatedEventData,
-      county: selectedCounty,
-    });
+    this.setState({county: selectedOption ? selectedOption : null});
   }
 
   handleChangeOnlyPublic(onlyPublic) {
-    const updatedEventData = this.state.analyticsPoolEventData;
-    const analytics = new Analytics(this.state);
-    const schoolTypeIds = this.getSelectedSchoolTypes();
-    updatedEventData.schoolTypes = onlyPublic ? 'Public' : analytics.getSelectedSchoolTypesForAnalytics(schoolTypeIds);
-    this.setState({
-      analyticsPoolEventData: updatedEventData,
-      onlyPublic: onlyPublic,
-    });
+    this.setState({onlyPublic: onlyPublic});
   }
 
   handleSelectSchoolTypes(schoolTypes) {
-    const updatedEventData = this.state.analyticsPoolEventData;
-    const analytics = new Analytics(this.state);
-    const schoolTypeIds = this.getSelectedSchoolTypes();
-    updatedEventData.schoolTypes = analytics.getSelectedSchoolTypesForAnalytics(schoolTypeIds);
-    this.setState({
-      analyticsPoolEventData: updatedEventData,
-      schoolTypes: schoolTypes,
-    });
+    this.setState({schoolTypes: schoolTypes});
   }
 
   handleToggleAllSchoolTypes() {
     this.toggleCollection('schoolTypes');
-    const updatedEventData = this.state.analyticsPoolEventData;
-    const analytics = new Analytics(this.state);
-    const schoolTypeIds = this.getSelectedSchoolTypes();
-    updatedEventData.schoolTypes = analytics.getSelectedSchoolTypesForAnalytics(schoolTypeIds);
-    this.setState({analyticsPoolEventData: updatedEventData});
   }
 
   handleChangeAllGradeLevels(allGradeLevels) {
-    const updatedEventData = this.state.analyticsPoolEventData;
-    const analytics = new Analytics(this.state);
-    updatedEventData.gradeLevels = allGradeLevels ? null : analytics.getGradeLevelsForAnalytics();
-    this.setState({
-      allGradeLevels: allGradeLevels,
-      analyticsPoolEventData: updatedEventData,
-    });
+    this.setState({allGradeLevels: allGradeLevels});
   }
 
   handleSelectGradeLevels(gradeLevels) {
-    const updatedEventData = this.state.analyticsPoolEventData;
-    const analytics = new Analytics(this.state);
-    updatedEventData.gradeLevels = analytics.getGradeLevelsForAnalytics();
-    this.setState({
-      analyticsPoolEventData: updatedEventData,
-      gradeLevels: gradeLevels,
-    });
+    this.setState({gradeLevels: gradeLevels});
   }
 
   handleToggleAllGradeLevels() {
     this.toggleCollection('gradeLevels');
-    const updatedEventData = this.state.analyticsPoolEventData;
-    updatedEventData.gradeLevels = this.getGradeLevelsForAnalytics();
-    this.setState({analyticsPoolEventData: updatedEventData});
   }
 
   /**
@@ -192,7 +146,7 @@ class FormulaForm extends React.Component {
   }
 
   processForm() {
-    const analytics = new Analytics(this.state);
+    const analytics = new Analytics(this);
     analytics.sendRankingPoolAnalyticsEvent();
 
     return $.ajax({
@@ -541,20 +495,7 @@ class FormulaForm extends React.Component {
   }
 
   handleChangeContext(event) {
-    const updatedEventData = this.state.analyticsPoolEventData;
-    switch (event.target.value) {
-      case 'school':
-        updatedEventData.context = 'schools';
-        break;
-      case 'district':
-        updatedEventData.context = 'school corporations';
-        break;
-      default:
-        console.error('Unrecognized context: ' + event.target.value);
-        updatedEventData.context = null;
-    }
     this.setState({
-      analyticsPoolEventData: updatedEventData,
       context: event.target.value,
       criteria: [],
     });

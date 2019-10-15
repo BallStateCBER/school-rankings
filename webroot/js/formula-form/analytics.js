@@ -1,6 +1,7 @@
 class Analytics {
-  constructor(state) {
-    this.state = state;
+  constructor(FormulaForm) {
+    this.formulaForm = FormulaForm;
+    this.state = FormulaForm.state;
   }
 
   /**
@@ -11,7 +12,7 @@ class Analytics {
    * @param {Array} gradeLevelRanges
    * @return {string|null}
    */
-  joinGradeLevelRanges(gradeLevelRanges) {
+  joinGradeRanges(gradeLevelRanges) {
     if (!gradeLevelRanges) {
       return null;
     }
@@ -107,7 +108,7 @@ class Analytics {
    * @param {string} gradeLevelName
    * @return {string|null}
    */
-  getRangeForGradeLevel(gradeLevelName) {
+  getRangeForGrade(gradeLevelName) {
     switch (gradeLevelName) {
       case this.getGradePreschool():
       case this.getGradePreK():
@@ -147,7 +148,7 @@ class Analytics {
     }
     const gradeLevelRanges = [];
     gradeLevelNames.forEach((gradeLevelName) => {
-      const gradeRange = this.getRangeForGradeLevel(gradeLevelName);
+      const gradeRange = this.getRangeForGrade(gradeLevelName);
       if (gradeLevelRanges.indexOf(gradeRange) === -1) {
         gradeLevelRanges.push(gradeRange);
       }
@@ -156,37 +157,37 @@ class Analytics {
     return gradeLevelRanges;
   }
 
-  /**
-   * Sends an event to Google Analytics describing the selections made to determine the pool of subjects to be ranked
-   */
-  sendRankingPoolAnalyticsEvent() {
-    const gradeLevels = this.state.analyticsPoolEventData.gradeLevels;
-    const eventData = {
-      hitType: 'event',
-      eventCategory: 'Formula Form',
-      eventAction: 'ranking pool',
-      dimension1: this.state.analyticsPoolEventData.context,
-      dimension2: this.state.analyticsPoolEventData.geographicArea,
-      dimension3: this.state.analyticsPoolEventData.schoolTypes,
-      dimension4: gradeLevels ? gradeLevels : 'Any grade level',
-    };
-    console.log(eventData);
+  getContext() {
+    const context = this.state.context;
+    switch (context) {
+      case 'school':
+        return context;
+      case 'district':
+        return 'school corporations';
+      default:
+        console.error('Unrecognized context: ' + context);
+        return null;
+    }
   }
 
-  /**
-   * Returns an alphabetized string of all selected SchoolType names or NULL if none are selected
-   *
-   * @param {Array} schoolTypeIds
-   * @return {null|String}
-   */
-  getSelectedSchoolTypesForAnalytics(schoolTypeIds) {
-    if (schoolTypeIds.length === 0) {
+  getGeographicArea() {
+    const county = this.state.county;
+    return county ? county.label + ' County, IN' : null;
+  }
+
+  getSchoolTypes() {
+    if (this.state.onlyPublic) {
+      return 'public';
+    }
+
+    const selectedSchoolTypeIds = this.formulaForm.getSelectedSchoolTypes();
+    if (selectedSchoolTypeIds.length === 0) {
       return null;
     }
 
     const schoolTypeNames = [];
     this.state.schoolTypes.forEach((schoolType) => {
-      if (this.includes(schoolTypeIds, schoolType.name)) { // .name is actually the schoolType's ID
+      if (this.includes(selectedSchoolTypeIds, schoolType.name)) { // .name is actually the schoolType's ID
         schoolTypeNames.push(schoolType.label.toLowerCase());
       }
     });
@@ -195,10 +196,35 @@ class Analytics {
     return schoolTypeNames.join(' / ');
   }
 
-  getGradeLevelsForAnalytics() {
-    const gradeLevelNames = this.getSelectedGradeNames();
-    const gradeRanges = this.getRangesForGrades(gradeLevelNames);
-    return this.joinGradeLevelRanges(gradeRanges);
+  getGradeLevels() {
+    const allGradesLabel = 'Any grade level';
+    if (this.state.allGradeLevels) {
+      return allGradesLabel;
+    }
+
+    const gradeNames = this.getSelectedGradeNames();
+    if (gradeNames && gradeNames.length === this.state.gradeLevels.size) {
+      return allGradesLabel;
+    }
+
+    const gradeRanges = this.getRangesForGrades(gradeNames);
+    return this.joinGradeRanges(gradeRanges);
+  }
+
+  /**
+   * Sends an event to Google Analytics describing the selections made to determine the pool of subjects to be ranked
+   */
+  sendRankingPoolAnalyticsEvent() {
+    const eventData = {
+      hitType: 'event',
+      eventCategory: 'Formula Form',
+      eventAction: 'ranking pool',
+      dimension1: this.getContext(),
+      dimension2: this.getGeographicArea(),
+      dimension3: this.getSchoolTypes(),
+      dimension4: this.getGradeLevels(),
+    };
+    console.log(eventData);
   }
 
   /**
@@ -215,6 +241,33 @@ class Analytics {
     });
 
     return selectedGradeRanges.length > 0 ? selectedGradeRanges : null;
+  }
+
+  /**
+   * Returns an array of selected SchoolType IDs
+   *
+   * @return {[]|Array}
+   */
+  getSelectedSchoolTypes() {
+    if (this.state.context !== 'school') {
+      return [];
+    }
+
+    if (this.state.onlyPublic) {
+      this.state.schoolTypes.forEach(function(schoolType) {
+        if (schoolType.name === 'public') {
+          return schoolType.id;
+        }
+      });
+    }
+
+    const selectedSchoolTypes = [];
+    this.state.schoolTypes.forEach(function(schoolType) {
+      if (schoolType.checked) {
+        selectedSchoolTypes.push(schoolType.name); // .name is actually the schoolType's ID
+      }
+    });
+    return selectedSchoolTypes;
   }
 }
 
