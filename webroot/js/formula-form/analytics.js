@@ -176,6 +176,10 @@ class Analytics {
   }
 
   getSchoolTypes() {
+    if (this.state.context !== 'school') {
+      return null;
+    }
+
     if (this.state.onlyPublic) {
       return 'public';
     }
@@ -197,6 +201,10 @@ class Analytics {
   }
 
   getGradeLevels() {
+    if (this.state.context !== 'school') {
+      return null;
+    }
+
     const allGradesLabel = 'Any grade level';
     if (this.state.allGradeLevels) {
       return allGradesLabel;
