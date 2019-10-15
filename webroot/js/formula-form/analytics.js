@@ -242,33 +242,6 @@ class Analytics {
 
     return selectedGradeRanges.length > 0 ? selectedGradeRanges : null;
   }
-
-  /**
-   * Returns an array of selected SchoolType IDs
-   *
-   * @return {[]|Array}
-   */
-  getSelectedSchoolTypes() {
-    if (this.state.context !== 'school') {
-      return [];
-    }
-
-    if (this.state.onlyPublic) {
-      this.state.schoolTypes.forEach(function(schoolType) {
-        if (schoolType.name === 'public') {
-          return schoolType.id;
-        }
-      });
-    }
-
-    const selectedSchoolTypes = [];
-    this.state.schoolTypes.forEach(function(schoolType) {
-      if (schoolType.checked) {
-        selectedSchoolTypes.push(schoolType.name); // .name is actually the schoolType's ID
-      }
-    });
-    return selectedSchoolTypes;
-  }
 }
 
 export {Analytics};
