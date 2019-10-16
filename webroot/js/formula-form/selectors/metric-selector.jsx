@@ -53,7 +53,7 @@ class MetricSelector extends React.Component {
       this.setupClickEvents();
     }).fail((jqXHR) => {
       let errorMsg = 'Error loading metrics';
-      if (jqXHR.hasOwnProperty('responseJSON')) {
+      if (jqXHR && jqXHR.hasOwnProperty('responseJSON')) {
         if (jqXHR.responseJSON.hasOwnProperty('message')) {
           errorMsg = jqXHR.responseJSON.message;
         }

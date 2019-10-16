@@ -231,7 +231,7 @@ class FormulaForm extends React.Component {
 
   static logApiError(jqXHR) {
     let errorMsg = 'Error loading rankings';
-    if (jqXHR.hasOwnProperty('responseJSON')) {
+    if (jqXHR && jqXHR.hasOwnProperty('responseJSON')) {
       if (jqXHR.responseJSON.hasOwnProperty('message')) {
         errorMsg = jqXHR.responseJSON.message;
       }
