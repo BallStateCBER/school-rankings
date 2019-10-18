@@ -37,6 +37,10 @@ class FormulaForm extends React.Component {
       schoolTypes: new Map(),
       uuid: FormulaForm.getUuid(),
     };
+    this.submittedData = {
+      context: null,
+      criteria: []
+    };
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
@@ -149,9 +153,19 @@ class FormulaForm extends React.Component {
     this.processForm();
   }
 
+  /**
+   * Updates this.submittedData, used to pass properties to RankingResults that are independent of state changes
+   */
+  updateSubmittedData() {
+    this.submittedData.context = this.state.context;
+    this.submittedData.criteria = this.state.criteria;
+  }
+
   processForm() {
     const analytics = new Analytics(this);
     analytics.sendRankingPoolAnalyticsEvent();
+
+    this.updateSubmittedData();
 
     return $.ajax({
       method: 'POST',
@@ -611,14 +625,14 @@ class FormulaForm extends React.Component {
         }
         {this.state.results &&
           <RankingResults results={this.state.results}
-                          criteria={this.state.criteria}
-                          context={this.state.context} />
+                          criteria={this.submittedData.criteria}
+                          context={this.submittedData.context} />
         }
         {this.state.results && this.state.noDataResults && this.state.noDataResults.length > 0 &&
           <NoDataResults results={this.state.noDataResults}
-                         context={this.state.context}
+                         context={this.submittedData.context}
                          hasResultsWithData={this.state.results && this.state.results.length > 0}
-                         criteriaCount={this.state.criteria.length} />
+                         criteriaCount={this.submittedData.criteria.length} />
         }
       </div>
     );
