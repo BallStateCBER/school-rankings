@@ -39,7 +39,7 @@ class FormulaForm extends React.Component {
     };
     this.submittedData = {
       context: null,
-      criteria: []
+      criteria: [],
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);

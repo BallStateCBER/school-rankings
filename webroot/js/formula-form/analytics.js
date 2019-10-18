@@ -232,7 +232,7 @@ class Analytics {
     const eventData = {
       category: 'Formula Form',
       action: 'Set ranking pool',
-    }
+    };
     const dimensions = {
       dimension1: this.getContext(),
       dimension2: this.getGeographicArea(),
