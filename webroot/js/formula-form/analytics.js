@@ -1,7 +1,13 @@
+import ReactGA from 'react-ga';
+
 class Analytics {
   constructor(FormulaForm) {
     this.formulaForm = FormulaForm;
     this.state = FormulaForm.state;
+    const trackingId = 'UA-32998887-12';
+    ReactGA.initialize(trackingId, {
+      debug: this.state.debug,
+    });
   }
 
   /**
@@ -224,15 +230,24 @@ class Analytics {
    */
   sendRankingPoolAnalyticsEvent() {
     const eventData = {
-      hitType: 'event',
-      eventCategory: 'Formula Form',
-      eventAction: 'ranking pool',
+      category: 'Formula Form',
+      action: 'Set ranking pool',
+    }
+    const dimensions = {
       dimension1: this.getContext(),
       dimension2: this.getGeographicArea(),
       dimension3: this.getSchoolTypes(),
       dimension4: this.getGradeLevels(),
     };
-    console.log(eventData);
+
+    if (this.state.debug) {
+      console.log(eventData);
+      console.log(dimensions);
+      return;
+    }
+
+    ReactGA.set(dimensions);
+    ReactGA.event(eventData);
   }
 
   /**

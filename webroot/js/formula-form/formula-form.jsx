@@ -25,6 +25,7 @@ class FormulaForm extends React.Component {
       context: null,
       county: null,
       criteria: [],
+      debug: false,
       gradeLevels: new Map(),
       loadingRankings: false,
       noDataResults: null,
@@ -55,6 +56,9 @@ class FormulaForm extends React.Component {
   componentDidMount() {
     this.setSchoolTypes();
     this.setGradeLevels();
+    if (document.getElementById('formula-form').getAttribute('data-debug')) {
+      this.setState({debug: true});
+    }
   }
 
   static getUuid() {
