@@ -16,6 +16,7 @@ class MetricSelector extends React.Component {
     };
     this.setupClickEvents = this.setupClickEvents.bind(this);
     this.clearMetricTree = this.clearMetricTree.bind(this);
+    this.loadMetricTree = this.loadMetricTree.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -56,7 +57,7 @@ class MetricSelector extends React.Component {
       this.setupSearch();
       this.setupClickEvents();
     }).fail((jqXHR) => {
-      let errorMsg = 'Error loading metrics';
+      let errorMsg = 'Error loading metrics. This may be a temporary network error.';
       if (jqXHR && jqXHR.hasOwnProperty('responseJSON')) {
         if (jqXHR.responseJSON.hasOwnProperty('message')) {
           errorMsg = jqXHR.responseJSON.message;
@@ -147,7 +148,12 @@ class MetricSelector extends React.Component {
           </span>
         }
         {this.state.hasError &&
-          <p className="text-danger">{this.state.errorMsg}</p>
+          <p className="text-danger">
+            {this.state.errorMsg}
+            <Button type="button" color="secondary" size="sm" onClick={this.loadMetricTree}>
+              Try again
+            </Button>
+          </p>
         }
         {this.state.successfullyLoaded &&
           <div className="input-group" id="jstree-search-container">
