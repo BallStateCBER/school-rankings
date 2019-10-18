@@ -37,7 +37,7 @@ class FormulaForm extends React.Component {
       uuid: FormulaForm.getUuid(),
     };
     this.handleChange = this.handleChange.bind(this);
-    this.handleChangeAllGradeLevels = this.handleChangeAllGradeLevels.bind(this);
+    this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
@@ -85,7 +85,7 @@ class FormulaForm extends React.Component {
     this.toggleCollection('schoolTypes');
   }
 
-  handleChangeAllGradeLevels(allGradeLevels) {
+  handleChangeAllGradeLevelsOption(allGradeLevels) {
     this.setState({allGradeLevels: allGradeLevels});
   }
 
@@ -552,7 +552,7 @@ class FormulaForm extends React.Component {
                 <GradeLevelSelector gradeLevels={this.state.gradeLevels}
                                     allGradeLevels={this.state.allGradeLevels}
                                     handleSelect={this.handleSelectGradeLevels}
-                                    handleChangeAllGradeLevels={this.handleChangeAllGradeLevels}
+                                    handleChangeAllGradeLevels={this.handleChangeAllGradeLevelsOption}
                                     handleToggleAll={this.handleToggleAllGradeLevels}/>
               </section>
             </div>
