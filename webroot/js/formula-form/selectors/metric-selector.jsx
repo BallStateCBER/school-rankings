@@ -38,7 +38,11 @@ class MetricSelector extends React.Component {
   }
 
   loadMetricTree() {
-    this.setState({loading: true});
+    this.setState({
+      errorMsg: '',
+      hasError: false,
+      loading: true,
+    });
 
     $.ajax({
       method: 'GET',
