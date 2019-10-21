@@ -2,8 +2,9 @@ import ReactGA from 'react-ga';
 
 class Analytics {
   constructor(FormulaForm) {
-    this.formulaForm = FormulaForm;
+    this.getSelectedSchoolTypes = FormulaForm.getSelectedSchoolTypes;
     this.state = FormulaForm.state;
+    this.submittedData = FormulaForm.submittedData;
     const trackingId = 'UA-32998887-12';
     ReactGA.initialize(trackingId, {
       debug: this.state.debug,
@@ -164,7 +165,7 @@ class Analytics {
   }
 
   getContext() {
-    const context = this.state.context;
+    const context = this.submittedData.context;
     switch (context) {
       case 'school':
         return context;
@@ -190,7 +191,7 @@ class Analytics {
       return 'public';
     }
 
-    const selectedSchoolTypeIds = this.formulaForm.getSelectedSchoolTypes();
+    const selectedSchoolTypeIds = this.getSelectedSchoolTypes();
     if (selectedSchoolTypeIds.length === 0) {
       return null;
     }

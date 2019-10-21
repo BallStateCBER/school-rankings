@@ -162,10 +162,10 @@ class FormulaForm extends React.Component {
   }
 
   processForm() {
+    this.updateSubmittedData();
+
     const analytics = new Analytics(this);
     analytics.sendRankingPoolAnalyticsEvent();
-
-    this.updateSubmittedData();
 
     return $.ajax({
       method: 'POST',
