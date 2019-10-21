@@ -158,6 +158,7 @@ class FormulaForm extends React.Component {
    */
   updateSubmittedData() {
     this.submittedData.context = this.state.context;
+    this.submittedData.countyId = this.state.county.value;
     this.submittedData.criteria = this.state.criteria;
   }
 
@@ -172,8 +173,8 @@ class FormulaForm extends React.Component {
       url: '/api/formulas/add/',
       dataType: 'json',
       data: {
-        context: this.state.context,
-        criteria: this.state.criteria,
+        context: this.submittedData.context,
+        criteria: this.submittedData.criteria,
       },
     }).done((data) => {
       if (
@@ -207,7 +208,7 @@ class FormulaForm extends React.Component {
     }
 
     const data = {
-      countyId: this.state.county.value,
+      countyId: this.submittedData.countyId,
       formulaId: this.formulaId,
       schoolTypes: this.getSelectedSchoolTypes(),
       gradeLevels: this.getSelectedGradeIds(),
