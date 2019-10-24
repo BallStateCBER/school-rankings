@@ -7,6 +7,7 @@ class Analytics {
     this.state = FormulaForm.state;
     this.submittedData = FormulaForm.submittedData;
     this.customDimensionMaxSize = 150;
+    this.minTruncatedPartLength = 13; // includes three bytes for ellipses
     const trackingId = 'UA-32998887-12';
     ReactGA.initialize(trackingId, {
       debug: this.state.debug,
@@ -270,59 +271,31 @@ class Analytics {
    * @return {string}
    */
   getSafeMetricName(metric) {
-    const minTruncatedPartLength = 13; // includes three bytes for ellipses
     const postfix = ' (#' + metric.metricId + ')';
-    let metricName = metric.name + postfix;
-    if (this.fits(metricName)) {
-      return metricName;
+    let fullMetricPath = metric.name + postfix;
+    if (this.fits(fullMetricPath)) {
+      return fullMetricPath;
     }
 
     // Trim whitespace from all metric names
-    const parts = metricName.split(' > ');
-    for (let i = 0; i < parts.length; i++) {
-      parts[i] = parts[i].trim();
+    let metricNames = fullMetricPath.split(' > ');
+    for (let i = 0; i < metricNames.length; i++) {
+      metricNames[i] = metricNames[i].trim();
     }
 
     // Loop through all of this metric's ancestors and attempt to truncate them from longest to shortest
-    const ancestorCount = parts.length - 1;
+    const ancestorCount = metricNames.length - 1;
     for (let n = 0; n < ancestorCount; n++) {
-      const totalExcessLength = Cutter.getBinarySize(metricName) - this.customDimensionMaxSize;
-      let longestPartSize = 0;
-      let longestPartIndex = null;
-
-      for (let i = 0; i < ancestorCount; i++) {
-        // Skip over already-truncated metric names
-        const part = parts[i].trim();
-        const partSize = Cutter.getBinarySize(part);
-        if (!part.includes('...')) {
-          if (partSize > longestPartSize) {
-            longestPartSize = partSize;
-            longestPartIndex = i;
-          }
-        }
-      }
-
-      if (longestPartIndex !== null) {
-        const longestPart = parts[longestPartIndex];
-
-        // Don't trim to smaller than the minimum size or more than necessary
-        const trimToSize = Math.max(minTruncatedPartLength, longestPartSize - totalExcessLength);
-        if (longestPartSize > trimToSize) {
-          parts[longestPartIndex] = Cutter.truncateToBinarySize(longestPart, trimToSize);
-
-          // Fix space preceding ellipses
-          parts[longestPartIndex] = parts[longestPartIndex].replace(' ...', '...');
-        }
-      }
-
-      metricName = parts.join(' > ');
-      if (this.fits(metricName)) {
-        return metricName;
+      const totalExcessLength = Cutter.getBinarySize(fullMetricPath) - this.customDimensionMaxSize;
+      metricNames = this.truncateLongestMetricName(metricNames, totalExcessLength);
+      fullMetricPath = metricNames.join(' > ');
+      if (this.fits(fullMetricPath)) {
+        return fullMetricPath;
       }
     }
 
     // If there are no ancestors, truncate the single metric name
-    if (parts.length === 1) {
+    if (metricNames.length === 1) {
       const truncateTo = this.customDimensionMaxSize - Cutter.getBinarySize(postfix);
       const metricNameTruncated = Cutter.truncateToBinarySize(metric.name, truncateTo) + postfix;
       if (this.fits(metricNameTruncated)) {
@@ -331,9 +304,9 @@ class Analytics {
     }
 
     // If there are ancestors (and apparently a lot) then hide all of them
-    if (parts.length > 1) {
+    if (metricNames.length > 1) {
       const hiddenAncestorsString = '... > ';
-      let lastPart = parts[parts.length - 1];
+      let lastPart = metricNames[metricNames.length - 1];
       let allAncestorsHidden = hiddenAncestorsString + lastPart;
       if (this.fits(allAncestorsHidden)) {
         return allAncestorsHidden;
@@ -351,6 +324,34 @@ class Analytics {
 
     // Apparently this method can't get this metric name to fit.
     return '(metric name too long to show)' + postfix;
+  }
+
+  /**
+   * Returns the metricNames array with the longest non-truncated metric name truncated, if possible
+   *
+   * @param {Array} metricNames
+   * @param {Number} totalExcessLength
+   * @return {Array}
+   */
+  truncateLongestMetricName(metricNames, totalExcessLength) {
+    const longestMetric = this.getLongestMetric(metricNames);
+
+    if (longestMetric.index === null) {
+      return metricNames;
+    }
+
+    const longestPart = metricNames[longestMetric.index];
+
+    // Don't trim to smaller than the minimum size or more than necessary
+    const trimToSize = Math.max(this.minTruncatedPartLength, longestMetric.size - totalExcessLength);
+    if (longestMetric.size > trimToSize) {
+      metricNames[longestMetric.index] = Cutter.truncateToBinarySize(longestPart, trimToSize);
+
+      // Fix space preceding ellipses
+      metricNames[longestMetric.index] = metricNames[longestMetric.index].replace(' ...', '...');
+    }
+
+    return metricNames;
   }
 
   /**
@@ -392,6 +393,30 @@ class Analytics {
     });
 
     return selectedGradeRanges.length > 0 ? selectedGradeRanges : null;
+  }
+
+  /**
+   * Returns the size and index for the longest non-truncated ancestor in the provided array of metric names
+   *
+   * @param {Array} metricNames
+   * @return {{size: number, index: null}}
+   */
+  getLongestMetric(metricNames) {
+    const longestMetric = {
+      size: 0,
+      index: null,
+    };
+    for (let i = 0; i < metricNames.length - 1; i++) {
+      const partSize = Cutter.getBinarySize(metricNames[i]);
+      if (!metricNames[i].includes('...')) {
+        if (partSize > longestMetric.size) {
+          longestMetric.size = partSize;
+          longestMetric.index = i;
+        }
+      }
+    }
+
+    return longestMetric;
   }
 }
 
