@@ -3,6 +3,7 @@ import Cutter from 'utf8-binary-cutter';
 
 class Analytics {
   constructor(FormulaForm) {
+    this.debug = FormulaForm.debug;
     this.getSelectedSchoolTypes = FormulaForm.getSelectedSchoolTypes;
     this.state = FormulaForm.state;
     this.submittedData = FormulaForm.submittedData;
@@ -10,7 +11,7 @@ class Analytics {
     this.minTruncatedPartLength = 13; // includes three bytes for ellipses
     const trackingId = 'UA-32998887-12';
     ReactGA.initialize(trackingId, {
-      debug: this.state.debug,
+      debug: this.debug,
     });
   }
 
@@ -244,7 +245,7 @@ class Analytics {
       dimension4: this.getGradeLevels(),
     };
 
-    if (this.state.debug) {
+    if (this.debug) {
       console.log(eventData);
       console.log(dimensions);
       return;
@@ -368,7 +369,7 @@ class Analytics {
         dimension6: criterion.weight,
       };
 
-      if (this.state.debug) {
+      if (this.debug) {
         console.log(eventData);
         console.log(dimensions);
         return;
