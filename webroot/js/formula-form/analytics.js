@@ -373,9 +373,8 @@ class Analytics {
         return;
       }
 
-      console.log('not debugging');
-      // ReactGA.set(dimensions);
-      // ReactGA.event(eventData);
+      ReactGA.set(dimensions);
+      ReactGA.event(eventData);
     });
   }
 
