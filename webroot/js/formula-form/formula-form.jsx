@@ -167,6 +167,7 @@ class FormulaForm extends React.Component {
 
     const analytics = new Analytics(this);
     analytics.sendRankingPoolAnalyticsEvent();
+    analytics.sendRankingCriteriaAnalyticsEvents();
 
     return $.ajax({
       method: 'POST',
@@ -369,6 +370,7 @@ class FormulaForm extends React.Component {
     // Add criterion
     const criterion = {
       metric: metric,
+      weight: 100,
     };
     const criteria = this.state.criteria;
     criteria.push(criterion);

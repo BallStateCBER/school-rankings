@@ -1,10 +1,12 @@
 import ReactGA from 'react-ga';
+import Cutter from 'utf8-binary-cutter';
 
 class Analytics {
   constructor(FormulaForm) {
     this.getSelectedSchoolTypes = FormulaForm.getSelectedSchoolTypes;
     this.state = FormulaForm.state;
     this.submittedData = FormulaForm.submittedData;
+    this.customDimensionMaxSize = 150;
     const trackingId = 'UA-32998887-12';
     ReactGA.initialize(trackingId, {
       debug: this.state.debug,
@@ -249,6 +251,132 @@ class Analytics {
 
     ReactGA.set(dimensions);
     ReactGA.event(eventData);
+  }
+
+  /**
+   * Returns TRUE if the supplied value is <= the max length of a Google Analytics custom dimension value
+   *
+   * @param {string} customDimensionValue
+   * @return {boolean}
+   */
+  fits(customDimensionValue) {
+    return Cutter.getBinarySize(customDimensionValue) <= this.customDimensionMaxSize;
+  }
+
+  /**
+   * Returns the metric name after truncating it as necessary to keep it within Google Analytics's max size requirement
+   *
+   * @param {Object} metric
+   * @return {string}
+   */
+  getSafeMetricName(metric) {
+    const minTruncatedPartLength = 13; // includes three bytes for ellipses
+    const postfix = ' (#' + metric.metricId + ')';
+    let metricName = metric.name + postfix;
+    if (this.fits(metricName)) {
+      return metricName;
+    }
+
+    // Trim whitespace from all metric names
+    const parts = metricName.split(' > ');
+    for (let i = 0; i < parts.length; i++) {
+      parts[i] = parts[i].trim();
+    }
+
+    // Loop through all of this metric's ancestors and attempt to truncate them from longest to shortest
+    const ancestorCount = parts.length - 1;
+    for (let n = 0; n < ancestorCount; n++) {
+      const totalExcessLength = Cutter.getBinarySize(metricName) - this.customDimensionMaxSize;
+      let longestPartSize = 0;
+      let longestPartIndex = null;
+
+      for (let i = 0; i < ancestorCount; i++) {
+        // Skip over already-truncated metric names
+        const part = parts[i].trim();
+        const partSize = Cutter.getBinarySize(part);
+        if (!part.includes('...')) {
+          if (partSize > longestPartSize) {
+            longestPartSize = partSize;
+            longestPartIndex = i;
+          }
+        }
+      }
+
+      if (longestPartIndex !== null) {
+        const longestPart = parts[longestPartIndex];
+
+        // Don't trim to smaller than the minimum size or more than necessary
+        const trimToSize = Math.max(minTruncatedPartLength, longestPartSize - totalExcessLength);
+        if (longestPartSize > trimToSize) {
+          parts[longestPartIndex] = Cutter.truncateToBinarySize(longestPart, trimToSize);
+
+          // Fix space preceding ellipses
+          parts[longestPartIndex] = parts[longestPartIndex].replace(' ...', '...');
+        }
+      }
+
+      metricName = parts.join(' > ');
+      if (this.fits(metricName)) {
+        return metricName;
+      }
+    }
+
+    // If there are no ancestors, truncate the single metric name
+    if (parts.length === 1) {
+      const truncateTo = this.customDimensionMaxSize - Cutter.getBinarySize(postfix);
+      const metricNameTruncated = Cutter.truncateToBinarySize(metric.name, truncateTo) + postfix;
+      if (this.fits(metricNameTruncated)) {
+        return metricNameTruncated;
+      }
+    }
+
+    // If there are ancestors (and apparently a lot) then hide all of them
+    if (parts.length > 1) {
+      const hiddenAncestorsString = '... > ';
+      let lastPart = parts[parts.length - 1];
+      let allAncestorsHidden = hiddenAncestorsString + lastPart;
+      if (this.fits(allAncestorsHidden)) {
+        return allAncestorsHidden;
+      }
+
+      // (hiddenAncestorsString + metric name + postfix) exceeds limit, so try to truncate metric name
+      lastPart = lastPart.replace(postfix, '');
+      const truncateTo = this.customDimensionMaxSize - Cutter.getBinarySize(hiddenAncestorsString + postfix);
+      allAncestorsHidden = hiddenAncestorsString + Cutter.truncateToBinarySize(lastPart, truncateTo);
+      allAncestorsHidden += postfix;
+      if (this.fits(allAncestorsHidden)) {
+        return allAncestorsHidden;
+      }
+    }
+
+    // Apparently this method can't get this metric name to fit.
+    return '(metric name too long to show)' + postfix;
+  }
+
+  /**
+   * Sends an event to Google Analytics for each ranking criteria that was selected
+   */
+  sendRankingCriteriaAnalyticsEvents() {
+    const eventData = {
+      category: 'Formula Form',
+      action: 'Set ranking criteria',
+    };
+    this.submittedData.criteria.forEach((criterion) => {
+      const dimensions = {
+        dimension5: this.getSafeMetricName(criterion.metric),
+        dimension6: criterion.weight,
+      };
+
+      if (this.state.debug) {
+        console.log(eventData);
+        console.log(dimensions);
+        return;
+      }
+
+      console.log('not debugging');
+      // ReactGA.set(dimensions);
+      // ReactGA.event(eventData);
+    });
   }
 
   /**
