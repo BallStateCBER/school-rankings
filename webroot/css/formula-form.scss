@@ -11,6 +11,9 @@
   .jstree-leaf[data-selectable="0"] {
     display: none;
   }
+  .alert {
+    margin: 1em 0;
+  }
 }
 li[data-selectable="0"] {
   > a {

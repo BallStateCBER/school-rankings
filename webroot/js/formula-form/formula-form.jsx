@@ -17,6 +17,7 @@ import {SchoolTypeSelector} from './selectors/school-type-selector.jsx';
 class FormulaForm extends React.Component {
   constructor(props) {
     super(props);
+    this.adminEmail = 'admin@indianaschoolrankings.com';
     this.formulaId = null;
     this.rankingId = null;
     this.jobId = null;
@@ -33,6 +34,7 @@ class FormulaForm extends React.Component {
       progressPercent: null,
       progressStatus: null,
       results: null,
+      resultsError: false,
       schoolTypes: new Map(),
       uuid: FormulaForm.getUuid(),
     };
@@ -148,6 +150,7 @@ class FormulaForm extends React.Component {
       progressPercent: 0,
       progressStatus: null,
       results: null,
+      resultsError: false,
     });
 
     this.processForm();
@@ -198,6 +201,10 @@ class FormulaForm extends React.Component {
       this.startRankingJob();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
+      this.setState({
+        loadingRankings: false,
+        resultsError: true,
+      });
     });
   }
 
@@ -237,6 +244,10 @@ class FormulaForm extends React.Component {
       this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
+      this.setState({
+        loadingRankings: false,
+        resultsError: true,
+      });
     });
   }
 
@@ -406,7 +417,10 @@ class FormulaForm extends React.Component {
       ) {
         console.log('Error checking job status');
         console.log(data);
-        this.setState({loadingRankings: false});
+        this.setState({
+          loadingRankings: false,
+          resultsError: true,
+        });
         return;
       }
 
@@ -432,6 +446,10 @@ class FormulaForm extends React.Component {
       this.loadResults();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
+      this.setState({
+        loadingRankings: false,
+        resultsError: true,
+      });
     });
   }
 
@@ -453,6 +471,7 @@ class FormulaForm extends React.Component {
       });
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
+      this.setState({resultsError: true});
     }).always(() => {
       this.setState({loadingRankings: false});
     });
@@ -620,6 +639,14 @@ class FormulaForm extends React.Component {
           {this.state.loadingRankings &&
             <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
                  className="loading"/>
+          }
+          {this.state.resultsError &&
+            <p className="alert alert-danger">
+              There was an error loading your results. This might be a temporary network error. Please try again, or
+              contact an administrator at {' '}
+              <a href={'mailto:' + this.adminEmail + '?subject=Error loading ranking results'}>{this.adminEmail}</a>
+              {' '} for assistance.
+            </p>
           }
         </form>
         {this.state.loadingRankings &&
