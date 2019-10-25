@@ -168,10 +168,6 @@ class FormulaForm extends React.Component {
   processForm() {
     this.updateSubmittedData();
 
-    const analytics = new Analytics(this);
-    analytics.sendRankingPoolAnalyticsEvent();
-    analytics.sendRankingCriteriaAnalyticsEvents();
-
     return $.ajax({
       method: 'POST',
       url: '/api/formulas/add/',
@@ -469,12 +465,19 @@ class FormulaForm extends React.Component {
         results: data.results,
         noDataResults: data.noDataResults,
       });
+      this.submitAnalyticsEvents();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
       this.setState({resultsError: true});
     }).always(() => {
       this.setState({loadingRankings: false});
     });
+  }
+
+  submitAnalyticsEvents() {
+    const analytics = new Analytics(this);
+    analytics.sendRankingPoolAnalyticsEvent();
+    analytics.sendRankingCriteriaAnalyticsEvents();
   }
 
   handleRemoveCriterion(metricId) {
