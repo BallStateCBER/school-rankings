@@ -198,6 +198,7 @@ class RankingsController extends AppController
             ->enableHydration(false)
             ->first();
 
+        $ranking = $this->rankStatistics($ranking);
         $ranking = $this->formatPercentageValues($ranking);
 
         // Separate out and sort no-data results
@@ -280,6 +281,58 @@ class RankingsController extends AppController
                     }
                     $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
                 }
+            }
+        }
+
+        return $ranking;
+    }
+
+    /**
+     * Loop through all statistics in these results and mark those statistics that have the highest values in this set
+     *
+     * @param array $ranking Ranking results
+     * @return array
+     */
+    private function rankStatistics(array $ranking)
+    {
+        // Collect all statistic values
+        $statisticValues = [];
+        $resultsKey = $ranking['results_districts'] ? 'results_districts' : 'results_schools';
+        foreach ($ranking[$resultsKey] as &$subject) {
+            foreach ($subject['statistics'] as &$statistic) {
+                $metricId = $statistic['metric_id'];
+                $value = $statistic['value'];
+                $statisticValues[$metricId][] = $value;
+            }
+        }
+
+        // Order each set of statistics by value
+        foreach ($statisticValues as $metricId => &$values) {
+            rsort($values);
+        }
+
+        // To discover ties, keep track of which metrics have their 1st, 2nd, and 3rd highest stat values marked
+        $statRanks = [];
+
+        // Flag each statistic if it's (tied for) the 1st, 2nd, or 3rd highest value
+        foreach ($ranking[$resultsKey] as &$subject) {
+            foreach ($subject['statistics'] as &$statistic) {
+                $metricId = $statistic['metric_id'];
+                $value = $statistic['value'];
+                $statistic['rank'] = null;
+                $statistic['rankTied'] = false;
+                for ($n = 1; $n <= 3; $n++) {
+                    if ($value == $statisticValues[$metricId][$n - 1]) {
+                        $statistic['rank'] = $n;
+                        if (isset($statRanks[$metricId][$n])) {
+                            $statistic['rankTied'] = true;
+                        } else {
+                            $statRanks[$metricId][$n] = true;
+                        }
+                        break;
+                    }
+                }
+
             }
         }
 

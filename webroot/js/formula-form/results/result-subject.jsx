@@ -36,8 +36,7 @@ class ResultSubject extends React.Component {
       const criterion = this.props.criteria[i];
       const metricId = criterion.metric.metricId;
       const metricName = criterion.metric.name;
-      const statisticValue = ResultSubject.getStatValue(statistics, metricId);
-      const statisticYear = ResultSubject.getStatYear(statistics, metricId);
+      const statistic = ResultSubject.getStatistic(statistics, metricId);
       const key = this.props.subjectData.id + '-stat-' + i;
 
       rows.push(
@@ -47,15 +46,15 @@ class ResultSubject extends React.Component {
               {metricName}
             </span>
           </th>
-          {statisticValue !== false &&
+          {statistic !== false &&
             <td>
-              {statisticValue}
+              {statistic.value}
               <span className="year">
-                {statisticYear}
+                {statistic.year}
               </span>
             </td>
           }
-          {statisticValue === false &&
+          {statistic === false &&
             <td className="missing-data">
               Unknown
             </td>
@@ -73,20 +72,55 @@ class ResultSubject extends React.Component {
     );
   }
 
-  static getStatValue(statistics, metricId) {
-    for (let i = 0; i < statistics.length; i++) {
-      if (statistics[i].metric_id === metricId) {
-        return statistics[i].value;
-      }
+  getRankedStats(statistics) {
+    if (this.props.dataCompleteness === 'empty') {
+      return null;
     }
 
-    return false;
+    const rows = [];
+
+    for (let i = 0; i < this.props.criteria.length; i++) {
+      const criterion = this.props.criteria[i];
+      const metricId = criterion.metric.metricId;
+      const metricName = criterion.metric.name;
+      const statistic = ResultSubject.getStatistic(statistics, metricId);
+      if (!statistic.rank) {
+        continue;
+      }
+      const key = this.props.subjectData.id + '-stat-rank-' + i;
+      let displayedRank = null;
+      switch (statistic.rank) {
+        case 1:
+          displayedRank = 'Highest';
+          break;
+        case 2:
+          displayedRank = '2nd highest';
+          break;
+        case 3:
+          displayedRank = '3rd highest';
+          break;
+        default:
+          continue;
+      }
+
+      rows.push(
+        <li key={key} style={{fontWeight: 'bold'}} className={'stat-ranked stat-ranked-' + statistic.rank}>
+          {displayedRank + ' score for ' + metricName}
+        </li>
+      );
+    }
+
+    return (
+      <ul>
+        {rows}
+      </ul>
+    );
   }
 
-  static getStatYear(statistics, metricId) {
+  static getStatistic(statistics, metricId) {
     for (let i = 0; i < statistics.length; i++) {
       if (statistics[i].metric_id === metricId) {
-        return statistics[i].year;
+        return statistics[i];
       }
     }
 
@@ -179,6 +213,7 @@ class ResultSubject extends React.Component {
             <h4 className="d-lg-none">
               Statistics
             </h4>
+            {this.getRankedStats(this.props.statistics)}
             {this.getDataCompletenessWarning()}
             {this.getStatValues(this.props.statistics)}
           </div>
