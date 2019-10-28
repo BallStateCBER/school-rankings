@@ -4,9 +4,9 @@ import '../../css/metric-manager.scss';
 import ReactDom from 'react-dom';
 import {Button} from 'reactstrap';
 import {MetricModal} from './metric-modal.jsx';
-import fontawesome from '@fortawesome/fontawesome';
-require('@fortawesome/fontawesome-free-solid');
-require('@fortawesome/fontawesome-free-regular');
+import {library, dom, config} from '@fortawesome/fontawesome-svg-core';
+import {fas} from '@fortawesome/free-solid-svg-icons';
+import {far} from '@fortawesome/free-regular-svg-icons';
 import {Legend} from './legend.jsx';
 import {Formatter} from './formatter.js';
 import {MetricSorter} from '../sort/metric-sorter.js';
@@ -16,7 +16,10 @@ window.jsTreeData = {
   editMetric: {},
 };
 
-fontawesome.config.searchPseudoElements = true;
+// FontAwesome
+library.add(fas, far);
+config.searchPseudoElements = true;
+dom.watch();
 
 class MetricManager extends React.Component {
   constructor(props) {
