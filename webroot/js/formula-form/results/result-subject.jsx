@@ -17,6 +17,12 @@ class ResultSubject extends React.Component {
     this.toggleShowStatistics = this.toggleShowStatistics.bind(this);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.showStatistics !== this.props.showStatistics) {
+      this.setState({showStatistics: this.props.showStatistics});
+    }
+  }
+
   getDataCompletenessWarning() {
     const dataCompleteness = this.props.dataCompleteness;
     if (dataCompleteness !== 'partial') {

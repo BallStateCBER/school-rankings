@@ -1,10 +1,15 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
+import {Button} from 'reactstrap';
 import {ResultSubject} from './result-subject.jsx';
 
 class RankingResults extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      showAllStatistics: false,
+    };
+    this.toggleShowAllStatistics = this.toggleShowAllStatistics.bind(this);
   }
 
   getResultCell(subject) {
@@ -27,7 +32,11 @@ class RankingResults extends React.Component {
                           statistics={subject.statistics}
                           criteria={this.props.criteria}
                           context={context}
-                          showStatistics={false} />;
+                          showStatistics={this.state.showAllStatistics} />;
+  }
+
+  toggleShowAllStatistics() {
+    this.setState({showAllStatistics: !this.state.showAllStatistics});
   }
 
   render() {
@@ -93,6 +102,9 @@ class RankingResults extends React.Component {
                   </div>
                   <div className="col-lg-6 d-none d-lg-block">
                     Statistics
+                    <Button color="link" size="sm" onClick={this.toggleShowAllStatistics}>
+                      {this.state.showAllStatistics ? 'Hide' : 'Show'} All
+                    </Button>
                   </div>
                 </div>
               </th>
