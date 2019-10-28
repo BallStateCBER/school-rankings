@@ -332,7 +332,6 @@ class RankingsController extends AppController
                         break;
                     }
                 }
-
             }
         }
 
