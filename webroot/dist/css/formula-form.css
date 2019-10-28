@@ -38,6 +38,13 @@
   margin-left: 20px; }.school-info {
   margin-bottom: 30px; }.text-danger button {
   margin-left: 1em;
-  vertical-align: baseline; }
+  vertical-align: baseline; }ul.stats-ranked {
+  padding-left: 0; }li.stat-ranked {
+  list-style-type: none; }li.stat-ranked i, li.stat-ranked svg {
+    margin-right: 0.5em; }.stat-ranked-1 {
+  font-weight: bold; }.stat-ranked-1 i, .stat-ranked-1 svg {
+    color: #C9B037; }.stat-ranked-2 i, .stat-ranked-2 svg {
+  color: #B4B4B4; }.stat-ranked-3 i, .stat-ranked-3 svg {
+  color: #AD8A56; }
 
 /*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJjc3MvZm9ybXVsYS1mb3JtLmNzcyIsInNvdXJjZVJvb3QiOiIifQ==*/

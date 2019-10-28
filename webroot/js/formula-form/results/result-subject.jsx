@@ -1,5 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {library, dom} from '@fortawesome/fontawesome-svg-core';
+import {fas} from '@fortawesome/free-solid-svg-icons';
+
+// FontAwesome
+library.add(fas);
+dom.watch();
 
 class ResultSubject extends React.Component {
   constructor(props) {
@@ -91,27 +97,28 @@ class ResultSubject extends React.Component {
       let displayedRank = null;
       switch (statistic.rank) {
         case 1:
-          displayedRank = 'Highest';
+          displayedRank = <span>Highest score for {metricName}</span>;
           break;
         case 2:
-          displayedRank = '2nd highest';
+          displayedRank = <span>2<sup>nd</sup> highest score for {metricName}</span>;
           break;
         case 3:
-          displayedRank = '3rd highest';
+          displayedRank = <span>3<sup>rd</sup> highest score for {metricName}</span>;
           break;
         default:
           continue;
       }
 
       rows.push(
-        <li key={key} style={{fontWeight: 'bold'}} className={'stat-ranked stat-ranked-' + statistic.rank}>
-          {displayedRank + ' score for ' + metricName}
+        <li key={key} className={'stat-ranked stat-ranked-' + statistic.rank}>
+          <i className="fas fa-trophy"></i>
+          {displayedRank}
         </li>
       );
     }
 
     return (
-      <ul>
+      <ul className="stats-ranked">
         {rows}
       </ul>
     );

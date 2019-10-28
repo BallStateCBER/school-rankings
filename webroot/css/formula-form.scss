@@ -100,3 +100,29 @@ table.ranking-results {
         vertical-align: baseline;
     }
 }
+ul.stats-ranked {
+  padding-left: 0;
+}
+li.stat-ranked {
+  list-style-type: none;
+  i, svg {
+    margin-right: 0.5em;
+  }
+}
+.stat-ranked-1 {
+  font-weight: bold;
+
+  i, svg {
+    color: #C9B037;
+  }
+}
+.stat-ranked-2 {
+  i, svg {
+    color: #B4B4B4;
+  }
+}
+.stat-ranked-3 {
+  i, svg {
+    color: #AD8A56;
+  }
+}
