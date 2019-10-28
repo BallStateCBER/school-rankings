@@ -26,7 +26,8 @@ class RankingResults extends React.Component {
                           dataCompleteness={subject.data_completeness}
                           statistics={subject.statistics}
                           criteria={this.props.criteria}
-                          context={context} />;
+                          context={context}
+                          showStatistics={false} />;
   }
 
   render() {

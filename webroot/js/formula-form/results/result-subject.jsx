@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {library, dom} from '@fortawesome/fontawesome-svg-core';
 import {fas} from '@fortawesome/free-solid-svg-icons';
+import {Button} from 'reactstrap';
 
 // FontAwesome
 library.add(fas);
@@ -10,6 +11,10 @@ dom.watch();
 class ResultSubject extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      showStatistics: props.showStatistics,
+    };
+    this.toggleShowStatistics = this.toggleShowStatistics.bind(this);
   }
 
   getDataCompletenessWarning() {
@@ -70,7 +75,7 @@ class ResultSubject extends React.Component {
     }
 
     return (
-      <table>
+      <table className="statistics">
         <tbody>
           {rows}
         </tbody>
@@ -115,6 +120,10 @@ class ResultSubject extends React.Component {
           {displayedRank}
         </li>
       );
+    }
+
+    if (rows.length === 0) {
+      return null;
     }
 
     return (
@@ -183,6 +192,10 @@ class ResultSubject extends React.Component {
     return ' teaching ' + retval.join(delimiter);
   }
 
+  toggleShowStatistics() {
+    this.setState({showStatistics: !this.state.showStatistics});
+  }
+
   render() {
     return (
       <td key={this.props.subjectData.id}>
@@ -221,8 +234,11 @@ class ResultSubject extends React.Component {
               Statistics
             </h4>
             {this.getRankedStats(this.props.statistics)}
-            {this.getDataCompletenessWarning()}
-            {this.getStatValues(this.props.statistics)}
+            <Button color="secondary" size="sm" onClick={this.toggleShowStatistics}>
+              {this.state.showStatistics ? 'Hide' : 'Show'} Statistics
+            </Button>
+            {this.state.showStatistics && this.getDataCompletenessWarning()}
+            {this.state.showStatistics && this.getStatValues(this.props.statistics)}
           </div>
         </div>
       </td>
@@ -234,6 +250,7 @@ ResultSubject.propTypes = {
   context: PropTypes.string.isRequired,
   criteria: PropTypes.array.isRequired,
   dataCompleteness: PropTypes.string.isRequired,
+  showStatistics: PropTypes.bool.isRequired,
   statistics: PropTypes.array.isRequired,
   subjectData: PropTypes.object.isRequired,
 };

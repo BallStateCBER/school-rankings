@@ -39,7 +39,8 @@ class NoDataResults extends React.Component {
                          dataCompleteness={subject.data_completeness}
                          statistics={[]}
                          criteria={[]}
-                         context={this.props.context} />
+                         context={this.props.context}
+                         showStatistics={false} />
         </tr>
       );
     }
