@@ -8,13 +8,9 @@ class ProgressBar extends React.Component {
 
   render() {
     const percent = this.props.percent ? Math.round(this.props.percent) : 0;
-    const status = this.props.status ? this.props.status : 'Starting';
 
     return (
       <div className="progress-bar-container">
-        <p className="status">
-          {status}
-        </p>
         <div className="progress">
           <div className=
                    "progress-bar progress-bar-striped progress-bar-animated"
@@ -31,7 +27,6 @@ class ProgressBar extends React.Component {
 
 ProgressBar.propTypes = {
   percent: PropTypes.number,
-  status: PropTypes.string,
 };
 
 export {ProgressBar};

@@ -2,7 +2,7 @@
 
 #formula-form {
   .loading {
-    margin-left: 10px;
+    margin: 0 0.5em;
   }
   section {
     margin-bottom: 30px;
@@ -12,6 +12,9 @@
     display: none;
   }
   .alert {
+    margin: 1em 0;
+  }
+  .progress-bar-container {
     margin: 1em 0;
   }
 }

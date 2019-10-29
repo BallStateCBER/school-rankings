@@ -640,8 +640,11 @@ class FormulaForm extends React.Component {
             Submit
           </Button>
           {this.state.loadingRankings &&
-            <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
-                 className="loading"/>
+            <span>
+              <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
+                   className="loading"/>
+              {this.state.progressStatus}
+            </span>
           }
           {this.state.resultsError &&
             <p className="alert alert-danger">
@@ -653,8 +656,7 @@ class FormulaForm extends React.Component {
           }
         </form>
         {this.state.loadingRankings &&
-          <ProgressBar percent={this.state.progressPercent}
-                       status={this.state.progressStatus} />
+          <ProgressBar percent={this.state.progressPercent} />
         }
         {this.state.results &&
           <RankingResults results={this.state.results}
