@@ -202,6 +202,14 @@ class ResultSubject extends React.Component {
     this.setState({showStatistics: !this.state.showStatistics});
   }
 
+  getDisplayedSchoolType() {
+    if (this.props.subjectData.school_type.hasOwnProperty('name')) {
+      return this.capitalize(this.props.subjectData.school_type.name) + ' school';
+    }
+
+    return 'School';
+  }
+
   render() {
     return (
       <td key={this.props.subjectData.id}>
@@ -212,7 +220,7 @@ class ResultSubject extends React.Component {
             </h3>
             {this.props.context === 'school' &&
               <p>
-                {this.capitalize(this.props.subjectData.school_type.name)} school
+                {this.getDisplayedSchoolType()}
                 {this.getDisplayedGradeLevels()}
               </p>
             }
