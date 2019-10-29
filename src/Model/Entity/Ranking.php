@@ -3,6 +3,7 @@ namespace App\Model\Entity;
 
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
 
 /**
  * Ranking Entity
@@ -76,5 +77,85 @@ class Ranking extends Entity
         }
 
         return [];
+    }
+
+    /**
+     * Ensures that all statistics for percentage-style metrics are formatted correctly
+     *
+     * This makes up for the fact that Indiana Department of Education data formats some percentage stats as
+     * floats (e.g. 0.41) and some as strings (e.g. "41%")
+     *
+     * @return void
+     */
+    public function formatPercentageValues()
+    {
+        $metricIsPercent = [];
+        $resultsFields = ['results_districts', 'results_schools'];
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        foreach ($resultsFields as $results) {
+            foreach ($this->$results as &$subject) {
+                foreach ($subject['statistics'] as &$statistic) {
+                    $metricId = $statistic['metric_id'];
+                    if (!isset($metricIsPercent[$metricId])) {
+                        $metricIsPercent[$metricId] = $metricsTable->isPercentMetric($metricId);
+                    }
+                    if (!$metricIsPercent[$metricId]) {
+                        continue;
+                    }
+                    if (Statistic::isPercentValue($statistic['value'])) {
+                        continue;
+                    }
+                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
+                }
+            }
+        }
+    }
+
+    /**
+     * Loop through all statistics in these results and mark those statistics that have the highest values in this set
+     *
+     * @return void
+     */
+    public function rankStatistics()
+    {
+        // Collect all statistic values
+        $statisticValues = [];
+        $resultsKey = $this->results_districts ? 'results_districts' : 'results_schools';
+        foreach ($this->$resultsKey as &$subject) {
+            foreach ($subject['statistics'] as &$statistic) {
+                $metricId = $statistic['metric_id'];
+                $value = $statistic['value'];
+                $statisticValues[$metricId][] = $value;
+            }
+        }
+
+        // Order each set of statistics by value
+        foreach ($statisticValues as $metricId => &$values) {
+            rsort($values);
+        }
+
+        // To discover ties, keep track of which metrics have their 1st, 2nd, and 3rd highest stat values marked
+        $statRanks = [];
+
+        // Flag each statistic if it's (tied for) the 1st, 2nd, or 3rd highest value
+        foreach ($this->$resultsKey as &$subject) {
+            foreach ($subject['statistics'] as &$statistic) {
+                $metricId = $statistic['metric_id'];
+                $value = $statistic['value'];
+                $statistic['rank'] = null;
+                $statistic['rankTied'] = false;
+                for ($n = 1; $n <= 3; $n++) {
+                    if ($value == $statisticValues[$metricId][$n - 1]) {
+                        $statistic['rank'] = $n;
+                        if (isset($statRanks[$metricId][$n])) {
+                            $statistic['rankTied'] = true;
+                        } else {
+                            $statRanks[$metricId][$n] = true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

@@ -3,7 +3,6 @@ namespace App\Controller\Api;
 
 use App\Controller\AppController;
 use App\Model\Entity\Ranking;
-use App\Model\Entity\Statistic;
 use App\Model\Table\CountiesTable;
 use App\Model\Table\FormulasTable;
 use App\Model\Table\GradesTable;
@@ -195,11 +194,10 @@ class RankingsController extends AppController
                 'ResultsSchools' => $containQueries['resultsSchools'],
                 'ResultsDistricts' => $containQueries['resultsDistricts']
             ])
-            ->enableHydration(false)
             ->first();
 
-        $ranking = $this->rankStatistics($ranking);
-        $ranking = $this->formatPercentageValues($ranking);
+        $ranking->rankStatistics();
+        $ranking->formatPercentageValues();
 
         // Separate out and sort no-data results
         $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
@@ -251,91 +249,6 @@ class RankingsController extends AppController
             'results' => $indexedResults,
             'noDataResults' => $resultsWithoutData
         ]);
-    }
-
-    /**
-     * Ensures that all statistics for percentage-style metrics are formatted correctly
-     *
-     * This makes up for the fact that Indiana Department of Education data formats some percentage stats as
-     * floats (e.g. 0.41) and some as strings (e.g. "41%")
-     *
-     * @param array $ranking Ranking results
-     * @return array
-     */
-    private function formatPercentageValues($ranking)
-    {
-        $metricIsPercent = [];
-        $resultsFields = ['results_districts', 'results_schools'];
-        foreach ($resultsFields as $results) {
-            foreach ($ranking[$results] as &$subject) {
-                foreach ($subject['statistics'] as &$statistic) {
-                    $metricId = $statistic['metric_id'];
-                    if (!isset($metricIsPercent[$metricId])) {
-                        $metricIsPercent[$metricId] = $this->metricsTable->isPercentMetric($metricId);
-                    }
-                    if (!$metricIsPercent[$metricId]) {
-                        continue;
-                    }
-                    if (Statistic::isPercentValue($statistic['value'])) {
-                        continue;
-                    }
-                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
-                }
-            }
-        }
-
-        return $ranking;
-    }
-
-    /**
-     * Loop through all statistics in these results and mark those statistics that have the highest values in this set
-     *
-     * @param array $ranking Ranking results
-     * @return array
-     */
-    private function rankStatistics(array $ranking)
-    {
-        // Collect all statistic values
-        $statisticValues = [];
-        $resultsKey = $ranking['results_districts'] ? 'results_districts' : 'results_schools';
-        foreach ($ranking[$resultsKey] as &$subject) {
-            foreach ($subject['statistics'] as &$statistic) {
-                $metricId = $statistic['metric_id'];
-                $value = $statistic['value'];
-                $statisticValues[$metricId][] = $value;
-            }
-        }
-
-        // Order each set of statistics by value
-        foreach ($statisticValues as $metricId => &$values) {
-            rsort($values);
-        }
-
-        // To discover ties, keep track of which metrics have their 1st, 2nd, and 3rd highest stat values marked
-        $statRanks = [];
-
-        // Flag each statistic if it's (tied for) the 1st, 2nd, or 3rd highest value
-        foreach ($ranking[$resultsKey] as &$subject) {
-            foreach ($subject['statistics'] as &$statistic) {
-                $metricId = $statistic['metric_id'];
-                $value = $statistic['value'];
-                $statistic['rank'] = null;
-                $statistic['rankTied'] = false;
-                for ($n = 1; $n <= 3; $n++) {
-                    if ($value == $statisticValues[$metricId][$n - 1]) {
-                        $statistic['rank'] = $n;
-                        if (isset($statRanks[$metricId][$n])) {
-                            $statistic['rankTied'] = true;
-                        } else {
-                            $statRanks[$metricId][$n] = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $ranking;
     }
 
     /**
