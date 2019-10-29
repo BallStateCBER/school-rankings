@@ -87,7 +87,7 @@ class Ranking extends Entity
      *
      * @return void
      */
-    public function formatPercentageValues()
+    public function formatNumericValues()
     {
         $metricIsPercent = [];
         $resultsFields = ['results_districts', 'results_schools'];
@@ -95,17 +95,22 @@ class Ranking extends Entity
         foreach ($resultsFields as $results) {
             foreach ($this->$results as &$subject) {
                 foreach ($subject['statistics'] as &$statistic) {
+                    // Should this statistic be formatted as a percentage?
                     $metricId = $statistic['metric_id'];
                     if (!isset($metricIsPercent[$metricId])) {
                         $metricIsPercent[$metricId] = $metricsTable->isPercentMetric($metricId);
                     }
-                    if (!$metricIsPercent[$metricId]) {
+
+                    // Percent values
+                    if ($metricIsPercent[$metricId]) {
+                        if (!Statistic::isPercentValue($statistic['value'])) {
+                            $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
+                        }
                         continue;
                     }
-                    if (Statistic::isPercentValue($statistic['value'])) {
-                        continue;
-                    }
-                    $statistic['value'] = Statistic::convertValueToPercent($statistic['value']);
+
+                    // Non-percent values
+                    $statistic['value'] = number_format($statistic['value']);
                 }
             }
         }

@@ -197,7 +197,7 @@ class RankingsController extends AppController
             ->first();
 
         $ranking->rankStatistics();
-        $ranking->formatPercentageValues();
+        $ranking->formatNumericValues();
 
         // Separate out and sort no-data results
         $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
