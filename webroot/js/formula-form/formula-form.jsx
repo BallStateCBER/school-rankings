@@ -178,9 +178,11 @@ class FormulaForm extends React.Component {
       },
     }).done((data) => {
       if (
-        !data.hasOwnProperty('success') ||
-        !data.hasOwnProperty('id') ||
-        !data.success
+        data && (
+          !data.hasOwnProperty('success') ||
+          !data.hasOwnProperty('id') ||
+          !data.success
+        )
       ) {
         console.log('Error creating formula record');
         console.log(data);
@@ -248,7 +250,8 @@ class FormulaForm extends React.Component {
   }
 
   static hasErrorCreatingJob(data) {
-    return !data.hasOwnProperty('success') ||
+    return !data ||
+      !data.hasOwnProperty('success') ||
       !data.hasOwnProperty('rankingId') ||
       !data.hasOwnProperty('jobId') ||
       !data.success ||
@@ -408,8 +411,10 @@ class FormulaForm extends React.Component {
       },
     }).done((data) => {
       if (
-        !data.hasOwnProperty('progress') ||
-        !data.hasOwnProperty('status')
+        data && (
+          !data.hasOwnProperty('progress') ||
+          !data.hasOwnProperty('status')
+        )
       ) {
         console.log('Error checking job status');
         console.log(data);
@@ -455,7 +460,7 @@ class FormulaForm extends React.Component {
       url: '/api/rankings/get/' + this.rankingId + '.json',
       dataType: 'json',
     }).done((data) => {
-      if (!data.hasOwnProperty('results')) {
+      if (data && !data.hasOwnProperty('results')) {
         console.log('Error retrieving ranking results');
         console.log(data);
         return;
