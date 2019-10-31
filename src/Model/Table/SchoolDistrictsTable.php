@@ -2,7 +2,6 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\SchoolDistrict;
-use Cake\Console\ConsoleIo;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
@@ -142,42 +141,6 @@ class SchoolDistrictsTable extends Table
             ->matching('SchoolDistrictCodes', function (Query $q) use ($options) {
                 return $q->where(['SchoolDistrictCodes.code' => $options['code']]);
             });
-    }
-
-    /**
-     * Finds a school district with a matching code or creates a new record and returns a record ID
-     *
-     * @param string $code School district code
-     * @param string $name School name
-     * @param ConsoleIo|null $io Console IO object
-     * @return int
-     */
-    public function getOrCreate($code, $name, $io = null)
-    {
-        /** @var SchoolDistrict $record */
-        $record = $this
-            ->find('byCode', ['code' => $code])
-            ->select(['id', 'name'])
-            ->first();
-
-        if ($record) {
-            if ($io) {
-                $msg = " - Identified district #$code: $record->name";
-                $io->out($msg);
-            }
-
-            return $record->id;
-        }
-
-        $record = $this->newEntity(compact('code', 'name'));
-        $this->saveOrFail($record);
-
-        if ($io) {
-            $msg = " - Added district #$code: $name";
-            $io->out($msg);
-        }
-
-        return $record->id;
     }
 
     /**
