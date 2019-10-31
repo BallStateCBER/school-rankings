@@ -11,7 +11,6 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property string $url
  * @property string $phone
- * @property string $code
  * @property string $origin_file
  * @property bool $closed
  * @property FrozenTime $created
@@ -40,7 +39,6 @@ class SchoolDistrict extends Entity
     protected $_accessible = [
         'name' => true,
         'url' => true,
-        'code' => true,
         'origin_file' => true,
         'closed' => true,
         'phone' => true,

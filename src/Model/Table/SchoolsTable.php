@@ -119,12 +119,6 @@ class SchoolsTable extends Table
             ->maxLength('phone', 30)
             ->allowEmpty('phone');
 
-        $validator
-            ->scalar('code')
-            ->maxLength('code', 255)
-            ->requirePresence('code', 'create')
-            ->notEmpty('code');
-
         return $validator;
     }
 
@@ -139,7 +133,6 @@ class SchoolsTable extends Table
     {
         $rules->add($rules->existsIn(['school_district_id'], 'SchoolDistricts'));
         $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
-        $rules->add($rules->isUnique(['code']));
 
         return $rules;
     }

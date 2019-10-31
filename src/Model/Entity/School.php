@@ -14,7 +14,6 @@ use Cake\ORM\Entity;
  * @property string $address
  * @property string $url
  * @property string $phone
- * @property string $code
  * @property string $origin_file
  * @property bool $closed
  * @property FrozenTime $created
@@ -49,7 +48,6 @@ class School extends Entity
         'url' => true,
         'phone' => true,
         'closed' => true,
-        'code' => true,
         'origin_file' => true,
         'created' => true,
         'modified' => true,

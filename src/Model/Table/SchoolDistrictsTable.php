@@ -110,12 +110,6 @@ class SchoolDistrictsTable extends Table
             ->maxLength('phone', 30)
             ->allowEmpty('phone');
 
-        $validator
-            ->scalar('code')
-            ->maxLength('code', 255)
-            ->requirePresence('code', 'create')
-            ->notEmpty('code');
-
         return $validator;
     }
 
@@ -128,8 +122,6 @@ class SchoolDistrictsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->isUnique(['code']));
-
         return $rules;
     }
 
