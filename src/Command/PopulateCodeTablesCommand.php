@@ -2,7 +2,9 @@
 namespace App\Command;
 
 use App\Model\Entity\School;
+use App\Model\Entity\SchoolCode;
 use App\Model\Entity\SchoolDistrict;
+use App\Model\Entity\SchoolDistrictCode;
 use App\Model\Table\SchoolCodesTable;
 use App\Model\Table\SchoolDistrictCodesTable;
 use App\Model\Table\SchoolDistrictsTable;
@@ -16,9 +18,12 @@ use Cake\Shell\Helper\ProgressHelper;
 
 /**
  * PopulateCodeTablesCommand command.
+ *
+ * @property ConsoleIo $io
  */
 class PopulateCodeTablesCommand extends Command
 {
+    private $io;
 
     /**
      * Hook method for defining this command's option parser.
@@ -44,39 +49,14 @@ class PopulateCodeTablesCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $tableLocator = TableRegistry::getTableLocator();
-        $models = [
-            'school' => [
-                'source_table' => $tableLocator->get('Schools'),
-                'destination_table' => $tableLocator->get('SchoolCodes'),
-                'foreign_key' => 'school_id'
-            ],
-            'district' => [
-                'source_table' => $tableLocator->get('SchoolDistricts'),
-                'destination_table' => $tableLocator->get('SchoolDistrictCodes'),
-                'foreign_key' => 'school_district_id'
-            ]
-        ];
+        $this->io = $io;
+        $models = $this->getModels();
 
-        // Get latest year in statistics table
-        $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
-        $result = $statisticsTable
-            ->find()
-            ->select(['year'])
-            ->orderDesc('year')
-            ->first();
-        $year = $result->year;
-
-        $response = $io->askChoice(
-            "Populate school_codes and school_district_codes tables?",
-            ['y', 'n'],
-            'n'
-        );
-        if ($response == 'n') {
+        if ($this->getConfirmation() == 'n') {
             return;
         }
 
-        $year = $io->ask('Using what year?', $year);
+        $year = $io->ask('Using what year?', $this->getDefaultYear());
         if (!is_numeric($year) || $year < 2015 || $year > date('Y')) {
             $io->err('That year is outside of the expected range');
 
@@ -108,6 +88,7 @@ class PopulateCodeTablesCommand extends Command
                 $progress->increment(1);
                 $progress->draw();
 
+                /** @var SchoolCode|SchoolDistrictCode $existingRecord */
                 $existingRecord = $destTable
                     ->find()
                     ->where(['code' => $record->code])
@@ -115,19 +96,7 @@ class PopulateCodeTablesCommand extends Command
 
                 // There's a record of this code referring to a different school/district
                 if ($existingRecord && $existingRecord->$foreignKey != $record->id) {
-                    $io->out();
-                    $io->err(sprintf(
-                        'Record #%s in %s codes table has code %s referring to %s #%s, ' .
-                        'but in the %s table it refers to %s #%s',
-                        $existingRecord->id,
-                        $key,
-                        $record->code,
-                        $key,
-                        $existingRecord->$foreignKey,
-                        $key . 's',
-                        $key,
-                        $record->id
-                    ));
+                    $this->outputMismatchError($existingRecord, $record, $key, $foreignKey);
 
                     return;
                 }
@@ -153,5 +122,85 @@ class PopulateCodeTablesCommand extends Command
         }
 
         $io->success('Done');
+    }
+
+    /**
+     * Outputs an error that explains that the same code has been found referring to multiple schools
+     *
+     * This situation is not expected to happen, and if it does, then some manual correction will probably be necessary.
+     * This would likely be the result of a school changing its code and mistakenly being imported as a new school.
+     *
+     * @param SchoolCode|SchoolDistrictCode $existingRecord A record in the codes table
+     * @param School|SchoolDistrict $record A record in the school or districts table
+     * @param string $key Either 'school' or 'district'
+     * @param string $foreignKey Either the string 'school_id' or 'school_district_id'
+     * @return void
+     */
+    private function outputMismatchError($existingRecord, School $record, $key, $foreignKey)
+    {
+        $this->io->out();
+        $this->io->err(sprintf(
+            'Record #%s in %s codes table has code %s referring to %s #%s, ' .
+            'but in the %s table it refers to %s #%s',
+            $existingRecord->id,
+            $key,
+            $record->code,
+            $key,
+            $existingRecord->$foreignKey,
+            $key . 's',
+            $key,
+            $record->id
+        ));
+    }
+
+    /**
+     * Returns a boolean indicating if the user is consenting to continue execution
+     *
+     * @return bool
+     */
+    private function getConfirmation()
+    {
+        $response = $this->io->askChoice(
+            "Populate school_codes and school_district_codes tables?",
+            ['y', 'n'],
+            'n'
+        );
+
+        return $response == 'y';
+    }
+
+    /**
+     * Returns the latest year in statistics table
+     *
+     * @return int
+     */
+    private function getDefaultYear()
+    {
+        $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
+
+        return $statisticsTable->getMostRecentYear();
+    }
+
+    /**
+     * Returns an array used to iterate through schools and districts
+     *
+     * @return array
+     */
+    private function getModels()
+    {
+        $tableLocator = TableRegistry::getTableLocator();
+
+        return [
+            'school' => [
+                'source_table' => $tableLocator->get('Schools'),
+                'destination_table' => $tableLocator->get('SchoolCodes'),
+                'foreign_key' => 'school_id'
+            ],
+            'district' => [
+                'source_table' => $tableLocator->get('SchoolDistricts'),
+                'destination_table' => $tableLocator->get('SchoolDistrictCodes'),
+                'foreign_key' => 'school_district_id'
+            ]
+        ];
     }
 }
