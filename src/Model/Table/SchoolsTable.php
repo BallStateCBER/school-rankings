@@ -8,6 +8,7 @@ use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -15,13 +16,14 @@ use Cake\Validation\Validator;
 /**
  * Schools Model
  *
- * @property SchoolDistrictsTable|BelongsTo $SchoolDistricts
- * @property SchoolTypesTable|BelongsTo $SchoolTypes
- * @property StatisticsTable|HasMany $Statistics
  * @property CitiesTable|BelongsToMany $Cities
  * @property CountiesTable|BelongsToMany $Counties
  * @property GradesTable|BelongsToMany $Grades
+ * @property SchoolCodesTable|BelongsToMany $SchoolCodes
+ * @property SchoolDistrictsTable|BelongsTo $SchoolDistricts
+ * @property SchoolTypesTable|BelongsTo $SchoolTypes
  * @property StatesTable|BelongsToMany $States
+ * @property StatisticsTable|HasMany $Statistics
  *
  * @method School get($primaryKey, $options = [])
  * @method School newEntity($data = null, array $options = [])
@@ -85,6 +87,9 @@ class SchoolsTable extends Table
             'joinTable' => 'ranking_results_schools',
             'dependent' => true
         ]);
+        $this->hasMany('SchoolCodes', [
+            'foreignKey' => 'school_id'
+        ]);
     }
 
     /**
@@ -135,6 +140,21 @@ class SchoolsTable extends Table
         $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
 
         return $rules;
+    }
+
+    /**
+     * Modifies a query by restricting results to those with an association with the provided DoE code
+     *
+     * @param Query $query Query object
+     * @param array $options Options array
+     * @return Query
+     */
+    public function findByCode(Query $query, $options)
+    {
+        return $query
+            ->matching('SchoolCodes', function (Query $q) use ($options) {
+                return $q->where(['SchoolCodes.code' => $options['code']]);
+            });
     }
 
     /**

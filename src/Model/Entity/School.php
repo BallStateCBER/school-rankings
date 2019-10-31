@@ -19,13 +19,14 @@ use Cake\ORM\Entity;
  * @property FrozenTime $created
  * @property FrozenTime $modified
  *
- * @property SchoolDistrict $school_district
- * @property SchoolType $school_type
- * @property Statistic[] $statistics
  * @property City[] $cities
  * @property County[] $counties
  * @property Grade[] $grades
+ * @property SchoolCode[] $school_codes
+ * @property SchoolDistrict $school_district
+ * @property SchoolType $school_type
  * @property State[] $states
+ * @property Statistic[] $statistics
  */
 class School extends Entity
 {
@@ -57,6 +58,7 @@ class School extends Entity
         'cities' => true,
         'counties' => true,
         'grades' => true,
-        'states' => true
+        'states' => true,
+        'school_codes' => true
     ];
 }

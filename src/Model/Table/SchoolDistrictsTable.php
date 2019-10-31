@@ -7,6 +7,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -80,6 +81,9 @@ class SchoolDistrictsTable extends Table
             'joinTable' => 'ranking_results_school_districts',
             'dependent' => true
         ]);
+        $this->hasMany('SchoolDistrictCodes', [
+            'foreignKey' => 'school_district_id'
+        ]);
     }
 
     /**
@@ -126,6 +130,21 @@ class SchoolDistrictsTable extends Table
     }
 
     /**
+     * Modifies a query by restricting results to those with an association with the provided DoE code
+     *
+     * @param Query $query Query object
+     * @param array $options Options array
+     * @return Query
+     */
+    public function findByCode(Query $query, $options)
+    {
+        return $query
+            ->matching('SchoolDistrictCodes', function (Query $q) use ($options) {
+                return $q->where(['SchoolDistrictCodes.code' => $options['code']]);
+            });
+    }
+
+    /**
      * Finds a school district with a matching code or creates a new record and returns a record ID
      *
      * @param string $code School district code
@@ -136,9 +155,9 @@ class SchoolDistrictsTable extends Table
     public function getOrCreate($code, $name, $io = null)
     {
         /** @var SchoolDistrict $record */
-        $record = $this->find()
+        $record = $this
+            ->find('byCode', ['code' => $code])
             ->select(['id', 'name'])
-            ->where(['code' => $code])
             ->first();
 
         if ($record) {
