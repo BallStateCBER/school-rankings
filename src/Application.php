@@ -28,6 +28,7 @@ use App\Command\MetricMergeCommand;
 use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
 use App\Command\MetricTreeCleanCommand;
+use App\Command\PopulateCodeTablesCommand;
 use App\Command\PopulateElasticsearchCommand;
 use App\Command\PopulateLocationOriginCommand;
 use App\Command\SpeedTestElasticsearchCommand;
@@ -128,6 +129,7 @@ class Application extends BaseApplication
         $commands->add('metric-parent-merge', MetricParentMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
         $commands->add('metric-tree-clean', MetricTreeCleanCommand::class);
+        $commands->add('populate-code-tables', PopulateCodeTablesCommand::class);
         $commands->add('populate-es', PopulateElasticsearchCommand::class);
         $commands->add('populate-location-origin', PopulateLocationOriginCommand::class);
         $commands->add('rank-test', RankTestShell::class);
