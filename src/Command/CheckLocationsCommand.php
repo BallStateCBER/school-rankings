@@ -192,22 +192,22 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for school districts with no associated open schools
+     * Checks for school districts with no associated schools
      *
      * @return void
      */
     private function checkDistrictsWithoutSchools()
     {
-        if (!$this->getConfirmation('Check for districts without any open schools?')) {
+        if (!$this->getConfirmation('Check for districts without schools?')) {
             return;
         }
 
-        $this->io->out('Checking for districts without open schools...');
+        $this->io->out('Checking for districts without schools...');
         $progress = $this->makeProgressBar(count($this->districts));
         $results = [];
         foreach ($this->districts as $district) {
             $progress->increment(1)->draw();
-            if ($district->hasOpenSchool()) {
+            if ($district->schools) {
                 continue;
             }
             $results[] = [
