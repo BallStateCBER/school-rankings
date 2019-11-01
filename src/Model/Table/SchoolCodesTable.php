@@ -82,6 +82,7 @@ class SchoolCodesTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['school_id'], 'Schools'));
+        $rules->add($rules->isUnique(['code']));
 
         return $rules;
     }

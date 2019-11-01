@@ -82,6 +82,7 @@ class SchoolDistrictCodesTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['school_district_id'], 'SchoolDistricts'));
+        $rules->add($rules->isUnique(['code']));
 
         return $rules;
     }
