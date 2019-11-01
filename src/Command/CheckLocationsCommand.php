@@ -7,6 +7,7 @@ use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\StatisticsTable;
+use Aura\Intl\Exception;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
@@ -132,6 +133,7 @@ class CheckLocationsCommand extends Command
                 'Cities',
                 'Counties',
                 'Grades',
+                'SchoolCodes',
                 'SchoolDistricts',
                 'SchoolTypes',
                 'States'
@@ -143,6 +145,7 @@ class CheckLocationsCommand extends Command
             ->contain([
                 'Cities',
                 'Counties',
+                'SchoolDistrictCodes',
                 'Schools',
                 'States'
             ])
@@ -153,7 +156,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for public schools with no school districts
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutDistricts()
@@ -175,7 +178,7 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $school->name,
-                $school->code,
+                $school->id,
                 $school->origin_file
             ];
         }
@@ -192,7 +195,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for school districts with no associated schools
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutSchools()
@@ -211,7 +214,7 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $district->name,
-                $district->code,
+                $district->id,
                 $district->origin_file
             ];
         }
@@ -233,9 +236,8 @@ class CheckLocationsCommand extends Command
      * @param string $resultNoun Such as 'school' or 'district'
      * @param array $headers Array of column headers to include in the displayed table
      * @return void
-     * @throws \Aura\Intl\Exception
      */
-    private function showResults($results, $resultNoun, $headers = ['Name', 'DoE Code', 'Origin File'])
+    private function showResults($results, $resultNoun, $headers = ['Name', 'ID', 'Origin File'])
     {
         $this->io->overwrite(sprintf(
             ' - %s %s found',
@@ -253,7 +255,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools with missing public / private / charter type
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutTypes()
@@ -273,7 +275,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any grade levels
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutGrades()
@@ -296,7 +298,6 @@ class CheckLocationsCommand extends Command
      * @param string $resultNoun Either 'school' or 'district'
      * @param string $message Starting message to output
      * @param string $fieldName Name of field of school object to check for empty status
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function checkForEmptyField($records, $resultNoun, $message, $fieldName)
@@ -311,7 +312,7 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $record->name,
-                $record->code,
+                $record->id,
                 $record->origin_file
             ];
         }
@@ -328,7 +329,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any cities
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutCities()
@@ -348,7 +349,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any counties
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutCounties()
@@ -368,7 +369,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any cities
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutStates()
@@ -388,7 +389,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools with missing addresses
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutAddresses()
@@ -408,7 +409,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools with missing Indiana Department of Education codes
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function checkSchoolsWithoutCodes()
@@ -421,14 +421,14 @@ class CheckLocationsCommand extends Command
             $this->schools,
             'school',
             'Checking for schools without DoE codes...',
-            'code'
+            'school_codes'
         );
     }
 
     /**
      * Checks for districts with missing Indiana Department of Education codes
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCodes()
@@ -436,18 +436,19 @@ class CheckLocationsCommand extends Command
         if (!$this->getConfirmation('Check for districts without Department of Education codes?')) {
             return;
         }
+
         $this->checkForEmptyField(
             $this->districts,
             'district',
             'Checking for districts without DoE codes...',
-            'code'
+            'district_codes'
         );
     }
 
     /**
      * Checks for districts that aren't associated with any cities
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCities()
@@ -467,7 +468,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any counties
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCounties()
@@ -487,7 +488,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any cities
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutStates()
@@ -508,7 +509,7 @@ class CheckLocationsCommand extends Command
      * Checks for any schools/districts with no associated data
      *
      * @param string $context Either 'school' or 'district'
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkForNoStats($context)
@@ -528,7 +529,7 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $record->name,
-                $record->code,
+                $record->id,
                 $record->origin_file
             ];
         }
@@ -545,7 +546,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any statistical data
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutStats()
@@ -560,7 +561,7 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any statistical data
      *
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutStats()
@@ -577,7 +578,7 @@ class CheckLocationsCommand extends Command
      *
      * @param string $context Either 'school' or 'district'
      * @param string $field e.g. 'cities' or 'counties'
-     * @throws \Aura\Intl\Exception
+     * @throws Exception
      * @return void
      */
     private function checkForMultipleGeographies($context, $field)
@@ -597,12 +598,12 @@ class CheckLocationsCommand extends Command
             }
             $results[] = [
                 $record->name,
-                $record->code,
+                $record->id,
                 implode(', ', Hash::extract($record->$field, '{n}.name'))
             ];
         }
         if ($results) {
-            $headers = ['Name', 'DoE Code', ucwords($field)];
+            $headers = ['Name', 'ID', ucwords($field)];
             $this->showResults($results, $context, $headers);
 
             return;
