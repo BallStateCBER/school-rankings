@@ -166,12 +166,10 @@ class PopulateLocationOriginCommand extends Command
                 $code = $location['districtCode'];
                 if (!in_array($code, $this->processedCodes['district'])) {
                     /** @var SchoolDistrict $district */
-                    $district = $this->schoolDistrictsTable->find()
+                    $district = $this->schoolDistrictsTable
+                        ->find('byCode', ['code' => $code])
                         ->select(['id', 'name'])
-                        ->where([
-                            'code' => $code,
-                            'origin_file' => ''
-                        ])
+                        ->where(['origin_file' => ''])
                         ->first();
                     if ($district) {
                         $this->setDistrictOriginFile($district);
@@ -186,12 +184,10 @@ class PopulateLocationOriginCommand extends Command
                 $code = $location['schoolCode'];
                 if (!in_array($code, $this->processedCodes['school'])) {
                     /** @var School $school */
-                    $school = $this->schoolsTable->find()
+                    $school = $this->schoolsTable
+                        ->find('byCode', ['code' => $code])
                         ->select(['id', 'name'])
-                        ->where([
-                            'code' => $code,
-                            'origin_file' => ''
-                        ])
+                        ->where(['origin_file' => ''])
                         ->first();
                     if ($school) {
                         $this->setSchoolOriginFile($school);
