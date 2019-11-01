@@ -22,32 +22,25 @@ class MetricModal extends React.Component {
       metricType: 'numeric',
       submitInProgress: false,
     };
-  }
 
-  componentWillMount() {
+    // If in edit mode, populate fields
     if (this.props.mode === 'edit') {
-      this.populateEditForm();
-    }
-  }
+      if (! window.jsTreeData.editMetric.hasOwnProperty('metricId')) {
+        return;
+      }
 
-  populateEditForm() {
-    if (! window.jsTreeData.editMetric.hasOwnProperty('metricId')) {
-      return;
-    }
+      const data = window.jsTreeData.editMetric;
+      if (this.state.metricId === data.metricId) {
+        return;
+      }
 
-    const data = window.jsTreeData.editMetric;
-    if (this.state.metricId === data.metricId) {
-      return;
+      this.state.metricId = data.metricId;
+      this.state.metricName = data.name;
+      this.state.metricDescription = data.description;
+      this.state.metricSelectable = data.selectable;
+      this.state.metricVisible = data.visible;
+      this.state.metricType = data.type;
     }
-
-    this.setState({
-      metricId: data.metricId,
-      metricName: data.name,
-      metricDescription: data.description,
-      metricSelectable: data.selectable,
-      metricVisible: data.visible,
-      metricType: data.type,
-    });
   }
 
   handleChange(event) {
