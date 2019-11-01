@@ -10,6 +10,7 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
@@ -128,13 +129,15 @@ class CheckLocationsCommand extends Command
         $this->io->out('Collecting data...');
         $progress = $this->makeProgressBar(2);
         $this->schools = $this->schoolsTable
-            ->find()
+            ->find('open')
             ->contain([
                 'Cities',
                 'Counties',
                 'Grades',
                 'SchoolCodes',
-                'SchoolDistricts',
+                'SchoolDistricts' => function (Query $q) {
+                    return $q->find('open');
+                },
                 'SchoolTypes',
                 'States'
             ])
@@ -146,7 +149,9 @@ class CheckLocationsCommand extends Command
                 'Cities',
                 'Counties',
                 'SchoolDistrictCodes',
-                'Schools',
+                'Schools' => function (Query $q) {
+                    return $q->find('open');
+                },
                 'States'
             ])
             ->all();
@@ -154,17 +159,17 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for public schools with no school districts
+     * Checks for public schools with no open school districts
      *
      * @return void
      */
     private function checkSchoolsWithoutDistricts()
     {
-        if (!$this->getConfirmation('Check for public schools without districts?')) {
+        if (!$this->getConfirmation('Check for public schools without open districts?')) {
             return;
         }
 
-        $this->io->out('Checking for public schools without districts...');
+        $this->io->out('Checking for public schools without open districts...');
         $progress = $this->makeProgressBar(count($this->schools));
         $results = [];
         foreach ($this->schools as $school) {
@@ -198,11 +203,11 @@ class CheckLocationsCommand extends Command
      */
     private function checkDistrictsWithoutSchools()
     {
-        if (!$this->getConfirmation('Check for districts without schools?')) {
+        if (!$this->getConfirmation('Check for districts without open schools?')) {
             return;
         }
 
-        $this->io->out('Checking for districts without schools...');
+        $this->io->out('Checking for districts without open schools...');
         $progress = $this->makeProgressBar(count($this->districts));
         $results = [];
         foreach ($this->districts as $district) {
@@ -251,44 +256,44 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for schools with missing public / private / charter type
+     * Checks for open schools with missing public / private / charter type
      *
      * @return void
      */
     private function checkSchoolsWithoutTypes()
     {
-        if (!$this->getConfirmation('Check for schools with missing public/private/charter type?')) {
+        if (!$this->getConfirmation('Check for open schools with missing public/private/charter type?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools with missing public/private/charter type...',
+            'Checking for open schools with missing public/private/charter type...',
             'school_type'
         );
     }
 
     /**
-     * Checks for schools that aren't associated with any grade levels
+     * Checks for open schools that aren't associated with any grade levels
      *
      * @return void
      */
     private function checkSchoolsWithoutGrades()
     {
-        if (!$this->getConfirmation('Check for schools without grade levels?')) {
+        if (!$this->getConfirmation('Check for open schools without grade levels?')) {
             return;
         }
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without grade levels...',
+            'Checking for open schools without grade levels...',
             'grades'
         );
     }
 
     /**
-     * Generic method for checking for an empty field in $this->schools
+     * Generic method for checking for an empty field in $this->schools or $this->districts
      *
      * @param array $records Array of either schools or districts
      * @param string $resultNoun Either 'school' or 'district'
@@ -323,185 +328,185 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for schools that aren't associated with any cities
+     * Checks for open schools that aren't associated with any cities
      *
      * @return void
      */
     private function checkSchoolsWithoutCities()
     {
-        if (!$this->getConfirmation('Check for schools without cities?')) {
+        if (!$this->getConfirmation('Check for open schools without cities?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without cities...',
+            'Checking for open schools without cities...',
             'cities'
         );
     }
 
     /**
-     * Checks for schools that aren't associated with any counties
+     * Checks for open schools that aren't associated with any counties
      *
      * @return void
      */
     private function checkSchoolsWithoutCounties()
     {
-        if (!$this->getConfirmation('Check for schools without counties?')) {
+        if (!$this->getConfirmation('Check for open schools without counties?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without counties...',
+            'Checking for open schools without counties...',
             'counties'
         );
     }
 
     /**
-     * Checks for schools that aren't associated with any cities
+     * Checks for open schools that aren't associated with any cities
      *
      * @return void
      */
     private function checkSchoolsWithoutStates()
     {
-        if (!$this->getConfirmation('Check for schools without states?')) {
+        if (!$this->getConfirmation('Check for open schools without states?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without states...',
+            'Checking for open schools without states...',
             'states'
         );
     }
 
     /**
-     * Checks for schools with missing addresses
+     * Checks for open schools with missing addresses
      *
      * @return void
      */
     private function checkSchoolsWithoutAddresses()
     {
-        if (!$this->getConfirmation('Check for schools without addresses?')) {
+        if (!$this->getConfirmation('Check for open schools without addresses?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without addresses...',
+            'Checking for open schools without addresses...',
             'address'
         );
     }
 
     /**
-     * Checks for schools with missing Indiana Department of Education codes
+     * Checks for open schools with missing Indiana Department of Education codes
      *
      * @return void
      */
     private function checkSchoolsWithoutCodes()
     {
-        if (!$this->getConfirmation('Check for schools without Department of Education codes?')) {
+        if (!$this->getConfirmation('Check for open schools without Department of Education codes?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->schools,
             'school',
-            'Checking for schools without DoE codes...',
+            'Checking for open schools without DoE codes...',
             'school_codes'
         );
     }
 
     /**
-     * Checks for districts with missing Indiana Department of Education codes
+     * Checks for open districts with missing Indiana Department of Education codes
      *
      * @return void
      */
     private function checkDistrictsWithoutCodes()
     {
-        if (!$this->getConfirmation('Check for districts without Department of Education codes?')) {
+        if (!$this->getConfirmation('Check for open districts without Department of Education codes?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->districts,
             'district',
-            'Checking for districts without DoE codes...',
+            'Checking for open districts without DoE codes...',
             'school_district_codes'
         );
     }
 
     /**
-     * Checks for districts that aren't associated with any cities
+     * Checks for open districts that aren't associated with any cities
      *
      * @return void
      */
     private function checkDistrictsWithoutCities()
     {
-        if (!$this->getConfirmation('Check for districts without cities?')) {
+        if (!$this->getConfirmation('Check for open districts without cities?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->districts,
             'district',
-            'Checking for districts without cities...',
+            'Checking for open districts without cities...',
             'cities'
         );
     }
 
     /**
-     * Checks for districts that aren't associated with any counties
+     * Checks for open districts that aren't associated with any counties
      *
      * @return void
      */
     private function checkDistrictsWithoutCounties()
     {
-        if (!$this->getConfirmation('Check for districts without counties?')) {
+        if (!$this->getConfirmation('Check for open districts without counties?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->districts,
             'district',
-            'Checking for districts without counties...',
+            'Checking for open districts without counties...',
             'counties'
         );
     }
 
     /**
-     * Checks for districts that aren't associated with any cities
+     * Checks for open districts that aren't associated with any cities
      *
      * @return void
      */
     private function checkDistrictsWithoutStates()
     {
-        if (!$this->getConfirmation('Check for districts without states?')) {
+        if (!$this->getConfirmation('Check for open districts without states?')) {
             return;
         }
 
         $this->checkForEmptyField(
             $this->districts,
             'district',
-            'Checking for districts without states...',
+            'Checking for open districts without states...',
             'states'
         );
     }
 
     /**
-     * Checks for any schools/districts with no associated data
+     * Checks for any open schools/districts with no associated data
      *
      * @param string $context Either 'school' or 'district'
      * @return void
      */
     private function checkForNoStats($context)
     {
-        $this->io->out("Checking for {$context}s without stats...");
+        $this->io->out("Checking for open {$context}s without stats...");
         $records = ($context == 'school') ? $this->schools : $this->districts;
         $progress = $this->makeProgressBar(count($records));
         $results = [];
@@ -531,13 +536,13 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for schools that aren't associated with any statistical data
+     * Checks for open schools that aren't associated with any statistical data
      *
      * @return void
      */
     private function checkSchoolsWithoutStats()
     {
-        if (!$this->getConfirmation('Check for schools without statistics?')) {
+        if (!$this->getConfirmation('Check for open schools without statistics?')) {
             return;
         }
 
@@ -545,13 +550,13 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for districts that aren't associated with any statistical data
+     * Checks for open districts that aren't associated with any statistical data
      *
      * @return void
      */
     private function checkDistrictsWithoutStats()
     {
-        if (!$this->getConfirmation('Check for districts without statistics?')) {
+        if (!$this->getConfirmation('Check for open districts without statistics?')) {
             return;
         }
 
@@ -559,7 +564,7 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for any schools/districts associated with multiple cities, counties, etc.
+     * Checks for any open schools/districts associated with multiple cities, counties, etc.
      *
      * @param string $context Either 'school' or 'district'
      * @param string $field e.g. 'cities' or 'counties'
@@ -567,11 +572,11 @@ class CheckLocationsCommand extends Command
      */
     private function checkForMultipleGeographies($context, $field)
     {
-        if (!$this->getConfirmation("Check for {$context}s with multiple $field?")) {
+        if (!$this->getConfirmation("Check for open {$context}s with multiple $field?")) {
             return;
         }
 
-        $this->io->out("Checking for {$context}s associated with multiple $field...");
+        $this->io->out("Checking for open {$context}s associated with multiple $field...");
         $records = ($context == 'school') ? $this->schools : $this->districts;
         $progress = $this->makeProgressBar(count($records));
         $results = [];

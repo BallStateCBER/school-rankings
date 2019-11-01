@@ -157,4 +157,16 @@ class SchoolDistrictsTable extends Table
             '9700' // GQE Retest Site
         ];
     }
+
+    /**
+     * Modifies a query by restricting results to open school districts
+     *
+     * @param Query $query Query object
+     * @param array $options Options array
+     * @return Query
+     */
+    public function findOpen(Query $query, $options)
+    {
+        return $query->where(['closed' => false]);
+    }
 }

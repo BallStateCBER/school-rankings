@@ -155,4 +155,16 @@ class SchoolsTable extends Table
                 return $q->where(['SchoolCodes.code' => $options['code']]);
             });
     }
+
+    /**
+     * Modifies a query by restricting results to open schools
+     *
+     * @param Query $query Query object
+     * @param array $options Options array
+     * @return Query
+     */
+    public function findOpen(Query $query, $options)
+    {
+        return $query->where(['closed' => false]);
+    }
 }
