@@ -69,4 +69,20 @@ class SchoolDistrict extends Entity
             'N/A'
         ]);
     }
+
+    /**
+     * Returns TRUE if this district contains an open school; assumes that $this->schools is populated
+     *
+     * @return bool
+     */
+    public function hasOpenSchool()
+    {
+        foreach ($this->schools as $school) {
+            if (!$school->closed) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
