@@ -7,13 +7,13 @@ use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\StatisticsTable;
-use Aura\Intl\Exception;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
+use Exception;
 
 /**
  * Class CheckLocationsCommand
@@ -54,7 +54,7 @@ class CheckLocationsCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -156,7 +156,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for public schools with no school districts
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutDistricts()
@@ -195,7 +194,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for school districts with no associated schools
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutSchools()
@@ -255,7 +253,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools with missing public / private / charter type
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutTypes()
@@ -275,7 +272,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any grade levels
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutGrades()
@@ -329,7 +325,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any cities
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutCities()
@@ -349,7 +344,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any counties
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutCounties()
@@ -369,7 +363,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any cities
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutStates()
@@ -389,7 +382,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools with missing addresses
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutAddresses()
@@ -428,7 +420,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts with missing Indiana Department of Education codes
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCodes()
@@ -448,7 +439,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any cities
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCities()
@@ -468,7 +458,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any counties
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutCounties()
@@ -488,7 +477,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any cities
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutStates()
@@ -509,7 +497,6 @@ class CheckLocationsCommand extends Command
      * Checks for any schools/districts with no associated data
      *
      * @param string $context Either 'school' or 'district'
-     * @throws Exception
      * @return void
      */
     private function checkForNoStats($context)
@@ -546,7 +533,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for schools that aren't associated with any statistical data
      *
-     * @throws Exception
      * @return void
      */
     private function checkSchoolsWithoutStats()
@@ -561,7 +547,6 @@ class CheckLocationsCommand extends Command
     /**
      * Checks for districts that aren't associated with any statistical data
      *
-     * @throws Exception
      * @return void
      */
     private function checkDistrictsWithoutStats()
@@ -578,7 +563,6 @@ class CheckLocationsCommand extends Command
      *
      * @param string $context Either 'school' or 'district'
      * @param string $field e.g. 'cities' or 'counties'
-     * @throws Exception
      * @return void
      */
     private function checkForMultipleGeographies($context, $field)
