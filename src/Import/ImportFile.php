@@ -7,6 +7,7 @@ use App\Model\Entity\Metric;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SchoolDistrictCodesTable;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use App\Model\Table\SpreadsheetColumnsMetricsTable;
@@ -827,7 +828,7 @@ class ImportFile
             try {
                 $metricId = $this->getMetricInput($suggestedName, $unknownMetric);
                 $this->setMetricId($colNum, $metricId);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->shell_io->error('Error: ' . $e->getMessage());
             }
             unset($cleanColName, $metricId, $suggestedName);
@@ -854,9 +855,12 @@ class ImportFile
         /**
          * @var SchoolDistrictsTable $schoolDistrictsTable
          * @var SchoolsTable $schoolsTable
+         * @var SchoolDistrictCodesTable $districtCodesTable
          */
         $schoolDistrictsTable = TableRegistry::getTableLocator()->get('SchoolDistricts');
         $schoolsTable = TableRegistry::getTableLocator()->get('Schools');
+        $districtCodesTable = TableRegistry::getTableLocator()->get('SchoolDistrictCodes');
+        $schoolCodesTable = TableRegistry::getTableLocator()->get('SchoolCodes');
         $context = $this->getWorksheets()[$this->activeWorksheet]['context'];
 
         // Note that both districts and schools will be identified if present, regardless of the current context
@@ -888,19 +892,22 @@ class ImportFile
             // Identify district
             $districtId = null;
             if (isset($location['districtCode']) && isset($location['districtName'])) {
-                $district = $schoolDistrictsTable->find()
+                $district = $schoolDistrictsTable
+                    ->find('byCode', ['code' => $location['districtCode']])
                     ->select(['id', 'name'])
-                    ->where(['code' => $location['districtCode']])
                     ->first();
                 if ($district) {
                     $log['district']['identifiedList'][$district->id] = true;
                 } else {
-                    $district = $schoolDistrictsTable->newEntity([
-                        'code' => $location['districtCode'],
-                        'name' => $location['districtName']
-                    ]);
+                    $district = $schoolDistrictsTable->newEntity(['name' => $location['districtName']]);
+                    $district->school_district_codes = [
+                        $districtCodesTable->newEntity([
+                            'code' => $location['districtCode'],
+                            'year' => $this->year
+                        ])
+                    ];
                     $schoolDistrictsTable->saveOrFail($district);
-                    $log['district']['addedList'][] = "#$district->code: $district->name";
+                    $log['district']['addedList'][] = "#{$location['districtCode']}: $district->name";
                 }
                 $districtId = $district->id;
                 $this->setLocationInfo($rowNum, 'districtId', $district->id);
@@ -911,21 +918,26 @@ class ImportFile
             // Identify school
             $schoolId = null;
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
-                $school = $schoolsTable->find()
+                $school = $schoolsTable
+                    ->find('by Code', ['code' => $location['schoolCode']])
                     ->select(['id', 'name'])
-                    ->where(['code' => $location['schoolCode']])
                     ->first();
                 if ($school) {
                     $log['school']['identifiedList'][$school->id] = true;
                 } else {
                     $this->checkNewSchoolName($location['schoolName']);
                     $school = $schoolsTable->newEntity([
-                        'code' => $location['schoolCode'],
                         'name' => $location['schoolName'],
                         'school_district_id' => $districtId
                     ]);
+                    $school->school_codes = [
+                        $schoolCodesTable->newEntity([
+                            'code' => $location['schoolCode'],
+                            'year' => $this->year
+                        ])
+                    ];
                     $schoolsTable->saveOrFail($school);
-                    $log['school']['addedList'][] = "#$school->code: $school->name";
+                    $log['school']['addedList'][] = "#{$location['schoolCode']}: $school->name";
                 }
                 $this->setLocationInfo($rowNum, 'schoolId', $school->id);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
@@ -1033,9 +1045,9 @@ class ImportFile
      * @param string $context Either school or district
      * @param array $unknownMetric Array of name and group information for the current column
      * @param string $metricName Name of new metric
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \Exception
      * @return int
+     *@throws Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     private function addMetricChain($context, $unknownMetric, $metricName)
     {
@@ -1073,7 +1085,7 @@ class ImportFile
      * @param string $context Either school or district
      * @param string $metricName Name of new metric
      * @param int|null $parentId ID of parent metric, or null for root
-     * @throws \Exception
+     * @throws Exception
      * @return Metric
      */
     private function getOrAddMetricParent($context, $metricName, $parentId)
@@ -1118,7 +1130,7 @@ class ImportFile
      * @param string $metricName Name of new metric
      * @param int|null $parentId ID of parent metric, or null for root
      * @param bool $selectable Whether or not this metric should be selectable when creating a ranking formula
-     * @throws \Exception
+     * @throws Exception
      * @return Metric
      */
     private function addMetric($context, $metricName, $parentId, $selectable = true)
