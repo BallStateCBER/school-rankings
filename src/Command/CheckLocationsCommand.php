@@ -432,7 +432,7 @@ class CheckLocationsCommand extends Command
             $this->districts,
             'district',
             'Checking for districts without DoE codes...',
-            'district_codes'
+            'school_district_codes'
         );
     }
 
