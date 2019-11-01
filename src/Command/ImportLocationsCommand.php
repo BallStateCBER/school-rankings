@@ -99,7 +99,7 @@ class ImportLocationsCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -260,14 +260,14 @@ class ImportLocationsCommand extends Command
      *
      * @param string $context Either 'school' or 'district'
      * @param string $code The Department of Education identification code
-     * @return array|\Cake\Datasource\EntityInterface
+     * @return array|EntityInterface
      */
     private function getLocation($context, $code)
     {
         $table = ($context == 'district') ? $this->districtsTable : $this->schoolsTable;
 
-        return $table->find()
-            ->where(['code' => Utility::removeLeadingZeros($code)])
+        return $table
+            ->find('byCode', ['code' => Utility::removeLeadingZeros($code)])
             ->firstOrFail();
     }
 
@@ -401,9 +401,9 @@ class ImportLocationsCommand extends Command
 
             // Get associated model data
             if (array_key_exists('district code', $data)) {
-                $district = $this->districtsTable->find()
+                $district = $this->districtsTable
+                    ->find('byCode', ['code' => Utility::removeLeadingZeros($data['district code'])])
                     ->select(['id'])
-                    ->where(['code' => Utility::removeLeadingZeros($data['district code'])])
                     ->firstOrFail();
             } else {
                 $district = null;
@@ -546,7 +546,7 @@ class ImportLocationsCommand extends Command
      *
      * @param string $name County name
      * @param int $stateId State ID
-     * @return \App\Model\Entity\County
+     * @return County
      */
     private function getCounty($name, $stateId)
     {
