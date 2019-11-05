@@ -4,6 +4,7 @@ namespace App\Import;
 use App\Command\ImportStatsCommand;
 use App\Command\Utility;
 use App\Model\Entity\Metric;
+use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
@@ -918,12 +919,19 @@ class ImportFile
             // Identify school
             $schoolId = null;
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
+                /** @var School $school */
                 $school = $schoolsTable
                     ->find('by Code', ['code' => $location['schoolCode']])
-                    ->select(['id', 'name'])
+                    ->select(['id', 'name', 'school_district_id'])
                     ->first();
                 if ($school) {
                     $log['school']['identifiedList'][$school->id] = true;
+
+                    // Add missing school district ID
+                    if (!$school->school_district_id) {
+                        $school = $schoolsTable->patchEntity($school, ['school_district_id' => $districtId]);
+                        $school = $schoolsTable->saveOrFail($school);
+                    }
                 } else {
                     $this->checkNewSchoolName($location['schoolName']);
                     $school = $schoolsTable->newEntity([
