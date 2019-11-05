@@ -167,6 +167,6 @@ class SchoolDistrictsTable extends Table
      */
     public function findOpen(Query $query, $options)
     {
-        return $query->where(['closed' => false]);
+        return $query->where(['SchoolDistricts.closed' => false]);
     }
 }

@@ -165,6 +165,6 @@ class SchoolsTable extends Table
      */
     public function findOpen(Query $query, $options)
     {
-        return $query->where(['closed' => false]);
+        return $query->where(['Schools.closed' => false]);
     }
 }
