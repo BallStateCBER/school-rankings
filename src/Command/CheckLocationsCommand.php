@@ -159,25 +159,25 @@ class CheckLocationsCommand extends Command
     }
 
     /**
-     * Checks for public schools with no open school districts
+     * Checks for public or charter schools with no open school districts
      *
      * @return void
      */
     private function checkSchoolsWithoutDistricts()
     {
-        if (!$this->getConfirmation('Check for public schools without open districts?')) {
+        if (!$this->getConfirmation('Check for public and charter schools without open districts?')) {
             return;
         }
 
-        $this->io->out('Checking for public schools without open districts...');
+        $this->io->out('Checking for public and charter schools without open districts...');
         $progress = $this->makeProgressBar(count($this->schools));
         $results = [];
         foreach ($this->schools as $school) {
             $progress->increment(1)->draw();
-            if (!isset($school->school_type->name)
-                || $school->school_type->name != 'public'
-                || $school->school_district_id
-            ) {
+            $typeIsKnown = isset($school->school_type->name);
+            $typeMatches = $typeIsKnown && in_array($school->school_type->name, ['public', 'charter']);
+            $hasDistrict = (bool)$school->school_district_id;
+            if (!$typeMatches || $hasDistrict) {
                 continue;
             }
             $results[] = [
