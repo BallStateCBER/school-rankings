@@ -76,11 +76,11 @@ class SchoolDistrictsTable extends Table
             'targetForeignKey' => 'state_id',
             'joinTable' => 'school_districts_states'
         ]);
-        $this->hasMany('RankingResults', [
-            'joinTable' => 'ranking_results_school_districts',
+        $this->hasMany('RankingResultsSchoolDistricts', [
             'dependent' => true
         ]);
         $this->hasMany('SchoolDistrictCodes', [
+            'dependent' => true,
             'foreignKey' => 'school_district_id'
         ]);
     }
