@@ -34,12 +34,15 @@ use App\Command\PopulateElasticsearchCommand;
 use App\Command\PopulateLocationOriginCommand;
 use App\Command\SpeedTestElasticsearchCommand;
 use App\Shell\RankTestShell;
+use Cake\Console\CommandCollection;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
+use Cake\Http\MiddlewareQueue as MiddlewareQueueAlias;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use DebugKit\Plugin;
 
 /**
  * Application setup class.
@@ -75,15 +78,15 @@ class Application extends BaseApplication
          * Debug Kit should not be installed on a production system
          */
         if (Configure::read('debug')) {
-            $this->addPlugin(\DebugKit\Plugin::class);
+            $this->addPlugin(Plugin::class);
         }
     }
 
     /**
      * Setup the middleware queue your application will use.
      *
-     * @param \Cake\Http\MiddlewareQueue $middlewareQueue The middleware queue to setup.
-     * @return \Cake\Http\MiddlewareQueue The updated middleware queue.
+     * @param MiddlewareQueueAlias $middlewareQueue The middleware queue to setup.
+     * @return MiddlewareQueueAlias The updated middleware queue.
      */
     public function middleware($middlewareQueue)
     {
@@ -109,8 +112,8 @@ class Application extends BaseApplication
     /**
      * Defines the commands and subcommands in this application
      *
-     * @param \Cake\Console\CommandCollection $commands Collection of commands
-     * @return \Cake\Console\CommandCollection
+     * @param CommandCollection $commands Collection of commands
+     * @return CommandCollection
      */
     public function console($commands)
     {
