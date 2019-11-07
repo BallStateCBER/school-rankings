@@ -189,7 +189,7 @@ class ImportLocationsCommand extends Command
      */
     public static function getDirectory()
     {
-        return ROOT . DS . 'data' . DS . 'open' . 'locations';
+        return ROOT . DS . 'data' . DS . 'locations' . DS . 'open';
     }
 
     /**
