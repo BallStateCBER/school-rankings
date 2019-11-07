@@ -142,10 +142,12 @@ class DeleteCommand extends Command
             default:
                 throw new InternalErrorException('Invalid table name: ' . $this->tableName);
         }
+        $entityClassArray = explode('\\', $this->subjectTable->getEntityClass());
+        $entityName = array_pop($entityClassArray);
         do {
-            $id = $this->io->ask($this->tableName . ' ID:');
+            $id = $this->io->ask($entityName . ' ID:');
             if (!$this->subjectTable->exists(['id' => $id])) {
-                $this->io->err('A ' . $this->tableName . ' with that ID doesn\'t exist');
+                $this->io->err('A ' . $entityName . ' with that ID doesn\'t exist');
                 continue;
             }
 
