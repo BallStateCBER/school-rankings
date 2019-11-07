@@ -23,7 +23,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
-use Cake\Shell\Helper\ProgressHelper;
 use Exception;
 
 /**
@@ -256,7 +255,7 @@ class ImportLocationsCommand extends Command
             'PHONE' => 'phone'
         ];
 
-        $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
+        $progress = Utility::makeProgressBar($lastRow - $firstRow + 1, $this->io);
         for ($row = $firstRow; $row <= $lastRow; $row++) {
             $progress->increment(1);
             $progress->draw();
@@ -336,7 +335,7 @@ class ImportLocationsCommand extends Command
             'HIGH GRADE 1' => 'high grade'
         ];
 
-        $progress = $this->makeProgressBar($lastRow - $firstRow + 1);
+        $progress = Utility::makeProgressBar($lastRow - $firstRow + 1, $this->io);
         for ($row = $firstRow; $row <= $lastRow; $row++) {
             $progress->increment(1);
             $progress->draw();
@@ -614,7 +613,7 @@ class ImportLocationsCommand extends Command
 
             $this->io->out("Updating {$context}s...");
 
-            $progress = $this->makeProgressBar(count($entities));
+            $progress = Utility::makeProgressBar(count($entities), $this->io);
             $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
             foreach ($entities as $entity) {
                 if (!$table->save($entity)) {
@@ -628,25 +627,6 @@ class ImportLocationsCommand extends Command
             }
             $this->io->overwrite(' - Done');
         }
-    }
-
-    /**
-     * Creates a progress bar, draws it, and returns it
-     *
-     * @param int $total Total number of items to be processed
-     * @return ProgressHelper
-     */
-    private function makeProgressBar($total)
-    {
-        /** @var ProgressHelper $progress */
-        $progress = $this->io->helper('Progress');
-        $progress->init([
-            'total' => $total,
-            'width' => 40,
-        ]);
-        $progress->draw();
-
-        return $progress;
     }
 
     /**

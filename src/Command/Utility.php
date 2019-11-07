@@ -3,6 +3,7 @@ namespace App\Command;
 
 use Cake\Console\ConsoleIo;
 use Cake\Filesystem\Folder;
+use Cake\Shell\Helper\ProgressHelper;
 use Exception;
 
 class Utility
@@ -130,5 +131,25 @@ class Utility
     public static function isYear($string)
     {
         return strlen($string) == 4 && is_numeric($string);
+    }
+
+    /**
+     * Creates a progress bar, draws it, and returns it
+     *
+     * @param int $total Total number of items to be processed
+     * @param ConsoleIo $io ConsoleIO object
+     * @return ProgressHelper
+     */
+    public static function makeProgressBar($total, $io)
+    {
+        /** @var ProgressHelper $progress */
+        $progress = $io->helper('Progress');
+        $progress->init([
+            'total' => $total,
+            'width' => 40,
+        ]);
+        $progress->draw();
+
+        return $progress;
     }
 }
