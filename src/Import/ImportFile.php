@@ -1,7 +1,6 @@
 <?php
 namespace App\Import;
 
-use App\Command\ImportStatsCommand;
 use App\Command\Utility;
 use App\Model\Entity\Metric;
 use App\Model\Entity\School;
@@ -1415,7 +1414,7 @@ class ImportFile
         $suggestedNameParts = [explode('.', $filename)[0]];
 
         // Add worksheet name (unless if it's a year)
-        if (!ImportStatsCommand::isYear($worksheetName)) {
+        if (!Utility::isYear($worksheetName)) {
             $suggestedNameParts[] = trim($worksheetName);
         }
 

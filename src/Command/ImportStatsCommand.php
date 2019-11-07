@@ -330,7 +330,7 @@ class ImportStatsCommand extends Command
         $retval = [];
 
         foreach ($subdirs as $year) {
-            if (!self::isYear($year)) {
+            if (!Utility::isYear($year)) {
                 throw new InternalErrorException('Directory ' . $dataPath . DS . $year . ' is not a year.');
             }
             $subdir = new Folder($dataPath . DS . $year);
@@ -349,17 +349,6 @@ class ImportStatsCommand extends Command
         $this->files = $retval;
 
         return $retval;
-    }
-
-    /**
-     * Returns true or false, indicating if $string appears to be a year
-     *
-     * @param string $string String to be tested
-     * @return bool
-     */
-    public static function isYear($string)
-    {
-        return strlen($string) == 4 && is_numeric($string);
     }
 
     /**

@@ -112,12 +112,23 @@ class Utility
 
         $year = substr($substr, 1, strpos($substr, ')') - 1);
 
-        if (!ImportStatsCommand::isYear($year)) {
+        if (!self::isYear($year)) {
             $io->error("$year is not a valid year");
 
             return false;
         }
 
         return $year;
+    }
+
+    /**
+     * Returns true or false, indicating if $string appears to be a year
+     *
+     * @param string $string String to be tested
+     * @return bool
+     */
+    public static function isYear($string)
+    {
+        return strlen($string) == 4 && is_numeric($string);
     }
 }
