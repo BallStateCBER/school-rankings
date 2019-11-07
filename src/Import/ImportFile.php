@@ -369,7 +369,7 @@ class ImportFile
         $value = str_replace([' ', '_', '.', 'idoe'], '', $value);
         $value = str_replace('corporation', 'corp', $value);
 
-        return in_array($value, ['corp', 'corpid', 'corpno']);
+        return in_array($value, ['corp', 'corpcode', 'corpid', 'corpno']);
     }
 
     /**
@@ -414,7 +414,7 @@ class ImportFile
         $value = strtolower($value);
         $value = str_replace([' ', '_', '.', 'idoe'], '', $value);
 
-        return in_array($value, ['school', 'schoolid', 'schid', 'schlid', 'schno', 'schl']);
+        return in_array($value, ['school', 'schoolcode', 'schoolid', 'schid', 'schlid', 'schno', 'schl']);
     }
 
     /**
