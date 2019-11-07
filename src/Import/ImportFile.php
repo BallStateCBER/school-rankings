@@ -46,6 +46,7 @@ use ZipArchive;
 class ImportFile
 {
     private $autoNameMetrics;
+    public $automaticallyAddLocations = true;
     private $error;
     private $filename;
     private $ignoredWorksheets = ['Sources'];
@@ -882,8 +883,16 @@ class ImportFile
         /** @var ProgressHelper $progress */
         $progress = $this->shell_io->helper('Progress');
         $locations = $this->getActiveWorksheetProperty('locations');
+        $count = count($locations);
+
+        if ($count == 0) {
+            $this->shell_io->out(' - None found');
+
+            return;
+        }
+
         $progress->init([
-            'total' => count($locations),
+            'total' => $count,
             'width' => 40,
         ]);
         $progress->draw();
