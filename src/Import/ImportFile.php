@@ -930,7 +930,7 @@ class ImportFile
             if (isset($location['schoolCode']) && isset($location['schoolName'])) {
                 /** @var School $school */
                 $school = $schoolsTable
-                    ->find('by Code', ['code' => $location['schoolCode']])
+                    ->find('byCode', ['code' => $location['schoolCode']])
                     ->select(['id', 'name', 'school_district_id'])
                     ->first();
                 if ($school) {
