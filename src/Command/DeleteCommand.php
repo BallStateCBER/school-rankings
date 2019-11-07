@@ -79,7 +79,6 @@ class DeleteCommand extends Command
             $this->listAssociationCounts();
             $this->io->out();
             if ($this->getDeleteConfirmation()) {
-                $this->io->success('Deleted ' . $this->subjectRecord->name);
                 if ($this->subjectTable->delete($this->subjectRecord)) {
                     $this->io->success('Deleted ' . $this->subjectRecord->name);
                 }
