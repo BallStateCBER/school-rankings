@@ -9,6 +9,7 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
@@ -27,6 +28,8 @@ use Cake\Utility\Inflector;
 class DeleteCommand extends Command
 {
     private $io;
+    private $description =
+        'This command will tell you if a record is safe to delete and then delete it and associated records.';
     private $statsTable;
     private $tableName;
     private $choices = [
@@ -49,6 +52,13 @@ class DeleteCommand extends Command
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
+    protected function buildOptionParser(ConsoleOptionParser $parser)
+    {
+        $parser->setDescription($this->description);
+
+        return $parser;
+    }
+
     /**
      * Runs this command
      *
@@ -59,9 +69,7 @@ class DeleteCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->io = $io;
-        $this->io->out(
-            'This command will tell you if a record is safe to delete and then delete it and associated records.'
-        );
+        $this->io->out($this->description);
         $this->io->warning('It is recommended that you back up the database before deleting anything.');
         while (true) {
             $this->io->out();
