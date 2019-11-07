@@ -309,10 +309,20 @@ class ImportFile
      */
     public function getContext()
     {
+        // Context has already been determined
         if (isset($this->worksheets[$this->activeWorksheet]['context'])) {
             return $this->worksheets[$this->activeWorksheet]['context'];
         }
 
+        // Context can be determined from the worksheet name
+        switch ($this->activeWorksheet) {
+            case 'Schools':
+                return 'school';
+            case 'Corporations':
+                return 'district';
+        }
+
+        // Context can be determined from the column headers
         for ($row = 1; $row <= 2; $row++) {
             $isSchoolContext = (
                     $this->isSchoolCodeHeader(1, $row)
