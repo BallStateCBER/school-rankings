@@ -19,6 +19,8 @@ use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Exception as PhpOfficeException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -168,8 +170,8 @@ class ImportFile
      * Sets the specified worksheet as the currently active worksheet
      *
      * @param string $worksheet Worksheet name
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @return void
+     * @throws PhpOfficeException
      */
     public function selectWorksheet($worksheet)
     {
@@ -183,7 +185,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return string|int|float
      */
     public function getValue($col, $row)
@@ -198,8 +200,8 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @return null|\PhpOffice\PhpSpreadsheet\Cell\Cell
+     * @return null|Cell
+     * @throws PhpOfficeException
      */
     public function getCell($col, $row)
     {
@@ -210,7 +212,7 @@ class ImportFile
      * Returns the index of the first row on which statistical data will be read
      *
      * @return int
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     private function getFirstDataRow()
@@ -232,7 +234,7 @@ class ImportFile
      * Assumed to be the first column after the school/district identifier columns
      *
      * @return int
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     private function getFirstDataCol()
@@ -257,7 +259,7 @@ class ImportFile
      *
      * @param int $col Column index (starting with one)
      * @param int $row Row index (starting with one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return bool
      */
     private function isLocationHeader($col, $row)
@@ -273,7 +275,7 @@ class ImportFile
      *
      * @param int $col Column number
      * @return string
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     private function getLocationColumnType($col)
@@ -303,7 +305,7 @@ class ImportFile
      * Returns the active worksheet's context (school or district)
      *
      * @return string
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     public function getContext()
@@ -346,7 +348,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return bool
      */
     private function isDistrictCodeHeader($col, $row)
@@ -369,7 +371,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return bool
      */
     private function isDistrictNameHeader($col, $row)
@@ -392,7 +394,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return bool
      */
     private function isSchoolCodeHeader($col, $row)
@@ -414,7 +416,7 @@ class ImportFile
      *
      * @param int $col Column index (starting at one)
      * @param int $row Row index (starting at one)
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return bool
      */
     private function isSchoolNameHeader($col, $row)
@@ -433,7 +435,7 @@ class ImportFile
      *
      * e.g. by grade, ethnic group, etc.
      *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      * @return array|null
      */
@@ -486,7 +488,7 @@ class ImportFile
      * Returns an array of information about the data columns for the selected worksheet
      *
      * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     private function getDataColumns()
@@ -650,7 +652,7 @@ class ImportFile
      * Returns an array of $row => $location, with $location keys districtCode, districtName, schoolCode, and schoolName
      *
      * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      */
     public function getLocations()
     {
@@ -711,7 +713,6 @@ class ImportFile
      * Loops through all data cells in the active worksheet and aborts script if any are invalid
      *
      * @return void
-     * @throws \Aura\Intl\Exception
      * @throws Exception
      */
     public function validateData()
@@ -786,7 +787,6 @@ class ImportFile
      * Checks the database for already-identified metrics and interacts with the user if necessary
      *
      * @return void
-     * @throws \Aura\Intl\Exception
      */
     public function identifyMetrics()
     {
@@ -1054,8 +1054,8 @@ class ImportFile
      * @param array $unknownMetric Array of name and group information for the current column
      * @param string $metricName Name of new metric
      * @return int
-     *@throws Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
+     * @throws PhpOfficeException
      */
     private function addMetricChain($context, $unknownMetric, $metricName)
     {
@@ -1174,7 +1174,7 @@ class ImportFile
     /**
      * Adjusts totalRows to not include rows at the end of the file with blank values in their first column
      *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return void
      */
     private function trimTotalRows()
@@ -1228,9 +1228,8 @@ class ImportFile
     }
 
     /**
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return void
-     * @throws \Aura\Intl\Exception
      * @throws Exception
      */
     public function recordData()
@@ -1364,7 +1363,7 @@ class ImportFile
      *
      * @param int $col Column number
      * @param int $row Column number
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @return mixed
      */
     private function getProcessedValue($col, $row)
@@ -1479,7 +1478,7 @@ class ImportFile
      * Returns an array of all column names (ignoring groupings) for the selected worksheet
      *
      * @return array
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      * @throws Exception
      */
     public function getColumnNames()
