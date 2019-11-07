@@ -1,6 +1,8 @@
 <?php
 namespace App\Command;
 
+use Cake\Console\ConsoleIo;
+use Cake\Filesystem\Folder;
 use Exception;
 
 class Utility
@@ -55,5 +57,36 @@ class Utility
     public static function removeLeadingZeros($string)
     {
         return ltrim($string, '0');
+    }
+
+    /**
+     * Asks the user for input and returns a filename, or FALSE if no files are available
+     *
+     * @param string $directory Directory in which to search for files
+     * @param ConsoleIo $io ConsoleIo object
+     * @return string|bool
+     */
+    public static function selectFile($directory, $io)
+    {
+        $files = (new Folder($directory))->find();
+        if (!$files) {
+            $io->out('No files found in ' . $directory);
+
+            return false;
+        }
+
+        $io->out('Available files:');
+
+        $tableData = [];
+        foreach ($files as $key => $file) {
+            $tableData[] = [$key + 1, $file];
+        }
+        array_unshift($tableData, ['Key', 'File']);
+        $io->helper('Table')->output($tableData);
+
+        $maxKey = (count($tableData) - 1);
+        $fileKey = $io->ask('Select a file (1-' . $maxKey . '):');
+
+        return $files[$fileKey - 1];
     }
 }

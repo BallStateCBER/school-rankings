@@ -21,7 +21,6 @@ use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\EntityInterface;
-use Cake\Filesystem\Folder;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
@@ -45,7 +44,6 @@ use Exception;
  * @property SchoolTypesTable $schoolTypesTable
  * @property StatesTable $statesTable
  * @property string $filename
- * @property string[] $files
  */
 class ImportLocationsCommand extends Command
 {
@@ -56,7 +54,6 @@ class ImportLocationsCommand extends Command
     private $districts = [];
     private $districtsTable;
     private $filename;
-    private $files;
     private $gradesTable;
     private $importFile;
     private $locationsAdded = [
@@ -202,27 +199,7 @@ class ImportLocationsCommand extends Command
      */
     public function selectFile()
     {
-        $dataPath = $this->getDirectory();
-        $this->files = (new Folder($dataPath))->find();
-        if (!$this->files) {
-            $this->io->out('No files found in ' . $dataPath);
-
-            return false;
-        }
-
-        $this->io->out('Available files:');
-
-        $tableData = [];
-        foreach ($this->files as $key => $file) {
-            $tableData[] = [$key + 1, $file];
-        }
-        array_unshift($tableData, ['Key', 'File']);
-        $this->io->helper('Table')->output($tableData);
-
-        $maxKey = (count($tableData) - 1);
-        $fileKey = $this->io->ask('Select a file (1-' . $maxKey . '):');
-
-        return $this->files[$fileKey - 1];
+        return Utility::selectFile($this->getDirectory(), $this->io);
     }
 
     /**
