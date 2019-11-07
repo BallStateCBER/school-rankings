@@ -57,7 +57,7 @@ class PopulateLocationOriginCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -269,7 +269,7 @@ class PopulateLocationOriginCommand extends Command
 
         foreach ($this->files as $key => $file) {
             $this->currentFile = $file;
-            $year = $importLocations->getYearFromFilename($file);
+            $year = Utility::getYearFromFilename($file, $this->io);
             if (!$year) {
                 return;
             }

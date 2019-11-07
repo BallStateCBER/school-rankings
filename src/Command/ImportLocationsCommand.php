@@ -109,7 +109,7 @@ class ImportLocationsCommand extends Command
         $io->out($file . ' selected');
         $this->filename = $file;
 
-        $year = $this->getYearFromFilename($file);
+        $year = Utility::getYearFromFilename($file, $this->io);
         if (!$year) {
             return;
         }
@@ -200,36 +200,6 @@ class ImportLocationsCommand extends Command
     public function selectFile()
     {
         return Utility::selectFile($this->getDirectory(), $this->io);
-    }
-
-    /**
-     * Returns the year in a filename formatted like "foo (2018).xlsx", or false if no valid year is found
-     *
-     * @param string $file Filename
-     * @return bool|string
-     */
-    public function getYearFromFilename($file)
-    {
-        $substr = strrchr($file, '(');
-
-        if ($substr === false) {
-            $this->io->error(sprintf(
-                "No year found in filename '%s'. Please format filename like 'Foo (2018).xlsx'.",
-                $file
-            ));
-
-            return false;
-        }
-
-        $year = substr($substr, 1, strpos($substr, ')') - 1);
-
-        if (!ImportStatsCommand::isYear($year)) {
-            $this->io->error("$year is not a valid year");
-
-            return false;
-        }
-
-        return $year;
     }
 
     /**

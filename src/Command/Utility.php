@@ -89,4 +89,35 @@ class Utility
 
         return $files[$fileKey - 1];
     }
+
+    /**
+     * Returns the year in a filename formatted like "foo (2018).xlsx", or false if no valid year is found
+     *
+     * @param string $file Filename
+     * @param ConsoleIo $io ConsoleIo object
+     * @return bool|string
+     */
+    public static function getYearFromFilename($file, $io)
+    {
+        $substr = strrchr($file, '(');
+
+        if ($substr === false) {
+            $io->error(sprintf(
+                "No year found in filename '%s'. Please format filename like 'Foo (2018).xlsx'.",
+                $file
+            ));
+
+            return false;
+        }
+
+        $year = substr($substr, 1, strpos($substr, ')') - 1);
+
+        if (!ImportStatsCommand::isYear($year)) {
+            $io->error("$year is not a valid year");
+
+            return false;
+        }
+
+        return $year;
+    }
 }
