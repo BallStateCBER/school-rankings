@@ -49,7 +49,7 @@ class ImportFile
     private $autoNameMetrics;
     private $error;
     private $filename;
-    private $ignoredWorksheets = [];
+    private $ignoredWorksheets = ['Sources'];
     private $isPercentMetric = [];
     private $metricsTable;
     private $overwrite;
