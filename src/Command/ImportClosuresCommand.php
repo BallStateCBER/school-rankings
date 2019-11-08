@@ -51,7 +51,7 @@ class ImportClosuresCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser = parent::buildOptionParser($parser);
-        $parser->setDescription('Imports information about school/corporation closures from spreadsheets');
+        $parser->setDescription('Imports information about school/district closures from spreadsheets');
 
         return $parser;
     }
