@@ -169,4 +169,19 @@ class SchoolDistrictsTable extends Table
     {
         return $query->where(['SchoolDistricts.closed' => false]);
     }
+
+    /**
+     * Returns an array of the names of all of this table's associations
+     *
+     * @return array
+     */
+    public function getAssociationNames()
+    {
+        $associations = [];
+        foreach ($this->associations() as $association) {
+            $associations[] = $association->getName();
+        }
+
+        return $associations;
+    }
 }
