@@ -61,4 +61,29 @@ class School extends Entity
         'states' => true,
         'school_codes' => true
     ];
+
+    /**
+     * Returns the names of fields (or associations) that can be written to when merging two schools
+     *
+     * @return array
+     */
+    public function getMergeableFields()
+    {
+        return [
+            'school_district_id',
+            'school_type_id',
+            'name',
+            'address',
+            'url',
+            'phone',
+            'closed',
+            'origin_file',
+            'school_statistics',
+            'cities',
+            'counties',
+            'grades',
+            'states',
+            'school_codes'
+        ];
+    }
 }

@@ -69,4 +69,27 @@ class SchoolDistrict extends Entity
             'N/A'
         ]);
     }
+
+    /**
+     * Returns the names of fields (or associations) that can be written to when merging two school districts
+     *
+     * @return array
+     */
+    public function getMergeableFields()
+    {
+        return [
+            'name',
+            'url',
+            'origin_file',
+            'closed',
+            'phone',
+            'school_district_statistics',
+            'schools',
+            'rankings',
+            'cities',
+            'counties',
+            'states',
+            'school_district_codes'
+        ];
+    }
 }
