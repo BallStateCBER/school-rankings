@@ -94,7 +94,9 @@ class UpdateIdoeCodesCommand extends Command
         $duplicateRecord = $this->checkForDuplicate();
         if ($duplicateRecord) {
             if ($this->getMergePrepConfirmation($duplicateRecord)) {
-                $this->merge($duplicateRecord->id, $this->record->id);
+                if ($this->merge($duplicateRecord->id, $this->record->id)) {
+                    return;
+                }
             } else {
                 return;
             }
