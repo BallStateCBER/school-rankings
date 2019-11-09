@@ -52,8 +52,15 @@ class DeleteCommand extends Command
         $this->statsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
+    /**
+     * Hook method for defining this command's option parser.
+     *
+     * @param ConsoleOptionParser $parser The parser to be defined
+     * @return ConsoleOptionParser
+     */
     protected function buildOptionParser(ConsoleOptionParser $parser)
     {
+        $parser = parent::buildOptionParser($parser);
         $parser->setDescription($this->description);
 
         return $parser;
