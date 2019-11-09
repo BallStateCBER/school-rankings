@@ -5,9 +5,6 @@ let phpcs = require('gulp-phpcs');
 let phpunit = require('gulp-phpunit');
 let _ = require('lodash');
 
-gulp.task('default', ['php_cs']);
-
-
 /** ************
  *    PHP     *
  **************/
