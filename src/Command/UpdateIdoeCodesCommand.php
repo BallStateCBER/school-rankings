@@ -24,10 +24,10 @@ use Cake\Utility\Hash;
  * @property string $codeAssociationName
  * @property string $context
  * @property string $description
+ * @property string $foreignKey
  * @property string $newCode
  * @property string $oldCode
  * @property string $tableName
- * @property string $foreignKey
  * @property string $year
  */
 class UpdateIdoeCodesCommand extends Command
@@ -35,13 +35,13 @@ class UpdateIdoeCodesCommand extends Command
     private $codeAssociationName;
     private $context;
     private $description = 'handles updating a school or corporation\'s IDOE code being updated';
+    private $foreignKey;
     private $io;
     private $newCode;
     private $oldCode;
     private $record;
     private $table;
     private $tableName;
-    private $foreignKey;
     private $year;
 
     /**
