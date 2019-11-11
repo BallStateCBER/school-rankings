@@ -699,7 +699,9 @@ class ImportLocationsCommand extends Command
             }
             $response = $this->io->askChoice(
                 sprintf(
-                    'Change district name from %s to %s?',
+                    "Change %s #%s's name from %s to %s?",
+                    $context,
+                    $record->id,
                     $record->getOriginal('name'),
                     $record->name
                 ),
