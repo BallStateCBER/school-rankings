@@ -328,17 +328,24 @@ class ImportLocationsCommand extends Command
         list($firstRow, $lastRow, $firstCol, $lastCol) = $this->getLoopParams();
         $fieldMap = [
             'IDOE CORPORATION ID' => 'district code',
+            'CORP' => 'district code',
+            'SCHL' => 'code',
             'IDOE SCHOOL ID' => 'code',
             'SCHOOL NAME' => 'name',
+            'SCHL_NAME' => 'name',
             'ADDRESS' => 'address',
             'CITY' => 'city',
             'STATE' => 'state',
             'ZIP' => 'zip',
             'COUNTY NAME' => 'county',
+            'COUNTY_NAME' => 'county',
             'SCHOOL HOMEPAGE' => 'url',
+            'SCHOOL_HOMEPAGE' => 'url',
             'PHONE' => 'phone',
             'LOW GRADE 1' => 'low grade',
-            'HIGH GRADE 1' => 'high grade'
+            'LOW_GRADE' => 'low grade',
+            'HIGH GRADE 1' => 'high grade',
+            'HIGH_GRADE' => 'high grade'
         ];
 
         $progress = Utility::makeProgressBar($lastRow - $firstRow + 1, $this->io);
