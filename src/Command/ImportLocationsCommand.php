@@ -127,6 +127,11 @@ class ImportLocationsCommand extends Command
         $io->out('Analyzing worksheets...');
         $io->out();
         $this->importFile->read();
+        if ($this->importFile->getError()) {
+            $this->io->err($this->importFile->getError());
+
+            return;
+        }
         foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
             $context = $worksheetInfo['context'];
             $io->info('Worksheet: ' . $worksheetName);

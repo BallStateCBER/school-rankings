@@ -287,6 +287,10 @@ class PopulateLocationOriginCommand extends Command
             $this->io->out('Analyzing worksheets...');
             $this->io->out();
             $this->importFile->read();
+            if ($this->importFile->getError()) {
+                $this->io->err($this->importFile->getError());
+                exit;
+            }
             foreach ($this->importFile->getWorksheets() as $worksheetName => $worksheetInfo) {
                 $context = $worksheetInfo['context'];
                 $this->io->info('Worksheet: ' . $worksheetName);
@@ -342,8 +346,7 @@ class PopulateLocationOriginCommand extends Command
                 $this->importFile->read();
                 if ($this->importFile->getError()) {
                     $this->io->error($this->importFile->getError());
-
-                    return;
+                    exit;
                 }
 
                 // Read in worksheet info and validate data
