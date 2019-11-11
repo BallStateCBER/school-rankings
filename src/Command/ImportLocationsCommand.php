@@ -153,6 +153,7 @@ class ImportLocationsCommand extends Command
             } elseif ($context == 'school') {
                 $this->prepareSchools();
             }
+            $this->confirmNameChanges($context);
             $this->reportAddedLocations();
 
             $io->out();
@@ -673,5 +674,41 @@ class ImportLocationsCommand extends Command
     private function isDummyPhone($phone)
     {
         return strpos($phone, '000-0000') !== false;
+    }
+
+    /**
+     * Confirms every name change and reverts any that the user doesn't consent to
+     *
+     * @param string $context Either 'school' or 'district'
+     * @return void
+     */
+    private function confirmNameChanges($context)
+    {
+        $records = $context == 'school' ? $this->schools : $this->districts;
+        $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+        foreach ($records as &$record) {
+            if (!$record->isDirty('name')) {
+                continue;
+            }
+            $response = $this->io->askChoice(
+                sprintf(
+                    'Change district name from %s to %s?',
+                    $record->getOriginal('name'),
+                    $record->name
+                ),
+                ['y', 'n'],
+                'n'
+            );
+            if ($response == 'n') {
+                $record = $table->patchEntity($record, [
+                    'name' => $record->getOriginal('name')
+                ]);
+            }
+        }
+        if ($context == 'school') {
+            $this->schools = $records;
+        } else {
+            $this->districts = $records;
+        }
     }
 }
