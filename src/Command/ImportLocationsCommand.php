@@ -277,6 +277,11 @@ class ImportLocationsCommand extends Command
                 $this->abort();
             }
 
+            // Avoid saving dummy data
+            if ($this->isDummyPhone($data['phone'])) {
+                $data['phone'] = null;
+            }
+
             // Prepare update
             $district = $this->getLocation($context, $data['code']);
             $district = $this->districtsTable->patchEntity($district, [
@@ -361,6 +366,11 @@ class ImportLocationsCommand extends Command
             if (!$this->citiesTable->Counties->link($city, [$county])) {
                 $this->io->error('Error linking ' . $city->name . ' to ' . $county->name . ' County');
                 $this->abort();
+            }
+
+            // Avoid saving dummy data
+            if ($this->isDummyPhone($data['phone'])) {
+                $data['phone'] = null;
             }
 
             // Prepare update
@@ -650,5 +660,18 @@ class ImportLocationsCommand extends Command
         }
 
         return $gradeIds;
+    }
+
+    /**
+     * Returns TRUE if this appears to be a dummy phone number, e.g. (000) 000-0000
+     *
+     * For some reason, the IDOE lists dummy phone numbers for some schools and districts instead of leaving them blank
+     *
+     * @param string $phone A phone number
+     * @return bool
+     */
+    private function isDummyPhone($phone)
+    {
+        return strpos($phone, '000-0000') !== false;
     }
 }
