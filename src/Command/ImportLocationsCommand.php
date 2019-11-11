@@ -117,11 +117,6 @@ class ImportLocationsCommand extends Command
         $dir = $this->getDirectory();
         $this->importFile = new ImportFile($year, $dir, $file, $io);
         $this->importFile->ignoreWorksheets(['closed']);
-        if ($this->importFile->getError()) {
-            $io->error($this->importFile->getError());
-
-            return;
-        }
 
         // Read in worksheet info and validate data
         $io->out('Analyzing worksheets...');
