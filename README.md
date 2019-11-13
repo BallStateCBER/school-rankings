@@ -7,3 +7,5 @@
 ## Documentation
  - [Terminology](docs/terminology.md)
  - [Updating Locations](docs/updating_locations.md)
+ - [Updating Statistics](docs/updating_statistics.md)
+ - [Location Quirks](docs/location_quirks.md) (unintuitive observations about schools and school corporations)
