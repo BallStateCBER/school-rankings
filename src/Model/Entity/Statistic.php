@@ -60,7 +60,7 @@ class Statistic extends Entity
      */
     public static function roundValue($value)
     {
-        // String
+        // Non-numeric values
         if (!is_numeric($value)) {
             return $value;
         }
