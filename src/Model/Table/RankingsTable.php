@@ -60,11 +60,14 @@ class RankingsTable extends Table
             'foreignKey' => 'formula_id',
             'joinType' => 'INNER'
         ]);
+
+        // If a ranking has no associated grades, it's assumed that schools teaching ALL grades are being ranked
         $this->belongsToMany('Grades', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'grade_id',
             'joinTable' => 'rankings_grades'
         ]);
+
         $this->belongsToMany('Cities', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'city_id',
