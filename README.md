@@ -12,3 +12,4 @@
  - [Fixing Errors](docs/fixing_errors.md)
  - [Location Quirks](docs/location_quirks.md) (unintuitive observations about schools and school corporations)
  - [Elasticsearch](docs/elasticsearch.md)
+ - [Miscellaneous Notes](docs/miscellaneous.md)
