@@ -1672,9 +1672,12 @@ class ImportFile
                 continue;
             }
 
+            /** @var Statistic $record */
             $record = $stat['record'];
             if ($deleteAll) {
-                $this->statisticsTable->delete($record);
+                if (!$this->statisticsTable->delete($record)) {
+                    $this->throwDeleteErrorException($record);
+                }
                 $this->counts['deleted']++;
                 continue;
             }
@@ -1683,7 +1686,9 @@ class ImportFile
             // Delete this and all subsequent records
             if ($response == 'ya') {
                 $deleteAll = true;
-                $this->statisticsTable->delete($record);
+                if (!$this->statisticsTable->delete($record)) {
+                    $this->throwDeleteErrorException($record);
+                }
                 $this->counts['deleted']++;
 
             // Ignore this and all subsequent records
@@ -1694,7 +1699,9 @@ class ImportFile
 
             // Delete this record
             } elseif ($response == 'y') {
-                $this->statisticsTable->delete($record);
+                if (!$this->statisticsTable->delete($record)) {
+                    $this->throwDeleteErrorException($record);
+                }
                 $this->counts['deleted']++;
 
             // Ignore this record
@@ -1729,6 +1736,22 @@ class ImportFile
             'Selection:',
             ['y', 'n', 'ya', 'na'],
             'n'
+        );
+    }
+
+    /**
+     * Throws an exception with a message about the provided error failing to be deleted
+     *
+     * @param Statistic $record The record that failed to be deleted
+     * @return void
+     * @throws InternalErrorException
+     */
+    private function throwDeleteErrorException(Statistic $record)
+    {
+        $details = $record->getErrors();
+        throw new InternalErrorException(
+            'Could not delete statistic with ID ' . $record->id,
+            $details ? 'Details: ' . print_r($details, true) : ''
         );
     }
 }
