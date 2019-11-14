@@ -139,7 +139,8 @@ class ImportStatsCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
+     * @throws InternalErrorException
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {

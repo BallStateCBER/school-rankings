@@ -1250,9 +1250,12 @@ class ImportFile
     }
 
     /**
-     * @throws PhpOfficeException
+     * Updates the database with data from the active worksheet
+     *
      * @return void
+     * @throws PhpOfficeException
      * @throws Exception
+     * @throws InternalErrorException
      */
     public function recordData()
     {
@@ -1622,6 +1625,7 @@ class ImportFile
      *
      * @param array $statsToDelete Each member has a Statistics record and a string containing the actual (non)value
      * @return void
+     * @throws InternalErrorException
      */
     private function processDeletableRecords(array $statsToDelete)
     {
@@ -1662,6 +1666,7 @@ class ImportFile
      * @param array $statsToDelete Each member has a Statistics record and a string containing the actual (non)value
      * @param bool $deleteAll TRUE if all records should be deleted, FALSE if each record should be confirmed by user
      * @return void
+     * @throws InternalErrorException
      */
     private function deleteRecords(array $statsToDelete, bool $deleteAll)
     {
