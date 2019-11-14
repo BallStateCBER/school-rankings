@@ -1327,7 +1327,7 @@ class ImportFile
                 // Add
                 if (!$existingStat) {
                     $locationIdField = ($context == 'school') ? 'school_id' : 'school_district_id';
-                    $statistic = $this->statisticsTable->newEntity([
+                    $this->addNewStatistic([
                         'metric_id' => $metricId,
                         $locationIdField => $locationId,
                         'value' => $value,
@@ -1335,16 +1335,7 @@ class ImportFile
                         'file' => $this->filename,
                         'contiguous' => true
                     ]);
-                    unset($locationIdField, $metricId);
-                    if ($statistic->getErrors()) {
-                        $errors = print_r($statistic->getErrors(), true);
-                        $this->shell_io->error("Error adding statistic. Details: \n" . $errors);
-                        throw new Exception();
-                    } else {
-                        $this->statisticsTable->save($statistic);
-                    }
-                    $this->counts['added']++;
-                    unset($existingStat, $statistic, $value);
+                    unset($existingStat, $value);
                     continue;
                 }
                 unset($metricId, $statistic);
@@ -1758,5 +1749,27 @@ class ImportFile
             'Could not delete statistic with ID ' . $record->id,
             $details ? 'Details: ' . print_r($details, true) : ''
         );
+    }
+
+    /**
+     * Attempts to add a new record to the Statistics table
+     *
+     * @param array $data Array of data to save as a new Statistic record
+     * @throws Exception
+     * @return void
+     */
+    private function addNewStatistic(array $data)
+    {
+        $statistic = $this->statisticsTable->newEntity($data);
+        unset($locationIdField, $metricId);
+        if ($statistic->getErrors()) {
+            $errors = print_r($statistic->getErrors(), true);
+            $this->shell_io->error("Error adding statistic. Details: \n" . $errors);
+            throw new Exception();
+        } else {
+            $this->statisticsTable->save($statistic);
+        }
+        $this->counts['added']++;
+        unset($statistic);
     }
 }
