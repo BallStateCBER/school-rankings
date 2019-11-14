@@ -16,3 +16,5 @@ Several command-line scripts have been developed to help automate issues in the 
 - `bin\cake fix-selectable` looks for unselectable metrics with associated statistics or selectable metrics with no 
   statistics and toggles their `selectable` flag. You can use this command to review a preview of the changes that it 
   will make before you precede with updates.
+
+- `bin\cake clean-associations` looks for redundant records in join tables and removes them.
