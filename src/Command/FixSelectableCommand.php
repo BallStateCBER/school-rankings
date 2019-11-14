@@ -142,6 +142,7 @@ class FixSelectableCommand extends CommonCommand
      * Displays a preview of what updates will take place
      *
      * @return void
+     * @throws Exception
      */
     private function previewUpdates()
     {
@@ -158,6 +159,7 @@ class FixSelectableCommand extends CommonCommand
         foreach ($this->updates as $mode => $metrics) {
             foreach ($metrics as $metric) {
                 // Display each metric as a path from its root ancestor, e.g. "Foo > Bar > Metric Name"
+                $this->metricsTable->setScope($metric['context']);
                 $metricPath = $this->metricsTable
                     ->find('path', ['for' => $metric['id']])
                     ->select(['id', 'name'])
