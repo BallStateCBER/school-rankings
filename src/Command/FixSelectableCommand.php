@@ -163,9 +163,9 @@ class FixSelectableCommand extends CommonCommand
                 $metricPath = $this->metricsTable
                     ->find('path', ['for' => $metric['id']])
                     ->select(['id', 'name'])
-                    ->all();
-                $metricPathNames = Hash::extract($metricPath->toArray(), '{n}.name');
-                $combinedPathNames = implode(' > ', $metricPathNames);
+                    ->toArray();
+                $metricPathNames = Hash::extract($metricPath, '{n}.name');
+                $combinedPathNames = implode(' > ', $metricPathNames) . " (#{$metric['id']})";
                 $tableData[] = [
                     str_replace("\n", ' - ', $combinedPathNames),
                     $mode
