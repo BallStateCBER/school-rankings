@@ -1349,7 +1349,10 @@ class ImportFile
 
                 // Update
                 if ($this->getOverwrite()) {
-                    $this->statisticsTable->patchEntity($existingStat, ['value' => $value]);
+                    $this->statisticsTable->patchEntity($existingStat, [
+                        'value' => $value,
+                        'file' => $this->filename
+                    ]);
                     if ($existingStat->getErrors() || !$this->statisticsTable->save($existingStat)) {
                         $errors = print_r($existingStat->getErrors(), true);
                         $this->shell_io->error("Error details: \n" . $errors);
