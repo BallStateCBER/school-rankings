@@ -1273,8 +1273,10 @@ class ImportFile
         $counts = [
             'added' => 0,
             'updated' => 0,
-            'ignored' => 0
+            'ignored' => 0,
+            'deleted' => 0
         ];
+        $statsToDelete = [];
         /** @var StatisticsTable $statisticsTable */
         $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
@@ -1298,15 +1300,24 @@ class ImportFile
                 $progress->draw();
 
                 $value = $this->getProcessedValue($col, $row);
-
-                // Ignore, not a value
-                if ($datum->isIgnorable($value)) {
-                    $counts['ignored']++;
-                    continue;
-                }
-
                 $metricId = $this->worksheets[$this->activeWorksheet]['dataColumns'][$col]['metricId'];
                 $existingStat = $statisticsTable->getStatistic($context, $metricId, $locationId, $year);
+
+                // Value is ignorable and won't be imported
+                if ($datum->isIgnorable($value)) {
+                    // This value was recorded to the statistics table and shouldn't have been
+                    if ($existingStat) {
+                        $statsToDelete[] = [
+                            'record' => $existingStat,
+                            'cellContents' => $value === null ? 'null' : "\"$value\""
+                        ];
+                    // Ignore this value
+                    } else {
+                        $counts['ignored']++;
+                    }
+
+                    continue;
+                }
 
                 // Add
                 if (!$existingStat) {
@@ -1356,6 +1367,67 @@ class ImportFile
         }
 
         $this->shell_io->overwrite(' - Done');
+
+        if ($statsToDelete) {
+            $count = count($statsToDelete);
+            $response = $this->getDeleteAllResponse($count);
+            $this->shell_io->out();
+
+            if ($response == 'n') {
+                $counts['ignored'] += $count;
+            } elseif ($response == 'a' || $response == 'e') {
+                $deleteAll = $response == 'a';
+                foreach ($statsToDelete as $stat) {
+                    $record = $stat['record'];
+                    $cellContents = $stat['cellContents'];
+                    if (!$deleteAll) {
+                        $this->shell_io->out(sprintf(
+                            'Statistic #%s was saved with value %s, but its spreadsheet cell contains %s. Delete?',
+                            $record->id,
+                            $record->value,
+                            $cellContents
+                        ));
+                        $this->shell_io->out(' - [y] yes');
+                        $this->shell_io->out(' - [n] no');
+                        $this->shell_io->out(' - [ya] yes and delete the rest');
+                        $this->shell_io->out(' - [na] no and skip the rest');
+                        $response = $this->shell_io->askChoice(
+                            'Selection:',
+                            ['y', 'n', 'ya', 'na'],
+                            'n'
+                        );
+                        if ($response == 'ya') {
+                            $deleteAll = true;
+                        } elseif ($response == 'na') {
+                            $this->shell_io->out();
+                            break;
+                        } elseif ($response == 'y') {
+                            $statisticsTable->delete($record);
+                            $counts['deleted']++;
+                        } elseif ($response == 'n') {
+                            $counts['ignored']++;
+                        }
+                    }
+
+                    if ($deleteAll) {
+                        $statisticsTable->delete($record);
+                        $counts['deleted']++;
+                    }
+                    $this->shell_io->out();
+                }
+            } elseif ($response == 's') {
+                $table = [['Statistic ID', 'Saved value', 'Value in spreadsheet']];
+                foreach ($statsToDelete as $stat) {
+                    $record = $stat['record'];
+                    $cellContents = $stat['cellContents'];
+                    $table[] = [$record->id, $record->value, $cellContents];
+                }
+                $this->shell_io->helper('Table')->output($table);
+
+                // TODO: Repeat prompt, get user input, and allow deleting
+            }
+        }
+
         foreach ($counts as $action => $count) {
             if (!$count) {
                 continue;
@@ -1571,5 +1643,32 @@ class ImportFile
 
             return;
         }
+    }
+
+    /**
+     * Displays a message about records that appear to need to be deleted and returns the user's response
+     *
+     * @param int $count Count of records that would be deleted
+     * @return string
+     */
+    private function getDeleteAllResponse(int $count)
+    {
+        $this->shell_io->warning(sprintf(
+            '%s found in the database that should not have been imported, ' .
+            'since %s to a blank cell or a cell with an ignorable value like "N/A". Delete %s?',
+            __n('One record was', "$count records were", $count),
+            __n('it corresponds', 'each correspond', $count),
+            __n('this record', 'these records', $count)
+        ));
+        $this->shell_io->out(' - [n] Don\'t delete any');
+        $this->shell_io->out(' - [a] Yes, delete all');
+        $this->shell_io->out(' - [e] Ask me for each record');
+        $this->shell_io->out(' - [s] Show all details');
+
+        return $this->shell_io->askChoice(
+            'Selection:',
+            ['n', 'a', 'e', 's'],
+            's'
+        );
     }
 }
