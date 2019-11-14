@@ -8,4 +8,5 @@
  - [Terminology](docs/terminology.md)
  - [Updating Locations](docs/updating_locations.md)
  - [Updating Statistics](docs/updating_statistics.md)
+ - [Fixing Errors](docs/fixing_errors.md)
  - [Location Quirks](docs/location_quirks.md) (unintuitive observations about schools and school corporations)
