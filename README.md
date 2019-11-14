@@ -11,3 +11,4 @@
  - [Checking for Errors](docs/checking_for_errors.md)
  - [Fixing Errors](docs/fixing_errors.md)
  - [Location Quirks](docs/location_quirks.md) (unintuitive observations about schools and school corporations)
+ - [Elasticsearch Commands](docs/elasticsearch.md)
