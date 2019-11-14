@@ -112,10 +112,10 @@ class FixSelectableCommand extends CommonCommand
         $this->makeProgressBar(count($this->metrics));
         foreach ($this->metrics as $metric) {
             if ($metric['selectable'] && !$this->hasStats[$metric['id']]) {
-                $this->updates['selectable'][] = $metric;
+                $this->updates['unselectable'][] = $metric;
             }
             if (!$metric['selectable'] && $this->hasStats[$metric['id']]) {
-                $this->updates['unselectable'][] = $metric;
+                $this->updates['selectable'][] = $metric;
             }
             $this->progress->increment(1)->draw();
         }
