@@ -8,6 +8,7 @@ use Cake\Console\ConsoleIo;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
+use Exception;
 
 /**
  * Class FixSelectableCommand
@@ -37,7 +38,7 @@ class FixSelectableCommand extends CommonCommand
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -63,7 +64,7 @@ class FixSelectableCommand extends CommonCommand
      * Collects metrics
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function getMetrics()
     {
@@ -102,7 +103,6 @@ class FixSelectableCommand extends CommonCommand
     /**
      * Prepares database updates
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function prepareUpdates()
