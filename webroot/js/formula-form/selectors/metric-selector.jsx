@@ -12,6 +12,7 @@ class MetricSelector extends React.Component {
       errorMsg: '',
       hasError: false,
       loading: false,
+      retrying: false,
       successfullyLoaded: false,
     };
     this.setupClickEvents = this.setupClickEvents.bind(this);
@@ -43,33 +44,63 @@ class MetricSelector extends React.Component {
       errorMsg: '',
       hasError: false,
       loading: true,
+      retrying: false,
     });
 
-    $.ajax({
+    let tryCount = 0;
+    const retryLimit = 3;
+    const options = {
       method: 'GET',
       url: '/api/metrics/' + this.props.context + 's.json?no-hidden=1',
       dataType: 'json',
-    }).done((data) => {
+      timeout: 4000,
+    };
+    const onDone = (data) => {
       // Load jsTree
       const container = $('#jstree');
       container.jstree(MetricSelector.getJsTreeConfig(data));
-      this.setState({successfullyLoaded: true});
+      this.setState({
+        loading: false,
+        retrying: false,
+        successfullyLoaded: true,
+      });
       this.setupSearch();
       this.setupClickEvents();
-    }).fail((jqXHR) => {
-      let errorMsg = 'Error loading metrics. This may be a temporary network error.';
-      if (jqXHR && jqXHR.hasOwnProperty('responseJSON')) {
-        if (jqXHR.responseJSON.hasOwnProperty('message')) {
-          errorMsg = jqXHR.responseJSON.message;
+    };
+    const onFail = (jqXHR) => {
+      console.log(jqXHR);
+      if (jqXHR.statusText === 'timeout') {
+        if (tryCount > 0) {
+          this.setState({retrying: true});
+        }
+        tryCount++;
+        if (tryCount <= retryLimit) {
+          console.log('Retrying');
+          $.ajax(options)
+            .done(onDone)
+            .fail(onFail);
+          return;
         }
       }
+      let errorMsg = 'Error loading metrics. This may be a temporary network error.';
+      if (
+        jqXHR &&
+        jqXHR.hasOwnProperty('responseJSON') &&
+        jqXHR.responseJSON &&
+        jqXHR.responseJSON.hasOwnProperty('message')
+      ) {
+          errorMsg = jqXHR.responseJSON.message;
+      }
       this.setState({
-        hasError: true,
         errorMsg: errorMsg,
+        hasError: true,
+        loading: false,
+        retrying: false,
       });
-    }).always(() => {
-      this.setState({loading: false});
-    });
+    };
+    $.ajax(options)
+      .done(onDone)
+      .fail(onFail);
   }
 
   setupSearch() {
@@ -138,11 +169,18 @@ class MetricSelector extends React.Component {
   }
 
   render() {
+    const subject = this.props.context === 'school' ? 'schools' : 'school corporation';
+
     return (
       <div>
         {this.state.loading &&
           <span className="loading">
-            Loading options...
+            {this.state.retrying &&
+              <span>It&apos;s taking longer than usual to load {subject} metrics...</span>
+            }
+            {!this.state.retrying &&
+              <span>Loading {subject} metrics...</span>
+            }
             <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
                  className="loading" />
           </span>
