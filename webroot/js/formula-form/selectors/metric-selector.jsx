@@ -68,14 +68,12 @@ class MetricSelector extends React.Component {
       this.setupClickEvents();
     };
     const onFail = (jqXHR) => {
-      console.log(jqXHR);
       if (jqXHR.statusText === 'timeout') {
         if (tryCount > 0) {
           this.setState({retrying: true});
         }
         tryCount++;
         if (tryCount <= retryLimit) {
-          console.log('Retrying');
           $.ajax(options)
             .done(onDone)
             .fail(onFail);
