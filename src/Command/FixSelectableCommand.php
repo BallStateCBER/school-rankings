@@ -162,12 +162,14 @@ class FixSelectableCommand extends CommonCommand
                 $this->metricsTable->setScope($metric['context']);
                 $metricPath = $this->metricsTable
                     ->find('path', ['for' => $metric['id']])
-                    ->select(['id', 'name'])
+                    ->select(['id', 'name', 'context'])
                     ->toArray();
                 $metricPathNames = Hash::extract($metricPath, '{n}.name');
-                $combinedPathNames = implode(' > ', $metricPathNames) . " (#{$metric['id']})";
+                $combinedPathNames = implode(' > ', $metricPathNames);
                 $tableData[] = [
+                    $metric['context'],
                     str_replace("\n", ' - ', $combinedPathNames),
+                    $metric['id'],
                     $mode
                 ];
                 $this->progress->increment(1)->draw();
@@ -184,7 +186,7 @@ class FixSelectableCommand extends CommonCommand
         ));
 
         // Display table in pages of 50 elements
-        $tableHeader = ['Metric', 'Will be set to'];
+        $tableHeader = ['Context', 'Metric', 'ID', 'Will be set to'];
         $page = 0;
         $perPage = 50;
         $rowCount = count($tableData);
