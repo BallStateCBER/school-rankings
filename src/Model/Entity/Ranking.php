@@ -109,8 +109,10 @@ class Ranking extends Entity
                         continue;
                     }
 
-                    // Non-percent values
-                    $statistic['value'] = number_format($statistic['value']);
+                    // Non-percent numeric values
+                    if (is_numeric($statistic['value'])) {
+                        $statistic['value'] = number_format($statistic['value']);
+                    }
                 }
             }
         }
