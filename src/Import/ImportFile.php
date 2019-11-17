@@ -1726,8 +1726,8 @@ class ImportFile
             $record->value,
             $cellContents
         ));
-        $this->shell_io->out(' - [y] yes');
-        $this->shell_io->out(' - [n] no');
+        $this->shell_io->out(' - [y] yes, delete it');
+        $this->shell_io->out(' - [n] no, keep it');
         $this->shell_io->out(' - [ya] yes and delete the rest');
         $this->shell_io->out(' - [na] no and skip the rest');
 
