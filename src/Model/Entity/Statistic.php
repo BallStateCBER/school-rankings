@@ -23,6 +23,8 @@ use Cake\ORM\Entity;
  * @property School $school
  * @property SchoolDistrict $school_district
  * @property int|float $numeric_value
+ * @property int $rank
+ * @property bool $rankTied
  */
 class Statistic extends Entity
 {
@@ -82,10 +84,8 @@ class Statistic extends Entity
      */
     protected function _getNumericValue()
     {
-        $value = $this->_properties['value'];
-
         // Grade values
-        switch ($value) {
+        switch ($this->value) {
             case 'a':
             case 'A':
                 return 4;
@@ -104,16 +104,15 @@ class Statistic extends Entity
         }
 
         // Percent values
-        if (self::isPercentValue($value)) {
-            $value = substr($value, 0, -1);
+        if (self::isPercentValue($this->value)) {
+            return (float)substr($this->value, 0, -1);
         }
 
-        if (!is_numeric($value)) {
-            $id = $this->properties['id'];
-            throw new InternalErrorException("Invalid value for statistic #$id: $value");
+        if (is_numeric($this->value)) {
+            return (float)$this->value;
         }
 
-        return (float)$value;
+        throw new InternalErrorException("Invalid value for statistic #$this->id: $this->value");
     }
 
     /**
