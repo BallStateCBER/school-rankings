@@ -108,13 +108,19 @@ class ResultSubject extends React.Component {
       let displayedRank = null;
       switch (statistic.rank) {
         case 1:
-          displayedRank = <span>Highest score for {metricName}</span>;
+          displayedRank = statistic.rankTied ?
+            <span>Tied for highest score for {metricName}</span> :
+            <span>Highest score for {metricName}</span>;
           break;
         case 2:
-          displayedRank = <span>2<sup>nd</sup> highest score for {metricName}</span>;
+          displayedRank = statistic.rankTied ?
+            <span>Tied for 2<sup>nd</sup> highest score for {metricName}</span> :
+            <span>2<sup>nd</sup> highest score for {metricName}</span>;
           break;
         case 3:
-          displayedRank = <span>3<sup>rd</sup> highest score for {metricName}</span>;
+          displayedRank = statistic.rankTied ?
+            <span>Tied for 3<sup>rd</sup> highest score for {metricName}</span> :
+            <span>3<sup>rd</sup> highest score for {metricName}</span>;
           break;
         default:
           continue;
