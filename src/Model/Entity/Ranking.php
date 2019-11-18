@@ -131,8 +131,15 @@ class Ranking extends Entity
         foreach ($this->$resultsKey as &$subject) {
             /** @var Statistic $statistic */
             foreach ($subject->statistics as &$statistic) {
-                $statisticValues[$statistic->metric_id][] = $statistic->numeric_value;
+                $value = $statistic->numeric_value;
+                $metricId = $statistic->metric_id;
+                $statisticValues[$metricId][] = $value;
             }
+        }
+
+        // Ensure that all values are unique
+        foreach ($statisticValues as $metricId => &$values) {
+            $values = array_unique($values);
         }
 
         // Order each set of statistics by value
@@ -152,7 +159,8 @@ class Ranking extends Entity
                 $statistic->rank = null;
                 $statistic->rankTied = false;
                 for ($n = 1; $n <= 3; $n++) {
-                    if ($value == $statisticValues[$metricId][$n - 1]) {
+                    $nthRankedValue = $statisticValues[$metricId][$n - 1];
+                    if ($value == $nthRankedValue) {
                         $statistic->rank = $n;
                         $rankedStatistics[$metricId][$n][] = $statistic->id;
                         break;
@@ -165,13 +173,12 @@ class Ranking extends Entity
         foreach ($this->$resultsKey as &$subject) {
             /** @var Statistic $statistic */
             foreach ($subject->statistics as &$statistic) {
-                for ($n = 1; $n <= 3; $n++) {
-                    $metricId = $statistic->metric_id;
-                    if (!isset($rankedStatistics[$metricId][$n])) {
-                        continue;
-                    }
-                    $statistic->rankTied = in_array($statistic->id, $rankedStatistics[$metricId][$n]);
+                $metricId = $statistic->metric_id;
+                if (!isset($rankedStatistics[$metricId][$statistic->rank])) {
+                    continue;
                 }
+
+                $statistic->rankTied = count($rankedStatistics[$metricId][$statistic->rank]) > 1;
             }
         }
     }
