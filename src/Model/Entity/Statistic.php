@@ -2,6 +2,7 @@
 namespace App\Model\Entity;
 
 use Cake\Http\Exception\InternalErrorException;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -15,12 +16,12 @@ use Cake\ORM\Entity;
  * @property int $year
  * @property bool $contiguous
  * @property string $file
- * @property \Cake\I18n\FrozenTime $created
- * @property \Cake\I18n\FrozenTime $modified
+ * @property FrozenTime $created
+ * @property FrozenTime $modified
  *
- * @property \App\Model\Entity\Metric $metric
- * @property \App\Model\Entity\School $school
- * @property \App\Model\Entity\SchoolDistrict $school_district
+ * @property Metric $metric
+ * @property School $school
+ * @property SchoolDistrict $school_district
  * @property int|float $numeric_value
  */
 class Statistic extends Entity
