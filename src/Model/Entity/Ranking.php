@@ -129,10 +129,9 @@ class Ranking extends Entity
         $statisticValues = [];
         $resultsKey = $this->results_districts ? 'results_districts' : 'results_schools';
         foreach ($this->$resultsKey as &$subject) {
-            foreach ($subject['statistics'] as &$statistic) {
-                $metricId = $statistic['metric_id'];
-                $value = $statistic['value'];
-                $statisticValues[$metricId][] = $value;
+            /** @var Statistic $statistic */
+            foreach ($subject->statistics as &$statistic) {
+                $statisticValues[$statistic->metric_id][] = $statistic->numeric_value;
             }
         }
 
@@ -141,26 +140,37 @@ class Ranking extends Entity
             rsort($values);
         }
 
-        // To discover ties, keep track of which metrics have their 1st, 2nd, and 3rd highest stat values marked
-        $statRanks = [];
+        // Keep track of which statistics are in 1st, 2nd, and 3rd place in their metrics in order to discover ties
+        $rankedStatistics = [];
 
-        // Flag each statistic if it's (tied for) the 1st, 2nd, or 3rd highest value
+        // Flag each statistic if it's the 1st, 2nd, or 3rd highest value (including tied ranks)
         foreach ($this->$resultsKey as &$subject) {
-            foreach ($subject['statistics'] as &$statistic) {
-                $metricId = $statistic['metric_id'];
-                $value = $statistic['value'];
-                $statistic['rank'] = null;
-                $statistic['rankTied'] = false;
+            /** @var Statistic $statistic */
+            foreach ($subject->statistics as &$statistic) {
+                $metricId = $statistic->metric_id;
+                $value = $statistic->numeric_value;
+                $statistic->rank = null;
+                $statistic->rankTied = false;
                 for ($n = 1; $n <= 3; $n++) {
                     if ($value == $statisticValues[$metricId][$n - 1]) {
-                        $statistic['rank'] = $n;
-                        if (isset($statRanks[$metricId][$n])) {
-                            $statistic['rankTied'] = true;
-                        } else {
-                            $statRanks[$metricId][$n] = true;
-                        }
+                        $statistic->rank = $n;
+                        $rankedStatistics[$metricId][$n][] = $statistic->id;
                         break;
                     }
+                }
+            }
+        }
+
+        // Note any ties
+        foreach ($this->$resultsKey as &$subject) {
+            /** @var Statistic $statistic */
+            foreach ($subject->statistics as &$statistic) {
+                for ($n = 1; $n <= 3; $n++) {
+                    $metricId = $statistic->metric_id;
+                    if (!isset($rankedStatistics[$metricId][$n])) {
+                        continue;
+                    }
+                    $statistic->rankTied = in_array($statistic->id, $rankedStatistics[$metricId][$n]);
                 }
             }
         }
