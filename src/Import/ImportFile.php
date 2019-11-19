@@ -17,6 +17,7 @@ use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Cake\Utility\Hash;
 use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Exception as PhpOfficeException;
@@ -133,6 +134,7 @@ class ImportFile
                 $this->worksheets[$wsName]['dataColumns'] = $this->getDataColumns();
                 $this->worksheets[$wsName]['locations'] = $this->getLocations();
                 $this->trimTotalRows();
+                $this->checkForStatConflicts();
             }
         } catch (Exception $e) {
             $this->error = $e->getMessage();
@@ -1774,5 +1776,106 @@ class ImportFile
         }
         $this->counts['added']++;
         unset($statistic);
+    }
+
+    /**
+     * Throws an exception if this sheet has 2+ rows describing different non-blank stats for the same school/district
+     *
+     * @return void
+     * @throws PhpOfficeException
+     * @throws Exception
+     */
+    private function checkForStatConflicts()
+    {
+        $context = $this->getContext();
+        $codeKey = $context == 'school' ? 'schoolCode' : 'districtCode';
+        $locations = $this->worksheets[$this->activeWorksheet]['locations'];
+
+        // Check for duplicate locations
+        $codes = Hash::extract($locations, "{n}.$codeKey");
+        $uniqueCodes = array_unique($codes);
+        if (count($codes) == count($uniqueCodes)) {
+            return;
+        }
+
+        // Get the codes for duplicated locations
+        $duplicateCodes = [];
+        foreach (array_count_values($codes) as $code => $count) {
+            if ($count > 1) {
+                $duplicateCodes[] = $code;
+            }
+        }
+
+        // Get the spreadsheet rows for each duplicated location
+        $duplicatedLocationRows = [];
+        foreach ($duplicateCodes as $code) {
+            foreach ($locations as $row => $location) {
+                if ($location[$codeKey] == $code) {
+                    $duplicatedLocationRows[$code][] = $row;
+                }
+            }
+        }
+
+        // Check for non-null values for the same location and the same column
+        foreach ($duplicatedLocationRows as $code => $rows) {
+            $columns = [];
+            foreach ($rows as $row) {
+                $colsInRow = $this->getColumnsWithDataInRow($row);
+                $columns = array_merge($columns, $colsInRow);
+            }
+
+            if (count($columns) == count(array_unique($columns))) {
+                continue;
+            }
+
+            $columnsWithConflicts = [];
+            foreach (array_count_values($columns) as $col => $count) {
+                if ($count > 1) {
+                    $columnsWithConflicts[] = $col;
+                }
+            }
+            $this->shell_io->error(sprintf(
+                'Stat conflict on %s worksheet: %s with code %d is on multiple rows with stats in %s %s',
+                $this->activeWorksheet,
+                ucfirst($context),
+                $code,
+                __n('column', 'columns', count($columnsWithConflicts)),
+                implode(', ', $columnsWithConflicts)
+            ));
+            $this->shell_io->out('Recommendations:');
+            $this->shell_io->out(' - If there are completely duplicated rows, just delete them');
+            $this->shell_io->out(' - If one of these values should be ignored, update Datum::isIgnorable()');
+            $this->shell_io->out(' - Investigate further if these rows show different, real values');
+
+            throw new Exception('Aborting');
+        }
+    }
+
+    /**
+     * Returns an array of column numbers that contain non-ignorable data in the provided row
+     *
+     * @param int $row Row number
+     * @throws PhpOfficeException
+     * @return int[]
+     */
+    private function getColumnsWithDataInRow($row)
+    {
+        $datum = new Datum();
+        $columnsWithData = [];
+        foreach ($this->getActiveWorksheetProperty('dataColumns') as $colNum => $colInfo) {
+            $cell = $this->getCell($colNum, $row);
+            if ($cell->isFormula()) {
+                $value = $cell->getCalculatedValue();
+            } else {
+                $value = $cell->getValue();
+                $value = is_string($value) ? trim($value) : $value;
+            }
+            if (!$datum->isIgnorable($value)) {
+                $columnsWithData[] = $colNum;
+                continue;
+            }
+        }
+
+        return $columnsWithData;
     }
 }
