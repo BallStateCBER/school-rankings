@@ -176,9 +176,15 @@ class StatisticsTable extends Table
             function ($entity) use ($metricsTable, $rules) {
                 /** @var Statistic $entity */
                 try {
-                    $isPercent = isset($entity->metric->is_percent) ?
-                        $entity->metric->is_percent :
+                    if (isset($entity->metric->is_percent)) {
+                        $isPercent = $entity->metric->is_percent;
+                    } elseif (isset($entity->metric_id)) {
                         $metricsTable->isPercentMetric($entity->metric_id);
+                    } else {
+                        throw new InternalErrorException(
+                            'Statistic cannot be added or updated without its metric or metric_id property'
+                        );
+                    }
 
                 // The associated metric does not exist, which is a violation that has been checked by an earlier rule
                 } catch (RecordNotFoundException $e) {
