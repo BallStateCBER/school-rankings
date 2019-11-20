@@ -26,6 +26,7 @@ use App\Command\ImportClosuresCommand;
 use App\Command\ImportLocationsCommand;
 use App\Command\ImportStatsCommand;
 use App\Command\ImportStatsStatusCommand;
+use App\Command\LocationMergeCommand;
 use App\Command\MetricMergeCommand;
 use App\Command\MetricParentMergeCommand;
 use App\Command\MetricReparentCommand;
@@ -133,7 +134,7 @@ class Application extends BaseApplication
         $commands->add('import-locations', ImportLocationsCommand::class);
         $commands->add('import-stats', ImportStatsCommand::class);
         $commands->add('import-stats-status', ImportStatsStatusCommand::class);
-        $commands->add('update-idoe-codes', UpdateIdoeCodesCommand::class);
+        $commands->add('location-merge', LocationMergeCommand::class);
         $commands->add('metric-merge', MetricMergeCommand::class);
         $commands->add('metric-parent-merge', MetricParentMergeCommand::class);
         $commands->add('metric-reparent', MetricReparentCommand::class);
@@ -143,6 +144,7 @@ class Application extends BaseApplication
         $commands->add('populate-location-origin', PopulateLocationOriginCommand::class);
         $commands->add('rank-test', RankTestShell::class);
         $commands->add('speed-test-es', SpeedTestElasticsearchCommand::class);
+        $commands->add('update-idoe-codes', UpdateIdoeCodesCommand::class);
 
         return $commands;
     }
