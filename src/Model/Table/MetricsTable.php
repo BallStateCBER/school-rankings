@@ -10,6 +10,10 @@ use Cake\Datasource\EntityInterface;
 use Cake\Event\Event;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\Association\BelongsTo;
+use Cake\ORM\Association\HasMany;
+use Cake\ORM\Behavior\TimestampBehavior;
+use Cake\ORM\Behavior\TreeBehavior;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -20,8 +24,8 @@ use Exception;
 /**
  * Metrics Model
  *
- * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\BelongsTo $ParentMetrics
- * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\HasMany $ChildMetrics
+ * @property MetricsTable|BelongsTo $ParentMetrics
+ * @property MetricsTable|HasMany $ChildMetrics
  *
  * @method Metric get($primaryKey, $options = [])
  * @method Metric newEntity($data = null, array $options = [])
@@ -31,8 +35,8 @@ use Exception;
  * @method Metric[] patchEntities($entities, array $data, array $options = [])
  * @method Metric findOrCreate($search, callable $callback = null, $options = [])
  *
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
- * @mixin \Cake\ORM\Behavior\TreeBehavior
+ * @mixin TimestampBehavior
+ * @mixin TreeBehavior
  */
 class MetricsTable extends Table
 {
@@ -78,8 +82,8 @@ class MetricsTable extends Table
     /**
      * Default validation rules.
      *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * @param Validator $validator Validator instance.
+     * @return Validator
      */
     public function validationDefault(Validator $validator)
     {
@@ -151,8 +155,8 @@ class MetricsTable extends Table
      * Returns a rules checker object that will be used for validating
      * application integrity.
      *
-     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
-     * @return \Cake\ORM\RulesChecker
+     * @param RulesChecker $rules The rules object to be modified.
+     * @return RulesChecker
      */
     public function buildRules(RulesChecker $rules)
     {
@@ -199,7 +203,7 @@ class MetricsTable extends Table
      * @param string $context Either 'school' or 'district'
      * @param string $metricName The name of the new metric
      * @param string $type Either 'numeric' or 'boolean'
-     * @return \Cake\Datasource\EntityInterface
+     * @return EntityInterface
      * @throws Exception
      */
     public function addRecord($context, $metricName, $type = 'numeric')
