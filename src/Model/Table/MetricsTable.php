@@ -7,6 +7,7 @@ use ArrayObject;
 use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\Event;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Http\Exception\InternalErrorException;
@@ -486,6 +487,8 @@ class MetricsTable extends Table
      *
      * @param int|string $metric ID of metric record or record name
      * @return bool
+     * @throws InternalErrorException
+     * @throws RecordNotFoundException
      */
     public function isPercentMetric($metric)
     {
