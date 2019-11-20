@@ -174,8 +174,11 @@ class StatisticsTable extends Table
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $rules->add(
             function ($entity) use ($metricsTable, $rules) {
+                /** @var Statistic $entity */
                 try {
-                    $isPercent = $metricsTable->isPercentMetric($entity->metric_id);
+                    $isPercent = isset($entity->metric->is_percent) ?
+                        $entity->metric->is_percent :
+                        $metricsTable->isPercentMetric($entity->metric_id);
 
                 // The associated metric does not exist, which is a violation that has been checked by an earlier rule
                 } catch (RecordNotFoundException $e) {
