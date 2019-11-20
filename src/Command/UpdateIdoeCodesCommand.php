@@ -33,7 +33,7 @@ class UpdateIdoeCodesCommand extends Command
 {
     private $codeAssociationName;
     private $context;
-    private $description = 'handles updating a school or corporation\'s IDOE code being updated';
+    private $description = 'handles a school or corporation switching to a new IDOE code';
     private $foreignKey;
     private $io;
     private $newCode;
