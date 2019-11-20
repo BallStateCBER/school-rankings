@@ -11,7 +11,6 @@ use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Hash;
 
 /**
  * UpdateIdoeCodesCommand command.
@@ -90,16 +89,8 @@ class UpdateIdoeCodesCommand extends Command
             return;
         }
 
-        // Handle merging
-        $duplicateRecord = $this->checkForDuplicate();
-        if ($duplicateRecord) {
-            if ($this->getMergePrepConfirmation($duplicateRecord)) {
-                if ($this->merge($duplicateRecord->id, $this->record->id)) {
-                    return;
-                }
-            } else {
-                return;
-            }
+        if ($this->recordFoundWithNewCode()) {
+            return;
         }
 
         // Check if code has already been added
@@ -188,11 +179,11 @@ class UpdateIdoeCodesCommand extends Command
     }
 
     /**
-     * Checks if a duplicate entry for this school/district was previously added
+     * Returns an existing school/district with the new code, or NULL if none is found
      *
      * @return null|School|SchoolDistrict
      */
-    private function checkForDuplicate()
+    private function getExistingWithNewCode()
     {
         $results = $this->table
             ->find('byCode', ['code' => $this->newCode])
@@ -218,293 +209,6 @@ class UpdateIdoeCodesCommand extends Command
         $this->abort();
 
         return null;
-    }
-
-    /**
-     * Returns TRUE if the user consents to start preparing a merge operation
-     *
-     * @param School|SchoolDistrict $duplicateRecord The existing record to be merged with $this->record and deleted
-     * @return bool
-     */
-    private function getMergePrepConfirmation($duplicateRecord)
-    {
-        $hasSameName = $this->record->name == $duplicateRecord->name;
-        $this->io->out();
-        $this->io->warning(sprintf(
-            'It appears that a second %s record with %s was added with the new IDOE code.',
-            $this->context,
-            $hasSameName ? 'the same name' : 'the name "' . $duplicateRecord->name . '"'
-        ));
-        $response = $this->io->askChoice(
-            sprintf(
-                'Merge these %ss? The newer record (ID: %s, code: %s) will be removed.',
-                $this->context,
-                $duplicateRecord->id,
-                $this->newCode
-            ),
-            ['y', 'n'],
-            'n'
-        );
-        if (!$hasSameName) {
-            $response = $this->io->askChoice(
-                sprintf(
-                    'Are you sure that %s (ID: %s) and %s (ID: %s) are the same %s and should be merged? ' .
-                    'The latter record will be removed.',
-                    $this->record->name,
-                    $this->record->id,
-                    $duplicateRecord->name,
-                    $duplicateRecord->id,
-                    $this->context
-                ),
-                ['y', 'n'],
-                'n'
-            );
-        }
-
-        return $response == 'y';
-    }
-
-    /**
-     * Takes a pair of IDs of school or districts to merge into one record
-     *
-     * @param int $fromId ID of record to remove after merging
-     * @param int $intoId ID of record to retain
-     * @return bool
-     */
-    private function merge($fromId, $intoId)
-    {
-        // Get both records
-        $this->io->out();
-        $this->io->out('Retrieving records...');
-        list($fromRecord, $intoRecord) = $this->getRecordsToMerge($fromId, $intoId);
-
-        // Prepare updates
-        $this->io->out();
-        $this->io->out('Preparing updates...');
-        $intoRecord = $this->mergeScalarFields($fromRecord, $intoRecord);
-        $intoRecord = $this->mergeAssociatedObjects($fromRecord, $intoRecord);
-        $intoRecord = $this->mergeAssociationArrays($fromRecord, $intoRecord);
-
-        // Report all dirty fields
-        $this->io->out();
-        $this->io->out('Results...');
-        $this->showDirtyFields($intoRecord);
-
-        // Check for errors
-        $this->io->out();
-        $this->io->out('Checking for errors...');
-        if ($intoRecord->getErrors()) {
-            $this->io->err('There are errors preventing these updates from taking place:');
-            print_r($intoRecord->getErrors());
-
-            return false;
-        }
-        $this->io->success('No errors found');
-
-        // Get confirmation
-        $this->io->out();
-        $response = $this->io->askChoice('Proceed with merge?', ['y', 'n'], 'n');
-        if ($response == 'n') {
-            return false;
-        }
-
-        // Update $intoRecord
-        $this->io->out();
-        $this->io->out("Updating {$this->context} with ID {$intoRecord->id}...");
-        if (!$this->table->save($intoRecord)) {
-            $this->io->error('There was an error saving those updates. Details: ');
-            print_r($intoRecord->getErrors());
-
-            return false;
-        }
-        $this->io->success('Done');
-
-        // Delete $fromRecord
-        $this->io->out();
-        $this->io->out("Deleting {$this->context} with ID {$fromRecord->id}...");
-        if (!$this->table->delete($fromRecord)) {
-            $this->io->error('There was an error deleting that record. Details: ');
-            print_r($fromRecord->getErrors());
-
-            return false;
-        }
-        $this->io->success('Done');
-
-        $this->record = $intoRecord;
-
-        $this->io->out();
-        $this->io->out('Merge complete');
-
-        return true;
-    }
-
-    /**
-     * Updates scalar fields (not arrays or objects) in $intoRecord
-     *
-     * @param School|SchoolDistrict $fromRecord Record to be removed and source of new values
-     * @param School|SchoolDistrict $intoRecord Record to be retained and updated
-     * @return School|SchoolDistrict
-     */
-    private function mergeScalarFields(School $fromRecord, School $intoRecord)
-    {
-        foreach ($intoRecord->getMergeableFields() as $field) {
-            // Don't merge
-            if (!is_scalar($fromRecord->$field)) {
-                continue;
-            }
-            if ($fromRecord->$field == $intoRecord->$field) {
-                continue;
-            }
-            if ($fromRecord->$field == '') {
-                continue;
-            }
-
-            // Merge
-            if ($intoRecord->$field == '') {
-                $this->io->out(sprintf(
-                    'Will update blank %s to "%s"',
-                    $field,
-                    str_replace("\n", '\n', $fromRecord->$field)
-                ));
-                $intoRecord = $this->table->patchEntity($intoRecord, [$field => $fromRecord->$field]);
-                continue;
-            }
-
-            // Have user resolve conflict and merge
-            $this->io->out("These {$this->context}s have different values for $field");
-            $this->io->out(sprintf(
-                ' - 1: Use the new value "%s"',
-                $fromRecord->$field
-            ));
-            $this->io->out(sprintf(
-                ' - 2: Keep the old value "%s"',
-                $intoRecord->$field
-            ));
-            $response = $this->io->askChoice('Which value should be kept?', [1, 2]);
-            if ($response == 1) {
-                $intoRecord = $this->table->patchEntity($intoRecord, [$field => $fromRecord->$field]);
-            }
-        }
-
-        return $intoRecord;
-    }
-
-    /**
-     * Updates one-to-one associations in $intoRecord
-     *
-     * @param School|SchoolDistrict $fromRecord Record to be removed and source of new values
-     * @param School|SchoolDistrict $intoRecord Record to be retained and updated
-     * @return School|SchoolDistrict
-     */
-    private function mergeAssociatedObjects(School $fromRecord, School $intoRecord)
-    {
-        foreach ($intoRecord->getMergeableFields() as $field) {
-            // Don't merge
-            if (!is_object($fromRecord->$field)) {
-                continue;
-            }
-            if (!$fromRecord->$field) {
-                continue;
-            }
-            if ($fromRecord->$field->id == $intoRecord->$field->id) {
-                continue;
-            }
-
-            // Merge
-            if (!$intoRecord->$field) {
-                $this->io->out('Will update ' . $field);
-                $intoRecord->$field = $fromRecord->$field;
-                $intoRecord->setDirty($field);
-                continue;
-            }
-
-            // Have user resolve conflict and merge
-            $this->io->out("These {$this->context}s have different {$field}s");
-            $this->io->out(sprintf(
-                ' - 1: %s to remove has value "%s"',
-                ucfirst($this->context),
-                $fromRecord->$field
-            ));
-            $this->io->out(sprintf(
-                ' - 2: %s to keep has value "%s"',
-                ucfirst($this->context),
-                $intoRecord->$field
-            ));
-            $response = $this->io->askChoice('Which value should be kept?', [1, 2]);
-            if ($response == 1) {
-                $intoRecord = $this->table->patchEntity($intoRecord, [$field => $fromRecord->$field]);
-            }
-        }
-
-        return $intoRecord;
-    }
-
-    /**
-     * Updates one-to-many associations in $intoRecord
-     *
-     * @param School|SchoolDistrict $fromRecord Record to be removed and source of new values
-     * @param School|SchoolDistrict $intoRecord Record to be retained and updated
-     * @return School|SchoolDistrict
-     */
-    private function mergeAssociationArrays($fromRecord, $intoRecord)
-    {
-        foreach ($intoRecord->getMergeableFields() as $field) {
-            // Don't merge
-            if (!is_array($fromRecord->$field)) {
-                continue;
-            }
-            if (count($fromRecord->$field) == 0) {
-                continue;
-            }
-
-            $existingIds = Hash::extract($intoRecord->$field, '{n}.id');
-            foreach ($fromRecord->$field as $associatedRecord) {
-                if (in_array($associatedRecord->id, $existingIds)) {
-                    continue;
-                }
-                $this->io->out("Will add association with record #{$associatedRecord->id} from $field table");
-                $intoRecord->$field[] = $associatedRecord;
-                $intoRecord->setDirty($field);
-            }
-        }
-
-        return $intoRecord;
-    }
-
-    /**
-     * Returns an array of the record to remove, followed by the record to retain
-     *
-     * @param int $fromId ID of record to merge and delete
-     * @param int $intoId ID of record to merge and retain
-     * @return School[]|SchoolDistrict[]
-     */
-    private function getRecordsToMerge(int $fromId, int $intoId)
-    {
-        $records = [];
-        foreach ([$fromId, $intoId] as $id) {
-            $records[] = $this->table
-                ->find()
-                ->where([$this->tableName . '.id' => $id])
-                ->contain($this->table->getAssociationNames())
-                ->first();
-        }
-
-        return $records;
-    }
-
-    /**
-     * Displays a table of all mergeable fields and whether or not they are dirty
-     *
-     * @param School|SchoolDistrict $record School or district record
-     * @return void
-     */
-    private function showDirtyFields($record)
-    {
-        $resultsTable = [['Field', 'Will be updated']];
-        foreach ($record->getMergeableFields() as $field) {
-            $resultsTable[] = [$field, $record->isDirty($field) ? 'Yes' : 'No'];
-        }
-        $this->io->helper('Table')->output($resultsTable);
     }
 
     /**
@@ -574,5 +278,39 @@ class UpdateIdoeCodesCommand extends Command
         do {
             $this->year = $this->io->ask('In roughly what year did this code change take place?');
         } while (!$this->validateYear($this->year));
+    }
+
+    /**
+     * Displays recommendations and returns TRUE if the new code corresponds to another existing school/district record
+     *
+     * @return bool
+     */
+    private function recordFoundWithNewCode()
+    {
+        $existingRecord = $this->getExistingWithNewCode();
+        if (!$existingRecord) {
+            return false;
+        }
+
+        // Give recommendation
+        $this->io->out(sprintf(
+            'The new IDOE code is associated with the %s with ID #%s and %s. If a %s changes its code to that ' .
+                'of another existing %s, it\'s recommended that the former %s just be marked as closed.',
+            $this->context,
+            $existingRecord->id,
+            ($existingRecord->name == $this->record->name) ? 'the same name' : "the name {$existingRecord->name}",
+            $this->context,
+            $this->context,
+            $this->context
+        ));
+
+        $this->io->out(sprintf(
+            'The %s with ID #%s is %s.',
+            $this->context,
+            $this->record->id,
+            $this->record->closed ? 'already marked as being closed, so further action is required' : 'marked as open'
+        ));
+
+        return true;
     }
 }
