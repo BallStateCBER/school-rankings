@@ -381,7 +381,7 @@ class FixPercentValuesCommand extends Command
         foreach ($metrics as $metric) {
             $this->progress->increment(1)->draw();
             $results = $this->statisticsTable->find()
-                ->select(['id', 'value', 'school_id', 'school_district_id'])
+                ->select(['id', 'value', 'school_id', 'school_district_id', 'metric_id'])
                 ->where([
                     'metric_id' => $metric->id,
                     $this->getMisformattedCondition($metric->is_percent)
