@@ -68,7 +68,7 @@ class UpdateIdoeCodesCommand extends Command
     }
 
     /**
-     * Implement this method with your command's logic.
+     * Takes a context, and old IDOE code, and a new IDOE code from the user and processes the request
      *
      * @param Arguments $args The command arguments.
      * @param ConsoleIo $io The console io
