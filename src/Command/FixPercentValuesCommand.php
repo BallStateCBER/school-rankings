@@ -14,6 +14,8 @@ use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Closure;
+use Exception;
 
 /**
  * Class FixPercentValuesCommand
@@ -31,8 +33,6 @@ use Cake\Shell\Helper\ProgressHelper;
  */
 class FixPercentValuesCommand extends Command
 {
-    const NONPERCENT = 'non-percent';
-    const PERCENT = 'percent';
     private $io;
     private $metricCount = 0;
     private $metrics;
@@ -50,7 +50,7 @@ class FixPercentValuesCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -106,7 +106,6 @@ class FixPercentValuesCommand extends Command
     /**
      * Retrieves all metrics
      *
-     * @throws \Aura\Intl\Exception
      * @return void
      */
     private function getMetrics()
@@ -141,7 +140,6 @@ class FixPercentValuesCommand extends Command
      *
      * @param string $context 'school' or 'district'
      * @return void
-     * @throws \Aura\Intl\Exception
      */
     private function findStatistics($context)
     {
@@ -256,7 +254,7 @@ class FixPercentValuesCommand extends Command
      * Returns a function to be used as a find condition to retrieve misformatted statistics
      *
      * @param bool $isPercent TRUE if the statistics SHOULD be percent-formatted
-     * @return \Closure
+     * @return Closure
      * @throws InternalErrorException
      */
     private function getMisformattedCondition($isPercent)
@@ -279,7 +277,6 @@ class FixPercentValuesCommand extends Command
      * Sets the value of is_percent for each metric if it's currently null
      *
      * @return void
-     * @throws \Aura\Intl\Exception
      */
     private function classifyMetrics()
     {
