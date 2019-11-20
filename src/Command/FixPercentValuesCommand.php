@@ -308,7 +308,16 @@ class FixPercentValuesCommand extends Command
         foreach ($metrics as $metric) {
             $this->progress->increment(1)->draw();
             if (!isset($metric->is_percent)) {
-                $isPercent = $parentIsPercent || $this->metricsTable->isPercentMetric($metric->name);
+                try {
+                    $isPercent = $parentIsPercent || $this->metricsTable->isPercentMetric($metric->name);
+                } catch (InternalErrorException $e) {
+                    $this->io->out(sprintf(
+                        'There was an error determining whether or not metric #%s (%s) is a percentage metric',
+                        $metric->id,
+                        $metric->name
+                    ));
+                    throw new InternalErrorException($e->getMessage());
+                }
                 $this->metricsTable->patchEntity($metric, ['is_percent' => $isPercent]);
                 $this->unclassifiedMetricCount++;
             }
