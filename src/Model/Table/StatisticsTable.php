@@ -179,7 +179,7 @@ class StatisticsTable extends Table
                     if (isset($entity->metric->is_percent)) {
                         $isPercent = $entity->metric->is_percent;
                     } elseif (isset($entity->metric_id)) {
-                        $metricsTable->isPercentMetric($entity->metric_id);
+                        $isPercent = $metricsTable->isPercentMetric($entity->metric_id);
                     } else {
                         throw new InternalErrorException(
                             'Statistic cannot be added or updated without its metric or metric_id property'
