@@ -167,6 +167,10 @@ class FixPercentValuesCommand extends Command
      */
     private function updateStatistics($context)
     {
+        if ($this->statisticsCount == 0) {
+            return;
+        }
+
         $this->io->out();
         $this->io->out(sprintf(
             'Updating %s misformatted %s statistics... %s',
