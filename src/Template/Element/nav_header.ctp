@@ -90,6 +90,8 @@ $isActive = function ($url, ServerRequest $request) {
                         <?= $this->Html->link(
                             'Log out',
                             [
+                                'plugin' => false,
+                                'prefix' => false,
                                 'controller' => 'Users',
                                 'action' => 'logout'
                             ],
