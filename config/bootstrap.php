@@ -40,6 +40,8 @@ use Cake\Http\ServerRequest;
 use Cake\Log\Log;
 use Cake\Mailer\Email;
 use Cake\Utility\Security;
+use Detection\MobileDetect;
+use josegonzalez\Dotenv\Loader as DotEnvLoader;
 
 /**
  * Uncomment block of code below if you want to use `.env` file during development.
@@ -47,7 +49,7 @@ use Cake\Utility\Security;
  * variables as required.
  */
 if (!env('APP_NAME') && file_exists(CONFIG . '.env')) {
-    $dotenv = new \josegonzalez\Dotenv\Loader([CONFIG . '.env']);
+    $dotenv = new DotEnvLoader([CONFIG . '.env']);
     $dotenv->parse()
         ->putenv()
         ->toEnv()
@@ -65,7 +67,7 @@ if (!env('APP_NAME') && file_exists(CONFIG . '.env')) {
 try {
     Configure::config('default', new PhpConfig());
     Configure::load('app', 'default', false);
-} catch (\Exception $e) {
+} catch (Exception $e) {
     exit($e->getMessage() . "\n");
 }
 
@@ -166,12 +168,12 @@ Security::setSalt(Configure::consume('Security.salt'));
  * Setup detectors for mobile and tablet.
  */
 ServerRequest::addDetector('mobile', function ($request) {
-    $detector = new \Detection\MobileDetect();
+    $detector = new MobileDetect();
 
     return $detector->isMobile();
 });
 ServerRequest::addDetector('tablet', function ($request) {
-    $detector = new \Detection\MobileDetect();
+    $detector = new MobileDetect();
 
     return $detector->isTablet();
 });
