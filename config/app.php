@@ -385,5 +385,7 @@ return [
         'sleeptime' => 2, // 2 seconds
         'workermaxruntime' => 300, // 5 minutes
         'workertimeout' => 3000 // 50 minutes
-    ]
+    ],
+
+    'adminEmail' => 'gtwatson@bsu.edu'
 ];
