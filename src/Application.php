@@ -70,13 +70,7 @@ class Application extends BaseApplication
         Configure::write('Users.config', ['users']);
 
         if (PHP_SAPI === 'cli') {
-            try {
-                $this->addPlugin('Bake');
-            } catch (MissingPluginException $e) {
-                // Do not halt if the plugin is missing
-            }
-
-            $this->addPlugin('Migrations');
+            $this->bootstrapCli();
         }
 
         /*
@@ -86,6 +80,21 @@ class Application extends BaseApplication
         if (Configure::read('debug')) {
             $this->addPlugin(Plugin::class);
         }
+    }
+
+    /**
+     * Loads required plugins for the CLI environment
+     *
+     * @return void
+     */
+    protected function bootstrapCli()
+    {
+        try {
+            $this->addPlugin('Bake');
+        } catch (MissingPluginException $e) {
+            // Do not halt if the plugin is missing
+        }
+        $this->addPlugin('Migrations');
     }
 
     /**
