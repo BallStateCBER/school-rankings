@@ -35,7 +35,27 @@
         <?php endif; ?>
         <?= $this->fetch('content') ?>
     </div>
-    <footer>
+    <footer class="d-flex">
+        <ul class="list-unstyled list-inline mx-auto justify-content-center">
+            <li class="list-inline-item">
+                <?= $this->Html->link(
+                    'Terms of Use',
+                    [
+                        'controller' => 'Pages',
+                        'action' => 'terms'
+                    ]
+                ) ?>
+            </li>
+            <li class="list-inline-item">
+                <?= $this->Html->link(
+                    'Privacy Policy',
+                    [
+                        'controller' => 'Pages',
+                        'action' => 'privacy'
+                    ]
+                ) ?>
+            </li>
+        </ul>
     </footer>
     <script>
         $(document).ready(function () {

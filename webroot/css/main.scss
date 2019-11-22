@@ -11,3 +11,18 @@
 #home-jumbotron {
     margin-top: 30px;
 }
+
+footer {
+  margin-top: 3em;
+
+  li {
+    padding: 0 2em;
+  }
+  a {
+    color: $text-muted;
+  }
+}
+
+section.terms {
+  margin: 2em 0;
+}
