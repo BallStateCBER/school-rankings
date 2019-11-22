@@ -95,7 +95,7 @@ class RankTask extends Shell
      * Processes an unprocessed ranking
      *
      * @param int $rankingId ID of ranking record
-     * @return bool
+     * @return void
      * @throws Exception
      */
     public function process($rankingId)
@@ -122,8 +122,6 @@ class RankTask extends Shell
         $this->updateJobProgress(1, true);
         $this->updateJobStatus('Done');
         $this->outputResults();
-
-        return true;
     }
 
     /**

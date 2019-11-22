@@ -2,7 +2,9 @@
 namespace App\Shell;
 
 use App\Shell\Task\RankTask;
+use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Shell;
+use Exception;
 
 /**
  * Class RankTestShell
@@ -16,7 +18,7 @@ class RankTestShell extends Shell
     /**
      * Defines this shell's arguments/options
      *
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function getOptionParser()
     {
@@ -32,7 +34,7 @@ class RankTestShell extends Shell
     /**
      * Processes the ranking job with the provided ranking ID
      *
-     * @throws \Exception
+     * @throws Exception
      * @return void
      */
     public function main()

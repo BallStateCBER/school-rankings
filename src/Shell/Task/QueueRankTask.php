@@ -1,6 +1,7 @@
 <?php
 namespace App\Shell\Task;
 
+use Exception;
 use Queue\Shell\Task\QueueTask;
 
 /**
@@ -31,8 +32,8 @@ class QueueRankTask extends QueueTask
      *
      * @param array $data The array passed to QueuedJobsTable::createJob()
      * @param int $jobId The id of the QueuedJob entity
-     * @return bool Success
-     * @throws \Exception
+     * @return void
+     * @throws Exception
      */
     public function run(array $data, $jobId)
     {
@@ -42,7 +43,7 @@ class QueueRankTask extends QueueTask
         $rankTask->initialize();
         $rankTask->setJobId($jobId);
 
-        return $rankTask->process($rankingId);
+        $rankTask->process($rankingId);
     }
 
     /**
