@@ -437,9 +437,8 @@ class CheckStatsCommand extends Command
      */
     private function checkNoStatsInYear(int $year)
     {
-        if (!$this->getConfirmation(
-            "Check for selectable metrics with no stats in the most recent year ($year)?"
-        )) {
+        $msg = "Check for selectable metrics with no stats in the most recent year ($year)?";
+        if (!$this->getConfirmation($msg)) {
             return;
         }
 
