@@ -40,6 +40,7 @@ use App\Shell\RankTestShell;
 use Cake\Console\CommandCollection;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
+use Cake\ElasticSearch\Plugin as ElasticSearchPlugin;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
 use Cake\Http\MiddlewareQueue as MiddlewareQueueAlias;
@@ -64,7 +65,7 @@ class Application extends BaseApplication
         parent::bootstrap();
 
         $this->addPlugin('Queue');
-        $this->addPlugin('Cake/ElasticSearch', ['bootstrap' => true]);
+        $this->addPlugin(ElasticSearchPlugin::class);
 
         if (PHP_SAPI === 'cli') {
             try {
