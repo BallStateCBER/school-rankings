@@ -66,6 +66,8 @@ class Application extends BaseApplication
 
         $this->addPlugin('Queue');
         $this->addPlugin(ElasticSearchPlugin::class);
+        $this->addPlugin('CakeDC/Users');
+        Configure::write('Users.config', ['users']);
 
         if (PHP_SAPI === 'cli') {
             try {
