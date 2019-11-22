@@ -192,7 +192,7 @@ class FormulaForm extends React.Component {
 
       this.setState({
         progressPercent: 10,
-        progressStatus: 'Preparing calculation',
+        progressStatus: 'Processing ranking formula',
       });
 
       this.formulaId = data.id;
@@ -234,7 +234,9 @@ class FormulaForm extends React.Component {
 
       this.setState({
         progressPercent: 20,
-        progressStatus: 'Preparing calculation',
+        progressStatus: this.submittedData.context === 'school' ?
+          'Processing school parameters' :
+          'Processing school corporation parameters',
       });
 
       this.rankingId = data.rankingId;
