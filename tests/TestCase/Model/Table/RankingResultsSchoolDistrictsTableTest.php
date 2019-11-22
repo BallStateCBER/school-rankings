@@ -24,9 +24,9 @@ class RankingResultsSchoolDistrictsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.ranking_results_school_districts',
-        'app.rankings',
-        'app.school_districts'
+        'app.RankingResultsSchoolDistricts',
+        'app.Rankings',
+        'app.SchoolDistricts'
     ];
 
     /**

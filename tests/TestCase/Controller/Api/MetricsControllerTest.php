@@ -22,8 +22,8 @@ class MetricsControllerTest extends IntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.metrics',
-        'app.statistics'
+        'app.Metrics',
+        'app.Statistics'
     ];
 
     /**

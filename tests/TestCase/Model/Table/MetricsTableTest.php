@@ -23,8 +23,8 @@ class MetricsTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.metrics',
-        'app.statistics'
+        'app.Metrics',
+        'app.Statistics'
     ];
 
     /**

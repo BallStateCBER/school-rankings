@@ -14,11 +14,11 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.criteria',
-        'app.formulas',
-        'app.metrics',
-        'app.spreadsheet_columns_metrics',
-        'app.statistics'
+        'app.Criteria',
+        'app.Formulas',
+        'app.Metrics',
+        'app.SpreadsheetColumnsMetrics',
+        'app.Statistics'
     ];
 
     /**

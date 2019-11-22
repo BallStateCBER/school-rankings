@@ -24,7 +24,7 @@ class ImportedFilesTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.imported_files'
+        'app.ImportedFiles'
     ];
 
     /**

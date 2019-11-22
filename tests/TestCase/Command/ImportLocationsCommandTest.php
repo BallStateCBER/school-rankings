@@ -11,21 +11,20 @@ class ImportLocationsCommandTest extends ConsoleIntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.cities',
-        'app.cities_counties',
-        'app.counties',
-        'app.imported_files',
-        'app.school_districts',
-        'app.school_districts',
-        'app.school_districts_cities',
-        'app.school_districts_counties',
-        'app.school_districts_states',
-        'app.school_types',
-        'app.schools',
-        'app.schools_cities',
-        'app.schools_counties',
-        'app.schools_states',
-        'app.states',
+        'app.Cities',
+        'app.CitiesCounties',
+        'app.Counties',
+        'app.ImportedFiles',
+        'app.SchoolDistricts',
+        'app.SchoolDistrictsCities',
+        'app.SchoolDistrictsCounties',
+        'app.SchoolDistrictsStates',
+        'app.SchoolTypes',
+        'app.Schools',
+        'app.SchoolsCities',
+        'app.SchoolsCounties',
+        'app.SchoolsStates',
+        'app.States',
     ];
 
     /**

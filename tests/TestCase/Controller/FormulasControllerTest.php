@@ -15,11 +15,11 @@ class FormulasControllerTest extends IntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.formulas',
-        'app.users',
-        'app.rankings',
-        'app.shared_formulas',
-        'app.criteria'
+        'app.Formulas',
+        'app.Users',
+        'app.Rankings',
+        'app.SharedFormulas',
+        'app.Criteria'
     ];
 
     /**

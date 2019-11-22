@@ -24,23 +24,23 @@ class SchoolsStatesTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.schools_states',
-        'app.schools',
-        'app.school_districts',
-        'app.rankings',
-        'app.rankings_school_districts',
-        'app.cities',
-        'app.school_districts_cities',
-        'app.counties',
-        'app.school_districts_counties',
-        'app.states',
-        'app.school_districts_states',
-        'app.school_types',
-        'app.statistics',
-        'app.schools_cities',
-        'app.schools_counties',
-        'app.grades',
-        'app.schools_grades'
+        'app.SchoolsStates',
+        'app.Schools',
+        'app.SchoolDistricts',
+        'app.Rankings',
+        'app.RankingsSchoolDistricts',
+        'app.Cities',
+        'app.SchoolDistrictsCities',
+        'app.Counties',
+        'app.SchoolDistrictsCounties',
+        'app.States',
+        'app.SchoolDistrictsStates',
+        'app.SchoolTypes',
+        'app.Statistics',
+        'app.SchoolsCities',
+        'app.SchoolsCounties',
+        'app.Grades',
+        'app.SchoolsGrades'
     ];
 
     /**

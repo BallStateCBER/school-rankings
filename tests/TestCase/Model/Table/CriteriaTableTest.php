@@ -24,9 +24,9 @@ class CriteriaTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.criteria',
-        'app.metrics',
-        'app.formulas'
+        'app.Criteria',
+        'app.Metrics',
+        'app.Formulas'
     ];
 
     /**

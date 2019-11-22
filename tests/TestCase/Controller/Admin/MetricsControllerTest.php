@@ -16,9 +16,9 @@ class MetricsControllerTest extends ApplicationTest
      * @var array
      */
     public $fixtures = [
-        'app.metrics',
-        'app.statistics',
-        'app.users'
+        'app.Metrics',
+        'app.Statistics',
+        'app.Users'
     ];
 
     /**

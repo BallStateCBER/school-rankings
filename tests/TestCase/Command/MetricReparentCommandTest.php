@@ -11,7 +11,7 @@ class MetricReparentCommandTest extends ConsoleIntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.metrics'
+        'app.Metrics'
     ];
 
     /**

@@ -11,12 +11,12 @@ class ImportStatsCommandTest extends ConsoleIntegrationTestCase
      * @var array
      */
     public $fixtures = [
-        'app.imported_files',
-        'app.metrics',
-        'app.school_districts',
-        'app.schools',
-        'app.spreadsheet_columns_metrics',
-        'app.statistics',
+        'app.ImportedFiles',
+        'app.Metrics',
+        'app.SchoolDistricts',
+        'app.Schools',
+        'app.SpreadsheetColumnsMetrics',
+        'app.Statistics',
     ];
 
     /**
