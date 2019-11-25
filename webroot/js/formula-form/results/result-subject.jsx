@@ -249,17 +249,19 @@ class ResultSubject extends React.Component {
               }
             </p>
           </div>
-          <div className="col-lg-6 school-stats">
-            <h4 className="d-lg-none">
-              Statistics
-            </h4>
-            {this.getRankedStats(this.props.statistics)}
-            <Button color="secondary" size="sm" onClick={this.toggleShowStatistics}>
-              {this.state.showStatistics ? 'Hide' : 'Show'} Statistics
-            </Button>
-            {this.state.showStatistics && this.getDataCompletenessWarning()}
-            {this.state.showStatistics && this.getStatValues(this.props.statistics)}
-          </div>
+          {this.props.dataCompleteness !== 'empty' &&
+            <div className="col-lg-6 school-stats">
+              <h4 className="d-lg-none">
+                Statistics
+              </h4>
+              {this.getRankedStats(this.props.statistics)}
+              <Button color="secondary" size="sm" onClick={this.toggleShowStatistics}>
+                {this.state.showStatistics ? 'Hide' : 'Show'} Statistics
+              </Button>
+              {this.state.showStatistics && this.getDataCompletenessWarning()}
+              {this.state.showStatistics && this.getStatValues(this.props.statistics)}
+            </div>
+          }
         </div>
       </td>
     );
