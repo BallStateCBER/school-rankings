@@ -141,11 +141,7 @@ class RankTask extends Shell
 
         $subjectTable = Context::getTable($this->context);
         $locations = $this->getLocations();
-        $this->progressHelper->init([
-            'total' => count($locations),
-            'width' => 40,
-        ]);
-        $this->progressHelper->draw();
+        $this->createProgressBar(count($locations));
 
         $step = 1;
         $schoolTypeIds = Hash::extract($this->ranking->school_types, '{n}.id');
@@ -181,8 +177,7 @@ class RankTask extends Shell
                 $this->subjects[$result->id] = $result;
             }
 
-            $this->progressHelper->increment(1);
-            $this->progressHelper->draw();
+            $this->incrementProgressBar();
             $overallProgress = $this->getOverallProgress($step, count($locations));
             $this->updateJobProgress($overallProgress);
             $step++;
@@ -311,11 +306,7 @@ class RankTask extends Shell
         }
 
         $stepsCount = count($this->subjects) + 1;
-        $this->progressHelper->init([
-            'total' => $stepsCount,
-            'width' => 40,
-        ]);
-        $this->progressHelper->draw();
+        $this->createProgressBar($stepsCount);
         $criteria = $this->ranking->formula->criteria;
         $metricIds = Hash::extract($criteria, '{n}.metric_id');
         $step = 1;
@@ -325,8 +316,7 @@ class RankTask extends Shell
         if (!$this->allowMultipleYears) {
             $year = $this->getYear();
         }
-        $this->progressHelper->increment(1);
-        $this->progressHelper->draw();
+        $this->incrementProgressBar();
 
         // Get stats
         foreach ($this->subjects as &$subject) {
@@ -338,8 +328,7 @@ class RankTask extends Shell
                 }
             }
 
-            $this->progressHelper->increment(1);
-            $this->progressHelper->draw();
+            $this->incrementProgressBar();
             $overallProgress = $this->getOverallProgress($step, $stepsCount);
             $this->updateJobProgress($overallProgress);
             $step++;
@@ -362,19 +351,14 @@ class RankTask extends Shell
         $subjectCount = count($this->subjects);
         if ($subjectCount) {
             $criteria = $this->ranking->formula->criteria;
-            $this->progressHelper->init([
-                'total' => count($this->subjects) * count($criteria),
-                'width' => 40,
-            ]);
-            $this->progressHelper->draw();
+            $this->createProgressBar(count($this->subjects) * count($criteria));
 
             foreach ($criteria as $criterion) {
                 $metricId = $criterion->metric_id;
                 $weight = $criterion->weight;
                 list($minValue, $maxValue) = $this->getValueRange($metricId);
                 if (!isset($minValue)) {
-                    $this->progressHelper->increment($subjectCount);
-                    $this->progressHelper->draw();
+                    $this->incrementProgressBar($subjectCount);
                     continue;
                 }
                 $step = 1;
@@ -390,8 +374,7 @@ class RankTask extends Shell
                         $outputMsgs[] = "Metric $metricId score for $subject->name: $metricScore";
                     }
 
-                    $this->progressHelper->increment(1);
-                    $this->progressHelper->draw();
+                    $this->incrementProgressBar();
                     $overallProgress = $this->getOverallProgress($step, count($this->subjects));
                     $this->updateJobProgress($overallProgress);
                     $step++;
@@ -682,5 +665,32 @@ class RankTask extends Shell
             ->first();
 
         return $result ? $result->year : null;
+    }
+
+    /**
+     * Increments the current progress bar by 1
+     *
+     * @param int $incrementAmount Specify if not 1
+     * @return void
+     */
+    private function incrementProgressBar($incrementAmount = 1)
+    {
+        $this->progressHelper->increment($incrementAmount);
+        $this->progressHelper->draw();
+    }
+
+    /**
+     * Creates and draws a progress bar at 0%
+     *
+     * @param int $count Total number of steps
+     * @return void
+     */
+    private function createProgressBar(int $count)
+    {
+        $this->progressHelper->init([
+            'total' => $count,
+            'width' => 40,
+        ]);
+        $this->progressHelper->draw();
     }
 }
