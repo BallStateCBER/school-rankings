@@ -388,5 +388,5 @@ return [
         'maxworkers' => 3
     ],
 
-    'adminEmail' => 'gtwatson@bsu.edu'
+    'adminEmail' => 'admin@indianaschoolrankings.com'
 ];
