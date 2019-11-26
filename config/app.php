@@ -384,7 +384,8 @@ return [
     'Queue' => [
         'sleeptime' => 2, // 2 seconds
         'workermaxruntime' => 300, // 5 minutes
-        'workertimeout' => 3000 // 50 minutes
+        'workertimeout' => 3000, // 50 minutes
+        'maxworkers' => 3
     ],
 
     'adminEmail' => 'gtwatson@bsu.edu'
