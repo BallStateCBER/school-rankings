@@ -301,30 +301,34 @@ class RankTask extends Shell
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
         $subjectCount = count($this->subjects);
-        if ($subjectCount) {
-            $this->progressHelper->init([
-                'total' => $subjectCount,
-                'width' => 40,
-            ]);
-            $this->progressHelper->draw();
-            $criteria = $this->ranking->formula->criteria;
-            $metricIds = Hash::extract($criteria, '{n}.metric_id');
-            $step = 1;
-            foreach ($this->subjects as &$subject) {
-                $subject->statistics = [];
-                foreach ($metricIds as $metricId) {
-                    $stat = $this->getStat($metricId, $subject->id);
-                    if ($stat) {
-                        $subject->statistics[] = $stat;
-                    }
-                }
+        if (!$subjectCount) {
+            $this->getIo()->out(' - Done');
 
-                $this->progressHelper->increment(1);
-                $this->progressHelper->draw();
-                $overallProgress = $this->getOverallProgress($step, count($this->subjects));
-                $this->updateJobProgress($overallProgress);
-                $step++;
+            return;
+        }
+
+        $this->progressHelper->init([
+            'total' => $subjectCount,
+            'width' => 40,
+        ]);
+        $this->progressHelper->draw();
+        $criteria = $this->ranking->formula->criteria;
+        $metricIds = Hash::extract($criteria, '{n}.metric_id');
+        $step = 1;
+        foreach ($this->subjects as &$subject) {
+            $subject->statistics = [];
+            foreach ($metricIds as $metricId) {
+                $stat = $this->getStat($metricId, $subject->id);
+                if ($stat) {
+                    $subject->statistics[] = $stat;
+                }
             }
+
+            $this->progressHelper->increment(1);
+            $this->progressHelper->draw();
+            $overallProgress = $this->getOverallProgress($step, count($this->subjects));
+            $this->updateJobProgress($overallProgress);
+            $step++;
         }
         $this->getIo()->overwrite(' - Done');
     }
