@@ -30,6 +30,8 @@ use Queue\Model\Table\QueuedJobsTable;
  * Class RankTask
  * @package App\Shell\Task
  * @property array $rankedSubjects
+ * @property bool $allowMultipleYears If TRUE, stats for an older year will be used if a subject has no stats for the
+ *      most recent year. If FALSE, all stats for all subjects will be from the same year.
  * @property County[] $locations
  * @property Criterion[] $criteria
  * @property float $progressUpdatePercent
@@ -60,6 +62,7 @@ class RankTask extends Shell
     private $rankingsTable;
     private $statsTable;
     private $subjects = [];
+    private $allowMultipleYears = false;
 
     /**
      * Elasticsearch index for statistics
@@ -307,18 +310,29 @@ class RankTask extends Shell
             return;
         }
 
+        $stepsCount = count($this->subjects) + 1;
         $this->progressHelper->init([
-            'total' => $subjectCount,
+            'total' => $stepsCount,
             'width' => 40,
         ]);
         $this->progressHelper->draw();
         $criteria = $this->ranking->formula->criteria;
         $metricIds = Hash::extract($criteria, '{n}.metric_id');
         $step = 1;
+
+        // Get year
+        $year = null;
+        if (!$this->allowMultipleYears) {
+            $year = $this->getYear();
+        }
+        $this->progressHelper->increment(1);
+        $this->progressHelper->draw();
+
+        // Get stats
         foreach ($this->subjects as &$subject) {
             $subject->statistics = [];
             foreach ($metricIds as $metricId) {
-                $stat = $this->getStat($metricId, $subject->id);
+                $stat = $this->getStat($metricId, $subject->id, $year);
                 if ($stat) {
                     $subject->statistics[] = $stat;
                 }
@@ -326,7 +340,7 @@ class RankTask extends Shell
 
             $this->progressHelper->increment(1);
             $this->progressHelper->draw();
-            $overallProgress = $this->getOverallProgress($step, count($this->subjects));
+            $overallProgress = $this->getOverallProgress($step, $stepsCount);
             $this->updateJobProgress($overallProgress);
             $step++;
         }
@@ -603,22 +617,34 @@ class RankTask extends Shell
      *
      * @param int $metricId Metric ID
      * @param int $subjectId School ID or school district ID
-     * @return Statistic
+     * @param int|null $year If specified, stats will only be searched for in the given year
+     * @return Statistic|null
      */
-    private function getStat($metricId, int $subjectId)
+    private function getStat($metricId, int $subjectId, int $year = null)
     {
+        // Abort if all stats must be in the same year, but that year is not specified
+        if (!$year && !$this->allowMultipleYears) {
+            return null;
+        }
+
         $usingElasticsearch = isset($this->statsEsIndex);
         $dataSource = $usingElasticsearch ? $this->statsEsIndex : $this->statsTable;
 
-        /** @var Statistic $stat */
-        $stat = $dataSource->find()
+        $query = $dataSource
+            ->find()
             ->select(['id', 'metric_id', 'value', 'year'])
             ->where([
                 'metric_id' => $metricId,
                 Context::getLocationField($this->context) => $subjectId
-            ])
-            ->order(['year' => 'DESC'])
-            ->first();
+            ]);
+        if ($this->allowMultipleYears) {
+            $query->order(['year' => 'DESC']);
+        } else {
+            $query->where(['year' => $year]);
+        }
+
+        /** @var Statistic $stat */
+        $stat = $query->first();
 
         if ($stat && $usingElasticsearch) {
             $stat = $this->statsTable->newEntity([
@@ -630,5 +656,31 @@ class RankTask extends Shell
         }
 
         return $stat;
+    }
+
+    /**
+     * Returns the most recent year found in all of the statistics associated with the given metrics and subjects
+     *
+     * @return int|null
+     */
+    private function getYear()
+    {
+        $dataSource = $this->statsEsIndex ?? $this->statsTable;
+        $criteria = $this->ranking->formula->criteria;
+        $metricIds = Hash::extract($criteria, '{n}.metric_id');
+        $subjectIds = Hash::extract($this->subjects, '{n}.id');
+
+        /** @var Statistic $result */
+        $result = $dataSource
+            ->find()
+            ->select(['year'])
+            ->order(['year' => 'DESC'])
+            ->where([
+                'metric_id in' => $metricIds,
+                Context::getLocationField($this->context) . ' in' => $subjectIds
+            ])
+            ->first();
+
+        return $result ? $result->year : null;
     }
 }
