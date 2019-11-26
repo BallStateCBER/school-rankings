@@ -13,6 +13,7 @@ import {NoDataResults} from './results/no-data-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
 import {RankingResults} from './results/ranking-results.jsx';
 import {SchoolTypeSelector} from './selectors/school-type-selector.jsx';
+import {Survey} from './survey.jsx';
 
 class FormulaForm extends React.Component {
   constructor(props) {
@@ -555,6 +556,7 @@ class FormulaForm extends React.Component {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
+          <Survey />
           <div className="row">
             <section className="form-group col-sm-6">
               <h3>
