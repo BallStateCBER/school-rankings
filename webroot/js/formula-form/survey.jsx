@@ -16,6 +16,23 @@ class Survey extends React.Component {
     this.cookies = new Cookies();
   }
 
+  /**
+   * Automatically fills out the survey form using Cookie data
+   */
+  componentDidMount() {
+    const savedDemoChoice = this.cookies.get('demoChoice');
+    const savedDemoFillIn = this.cookies.get('demoFillIn');
+    if (!savedDemoChoice) {
+      return;
+    }
+    this.setState({demoChoice: savedDemoChoice});
+
+    if (savedDemoChoice !== 'Other') {
+      return;
+    }
+    this.setState({demoFillIn: savedDemoFillIn});
+  }
+
   handleRadioChange(event) {
     this.setState({demoChoice: event.target.value});
     this.cookies.set('demoChoice', event.target.value);
