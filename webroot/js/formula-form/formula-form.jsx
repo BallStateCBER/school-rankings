@@ -1,4 +1,5 @@
 import '../../css/formula-form.scss';
+import Cookies from 'universal-cookie';
 import React from 'react';
 import ReactDom from 'react-dom';
 import Select from 'react-select';
@@ -27,6 +28,8 @@ class FormulaForm extends React.Component {
       context: null,
       county: null,
       criteria: [],
+      demoChoice: null,
+      demoFillIn: '',
       gradeLevels: new Map(),
       loadingRankings: false,
       noDataResults: null,
@@ -44,11 +47,15 @@ class FormulaForm extends React.Component {
       criteria: [],
     };
     this.debug = false;
+    this.cookies = new Cookies();
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
+    this.handleDemoFillInChange = this.handleDemoFillInChange.bind(this);
+    this.handleDemoFillInFocus = this.handleDemoFillInFocus.bind(this);
+    this.handleDemoRadioChange = this.handleDemoRadioChange.bind(this);
     this.handleRemoveCriterion = this.handleRemoveCriterion.bind(this);
     this.handleSelectCounty = this.handleSelectCounty.bind(this);
     this.handleSelectGradeLevels = this.handleSelectGradeLevels.bind(this);
@@ -63,6 +70,7 @@ class FormulaForm extends React.Component {
   componentDidMount() {
     this.setSchoolTypes();
     this.setGradeLevels();
+    this.autoFillDemoForm();
     if (document.getElementById('formula-form').getAttribute('data-debug')) {
       this.debug = true;
     }
@@ -552,10 +560,44 @@ class FormulaForm extends React.Component {
     });
   }
 
+  handleDemoRadioChange(value) {
+    this.setState({demoChoice: value});
+    this.cookies.set('demoChoice', value);
+  }
+
+  handleDemoFillInChange(value) {
+    this.setState({demoFillIn: value});
+    this.cookies.set('demoFillIn', value);
+  }
+
+  handleDemoFillInFocus() {
+    this.setState({demoChoice: 'Other'});
+    this.cookies.set('demoChoice', 'Other');
+  }
+
+  /**
+   * Automatically fills out the survey form using Cookie data
+   */
+  autoFillDemoForm() {
+    const savedDemoChoice = this.cookies.get('demoChoice');
+    const savedDemoFillIn = this.cookies.get('demoFillIn');
+    if (!savedDemoChoice) {
+      return;
+    }
+    this.setState({demoChoice: savedDemoChoice});
+
+    if (savedDemoChoice !== 'Other') {
+      return;
+    }
+    this.setState({demoFillIn: savedDemoFillIn});
+  }
+
   render() {
     return (
       <div>
-        <Survey />
+        <Survey handleRadioChange={this.handleDemoRadioChange} handleFillInFocus={this.handleDemoFillInFocus}
+                handleFillInChange={this.handleDemoFillInChange} choice={this.state.demoChoice}
+                fillIn={this.state.demoFillIn} />
         <form onSubmit={this.handleSubmit}>
           <div className="row">
             <section className="form-group col-sm-6">

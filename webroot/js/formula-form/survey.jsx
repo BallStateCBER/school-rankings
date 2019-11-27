@@ -1,51 +1,27 @@
 import '../../css/formula-form.scss';
+import PropTypes from 'prop-types';
 import React from 'react';
 import {CustomInput} from 'reactstrap';
-import Cookies from 'universal-cookie';
 
 class Survey extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      demoChoice: null,
-      demoFillIn: '',
-    };
+
+    this.handleFillInChange = this.handleFillInChange.bind(this);
     this.handleFillInFocus = this.handleFillInFocus.bind(this);
     this.handleRadioChange = this.handleRadioChange.bind(this);
-    this.handleFillInChange = this.handleFillInChange.bind(this);
-    this.cookies = new Cookies();
-  }
-
-  /**
-   * Automatically fills out the survey form using Cookie data
-   */
-  componentDidMount() {
-    const savedDemoChoice = this.cookies.get('demoChoice');
-    const savedDemoFillIn = this.cookies.get('demoFillIn');
-    if (!savedDemoChoice) {
-      return;
-    }
-    this.setState({demoChoice: savedDemoChoice});
-
-    if (savedDemoChoice !== 'Other') {
-      return;
-    }
-    this.setState({demoFillIn: savedDemoFillIn});
   }
 
   handleRadioChange(event) {
-    this.setState({demoChoice: event.target.value});
-    this.cookies.set('demoChoice', event.target.value);
-  }
-
-  handleFillInChange(event) {
-    this.setState({demoFillIn: event.target.value});
-    this.cookies.set('demoFillIn', event.target.value);
+    this.props.handleRadioChange(event.target.value);
   }
 
   handleFillInFocus() {
-    this.setState({demoChoice: 'Other'});
-    this.cookies.set('demoChoice', 'Other');
+    this.props.handleFillInFocus();
+  }
+
+  handleFillInChange(event) {
+    this.props.handleFillInChange(event.target.value);
   }
 
   getOptions() {
@@ -75,7 +51,7 @@ class Survey extends React.Component {
       const optionInput = (
         <div className="form-check" key={option.key}>
           <input className="form-check-input" type="radio" id={inputName} value={option.value}
-                 onChange={this.handleRadioChange} checked={this.state.demoChoice === option.value} />
+                 onChange={this.handleRadioChange} checked={this.props.choice === option.value} />
           <label className="form-check-label" htmlFor={inputName}>
             {option.label}
           </label>
@@ -97,11 +73,11 @@ class Survey extends React.Component {
           {this.getOptionInputs()}
           <div className="form-check" key="other">
             <input className="form-check-input" type="radio" id="demo-choice-other" value="Other"
-                   onChange={this.handleRadioChange} checked={this.state.demoChoice === 'Other'} />
+                   onChange={this.handleRadioChange} checked={this.props.choice === 'Other'} />
             <label className="form-check-label" htmlFor="demo-choice-other">
               Other:
               <CustomInput id="demo-fill-in" type="text" inline={true} onFocus={this.handleFillInFocus}
-                           onChange={this.handleFillInChange} value={this.state.demoFillIn} />
+                           onChange={this.handleFillInChange} value={this.props.fillIn} />
             </label>
           </div>
         </form>
@@ -109,5 +85,13 @@ class Survey extends React.Component {
     );
   }
 }
+
+Survey.propTypes = {
+  choice: PropTypes.string,
+  fillIn: PropTypes.string,
+  handleFillInChange: PropTypes.func.isRequired,
+  handleFillInFocus: PropTypes.func.isRequired,
+  handleRadioChange: PropTypes.func.isRequired,
+};
 
 export {Survey};
