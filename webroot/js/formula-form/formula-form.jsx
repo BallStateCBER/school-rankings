@@ -555,8 +555,8 @@ class FormulaForm extends React.Component {
   render() {
     return (
       <div>
+        <Survey />
         <form onSubmit={this.handleSubmit}>
-          <Survey />
           <div className="row">
             <section className="form-group col-sm-6">
               <h3>
