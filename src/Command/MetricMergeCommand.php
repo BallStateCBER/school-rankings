@@ -362,7 +362,7 @@ class MetricMergeCommand extends CommonCommand
         $this->sortedStats = [
             'noConflict' => [],
             'equalValues' => [],
-            'inequalValues' => []
+            'unequalValues' => []
         ];
         $this->makeProgressBar(count($this->statsToMerge));
         foreach ($this->statsToMerge as $stat) {
@@ -378,7 +378,7 @@ class MetricMergeCommand extends CommonCommand
                 ->first();
             $this->progress->increment(1)->draw();
             if ($conflictStat) {
-                $key = $conflictStat['value'] == $stat->value ? 'equalValues' : 'inequalValues';
+                $key = $conflictStat['value'] == $stat->value ? 'equalValues' : 'unequalValues';
                 $this->sortedStats[$key][] = $stat->id;
                 unset($conflictStat, $key);
                 continue;
@@ -388,8 +388,8 @@ class MetricMergeCommand extends CommonCommand
             unset($conflictStat);
         }
         $evCount = count($this->sortedStats['equalValues']);
-        $ivCount = count($this->sortedStats['inequalValues']);
-        $totalConflicts = $evCount + $ivCount;
+        $uvCount = count($this->sortedStats['unequalValues']);
+        $totalConflicts = $evCount + $uvCount;
         $this->io->overwrite(sprintf(
             ' - Done %s',
             $this->getDuration($start)
@@ -411,11 +411,11 @@ class MetricMergeCommand extends CommonCommand
                     __n('stat', 'stats', $evCount)
                 ));
             }
-            if ($ivCount) {
+            if ($uvCount) {
                 $this->io->out(sprintf(
                     ' - %s %s with different values for each metric will be deleted',
-                    $ivCount,
-                    __n('stat', 'stats', $ivCount)
+                    $uvCount,
+                    __n('stat', 'stats', $uvCount)
                 ));
             }
         }
@@ -430,7 +430,7 @@ class MetricMergeCommand extends CommonCommand
         }
         unset(
             $evCount,
-            $ivCount,
+            $uvCount,
             $locationField,
             $ncCount,
             $start,
