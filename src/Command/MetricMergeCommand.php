@@ -21,6 +21,7 @@ use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
+use Exception;
 
 /**
  * Class MetricMergeCommand
@@ -84,7 +85,7 @@ class MetricMergeCommand extends CommonCommand
      * Display help for this console.
      *
      * @param ConsoleOptionParser $parser Console options parser object
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
@@ -109,8 +110,7 @@ class MetricMergeCommand extends CommonCommand
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Aura\Intl\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -204,7 +204,7 @@ class MetricMergeCommand extends CommonCommand
      * Checks that the specified metrics exist
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function verifyMetrics()
     {
@@ -761,7 +761,7 @@ class MetricMergeCommand extends CommonCommand
      * Deletes the first of the two specified metrics
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function deleteMetric()
     {
@@ -870,7 +870,7 @@ class MetricMergeCommand extends CommonCommand
     /**
      * Recovers tree structure
      *
-     * @throws \Exception
+     * @throws Exception
      * @return void
      */
     private function fixTree()
