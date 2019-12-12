@@ -368,7 +368,7 @@ class CheckStatsCommand extends Command
             return;
         }
 
-        $this->io->out('Finding selectable metrics with no associated statistics...');
+        $this->io->out('Finding unselectable metrics with associated statistics...');
         $unselectableMetrics = $this->getSelectableMetrics(false);
 
         $progress = $this->makeProgressBar(count($unselectableMetrics));
