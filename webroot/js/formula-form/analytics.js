@@ -238,12 +238,14 @@ class Analytics {
       category: 'Formula Form',
       action: 'Set ranking pool',
     };
-    const dimensions = {
+
+    let dimensions = {
       dimension1: this.getContext(),
       dimension2: this.getGeographicArea(),
       dimension3: this.getSchoolTypes(),
       dimension4: this.getGradeLevels(),
     };
+    dimensions = this.addDemographicGroup(dimensions);
 
     if (this.debug) {
       console.log(eventData);
@@ -418,6 +420,43 @@ class Analytics {
     }
 
     return longestMetric;
+  }
+
+  /**
+   * If demographic info was provided, adds it to the analytics dimension object and then returns the modified object
+   *
+   * @param {Object} dimensions
+   * @return {*}
+   */
+  addDemographicGroup(dimensions) {
+    const demographicGroup = this.getDemographicGroup();
+
+    if (demographicGroup) {
+      dimensions.dimension7 = demographicGroup;
+    }
+
+    return dimensions;
+  }
+
+  /**
+   * Returns the user's demographic choice / typed answer, or NULL if no selection was made
+   *
+   * @return {string|null}
+   */
+  getDemographicGroup() {
+    if (!this.state.demoChoice) {
+      return null;
+    }
+
+    if (this.state.demoChoice !== 'Other') {
+      return this.state.demoChoice;
+    }
+
+    if (this.state.demoFillIn !== '') {
+      return this.state.demoFillIn;
+    }
+
+    return 'Other';
   }
 }
 
