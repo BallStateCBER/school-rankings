@@ -1,8 +1,8 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import {library, dom} from '@fortawesome/fontawesome-svg-core';
-import {fas} from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
 import {Button} from 'reactstrap';
+import {fas} from '@fortawesome/free-solid-svg-icons';
+import {library, dom} from '@fortawesome/fontawesome-svg-core';
 
 // FontAwesome
 library.add(fas);
@@ -13,8 +13,11 @@ class ResultSubject extends React.Component {
     super(props);
     this.state = {
       showStatistics: props.showStatistics,
+      showUnknownDataInfo: false,
     };
+    this.getUnknownDataInfoText = this.getUnknownDataInfoText.bind(this);
     this.toggleShowStatistics = this.toggleShowStatistics.bind(this);
+    this.toggleShowUnknownDataInfo = this.toggleShowUnknownDataInfo.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -30,9 +33,19 @@ class ResultSubject extends React.Component {
     }
 
     return (
-      <p className="data-completeness-warning alert alert-warning">
-        Some data unavailable
-      </p>
+      <div className="data-completeness-warning alert alert-warning">
+        <p>
+          Some data unavailable
+          <Button color="link" onClick={this.toggleShowUnknownDataInfo}>
+            <i className="fas fa-question-circle"></i>
+          </Button>
+        </p>
+        {this.state.showUnknownDataInfo &&
+          <p>
+            {this.getUnknownDataInfoText()}
+          </p>
+        }
+      </div>
     );
   }
 
@@ -266,6 +279,23 @@ class ResultSubject extends React.Component {
       </td>
     );
   }
+
+  toggleShowUnknownDataInfo() {
+    this.setState({showUnknownDataInfo: !this.state.showUnknownDataInfo});
+  }
+
+  /**
+   * Returns the text that explains unknown data
+   *
+   * @return {string}
+   */
+  getUnknownDataInfoText() {
+    const subjectNoun = this.props.context === 'school' ? 'school' : 'school corporation';
+
+    return 'Some data may not be reported by a ' + subjectNoun + ' for various reasons, such as a measurement ' +
+      'not relating to any of the grade levels taught by a ' + subjectNoun + ' or the data for very small student ' +
+      'populations being suppressed in order to protect individual privacy.';
+  };
 }
 
 ResultSubject.propTypes = {

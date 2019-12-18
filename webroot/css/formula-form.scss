@@ -1,23 +1,29 @@
 @import "../bootstrap/css/bootstrap.min.css";
+@import "~bootstrap/scss/bootstrap";
 
 #formula-form {
   .loading {
     margin: 0 0.5em;
   }
+
   section {
     margin-bottom: 30px;
     margin-top: 30px;
   }
+
   .jstree-leaf[data-selectable="0"] {
     display: none;
   }
+
   .alert {
     margin: 1em 0;
   }
+
   .progress-bar-container {
     margin: 1em 0;
   }
 }
+
 li[data-selectable="0"] {
   > a {
     i.jstree-checkbox {
@@ -25,18 +31,22 @@ li[data-selectable="0"] {
     }
   }
 }
+
 #jstree {
   max-height: 300px;
   overflow: auto;
 }
+
 .jstree-default .jstree-leaf > i.jstree-icon {
   width: 0;
 }
+
 #jstree-search-container {
   button {
     margin-left: 15px;
   }
 }
+
 table.ranking-results {
   margin-top: 30px;
 
@@ -45,6 +55,7 @@ table.ranking-results {
       font-size: 1.5rem
     }
   }
+
   th {
     font-weight: normal;
     word-break: normal;
@@ -56,12 +67,15 @@ table.ranking-results {
       width: 50px;
     }
   }
+
   td {
     word-break: normal;
   }
+
   .school-name {
     font-size: 1.5rem;
   }
+
   .year {
     color: #666;
     font-size: 80%;
@@ -70,48 +84,60 @@ table.ranking-results {
     &::before {
       content: '(';
     }
+
     &::after {
       content: ')';
     }
   }
+
   .col-sm-6:first-child {
     padding-bottom: 30px;
   }
+
   .data-completeness-warning {
     padding: 0.25rem 1.25rem;
   }
 }
+
 #criteria {
   > div {
     margin-bottom: 2px;
     margin-top: 2px;
     padding: 5px;
   }
+
   .metric-name {
     font-weight: bold;
   }
 }
+
 .options-breakdown {
   margin-left: 20px;
 }
+
 .school-info {
   margin-bottom: 30px;
 }
+
 .text-danger {
-    button {
-        margin-left: 1em;
-        vertical-align: baseline;
-    }
+  button {
+    margin-left: 1em;
+    vertical-align: baseline;
+  }
 }
+
 ul.stats-ranked {
   padding-left: 0;
 }
+
 li.stat-ranked {
   list-style-type: none;
+
   i, svg {
     margin-right: 0.5em;
   }
 }
+
 .stat-ranked-1 {
   font-weight: bold;
 
@@ -119,19 +145,44 @@ li.stat-ranked {
     color: #C9B037;
   }
 }
+
 .stat-ranked-2 {
   i, svg {
     color: #B4B4B4;
   }
 }
+
 .stat-ranked-3 {
   i, svg {
     color: #AD8A56;
   }
 }
+
 table.statistics {
   margin-top: 1em;
 }
+
 #demo-fill-in {
   margin-left: 1em;
+}
+
+.missing-data {
+  font-style: italic;
+  color: $text-muted;
+}
+
+.data-completeness-warning {
+  button {
+    padding-top: 0;
+    padding-bottom: 0;
+    vertical-align: baseline;
+  }
+
+  p {
+    margin-bottom: 0;
+
+    &:not(:first-child) {
+      margin-top: 1rem;
+    }
+  }
 }
