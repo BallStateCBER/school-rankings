@@ -59,7 +59,7 @@ class NoDataResults extends React.Component {
           {isPlural ? ' were ' : ' was '}
           found in this location that cannot be ranked because
           {isPlural ? ' they have ' : ' it has '}
-          no data available for the categories that you selected.
+          no data available for the criteria that you selected.
         </p>
         <button id="show-results-without-data"
                 className="btn btn-outline-primary"

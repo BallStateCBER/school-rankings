@@ -52,7 +52,7 @@ class RankingResults extends React.Component {
             No Results
           </h3>
           <p>
-            No {subjectsNotFound} were found matching your selected criteria.
+            No {subjectsNotFound} were found with data matching your selected criteria.
           </p>
         </section>
       );
