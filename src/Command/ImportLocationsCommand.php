@@ -23,6 +23,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
+use Elastica\Exception\NotFoundException;
 use Exception;
 
 /**
@@ -363,7 +364,13 @@ class ImportLocationsCommand extends Command
                 $district = $this->districtsTable
                     ->find('byCode', ['code' => Utility::removeLeadingZeros($data['district code'])])
                     ->select(['id'])
-                    ->firstOrFail();
+                    ->first();
+                if (!$district) {
+                    throw new NotFoundException(
+                        "Cannot add school with district code {$data['district code']} " .
+                        ' because that district has not yet been added to the database'
+                    );
+                }
             } else {
                 $district = null;
             }
