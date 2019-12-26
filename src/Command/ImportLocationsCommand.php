@@ -63,6 +63,7 @@ class ImportLocationsCommand extends Command
         'counties' => [],
         'states' => []
     ];
+    private $nameChanges = [];
     private $schools = [];
     private $schoolsTable;
     private $schoolTypesTable;
@@ -704,18 +705,10 @@ class ImportLocationsCommand extends Command
             if (!$record->isDirty('name')) {
                 continue;
             }
-            $response = $this->io->askChoice(
-                sprintf(
-                    "Change %s #%s's name from %s to %s?",
-                    $context,
-                    $record->id,
-                    $record->getOriginal('name'),
-                    $record->name
-                ),
-                ['y', 'n'],
-                'n'
-            );
-            if ($response == 'n') {
+
+            $changeName = $this->getNameChangeConfirmation($context, $record);
+
+            if (!$changeName) {
                 $record = $table->patchEntity($record, [
                     'name' => $record->getOriginal('name')
                 ]);
@@ -726,5 +719,35 @@ class ImportLocationsCommand extends Command
         } else {
             $this->districts = $records;
         }
+    }
+
+    /**
+     * Returns TRUE if the record's name should be updated
+     *
+     * @param string $context Either 'school' or 'district'
+     * @param School|SchoolDistrict $record School or district record
+     * @return bool
+     */
+    private function getNameChangeConfirmation($context, $record)
+    {
+        if (isset($this->nameChanges[$context][$record->id][$record->name])) {
+            return $this->nameChanges[$context][$record->id][$record->name];
+        }
+
+        $response = $this->io->askChoice(
+            sprintf(
+                "Change %s #%s's name from %s to %s?",
+                $context,
+                $record->id,
+                $record->getOriginal('name'),
+                $record->name
+            ),
+            ['y', 'n'],
+            'n'
+        );
+        $changeName = $response == 'y';
+        $this->nameChanges[$context][$record->id][$record->name] = $changeName;
+
+        return $changeName;
     }
 }
