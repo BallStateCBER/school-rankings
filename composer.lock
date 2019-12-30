@@ -462,16 +462,16 @@
         },
         {
             "name": "dereuromark/cakephp-queue",
-            "version": "4.2.0",
+            "version": "4.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dereuromark/cakephp-queue.git",
-                "reference": "124104f0c6b5263c3bcb3223d832503740dd3d6c"
+                "reference": "efcbe884682a06839178893c45c20d0f3aef600e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dereuromark/cakephp-queue/zipball/124104f0c6b5263c3bcb3223d832503740dd3d6c",
-                "reference": "124104f0c6b5263c3bcb3223d832503740dd3d6c",
+                "url": "https://api.github.com/repos/dereuromark/cakephp-queue/zipball/efcbe884682a06839178893c45c20d0f3aef600e",
+                "reference": "efcbe884682a06839178893c45c20d0f3aef600e",
                 "shasum": ""
             },
             "require": {
@@ -483,7 +483,7 @@
             },
             "require-dev": {
                 "cakephp/migrations": "^2.0",
-                "dereuromark/cakephp-ide-helper": "dev-feature/directive as 0.14",
+                "dereuromark/cakephp-ide-helper": "dev-master",
                 "dereuromark/cakephp-tools": "^1.9.7",
                 "fig-r/psr2r-sniffer": "dev-master",
                 "friendsofcake/search": "^5.0"
@@ -524,7 +524,7 @@
                 "deferred tasks",
                 "queue"
             ],
-            "time": "2019-10-30T16:52:55+00:00"
+            "time": "2019-12-17T01:08:48+00:00"
         },
         {
             "name": "doctrine/instantiator",
