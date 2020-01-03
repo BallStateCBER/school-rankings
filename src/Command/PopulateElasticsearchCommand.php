@@ -5,8 +5,15 @@ use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
+use Cake\ElasticSearch\Datasource\Connection;
+use Cake\ElasticSearch\Index as ESIndex;
+use Cake\ElasticSearch\IndexRegistry;
+use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Elastica\Client;
+use Elastica\Index;
+use Exception;
 
 /**
  * Class PopulateElasticsearchCommand
@@ -20,16 +27,16 @@ class PopulateElasticsearchCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $indexName = 'statistics';
 
-        /** @var \Cake\ElasticSearch\Datasource\Connection|\Elastica\Client $connection */
+        /** @var Connection|Client $connection */
         $connection = ConnectionManager::get('elastic');
 
-        /** @var \Elastica\Index $statisticsIndexRegistry */
+        /** @var Index $statisticsIndexRegistry */
         $statisticsIndexRegistry = $connection->getIndex($indexName);
 
         $exists = $statisticsIndexRegistry->exists();
@@ -67,8 +74,8 @@ class PopulateElasticsearchCommand extends Command
         $totalStatsCount = $statisticsTable->find()->count();
         $io->out("Total stats in MySQL table: " . number_format($totalStatsCount));
 
-        /** @var \Cake\ElasticSearch\Index $statisticsIndex */
-        $statisticsIndex = \Cake\ElasticSearch\IndexRegistry::get($indexName);
+        /** @var ESIndex $statisticsIndex */
+        $statisticsIndex = IndexRegistry::get($indexName);
         $totalCopiedStats = $statisticsIndex->find()->count();
         $io->out("Total stats in elasticsearch index: " . number_format($totalCopiedStats));
 
@@ -105,7 +112,7 @@ class PopulateElasticsearchCommand extends Command
 
             foreach ($stats as $i => $stat) {
                 $saveResult = $statisticsIndex->save(
-                    new \Cake\ORM\Entity([
+                    new Entity([
                         'id' => $stat->id,
                         'metric_id' => $stat->metric_id,
                         'school_id' => $stat->school_id,
@@ -114,9 +121,7 @@ class PopulateElasticsearchCommand extends Command
                         'year' => $stat->year
                     ])
                 );
-                if ($saveResult) {
-                    //$io->out("Stat record $i added");
-                } else {
+                if (!$saveResult) {
                     $io->error('Error adding stat');
                 }
             }
