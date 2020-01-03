@@ -18,9 +18,19 @@ use Exception;
 /**
  * Class PopulateElasticsearchCommand
  * @package App\Command
+ *
+ * @property bool $includeAllYears
+ * @property bool $includeHidden
+ * @property string $indexName
+ * @property ConsoleIo $io
  */
 class PopulateElasticsearchCommand extends Command
 {
+    private $includeAllYears;
+    private $includeHidden;
+    private $indexName;
+    private $io;
+
     /**
      * Copies data from MySQL into Elasticsearch
      *
@@ -31,19 +41,22 @@ class PopulateElasticsearchCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $indexName = 'statistics';
+        $this->io = $io;
+        $this->setIncludeHidden();
+        $this->setIncludeAllYears();
+        $this->setIndexName();
 
         /** @var Connection|Client $connection */
         $connection = ConnectionManager::get('elastic');
 
         /** @var Index $statisticsIndexRegistry */
-        $statisticsIndexRegistry = $connection->getIndex($indexName);
+        $statisticsIndexRegistry = $connection->getIndex($this->indexName);
 
         $exists = $statisticsIndexRegistry->exists();
         if ($exists) {
-            if ($io->askChoice('Delete existing index?', ['y', 'n'], 'n') === 'y') {
+            if ($io->askChoice('Delete existing index with that name?', ['y', 'n'], 'n') === 'y') {
                 $statisticsIndexRegistry->delete();
-                $io->out("$indexName index deleted");
+                $io->out("$this->indexName index deleted");
                 $exists = false;
             }
         }
@@ -67,7 +80,7 @@ class PopulateElasticsearchCommand extends Command
                 ]
             ];
             $statisticsIndexRegistry->create($indexOptions);
-            $io->out("$indexName index created");
+            $io->out("$this->indexName index created");
         }
 
         $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
@@ -75,7 +88,7 @@ class PopulateElasticsearchCommand extends Command
         $io->out("Total stats in MySQL table: " . number_format($totalStatsCount));
 
         /** @var ESIndex $statisticsIndex */
-        $statisticsIndex = IndexRegistry::get($indexName);
+        $statisticsIndex = IndexRegistry::get($this->indexName);
         $totalCopiedStats = $statisticsIndex->find()->count();
         $io->out("Total stats in elasticsearch index: " . number_format($totalCopiedStats));
 
@@ -147,5 +160,51 @@ class PopulateElasticsearchCommand extends Command
         $statisticsIndexRegistry->refresh();
         $totalCopiedStats = $statisticsIndex->find()->count();
         $io->out("Updated total stats in elasticsearch index: " . number_format($totalCopiedStats));
+    }
+
+    /**
+     * Sets the $includeHidden property
+     *
+     * @return void
+     */
+    private function setIncludeHidden()
+    {
+        $response = $this->io->askChoice(
+            'Would you like statistics associated with hidden metrics included?',
+            ['y', 'n'],
+            'n'
+        );
+        $this->includeHidden = $response == 'y';
+    }
+
+    /**
+     * Sets the $includeAllYears property
+     *
+     * @return void
+     */
+    private function setIncludeAllYears()
+    {
+        $response = $this->io->askChoice(
+            'Would you like all years of statistics included, rather than only the most recent years?',
+            ['y', 'n'],
+            'n'
+        );
+        $this->includeAllYears = $response == 'y';
+    }
+
+    /**
+     * Sets the $indexName property
+     *
+     * @return void
+     */
+    private function setIndexName()
+    {
+        $indexNameSuggestion = sprintf(
+            'statistics%s%s-%s',
+            $this->includeHidden ? '' : '-nohidden',
+            $this->includeAllYears ? '' : '-recent',
+            date('Y-m-d')
+        );
+        $this->indexName = $this->io->ask('Enter the name of this new index', $indexNameSuggestion);
     }
 }
