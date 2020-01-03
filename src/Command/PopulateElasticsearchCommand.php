@@ -160,6 +160,11 @@ class PopulateElasticsearchCommand extends Command
         $statisticsIndexRegistry->refresh();
         $totalCopiedStats = $statisticsIndex->find()->count();
         $io->out("Updated total stats in elasticsearch index: " . number_format($totalCopiedStats));
+
+        $io->info(
+            'To start using this new index, update the Elasticsearch.statisticsIndex configuration value in ' .
+            'app.php to ' . $this->indexName
+        );
     }
 
     /**
