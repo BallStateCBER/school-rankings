@@ -388,5 +388,8 @@ return [
         'maxworkers' => 3
     ],
 
-    'adminEmail' => 'admin@indianaschoolrankings.com'
+    'adminEmail' => 'admin@indianaschoolrankings.com',
+    'Elasticsearch' => [
+        'statisticsIndex' => 'statistics'
+    ]
 ];

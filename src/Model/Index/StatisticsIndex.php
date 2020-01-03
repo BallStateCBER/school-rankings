@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Index;
 
+use Cake\Core\Configure;
 use Cake\ElasticSearch\Index;
 
 class StatisticsIndex extends Index
@@ -12,7 +13,7 @@ class StatisticsIndex extends Index
      */
     public function getName()
     {
-        return 'statistics';
+        return Configure::read('Elasticsearch.statisticsIndex');
     }
 
     /**
