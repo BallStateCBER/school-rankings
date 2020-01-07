@@ -115,8 +115,6 @@ class PopulateElasticsearchCommand extends Command
             return;
         }
 
-        $io->out("Importing all stats...");
-        $this->start = microtime(true);
         $this->importStats();
         $this->showDuration();
         $this->showNewRecordCount();
@@ -247,6 +245,9 @@ class PopulateElasticsearchCommand extends Command
      */
     private function importStats()
     {
+        $this->io->out("Importing all stats...");
+        $this->start = microtime(true);
+
         /** @var ProgressHelper $progress */
         $progress = $this->io->helper('Progress');
         $progress->init([
