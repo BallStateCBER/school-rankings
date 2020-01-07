@@ -409,7 +409,14 @@ class PopulateElasticsearchCommand extends Command
     {
         $query = $this->statisticsTable->find();
 
+        $this->io->out('Determining count of stats to import...');
         if (!$this->includeAllYears) {
+            /** @var ProgressHelper $progress */
+            $progress = $this->io->helper('Progress');
+            $progress->init([
+                'total' => count($this->metricYears),
+                'width' => 40,
+            ]);
             $count = 0;
             foreach ($this->metricYears as $metricId => $year) {
                 $count += $this->statisticsTable
@@ -419,6 +426,8 @@ class PopulateElasticsearchCommand extends Command
                         'year' => $this->metricYears[$metricId],
                     ])
                     ->count();
+                $progress->increment(1);
+                $progress->draw();
             }
             $this->statsToImportCount = $count;
 
