@@ -7,22 +7,16 @@ use Cake\ElasticSearch\Index;
 class StatisticsIndex extends Index
 {
     /**
-     * The name of index in Elasticsearch
+     * Initialization method
      *
-     * @return  string
+     * @param array $config Configuration options passed to the constructor
+     * @return void
      */
-    public function getName()
+    public function initialize(array $config)
     {
-        return Configure::read('Elasticsearch.statisticsIndex');
-    }
+        parent::initialize($config);
 
-    /**
-     * The name of mapping type in Elasticsearch
-     *
-     * @return  string
-     */
-    public function getType()
-    {
-        return '_doc';
+        $this->_name = Configure::read('Elasticsearch.statisticsIndex');
+        $this->_type = '_doc';
     }
 }
