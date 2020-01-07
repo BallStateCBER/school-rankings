@@ -114,6 +114,7 @@ class PopulateElasticsearchCommand extends Command
 
         $this->totalStatsCount = $this->statisticsTable->find()->count();
         $this->statisticsIndex = IndexRegistry::get($this->indexName);
+        $this->statisticsIndex->setName($this->indexName);
         $this->showRecordCounts();
 
         $continue = $io->askChoice('Import entire stats table into Elasticsearch?', ['y', 'n'], 'n');
