@@ -46,7 +46,7 @@ class PopulateElasticsearchCommand extends Command
         'school_id',
         'school_district_id',
         'value',
-        'year'
+        'year',
     ];
     private $includeAllYears;
     private $includedMetricIds;
@@ -54,7 +54,7 @@ class PopulateElasticsearchCommand extends Command
     private $indexName;
     private $indexOptions = [
         'settings' => [
-            'number_of_shards' => 1
+            'number_of_shards' => 1,
         ],
         'mappings' => [
             '_doc' => [
@@ -64,10 +64,10 @@ class PopulateElasticsearchCommand extends Command
                     'school_id' => ['type' => 'long'],
                     'school_district_id' => ['type' => 'long'],
                     'value' => ['type' => 'keyword'],
-                    'year' => ['type' => 'integer']
-                ]
-            ]
-        ]
+                    'year' => ['type' => 'integer'],
+                ],
+            ],
+        ],
     ];
     private $io;
     private $perPage = 100;
@@ -324,7 +324,7 @@ class PopulateElasticsearchCommand extends Command
             'school_id' => $stat->school_id,
             'school_district_id' => $stat->school_district_id,
             'value' => $stat->value,
-            'year' => $stat->year
+            'year' => $stat->year,
         ]);
     }
 
