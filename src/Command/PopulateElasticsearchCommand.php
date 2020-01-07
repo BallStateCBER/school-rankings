@@ -1,7 +1,6 @@
 <?php
 namespace App\Command;
 
-use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
@@ -33,11 +32,11 @@ use Exception;
  * @property float $start
  * @property Index $statisticsIndexRegistry
  * @property int $perPage
- * @property int $totalStatsCount
+ * @property int $statsToImportCount
+ * @property int[] $includedMetricIds
  * @property StatisticsTable $statisticsTable
  * @property string $indexName
  * @property string[] $importFields
- * @property Metric[] $includedMetrics
  */
 class PopulateElasticsearchCommand extends Command
 {
@@ -50,6 +49,7 @@ class PopulateElasticsearchCommand extends Command
         'year'
     ];
     private $includeAllYears;
+    private $includedMetricIds;
     private $includeHidden;
     private $indexName;
     private $indexOptions = [
@@ -75,8 +75,7 @@ class PopulateElasticsearchCommand extends Command
     private $statisticsIndex;
     private $statisticsIndexRegistry;
     private $statisticsTable;
-    private $totalStatsCount;
-    private $includedMetrics;
+    private $statsToImportCount;
 
     /**
      * Initialization method
@@ -112,7 +111,8 @@ class PopulateElasticsearchCommand extends Command
         $this->deleteExistingIndex();
         $this->createNewIndex();
 
-        $this->totalStatsCount = $this->statisticsTable->find()->count();
+        $this->setMetrics();
+        $this->setStatsToImportCount();
         $this->statisticsIndex = IndexRegistry::get($this->indexName);
         $this->statisticsIndex->setName($this->indexName);
         $this->showRecordCounts();
@@ -122,7 +122,6 @@ class PopulateElasticsearchCommand extends Command
             return;
         }
 
-        $this->setMetrics();
         $this->importStats();
         $this->showDuration();
         $this->showNewRecordCount();
@@ -228,7 +227,14 @@ class PopulateElasticsearchCommand extends Command
      */
     private function showRecordCounts()
     {
-        $this->io->out("Total stats in MySQL table: " . number_format($this->totalStatsCount));
+        $totalStatsCount = $this->statisticsTable->find()->count();
+        $percent = round(($this->statsToImportCount / $totalStatsCount) * 100);
+        $this->io->out("Total stats in MySQL table: " . number_format($totalStatsCount));
+        $this->io->out(sprintf(
+            'Stats to be imported: %s (%s%%)',
+            number_format($this->statsToImportCount),
+            $percent
+        ));
 
         $totalCopiedStats = $this->statisticsIndex->find()->count();
         $this->io->out("Total stats in Elasticsearch index: " . number_format($totalCopiedStats));
@@ -259,11 +265,11 @@ class PopulateElasticsearchCommand extends Command
         /** @var ProgressHelper $progress */
         $progress = $this->io->helper('Progress');
         $progress->init([
-            'total' => $this->totalStatsCount,
+            'total' => $this->statsToImportCount,
             'width' => 40,
         ]);
 
-        for ($offset = 0; $offset <= $this->totalStatsCount; $offset += $this->perPage) {
+        for ($offset = 0; $offset <= $this->statsToImportCount; $offset += $this->perPage) {
             $query = $this->statisticsTable
                 ->find()
                 ->select($this->importFields)
@@ -271,10 +277,9 @@ class PopulateElasticsearchCommand extends Command
                 ->offset($offset)
                 ->orderAsc('id');
 
-            if ($this->includedMetrics) {
-                $metricIds = Hash::extract($this->includedMetrics, '{n}.id');
-                $query->where(function (QueryExpression $exp) use ($metricIds) {
-                    return $exp->in('metric_id', $metricIds);
+            if ($this->includedMetricIds) {
+                $query->where(function (QueryExpression $exp) {
+                    return $exp->in('metric_id', $this->includedMetricIds);
                 });
             }
 
@@ -354,12 +359,12 @@ class PopulateElasticsearchCommand extends Command
     {
         $duration = microtime(true) - $this->start;
         $avgSeconds = ($duration / $this->perPage);
-        $estTotalHours = round(($this->totalStatsCount * $avgSeconds) / 60 / 60, 2);
+        $estTotalHours = round(($this->statsToImportCount * $avgSeconds) / 60 / 60, 2);
         $this->io->out("Estimated time to import all stats: $estTotalHours hours");
     }
 
     /**
-     * Sets $this->includedMetrics to the Metric entities that imported statistics should be restricted to, or NULL if
+     * Sets $this->includedMetricIds to the Metric entities that imported statistics should be restricted to, or NULL if
      * no such metric restrictions are in place
      *
      * @throws Exception
@@ -377,8 +382,26 @@ class PopulateElasticsearchCommand extends Command
 
         $query = $metricsTable
             ->find('visible')
-            ->select(['id', 'name']);
+            ->select(['id']);
 
-        $this->includedMetrics = $metricsTable->getAllDescendants($query);
+        $metrics = $metricsTable->getAllDescendants($query);
+        $this->includedMetricIds = Hash::extract($metrics, '{n}.id');
+    }
+
+    /**
+     * Sets the statsToImportCount property
+     *
+     * @return void
+     */
+    private function setStatsToImportCount()
+    {
+        $query = $this->statisticsTable->find();
+        if ($this->includedMetricIds) {
+            $query->where(function (QueryExpression $exp) {
+                return $exp->in('metric_id', $this->includedMetricIds);
+            });
+        }
+
+        $this->statsToImportCount = $query->count();
     }
 }
