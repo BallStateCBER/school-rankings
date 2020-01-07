@@ -552,4 +552,56 @@ class MetricsTable extends Table
 
         return $query->where(['OR' => $conditions]);
     }
+
+    /**
+     * Custom finder for retrieving visible metrics
+     *
+     * @param Query $query Cake ORM query
+     * @return Query
+     */
+    public function findVisible(Query $query)
+    {
+        return $query->where(['visible' => true]);
+    }
+
+    /**
+     * Custom finder for retrieving selectable metrics
+     *
+     * @param Query $query Cake ORM query
+     * @return Query
+     */
+    public function findSelectable(Query $query)
+    {
+        return $query->where(['selectable' => true]);
+    }
+
+    /**
+     * Returns a flat array of all descendents who (and whose ancestors) match the provided conditions
+     *
+     * i.e. if a metric in an ancestry chain fails any of the provided conditions, none of its children will be returned
+     *
+     * @param Query $query Cake ORM query
+     * @param int $parentId Parent metric ID
+     * @return Metric[]
+     */
+    public function getAllDescendants($query, $parentId = null)
+    {
+        $baseQuery = $query->cleanCopy();
+        if (isset($parentId)) {
+            $baseQuery->where(['parent_id' => $parentId]);
+        } else {
+            $baseQuery->where(function (QueryExpression $exp) {
+                return $exp->isNull('parent_id');
+            });
+        }
+
+        $baseResults = $baseQuery->toArray();
+        $allResults = $baseResults;
+        foreach ($baseResults as $baseResult) {
+            $childResults = $this->getAllDescendants($query, $baseResult->id);
+            $allResults = array_merge($allResults, $childResults);
+        }
+
+        return $allResults;
+    }
 }
