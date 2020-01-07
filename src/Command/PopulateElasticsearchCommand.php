@@ -235,6 +235,7 @@ class PopulateElasticsearchCommand extends Command
     {
         $totalStatsCount = $this->statisticsTable->find()->count();
         $percent = round(($this->statsToImportCount / $totalStatsCount) * 100);
+        $this->io->out();
         $this->io->out("Total stats in MySQL table: " . number_format($totalStatsCount));
         $this->io->out(sprintf(
             'Stats to be imported: %s (%s%%)',
@@ -409,6 +410,7 @@ class PopulateElasticsearchCommand extends Command
     {
         $query = $this->statisticsTable->find();
 
+        $this->io->out();
         $this->io->out('Determining count of stats to import...');
         if (!$this->includeAllYears) {
             /** @var ProgressHelper $progress */
