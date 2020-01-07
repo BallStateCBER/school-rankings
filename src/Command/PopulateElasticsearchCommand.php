@@ -1,11 +1,14 @@
 <?php
 namespace App\Command;
 
+use App\Model\Entity\Metric;
 use App\Model\Entity\Statistic;
+use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\ConnectionManager;
 use Cake\ElasticSearch\Datasource\Connection;
 use Cake\ElasticSearch\Index as ESIndex;
@@ -13,6 +16,7 @@ use Cake\ElasticSearch\IndexRegistry;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Cake\Utility\Hash;
 use Elastica\Client;
 use Elastica\Index;
 use Exception;
@@ -33,6 +37,7 @@ use Exception;
  * @property StatisticsTable $statisticsTable
  * @property string $indexName
  * @property string[] $importFields
+ * @property Metric[] $includedMetrics
  */
 class PopulateElasticsearchCommand extends Command
 {
@@ -71,6 +76,7 @@ class PopulateElasticsearchCommand extends Command
     private $statisticsIndexRegistry;
     private $statisticsTable;
     private $totalStatsCount;
+    private $includedMetrics;
 
     /**
      * Initialization method
@@ -115,6 +121,7 @@ class PopulateElasticsearchCommand extends Command
             return;
         }
 
+        $this->setMetrics();
         $this->importStats();
         $this->showDuration();
         $this->showNewRecordCount();
@@ -256,13 +263,21 @@ class PopulateElasticsearchCommand extends Command
         ]);
 
         for ($offset = 0; $offset <= $this->totalStatsCount; $offset += $this->perPage) {
-            $stats = $this->statisticsTable
+            $query = $this->statisticsTable
                 ->find()
                 ->select($this->importFields)
                 ->limit($this->perPage)
                 ->offset($offset)
                 ->orderAsc('id');
 
+            if ($this->includedMetrics) {
+                $metricIds = Hash::extract($this->includedMetrics, '{n}.id');
+                $query->where(function (QueryExpression $exp) use ($metricIds) {
+                    return $exp->in('metric_id', $metricIds);
+                });
+            }
+
+            $stats = $query->all();
             foreach ($stats as $i => $stat) {
                 $this->importSingleStat($stat);
             }
@@ -340,5 +355,29 @@ class PopulateElasticsearchCommand extends Command
         $avgSeconds = ($duration / $this->perPage);
         $estTotalHours = round(($this->totalStatsCount * $avgSeconds) / 60 / 60, 2);
         $this->io->out("Estimated time to import all stats: $estTotalHours hours");
+    }
+
+    /**
+     * Sets $this->includedMetrics to the Metric entities that imported statistics should be restricted to, or NULL if
+     * no such metric restrictions are in place
+     *
+     * @throws Exception
+     * @return void
+     */
+    private function setMetrics()
+    {
+        if ($this->includeHidden) {
+            return;
+        }
+
+        /** @var MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $this->io->out('Collecting all non-hidden metrics...');
+
+        $query = $metricsTable
+            ->find('visible')
+            ->select(['id', 'name']);
+
+        $this->includedMetrics = $metricsTable->getAllDescendants($query);
     }
 }
