@@ -34,6 +34,8 @@ use Exception;
  * @property int $perPage
  * @property int $statsToImportCount
  * @property int[] $includedMetricIds
+ * @property int[] $metricYears
+ * @property MetricsTable $metricsTable
  * @property StatisticsTable $statisticsTable
  * @property string $indexName
  * @property string[] $importFields
@@ -70,6 +72,8 @@ class PopulateElasticsearchCommand extends Command
         ],
     ];
     private $io;
+    private $metricsTable;
+    private $metricYears;
     private $perPage = 100;
     private $start;
     private $statisticsIndex;
@@ -87,6 +91,7 @@ class PopulateElasticsearchCommand extends Command
         parent::initialize();
 
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
+        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
     }
 
     /**
@@ -112,6 +117,7 @@ class PopulateElasticsearchCommand extends Command
         $this->createNewIndex();
 
         $this->setMetrics();
+        $this->setMetricYears();
         $this->setStatsToImportCount();
         $this->statisticsIndex = IndexRegistry::get($this->indexName);
         $this->statisticsIndex->setName($this->indexName);
@@ -277,10 +283,13 @@ class PopulateElasticsearchCommand extends Command
                 ->offset($offset)
                 ->orderAsc('id');
 
-            if ($this->includedMetricIds) {
+            if (!$this->includeHidden) {
                 $query->where(function (QueryExpression $exp) {
                     return $exp->in('metric_id', $this->includedMetricIds);
                 });
+            }
+            if (!$this->includeAllYears) {
+                $query->where(['OR' => $this->getYearConditions()]);
             }
 
             $stats = $query->all();
@@ -372,19 +381,22 @@ class PopulateElasticsearchCommand extends Command
      */
     private function setMetrics()
     {
+        $this->io->out('Collecting metrics...');
+
         if ($this->includeHidden) {
+            $metrics = $this->metricsTable
+                ->find()
+                ->select(['id'])
+                ->toArray();
+            $this->includedMetricIds = Hash::extract($metrics, '{n}.id');
+
             return;
         }
 
-        /** @var MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $this->io->out('Collecting all non-hidden metrics...');
-
-        $query = $metricsTable
+        $query = $this->metricsTable
             ->find('visible')
             ->select(['id']);
-
-        $metrics = $metricsTable->getAllDescendants($query);
+        $metrics = $this->metricsTable->getAllDescendants($query);
         $this->includedMetricIds = Hash::extract($metrics, '{n}.id');
     }
 
@@ -396,12 +408,88 @@ class PopulateElasticsearchCommand extends Command
     private function setStatsToImportCount()
     {
         $query = $this->statisticsTable->find();
-        if ($this->includedMetricIds) {
-            $query->where(function (QueryExpression $exp) {
-                return $exp->in('metric_id', $this->includedMetricIds);
-            });
+
+        if (!$this->includeAllYears) {
+            $count = 0;
+            foreach ($this->metricYears as $metricId => $year) {
+                $count += $this->statisticsTable
+                    ->find()
+                    ->where([
+                        'metric_id' => $metricId,
+                        'year' => $this->metricYears[$metricId],
+                    ])
+                    ->count();
+            }
+            $this->statsToImportCount = $count;
+
+            return;
+        }
+
+        if (!$this->includeHidden) {
+            $this->statsToImportCount = $query
+                ->where(function (QueryExpression $exp) {
+                    return $exp->in('metric_id', $this->includedMetricIds);
+                })
+                ->count();
+
+            return;
         }
 
         $this->statsToImportCount = $query->count();
+    }
+
+    /**
+     * Sets the metricYears property with (metric ID) => (most recent year) pairs
+     *
+     * @return void
+     */
+    private function setMetricYears()
+    {
+        if ($this->includeAllYears) {
+            return;
+        }
+
+        $this->io->out('Determining most recent years for each metric...');
+
+        /** @var ProgressHelper $progress */
+        $progress = $this->io->helper('Progress');
+        $progress->init([
+            'total' => count($this->includedMetricIds),
+            'width' => 40,
+        ]);
+
+        foreach ($this->includedMetricIds as $metricId) {
+            /** @var Statistic $statistic */
+            $statistic = $this->statisticsTable
+                ->find()
+                ->select(['year'])
+                ->where(['metric_id' => $metricId])
+                ->orderDesc('year')
+                ->first();
+            if ($statistic) {
+                $this->metricYears[$metricId] = $statistic->year;
+            }
+
+            $progress->increment(1);
+            $progress->draw();
+        }
+    }
+
+    /**
+     * Returns an array of OR conditions to put into a statisticsTable query
+     *
+     * @return array
+     */
+    private function getYearConditions()
+    {
+        $yearConditions = [];
+        foreach ($this->metricYears as $metricId => $year) {
+            $yearConditions[] = [
+                'metric_id' => $metricId,
+                'year' => $year,
+            ];
+        }
+
+        return $yearConditions;
     }
 }
