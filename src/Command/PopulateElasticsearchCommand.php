@@ -184,8 +184,7 @@ class PopulateElasticsearchCommand extends Command
      */
     private function deleteExistingIndex()
     {
-        $exists = $this->statisticsIndexRegistry->exists();
-        if (!$exists) {
+        if (!$this->statisticsIndexRegistry->exists()) {
             return;
         }
 
