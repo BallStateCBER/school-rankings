@@ -211,7 +211,7 @@ class PopulateElasticsearchCommand extends Command
 
         $response = $this->io->askChoice('Create new index?', ['y', 'n'], 'n');
         if ($response !== 'y') {
-            return;
+            exit;
         }
 
         // Make mapping type name match index name
