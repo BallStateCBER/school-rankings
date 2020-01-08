@@ -58,17 +58,16 @@ class PopulateElasticsearchCommand extends Command
         'settings' => [
             'number_of_shards' => 1,
         ],
-        'mappings' => [
-            '_doc' => [
-                'properties' => [
-                    'id' => ['type' => 'long'],
-                    'metric_id' => ['type' => 'long'],
-                    'school_id' => ['type' => 'long'],
-                    'school_district_id' => ['type' => 'long'],
-                    'value' => ['type' => 'keyword'],
-                    'year' => ['type' => 'integer'],
-                ],
-            ],
+        'mappings' => [],
+    ];
+    private $mappingProperties = [
+        'properties' => [
+            'id' => ['type' => 'long'],
+            'metric_id' => ['type' => 'long'],
+            'school_id' => ['type' => 'long'],
+            'school_district_id' => ['type' => 'long'],
+            'value' => ['type' => 'keyword'],
+            'year' => ['type' => 'integer'],
         ],
     ];
     private $io;
@@ -121,6 +120,7 @@ class PopulateElasticsearchCommand extends Command
         $this->setStatsToImportCount();
         $this->statisticsIndex = IndexRegistry::get($this->indexName);
         $this->statisticsIndex->setName($this->indexName);
+        $this->statisticsIndex->setType($this->indexName);
         $this->showRecordCounts();
 
         $continue = $io->askChoice('Import entire stats table into Elasticsearch?', ['y', 'n'], 'n');
@@ -222,6 +222,8 @@ class PopulateElasticsearchCommand extends Command
             return;
         }
 
+        // Make mapping type name match index name
+        $this->indexOptions['mappings'][$this->indexName] = $this->mappingProperties;
         $this->statisticsIndexRegistry->create($this->indexOptions);
         $this->io->out("$this->indexName index created");
     }
