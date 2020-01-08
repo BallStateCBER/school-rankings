@@ -24,7 +24,6 @@ use Exception;
  * Class PopulateElasticsearchCommand
  * @package App\Command
  *
- * @property array $indexOptions
  * @property bool $includeAllYears
  * @property bool $includeHidden
  * @property ConsoleIo $io
@@ -54,12 +53,6 @@ class PopulateElasticsearchCommand extends Command
     private $includedMetricIds;
     private $includeHidden;
     private $indexName;
-    private $indexOptions = [
-        'settings' => [
-            'number_of_shards' => 1,
-        ],
-        'mappings' => [],
-    ];
     private $mappingProperties = [
         'properties' => [
             'id' => ['type' => 'long'],
@@ -223,8 +216,9 @@ class PopulateElasticsearchCommand extends Command
         }
 
         // Make mapping type name match index name
-        $this->indexOptions['mappings'][$this->indexName] = $this->mappingProperties;
-        $this->statisticsIndexRegistry->create($this->indexOptions);
+        $this->statisticsIndexRegistry->create([
+            'mappings' => [$this->indexName => $this->mappingProperties],
+        ]);
         $this->io->out("$this->indexName index created");
     }
 
