@@ -318,17 +318,27 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns the most recent year for which statistics are found
+     * Returns the most recent year for which statistics are found, optionally for a specified metric
      *
+     * @param int|null $metricId Optional metric ID
      * @return int
+     * @throws InternalErrorException
      */
-    public function getMostRecentYear()
+    public function getMostRecentYear($metricId = null)
     {
         /** @var Statistic $stat */
-        $stat = $this->find()
+        $query = $this->find()
             ->select(['year'])
-            ->orderDesc('year')
-            ->first();
+            ->orderDesc('year');
+
+        if ($metricId) {
+            if (!is_int($metricId)) {
+                throw new InternalErrorException('Metric ID ' . $metricId . ' is invalid.');
+            }
+            $query->where(['metric_id' => $metricId]);
+        }
+
+        $stat = $query->first();
 
         return $stat->year;
     }
