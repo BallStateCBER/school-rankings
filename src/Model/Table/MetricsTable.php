@@ -61,22 +61,22 @@ class MetricsTable extends Table
         $this->addBehavior('Tree');
 
         $this->hasMany('Criteria', [
-            'foreignKey' => 'metric_id'
+            'foreignKey' => 'metric_id',
         ]);
 
         $this->hasMany('Statistics', [
             'className' => 'Statistics',
-            'foreignKey' => 'metric_id'
+            'foreignKey' => 'metric_id',
         ])->setDependent(true);
 
         $this->belongsTo('ParentMetrics', [
             'className' => 'Metrics',
-            'foreignKey' => 'parent_id'
+            'foreignKey' => 'parent_id',
         ]);
 
         $this->hasMany('ChildMetrics', [
             'className' => 'Metrics',
-            'foreignKey' => 'parent_id'
+            'foreignKey' => 'parent_id',
         ]);
     }
 
@@ -100,7 +100,7 @@ class MetricsTable extends Table
                 'rule' => function ($value) {
                     return Context::isValid($value);
                 },
-                'message' => 'The title is not valid'
+                'message' => 'The title is not valid',
             ]);
 
         $validator
@@ -109,7 +109,7 @@ class MetricsTable extends Table
             ->add('parent_id', 'isValidParent', [
                 'rule' => 'validateParent',
                 'message' => 'Another metric with the same parent has the same name',
-                'provider' => 'table'
+                'provider' => 'table',
             ]);
 
         $validator
@@ -120,7 +120,7 @@ class MetricsTable extends Table
             ->add('name', 'unique', [
                 'rule' => 'validateName',
                 'message' => 'Another metric with the same parent has the same name',
-                'provider' => 'table'
+                'provider' => 'table',
             ]);
 
         $validator
@@ -167,7 +167,7 @@ class MetricsTable extends Table
             return $this->childCount($entity, true) === 0;
         }, 'cantDeleteParentMetric', [
             'message' => 'Cannot delete a metric with child-records',
-            'errorField' => 'children'
+            'errorField' => 'children',
         ]);
 
         $rules->addDelete(function ($entity) {
@@ -176,7 +176,7 @@ class MetricsTable extends Table
                 ->exists(['metric_id' => $entity->id]);
         }, 'cantDeleteWithStatistics', [
             'message' => 'Cannot delete a metric with statistics',
-            'errorField' => 'statistics'
+            'errorField' => 'statistics',
         ]);
 
         $rules->addDelete(function ($entity) {
@@ -185,14 +185,14 @@ class MetricsTable extends Table
                 ->exists(['metric_id' => $entity->id]);
         }, 'cantDeleteWithSCM', [
             'message' => 'Cannot delete a metric with associated spreadsheet columns',
-            'errorField' => 'spreadsheet_columns_metrics'
+            'errorField' => 'spreadsheet_columns_metrics',
         ]);
 
         $rules->addUpdate(function ($entity) {
             return !$this->hasIncompatibleStatistics($entity->type, $entity->id);
         }, 'cantChangeMetricContext', [
             'message' => 'Cannot change metric type. Existing statistics are incompatible with new type.',
-            'errorField' => 'statistics'
+            'errorField' => 'statistics',
         ]);
 
         return $rules;
@@ -216,7 +216,7 @@ class MetricsTable extends Table
             'selectable' => true,
             'visible' => true,
             'type' => $type,
-            'is_percent' => null
+            'is_percent' => null,
         ]);
 
         if ($this->save($metric)) {
@@ -283,7 +283,7 @@ class MetricsTable extends Table
                 'metric_id' => $metricId,
                 function (QueryExpression $exp) {
                     return $exp->notIn('value', ['0', '1']);
-                }
+                },
             ])
             ->count() > 0;
     }

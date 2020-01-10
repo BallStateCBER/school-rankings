@@ -43,11 +43,11 @@ class RankingsSchoolTypesTable extends Table
 
         $this->belongsTo('Rankings', [
             'foreignKey' => 'ranking_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('SchoolTypes', [
             'foreignKey' => 'school_type_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 

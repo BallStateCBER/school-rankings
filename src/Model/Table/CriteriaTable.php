@@ -41,11 +41,11 @@ class CriteriaTable extends Table
 
         $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('Formulas', [
             'foreignKey' => 'formula_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 
@@ -103,7 +103,7 @@ class CriteriaTable extends Table
             'metricNotFound',
             [
                 'errorField' => 'metric_id',
-                'message' => 'Associated metric not found'
+                'message' => 'Associated metric not found',
             ]
         );
 

@@ -41,7 +41,7 @@ class SchoolDistrictCodesTable extends Table
 
         $this->belongsTo('SchoolDistricts', [
             'foreignKey' => 'school_district_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 

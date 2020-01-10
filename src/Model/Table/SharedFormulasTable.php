@@ -43,11 +43,11 @@ class SharedFormulasTable extends Table
 
         $this->belongsTo('Formulas', [
             'foreignKey' => 'formula_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 

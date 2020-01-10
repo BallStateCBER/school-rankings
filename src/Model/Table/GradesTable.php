@@ -44,12 +44,12 @@ class GradesTable extends Table
         $this->belongsToMany('Rankings', [
             'foreignKey' => 'grade_id',
             'targetForeignKey' => 'school_id',
-            'joinTable' => 'rankings_grades'
+            'joinTable' => 'rankings_grades',
         ]);
         $this->belongsToMany('Schools', [
             'foreignKey' => 'grade_id',
             'targetForeignKey' => 'school_id',
-            'joinTable' => 'schools_grades'
+            'joinTable' => 'schools_grades',
         ]);
     }
 
@@ -147,7 +147,7 @@ class GradesTable extends Table
         // Get grade IDs corresponding to the low and high grade abbreviations
         $gradeIds = [
             'low' => null,
-            'high' => null
+            'high' => null,
         ];
         foreach ($gradeAbbrevs as $key => $gradeAbbrev) {
             $grade = $this->getGradeByIdoeAbbreviation($gradeAbbrev, $allGrades);

@@ -45,7 +45,7 @@ class SpreadsheetColumnsMetricsTable extends Table
 
         $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 
@@ -130,7 +130,7 @@ class SpreadsheetColumnsMetricsTable extends Table
             'context',
             'worksheet',
             'group_name',
-            'column_name'
+            'column_name',
         ];
         foreach ($expectedKeys as $key) {
             if (!array_key_exists($key, $conditions)) {
@@ -176,7 +176,7 @@ class SpreadsheetColumnsMetricsTable extends Table
             'worksheet' => $importFile->activeWorksheet,
             'group_name' => $colInfo['group'],
             'column_name' => $colInfo['name'],
-            'metric_id' => $metricId
+            'metric_id' => $metricId,
         ]);
 
         if ($this->save($record)) {

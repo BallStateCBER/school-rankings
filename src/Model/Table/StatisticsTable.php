@@ -25,15 +25,15 @@ class StatisticsTable extends Table
 
         $this->belongsTo('Metrics', [
             'foreignKey' => 'metric_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('Schools', [
             'foreignKey' => 'school_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('SchoolDistricts', [
             'foreignKey' => 'school_district_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 
@@ -70,7 +70,7 @@ class StatisticsTable extends Table
             ->add('role', 'validValue', [
                 'rule' => 'isValidValue',
                 'message' => 'Stat values must be numbers, percents, or capital letter grades',
-                'provider' => 'table'
+                'provider' => 'table',
             ]);
 
         $validator
@@ -80,7 +80,7 @@ class StatisticsTable extends Table
             ->add('role', 'validYear', [
                 'rule' => 'isValidYear',
                 'message' => 'Invalid year',
-                'provider' => 'table'
+                'provider' => 'table',
             ]);
 
         $validator
@@ -118,7 +118,7 @@ class StatisticsTable extends Table
             'metricExists',
             [
                 'errorField' => 'metric_id',
-                'message' => 'Metric not found'
+                'message' => 'Metric not found',
             ]
         );
 
@@ -130,7 +130,7 @@ class StatisticsTable extends Table
             'subjectSpecified',
             [
                 'errorField' => 'subject',
-                'message' => 'School/district not specified'
+                'message' => 'School/district not specified',
             ]
         );
 
@@ -147,7 +147,7 @@ class StatisticsTable extends Table
             'schoolExists',
             [
                 'errorField' => 'school_id',
-                'message' => 'School not found'
+                'message' => 'School not found',
             ]
         );
 
@@ -165,7 +165,7 @@ class StatisticsTable extends Table
             'districtExists',
             [
                 'errorField' => 'school_district_id',
-                'message' => 'District not found'
+                'message' => 'District not found',
             ]
         );
 
@@ -202,7 +202,7 @@ class StatisticsTable extends Table
             'percentageInBounds',
             [
                 'errorField' => 'value',
-                'message' => 'Percentage values must be between 0 and 100%'
+                'message' => 'Percentage values must be between 0 and 100%',
             ]
         );
 
@@ -230,12 +230,12 @@ class StatisticsTable extends Table
                 'value',
                 'school_id',
                 'school_district_id',
-                'metric_id'
+                'metric_id',
             ])
             ->where([
                 'metric_id' => $metricId,
                 'year' => $year,
-                $locationField => $locationId
+                $locationField => $locationId,
             ])
             ->orderDesc('created')
             ->first();

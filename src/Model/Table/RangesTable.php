@@ -40,7 +40,7 @@ class RangesTable extends Table
         $this->belongsToMany('Rankings', [
             'foreignKey' => 'range_id',
             'targetForeignKey' => 'ranking_id',
-            'joinTable' => 'rankings_ranges'
+            'joinTable' => 'rankings_ranges',
         ]);
     }
 

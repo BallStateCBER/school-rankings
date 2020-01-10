@@ -54,59 +54,59 @@ class RankingsTable extends Table
         $this->addBehavior('Timestamp');
 
         $this->belongsTo('Users', [
-            'foreignKey' => 'user_id'
+            'foreignKey' => 'user_id',
         ]);
         $this->belongsTo('Formulas', [
             'foreignKey' => 'formula_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
 
         // If a ranking has no associated grades, it's assumed that schools teaching ALL grades are being ranked
         $this->belongsToMany('Grades', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'grade_id',
-            'joinTable' => 'rankings_grades'
+            'joinTable' => 'rankings_grades',
         ]);
 
         $this->belongsToMany('Cities', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'city_id',
-            'joinTable' => 'rankings_cities'
+            'joinTable' => 'rankings_cities',
         ]);
         $this->belongsToMany('Counties', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'county_id',
-            'joinTable' => 'rankings_counties'
+            'joinTable' => 'rankings_counties',
         ]);
         $this->belongsToMany('Ranges', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'range_id',
-            'joinTable' => 'rankings_ranges'
+            'joinTable' => 'rankings_ranges',
         ]);
         $this->belongsToMany('SchoolDistricts', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'school_district_id',
-            'joinTable' => 'rankings_school_districts'
+            'joinTable' => 'rankings_school_districts',
         ]);
         $this->belongsToMany('SchoolTypes', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'school_type_id',
-            'joinTable' => 'rankings_school_types'
+            'joinTable' => 'rankings_school_types',
         ]);
         $this->belongsToMany('States', [
             'foreignKey' => 'ranking_id',
             'targetForeignKey' => 'state_id',
-            'joinTable' => 'rankings_states'
+            'joinTable' => 'rankings_states',
         ]);
         $this->hasMany('ResultsSchools', [
             'className' => 'RankingResultsSchools',
             'foreignKey' => 'ranking_id',
-            'joinTable' => 'ranking_results_schools'
+            'joinTable' => 'ranking_results_schools',
         ]);
         $this->hasMany('ResultsDistricts', [
             'className' => 'RankingResultsSchoolDistricts',
             'foreignKey' => 'ranking_id',
-            'joinTable' => 'ranking_results_school_districts'
+            'joinTable' => 'ranking_results_school_districts',
         ]);
     }
 

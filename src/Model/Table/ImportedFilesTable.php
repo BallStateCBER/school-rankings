@@ -72,7 +72,7 @@ class ImportedFilesTable extends Table
             ->select(['created'])
             ->where([
                 'year' => (int)$year,
-                'file' => $file
+                'file' => $file,
             ])
             ->orderDesc('created')
             ->first();

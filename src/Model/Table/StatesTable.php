@@ -43,25 +43,25 @@ class StatesTable extends Table
         $this->setDisplayField('name');
 
         $this->hasMany('Cities', [
-            'foreignKey' => 'state_id'
+            'foreignKey' => 'state_id',
         ]);
         $this->hasMany('Counties', [
-            'foreignKey' => 'state_id'
+            'foreignKey' => 'state_id',
         ]);
         $this->belongsToMany('Rankings', [
             'foreignKey' => 'state_id',
             'targetForeignKey' => 'ranking_id',
-            'joinTable' => 'rankings_states'
+            'joinTable' => 'rankings_states',
         ]);
         $this->belongsToMany('SchoolDistricts', [
             'foreignKey' => 'state_id',
             'targetForeignKey' => 'school_district_id',
-            'joinTable' => 'school_districts_states'
+            'joinTable' => 'school_districts_states',
         ]);
         $this->belongsToMany('Schools', [
             'foreignKey' => 'state_id',
             'targetForeignKey' => 'school_id',
-            'joinTable' => 'schools_states'
+            'joinTable' => 'schools_states',
         ]);
     }
 
@@ -102,7 +102,7 @@ class StatesTable extends Table
         return [
             'Indiana' => 'IN',
             'Illinois' => 'IL',
-            'Ohio' => 'OH'
+            'Ohio' => 'OH',
         ];
     }
 

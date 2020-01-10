@@ -54,40 +54,40 @@ class SchoolsTable extends Table
         $this->addBehavior('Timestamp');
 
         $this->belongsTo('SchoolDistricts', [
-            'foreignKey' => 'school_district_id'
+            'foreignKey' => 'school_district_id',
         ]);
         $this->belongsTo('SchoolTypes', [
-            'foreignKey' => 'school_type_id'
+            'foreignKey' => 'school_type_id',
         ]);
         $this->hasMany('Statistics', [
-            'foreignKey' => 'school_id'
+            'foreignKey' => 'school_id',
         ]);
         $this->belongsToMany('Cities', [
             'foreignKey' => 'school_id',
             'targetForeignKey' => 'city_id',
-            'joinTable' => 'schools_cities'
+            'joinTable' => 'schools_cities',
         ]);
         $this->belongsToMany('Counties', [
             'foreignKey' => 'school_id',
             'targetForeignKey' => 'county_id',
-            'joinTable' => 'schools_counties'
+            'joinTable' => 'schools_counties',
         ]);
         $this->belongsToMany('Grades', [
             'foreignKey' => 'school_id',
             'targetForeignKey' => 'grade_id',
-            'joinTable' => 'schools_grades'
+            'joinTable' => 'schools_grades',
         ]);
         $this->belongsToMany('States', [
             'foreignKey' => 'school_id',
             'targetForeignKey' => 'state_id',
-            'joinTable' => 'schools_states'
+            'joinTable' => 'schools_states',
         ]);
         $this->hasMany('RankingResultsSchools', [
-            'dependent' => true
+            'dependent' => true,
         ]);
         $this->hasMany('SchoolCodes', [
             'dependent' => true,
-            'foreignKey' => 'school_id'
+            'foreignKey' => 'school_id',
         ]);
     }
 

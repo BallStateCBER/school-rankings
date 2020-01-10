@@ -41,11 +41,11 @@ class SchoolsStatesTable extends Table
 
         $this->belongsTo('Schools', [
             'foreignKey' => 'school_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsTo('States', [
             'foreignKey' => 'state_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
     }
 

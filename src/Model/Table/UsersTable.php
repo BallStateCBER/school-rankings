@@ -47,13 +47,13 @@ class UsersTable extends \CakeDC\Users\Model\Table\UsersTable
         $this->addBehavior('Timestamp');
 
         $this->hasMany('Formulas', [
-            'foreignKey' => 'user_id'
+            'foreignKey' => 'user_id',
         ]);
         $this->hasMany('Rankings', [
-            'foreignKey' => 'user_id'
+            'foreignKey' => 'user_id',
         ]);
         $this->hasMany('SharedFormulas', [
-            'foreignKey' => 'user_id'
+            'foreignKey' => 'user_id',
         ]);
     }
 

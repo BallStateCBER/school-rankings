@@ -51,16 +51,16 @@ class FormulasTable extends Table
         $this->addBehavior('Timestamp');
 
         $this->belongsTo('Users', [
-            'foreignKey' => 'user_id'
+            'foreignKey' => 'user_id',
         ]);
         $this->hasMany('Rankings', [
-            'foreignKey' => 'formula_id'
+            'foreignKey' => 'formula_id',
         ])->setDependent(true);
         $this->hasMany('SharedFormulas', [
-            'foreignKey' => 'formula_id'
+            'foreignKey' => 'formula_id',
         ])->setDependent(true);
         $this->hasMany('Criteria', [
-            'foreignKey' => 'formula_id'
+            'foreignKey' => 'formula_id',
         ])->setDependent(true);
     }
 

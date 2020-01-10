@@ -50,27 +50,27 @@ class CitiesTable extends Table
 
         $this->belongsTo('States', [
             'foreignKey' => 'state_id',
-            'joinType' => 'INNER'
+            'joinType' => 'INNER',
         ]);
         $this->belongsToMany('Counties', [
             'foreignKey' => 'city_id',
             'targetForeignKey' => 'county_id',
-            'joinTable' => 'cities_counties'
+            'joinTable' => 'cities_counties',
         ]);
         $this->belongsToMany('Rankings', [
             'foreignKey' => 'city_id',
             'targetForeignKey' => 'ranking_id',
-            'joinTable' => 'rankings_cities'
+            'joinTable' => 'rankings_cities',
         ]);
         $this->belongsToMany('SchoolDistricts', [
             'foreignKey' => 'city_id',
             'targetForeignKey' => 'school_district_id',
-            'joinTable' => 'school_districts_cities'
+            'joinTable' => 'school_districts_cities',
         ]);
         $this->belongsToMany('Schools', [
             'foreignKey' => 'city_id',
             'targetForeignKey' => 'school_id',
-            'joinTable' => 'schools_cities'
+            'joinTable' => 'schools_cities',
         ]);
     }
 

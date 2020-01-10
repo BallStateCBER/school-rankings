@@ -45,10 +45,10 @@ class SchoolTypesTable extends Table
         $this->addBehavior('Timestamp');
 
         $this->hasMany('Rankings', [
-            'foreignKey' => 'school_type_id'
+            'foreignKey' => 'school_type_id',
         ]);
         $this->hasMany('Schools', [
-            'foreignKey' => 'school_type_id'
+            'foreignKey' => 'school_type_id',
         ]);
     }
 
@@ -83,7 +83,7 @@ class SchoolTypesTable extends Table
         return [
             'public',
             'private',
-            'charter'
+            'charter',
         ];
     }
 

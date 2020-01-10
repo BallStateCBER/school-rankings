@@ -51,37 +51,37 @@ class SchoolDistrictsTable extends Table
         $this->addBehavior('Timestamp');
 
         $this->hasMany('Statistics', [
-            'foreignKey' => 'school_district_id'
+            'foreignKey' => 'school_district_id',
         ]);
         $this->hasMany('Schools', [
-            'foreignKey' => 'school_district_id'
+            'foreignKey' => 'school_district_id',
         ]);
         $this->belongsToMany('Rankings', [
             'foreignKey' => 'school_district_id',
             'targetForeignKey' => 'ranking_id',
-            'joinTable' => 'rankings_school_districts'
+            'joinTable' => 'rankings_school_districts',
         ]);
         $this->belongsToMany('Cities', [
             'foreignKey' => 'school_district_id',
             'targetForeignKey' => 'city_id',
-            'joinTable' => 'school_districts_cities'
+            'joinTable' => 'school_districts_cities',
         ]);
         $this->belongsToMany('Counties', [
             'foreignKey' => 'school_district_id',
             'targetForeignKey' => 'county_id',
-            'joinTable' => 'school_districts_counties'
+            'joinTable' => 'school_districts_counties',
         ]);
         $this->belongsToMany('States', [
             'foreignKey' => 'school_district_id',
             'targetForeignKey' => 'state_id',
-            'joinTable' => 'school_districts_states'
+            'joinTable' => 'school_districts_states',
         ]);
         $this->hasMany('RankingResultsSchoolDistricts', [
-            'dependent' => true
+            'dependent' => true,
         ]);
         $this->hasMany('SchoolDistrictCodes', [
             'dependent' => true,
-            'foreignKey' => 'school_district_id'
+            'foreignKey' => 'school_district_id',
         ]);
     }
 
@@ -154,7 +154,7 @@ class SchoolDistrictsTable extends Table
     {
         return [
             '8801', // Community-based Preschools
-            '9700' // GQE Retest Site
+            '9700', // GQE Retest Site
         ];
     }
 
