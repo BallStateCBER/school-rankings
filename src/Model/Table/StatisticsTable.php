@@ -321,7 +321,7 @@ class StatisticsTable extends Table
      * Returns the most recent year for which statistics are found, optionally for a specified metric
      *
      * @param int|null $metricId Optional metric ID
-     * @return int
+     * @return int|null
      * @throws InternalErrorException
      */
     public function getMostRecentYear($metricId = null)
@@ -340,6 +340,6 @@ class StatisticsTable extends Table
 
         $stat = $query->first();
 
-        return $stat->year;
+        return $stat ? $stat->year : null;
     }
 }
