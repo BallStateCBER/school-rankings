@@ -10,6 +10,7 @@ use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
+use ArrayAccess;
 use Cake\Console\Shell;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\ConnectionManager;
@@ -30,13 +31,14 @@ use Queue\Model\Table\QueuedJobsTable;
  * Class RankTask
  * @package App\Shell\Task
  * @property array $rankedSubjects
- * @property bool $allowMultipleYears If TRUE, stats for an older year will be used if a subject has no stats for the
- *      most recent year. If FALSE, all stats for all subjects will be from the same year.
+ * @property bool $allowMultipleYearsPerMetric If TRUE, stats for an older year will be used if a subject has no stats
+ *      for the most recent year. If FALSE, all stats for all subjects in a given metric will be from the same year.
  * @property County[] $locations
  * @property Criterion[] $criteria
  * @property float $progressUpdatePercent
  * @property float $progressUpdateTime
  * @property float[] $progressRange
+ * @property int[] $metricYears
  * @property int|float $progressUpdateInterval
  * @property ProgressHelper $progressHelper
  * @property QueuedJobsTable $jobsTable
@@ -48,10 +50,12 @@ use Queue\Model\Table\QueuedJobsTable;
  */
 class RankTask extends Shell
 {
+    private $allowMultipleYearsPerMetric = false;
     private $context;
     private $criteria;
     private $jobId;
     private $jobsTable;
+    private $metricYears = [];
     private $progressHelper;
     private $progressRange = [0, 1];
     private $progressUpdateInterval = 1; // seconds
@@ -62,7 +66,6 @@ class RankTask extends Shell
     private $rankingsTable;
     private $statsTable;
     private $subjects = [];
-    private $allowMultipleYears = false;
 
     /**
      * Elasticsearch index for statistics
@@ -105,6 +108,8 @@ class RankTask extends Shell
     {
         $this->setProgressRange(0, 0.05);
         $this->loadRankingRecord($rankingId);
+        $msg = $this->isUsingElasticsearch() ? 'Using Elasticsearch statistics index' : 'Using MySQL statistics table';
+        $this->getIo()->out($msg);
         $this->loadSubjects();
 
         $this->setProgressRange(0.05, 0.9);
@@ -295,6 +300,8 @@ class RankTask extends Shell
      */
     private function loadStats()
     {
+        $this->loadYears();
+
         $msg = 'Analyzing statistical data';
         $this->getIo()->out("$msg...");
         $this->updateJobStatus($msg);
@@ -307,22 +314,16 @@ class RankTask extends Shell
 
         $stepsCount = count($this->subjects) + 1;
         $this->createProgressBar($stepsCount);
-        $criteria = $this->ranking->formula->criteria;
-        $metricIds = Hash::extract($criteria, '{n}.metric_id');
+        $metricIds = $this->getMetricIds();
         $step = 1;
 
-        // Get year
-        $year = null;
-        if (!$this->allowMultipleYears) {
-            $year = $this->getYear();
-        }
         $this->incrementProgressBar();
 
         // Get stats
         foreach ($this->subjects as &$subject) {
             $subject->statistics = [];
             foreach ($metricIds as $metricId) {
-                $stat = $this->getStat($metricId, $subject->id, $year);
+                $stat = $this->getStat($metricId, $subject->id);
                 if ($stat) {
                     $subject->statistics[] = $stat;
                 }
@@ -383,7 +384,7 @@ class RankTask extends Shell
         }
 
         $this->getIo()->overwrite(' - Done');
-
+        $this->getIo()->out('Results:');
         foreach ($outputMsgs as $outputMsg) {
             $this->getIo()->out(" - $outputMsg");
         }
@@ -598,36 +599,28 @@ class RankTask extends Shell
      *
      * @param int $metricId Metric ID
      * @param int $subjectId School ID or school district ID
-     * @param int|null $year If specified, stats will only be searched for in the given year
      * @return Statistic|null
      */
-    private function getStat($metricId, int $subjectId, int $year = null)
+    private function getStat($metricId, int $subjectId)
     {
-        // Abort if all stats must be in the same year, but that year is not specified
-        if (!$year && !$this->allowMultipleYears) {
-            return null;
-        }
-
-        $usingElasticsearch = isset($this->statsEsIndex);
-        $dataSource = $usingElasticsearch ? $this->statsEsIndex : $this->statsTable;
-
-        $query = $dataSource
+        $query = $this->getStatsDatasource()
             ->find()
             ->select(['id', 'metric_id', 'value', 'year'])
             ->where([
                 'metric_id' => $metricId,
                 Context::getLocationField($this->context) => $subjectId,
             ]);
-        if ($this->allowMultipleYears) {
+        if ($this->allowMultipleYearsPerMetric) {
             $query->order(['year' => 'DESC']);
         } else {
+            $year = $this->metricYears[$metricId];
             $query->where(['year' => $year]);
         }
 
         /** @var Statistic $stat */
         $stat = $query->first();
 
-        if ($stat && $usingElasticsearch) {
+        if ($stat && $this->isUsingElasticsearch()) {
             $stat = $this->statsTable->newEntity([
                 'id' => $stat->id,
                 'metric_id' => $stat->metric_id,
@@ -647,8 +640,7 @@ class RankTask extends Shell
     private function getYear()
     {
         $dataSource = $this->statsEsIndex ?? $this->statsTable;
-        $criteria = $this->ranking->formula->criteria;
-        $metricIds = Hash::extract($criteria, '{n}.metric_id');
+        $metricIds = $this->getMetricIds();
         $subjectIds = Hash::extract($this->subjects, '{n}.id');
 
         /** @var Statistic $result */
@@ -690,5 +682,65 @@ class RankTask extends Shell
             'width' => 40,
         ]);
         $this->progressHelper->draw();
+    }
+
+    /**
+     * Returns the array of criteria for the current ranking task
+     *
+     * @return Criterion[]
+     */
+    private function getCriteria()
+    {
+        return $this->ranking->formula->criteria;
+    }
+
+    /**
+     * Returns the array of metric IDs associated with the current ranking task
+     *
+     * @return array|ArrayAccess
+     */
+    private function getMetricIds()
+    {
+        return Hash::extract($this->getCriteria(), '{n}.metric_id');
+    }
+
+    /**
+     * Returns the Elasticsearch stats index, or if it's not available, the MySQL stats table
+     *
+     * @return StatisticsTable|ElasticsearchIndex
+     */
+    private function getStatsDatasource()
+    {
+        return isset($this->statsEsIndex) ? $this->statsEsIndex : $this->statsTable;
+    }
+
+    /**
+     * Populates the metricYears property with the most recent year associated with each metric, or aborts if stats are
+     * not being constrained to a specific year per metric
+     *
+     * @return void
+     */
+    private function loadYears()
+    {
+        if ($this->allowMultipleYearsPerMetric) {
+            return;
+        }
+
+        $this->getIo()->out('Finding most recent years for each metric...');
+        $dataSource = $this->getStatsDatasource();
+        foreach ($this->getMetricIds() as $metricId) {
+            $this->metricYears[$metricId] = $dataSource->getMostRecentYear($metricId);
+        }
+        $this->getIo()->out(' - Done');
+    }
+
+    /**
+     * Returns TRUE if the Elasticsearch statistics index is available
+     *
+     * @return bool
+     */
+    private function isUsingElasticsearch()
+    {
+        return isset($this->statsEsIndex);
     }
 }
