@@ -46,8 +46,7 @@ class StatisticsTable extends Table
     public function validationDefault(Validator $validator)
     {
         $validator
-            ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->integer('id');
 
         $validator
             ->integer('metric_id')
@@ -66,7 +65,7 @@ class StatisticsTable extends Table
             ->scalar('value')
             ->maxLength('value', 255)
             ->requirePresence('value', 'create')
-            ->notEmpty('value')
+            ->notEmptyString('value')
             ->add('role', 'validValue', [
                 'rule' => 'isValidValue',
                 'message' => 'Stat values must be numbers, percents, or capital letter grades',
@@ -76,7 +75,6 @@ class StatisticsTable extends Table
         $validator
             ->integer('year')
             ->requirePresence('year', 'create')
-            ->notEmpty('year')
             ->add('role', 'validYear', [
                 'rule' => 'isValidYear',
                 'message' => 'Invalid year',
@@ -85,14 +83,13 @@ class StatisticsTable extends Table
 
         $validator
             ->boolean('contiguous')
-            ->requirePresence('contiguous', 'create')
-            ->notEmpty('contiguous');
+            ->requirePresence('contiguous', 'create');
 
         $validator
             ->scalar('file')
             ->maxLength('file', 255)
             ->requirePresence('file', 'create')
-            ->notEmpty('file');
+            ->notEmptyString('file');
 
         return $validator;
     }
