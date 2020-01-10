@@ -445,8 +445,8 @@ class RankTask extends Shell
                 'Ranges',
                 'SchoolDistricts',
                 'SchoolTypes',
-                'States'
-            ]
+                'States',
+            ],
         ]);
         $this->context = $this->ranking->formula->context;
         $this->getIo()->out(' - Ranking found');
@@ -570,9 +570,7 @@ class RankTask extends Shell
                     'rank' => $rank,
                     $locationIdField => $subject->id,
                     'data_completeness' => $subject->getDataCompleteness(),
-                    'statistics' => [
-                        '_ids' => $statIds
-                    ]
+                    'statistics' => ['_ids' => $statIds],
                 ];
             }
         }
@@ -618,7 +616,7 @@ class RankTask extends Shell
             ->select(['id', 'metric_id', 'value', 'year'])
             ->where([
                 'metric_id' => $metricId,
-                Context::getLocationField($this->context) => $subjectId
+                Context::getLocationField($this->context) => $subjectId,
             ]);
         if ($this->allowMultipleYears) {
             $query->order(['year' => 'DESC']);
@@ -634,7 +632,7 @@ class RankTask extends Shell
                 'id' => $stat->id,
                 'metric_id' => $stat->metric_id,
                 'value' => $stat->value,
-                'year' => $stat->year
+                'year' => $stat->year,
             ]);
         }
 
@@ -660,7 +658,7 @@ class RankTask extends Shell
             ->order(['year' => 'DESC'])
             ->where([
                 'metric_id in' => $metricIds,
-                Context::getLocationField($this->context) . ' in' => $subjectIds
+                Context::getLocationField($this->context) . ' in' => $subjectIds,
             ])
             ->first();
 
