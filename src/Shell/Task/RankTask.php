@@ -8,6 +8,7 @@ use App\Model\Entity\Ranking;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Entity\Statistic;
+use App\Model\StatSearcher;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\StatisticsTable;
 use ArrayAccess;
@@ -633,31 +634,6 @@ class RankTask extends Shell
     }
 
     /**
-     * Returns the most recent year found in all of the statistics associated with the given metrics and subjects
-     *
-     * @return int|null
-     */
-    private function getYear()
-    {
-        $dataSource = $this->statsEsIndex ?? $this->statsTable;
-        $metricIds = $this->getMetricIds();
-        $subjectIds = Hash::extract($this->subjects, '{n}.id');
-
-        /** @var Statistic $result */
-        $result = $dataSource
-            ->find()
-            ->select(['year'])
-            ->order(['year' => 'DESC'])
-            ->where([
-                'metric_id in' => $metricIds,
-                Context::getLocationField($this->context) . ' in' => $subjectIds,
-            ])
-            ->first();
-
-        return $result ? $result->year : null;
-    }
-
-    /**
      * Increments the current progress bar by 1
      *
      * @param int $incrementAmount Specify if not 1
@@ -726,10 +702,16 @@ class RankTask extends Shell
             return;
         }
 
+        $subjectIds = Hash::extract($this->subjects, '{n}.id');
+        $locationField = Context::getLocationField($this->context);
+
         $this->getIo()->out('Finding most recent years for each metric...');
-        $dataSource = $this->getStatsDatasource();
+        $statSearcher = new StatSearcher($this->getStatsDatasource());
         foreach ($this->getMetricIds() as $metricId) {
-            $this->metricYears[$metricId] = $dataSource->getMostRecentYear($metricId);
+            $this->metricYears[$metricId] = $statSearcher->getMostRecentYear([
+                'metric_id' => $metricId,
+                "{$locationField}s" => $subjectIds,
+            ]);
         }
         $this->getIo()->out(' - Done');
     }
