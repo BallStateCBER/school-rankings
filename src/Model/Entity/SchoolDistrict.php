@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use App\Model\Entity\Traits\RankableTrait;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
