@@ -15,6 +15,11 @@ class StatSearcher
 {
     private $dataSource;
 
+    /**
+     * StatSearcher constructor
+     *
+     * @param StatisticsIndex|StatisticsTable $datasource Either an Elasticsearch index or a database table
+     */
     public function __construct($datasource)
     {
         $this->dataSource = $datasource;
