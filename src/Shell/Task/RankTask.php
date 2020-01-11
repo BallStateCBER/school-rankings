@@ -91,10 +91,11 @@ class RankTask extends Shell
          * @var ElasticaIndex $statisticsIndexRegistry
          * @var ElasticsearchIndex $statisticsIndex
          */
+        $statsEsIndex = IndexRegistry::get('Statistics');
         $connection = ConnectionManager::get('elastic');
-        $statisticsIndexRegistry = $connection->getIndex('statistics');
+        $statisticsIndexRegistry = $connection->getIndex($statsEsIndex->getName());
         if ($statisticsIndexRegistry->exists()) {
-            $this->statsEsIndex = IndexRegistry::get('statistics');
+            $this->statsEsIndex = $statsEsIndex;
         }
     }
 
