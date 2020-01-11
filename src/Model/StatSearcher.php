@@ -38,7 +38,7 @@ class StatSearcher
         $query = $this->datasource
             ->find()
             ->select(['year'])
-            ->orderDesc('year');
+            ->order(['year' => 'desc']);
 
         if (isset($options['metric_id'])) {
             $query->where(['metric_id' => $options['metric_id']]);
