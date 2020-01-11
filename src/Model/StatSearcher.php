@@ -13,7 +13,7 @@ use Cake\Http\Exception\InternalErrorException;
  */
 class StatSearcher
 {
-    private $dataSource;
+    private $datasource;
 
     /**
      * StatSearcher constructor
@@ -22,7 +22,7 @@ class StatSearcher
      */
     public function __construct($datasource)
     {
-        $this->dataSource = $datasource;
+        $this->datasource = $datasource;
     }
 
     /**
