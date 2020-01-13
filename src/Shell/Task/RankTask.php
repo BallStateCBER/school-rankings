@@ -615,8 +615,10 @@ class RankTask extends Shell
         if ($this->allowMultipleYearsPerMetric) {
             $query->order(['year' => 'DESC']);
         } else {
-            $year = $this->metricYears[$metricId];
-            $query->where(['year' => $year]);
+            $year = $this->metricYears[$metricId] ?? null;
+            if ($year) {
+                $query->where(['year' => $year]);
+            }
         }
 
         /** @var Statistic $stat */
