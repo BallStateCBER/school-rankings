@@ -20,13 +20,13 @@ class MetricsHelper extends Helper
                 'text' => $metric['name'],
                 'a_attr' => [
                     'selectable' => $metric['selectable'] ? 1 : 0,
-                    'type' => $metric['type']
+                    'type' => $metric['type'],
                 ],
                 'data' => [
                     'selectable' => (bool)$metric['selectable'],
                     'type' => $metric['type'],
-                    'metricId' => $metric['id']
-                ]
+                    'metricId' => $metric['id'],
+                ],
             ];
             if ($metric['children']) {
                 $jTreeData['children'] = $this->getJsTreeData($metric['children']);

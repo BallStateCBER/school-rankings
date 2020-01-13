@@ -93,11 +93,11 @@ class MetricMergeCommand extends CommonCommand
             'metricIdsToDelete' => [
                 'help' => 'One or more metric IDs or ranges (e.g. "1,3-5,7-10") ' .
                     'to merge into the second argument and delete',
-                'required' => true
+                'required' => true,
             ],
             'metricIdToRetain' => [
                 'help' => 'A metric ID to merge the first metric(s) into and retain',
-                'required' => true
+                'required' => true,
             ],
         ]);
 
@@ -313,7 +313,7 @@ class MetricMergeCommand extends CommonCommand
                     $locationField,
                     'year',
                     'value',
-                    'metric_id'
+                    'metric_id',
                 ])
                 ->where(['metric_id' => $metricId])
                 ->toArray();
@@ -362,7 +362,7 @@ class MetricMergeCommand extends CommonCommand
         $this->sortedStats = [
             'noConflict' => [],
             'equalValues' => [],
-            'unequalValues' => []
+            'unequalValues' => [],
         ];
         $this->makeProgressBar(count($this->statsToMerge));
         foreach ($this->statsToMerge as $stat) {
@@ -372,7 +372,7 @@ class MetricMergeCommand extends CommonCommand
                 ->where([
                     $locationField => $stat->$locationField,
                     'year' => $stat->year,
-                    'metric_id' => $this->metricIdToRetain
+                    'metric_id' => $this->metricIdToRetain,
                 ])
                 ->enableHydration(false)
                 ->first();
@@ -573,7 +573,7 @@ class MetricMergeCommand extends CommonCommand
         $this->io->out('Checking for criterion conflicts...');
         $this->sortedCriteria = [
             'noConflict' => [],
-            'conflict' => []
+            'conflict' => [],
         ];
         $this->makeProgressBar(count($this->criteriaToMerge));
         foreach ($this->criteriaToMerge as $criterion) {
@@ -584,7 +584,7 @@ class MetricMergeCommand extends CommonCommand
                         return $exp->notEq('Criteria.id', $criterion->id);
                     },
                     'formula_id' => $criterion->formula_id,
-                    'metric_id' => $this->metricIdToRetain
+                    'metric_id' => $this->metricIdToRetain,
                 ])
                 ->count() > 0;
 
@@ -793,7 +793,7 @@ class MetricMergeCommand extends CommonCommand
             ->where([
                 function (QueryExpression $exp) {
                     return $exp->in('metric_id', $this->metricIdsToDelete);
-                }
+                },
             ])
             ->toArray();
 

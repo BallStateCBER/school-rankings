@@ -77,7 +77,7 @@ if (Configure::read('debug')) {
     Configure::write('EmailTransport.default.className', 'Debug');
     Configure::write('Email.default.log', [
         'level' => 'info',
-        'scope' => 'email'
+        'scope' => 'email',
     ]);
 }
 

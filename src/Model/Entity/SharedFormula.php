@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -9,10 +10,10 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $formula_id
  * @property int $user_id
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  *
- * @property \App\Model\Entity\Formula $formula
- * @property \App\Model\Entity\User $user
+ * @property Formula $formula
+ * @property User $user
  */
 class SharedFormula extends Entity
 {
@@ -31,6 +32,6 @@ class SharedFormula extends Entity
         'user_id' => true,
         'created' => true,
         'formula' => true,
-        'user' => true
+        'user' => true,
     ];
 }

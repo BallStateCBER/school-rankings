@@ -10,7 +10,7 @@ use Cake\ORM\Entity;
  * @property string $center
  * @property int $distance
  *
- * @property \App\Model\Entity\Ranking[] $rankings
+ * @property Ranking[] $rankings
  */
 class Range extends Entity
 {
@@ -27,6 +27,6 @@ class Range extends Entity
     protected $_accessible = [
         'center' => true,
         'distance' => true,
-        'rankings' => true
+        'rankings' => true,
     ];
 }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -9,7 +10,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $year
  * @property string $file
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  */
 class ImportedFile extends Entity
 {
@@ -27,6 +28,6 @@ class ImportedFile extends Entity
         'id' => true,
         'year' => true,
         'file' => true,
-        'created' => true
+        'created' => true,
     ];
 }

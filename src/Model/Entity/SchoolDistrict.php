@@ -52,7 +52,7 @@ class SchoolDistrict extends Entity
         'cities' => true,
         'counties' => true,
         'states' => true,
-        'school_district_codes' => true
+        'school_district_codes' => true,
     ];
 
     /**
@@ -67,7 +67,7 @@ class SchoolDistrict extends Entity
         return in_array($code, [
             '-0999',
             '-999',
-            'N/A'
+            'N/A',
         ]);
     }
 
@@ -90,7 +90,7 @@ class SchoolDistrict extends Entity
             'cities',
             'counties',
             'states',
-            'school_district_codes'
+            'school_district_codes',
         ];
     }
 }

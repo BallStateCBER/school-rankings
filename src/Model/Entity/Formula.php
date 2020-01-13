@@ -46,6 +46,6 @@ class Formula extends Entity
         'user' => true,
         'rankings' => true,
         'shared_formulas' => true,
-        'criteria' => true
+        'criteria' => true,
     ];
 }

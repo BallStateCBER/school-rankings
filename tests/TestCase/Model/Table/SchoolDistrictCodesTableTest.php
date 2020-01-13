@@ -14,7 +14,7 @@ class SchoolDistrictCodesTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\SchoolDistrictCodesTable
+     * @var SchoolDistrictCodesTable
      */
     public $SchoolDistrictCodes;
 
@@ -25,7 +25,7 @@ class SchoolDistrictCodesTableTest extends TestCase
      */
     public $fixtures = [
         'app.SchoolDistrictCodes',
-        'app.SchoolDistricts'
+        'app.SchoolDistricts',
     ];
 
     /**

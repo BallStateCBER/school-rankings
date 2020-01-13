@@ -39,7 +39,7 @@ class RangesFixture extends TestFixture
         [
             'id' => 1,
             'center' => 'Lorem ipsum dolor sit amet',
-            'distance' => 1
+            'distance' => 1,
         ],
     ];
 }

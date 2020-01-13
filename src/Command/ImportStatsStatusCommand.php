@@ -26,12 +26,12 @@ class ImportStatsStatusCommand extends Command
      * Display help for this console.
      *
      * @param ConsoleOptionParser $parser Console options parser object
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
-            'year' => ['help' => 'The specific year to look up']
+            'year' => ['help' => 'The specific year to look up'],
         ]);
 
         return $parser;

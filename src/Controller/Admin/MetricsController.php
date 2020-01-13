@@ -5,6 +5,7 @@ use App\Controller\AppController;
 use App\Model\Context\Context;
 use App\Model\Table\MetricsTable;
 use Cake\Http\Exception\BadRequestException;
+use Exception;
 
 /**
  * Class MetricsController
@@ -28,14 +29,14 @@ class MetricsController extends AppController
 
         $this->set([
             'context' => $context,
-            'titleForLayout' => $context == 'school' ? 'School Metrics' : 'School District Metrics'
+            'titleForLayout' => $context == 'school' ? 'School Metrics' : 'School District Metrics',
         ]);
     }
 
     /**
      * Displays both entire metric trees for printing
      *
-     * @throws \Exception
+     * @throws Exception
      * @return void
      */
     public function tree()
@@ -51,7 +52,7 @@ class MetricsController extends AppController
                 ->toArray();
         }
         $this->set([
-            'metrics' => $metrics
+            'metrics' => $metrics,
         ]);
     }
 }

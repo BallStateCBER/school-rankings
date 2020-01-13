@@ -10,11 +10,11 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property string $abbreviation
  *
- * @property \App\Model\Entity\City[] $cities
- * @property \App\Model\Entity\County[] $counties
- * @property \App\Model\Entity\Ranking[] $rankings
- * @property \App\Model\Entity\SchoolDistrict[] $school_districts
- * @property \App\Model\Entity\School[] $schools
+ * @property City[] $cities
+ * @property County[] $counties
+ * @property Ranking[] $rankings
+ * @property SchoolDistrict[] $school_districts
+ * @property School[] $schools
  */
 class State extends Entity
 {
@@ -36,6 +36,6 @@ class State extends Entity
         'counties' => true,
         'rankings' => true,
         'school_districts' => true,
-        'schools' => true
+        'schools' => true,
     ];
 }

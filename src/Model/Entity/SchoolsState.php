@@ -29,6 +29,6 @@ class SchoolsState extends Entity
         'school_id' => true,
         'state_id' => true,
         'school' => true,
-        'state' => true
+        'state' => true,
     ];
 }

@@ -14,7 +14,7 @@ class StatesTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\StatesTable
+     * @var StatesTable
      */
     public $States;
 
@@ -48,7 +48,7 @@ class StatesTableTest extends TestCase
         'app.SchoolsStates',
         'app.States',
         'app.Statistics',
-        'app.Users'
+        'app.Users',
     ];
 
     /**

@@ -139,7 +139,7 @@ class CheckLocationsCommand extends Command
                     return $q->find('open');
                 },
                 'SchoolTypes',
-                'States'
+                'States',
             ])
             ->all();
         $progress->increment(1)->draw();
@@ -152,7 +152,7 @@ class CheckLocationsCommand extends Command
                 'Schools' => function (Query $q) {
                     return $q->find('open');
                 },
-                'States'
+                'States',
             ])
             ->all();
         $this->io->overwrite(' - Done');
@@ -183,7 +183,7 @@ class CheckLocationsCommand extends Command
             $results[] = [
                 $school->name,
                 $school->id,
-                $school->origin_file
+                $school->origin_file,
             ];
         }
         if ($results) {
@@ -218,7 +218,7 @@ class CheckLocationsCommand extends Command
             $results[] = [
                 $district->name,
                 $district->id,
-                $district->origin_file
+                $district->origin_file,
             ];
         }
 
@@ -314,7 +314,7 @@ class CheckLocationsCommand extends Command
             $results[] = [
                 $record->name,
                 $record->id,
-                $record->origin_file
+                $record->origin_file,
             ];
         }
         if ($results) {
@@ -514,7 +514,7 @@ class CheckLocationsCommand extends Command
             $progress->increment(1)->draw();
             $locationField = Context::getLocationField($context);
             $dataFound = $this->statsTable->exists([
-                $locationField => $record->id
+                $locationField => $record->id,
             ]);
             if ($dataFound) {
                 continue;
@@ -522,7 +522,7 @@ class CheckLocationsCommand extends Command
             $results[] = [
                 $record->name,
                 $record->id,
-                $record->origin_file
+                $record->origin_file,
             ];
         }
         if ($results) {
@@ -588,7 +588,7 @@ class CheckLocationsCommand extends Command
             $results[] = [
                 $record->name,
                 $record->id,
-                implode(', ', Hash::extract($record->$field, '{n}.name'))
+                implode(', ', Hash::extract($record->$field, '{n}.name')),
             ];
         }
         if ($results) {

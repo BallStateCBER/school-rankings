@@ -14,7 +14,7 @@ class CriteriaTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\CriteriaTable
+     * @var CriteriaTable
      */
     public $Criteria;
 
@@ -26,7 +26,7 @@ class CriteriaTableTest extends TestCase
     public $fixtures = [
         'app.Criteria',
         'app.Metrics',
-        'app.Formulas'
+        'app.Formulas',
     ];
 
     /**
@@ -64,7 +64,7 @@ class CriteriaTableTest extends TestCase
             'formula_id' => 1,
             'metric_id' => 999999,
             'preference' => 'high',
-            'weight' => 1
+            'weight' => 1,
         ]);
         $result = $this->Criteria->save($criterion);
         $this->assertFalse($result);
@@ -81,7 +81,7 @@ class CriteriaTableTest extends TestCase
             'formula_id' => 1,
             'metric_id' => 1,
             'preference' => 'high',
-            'weight' => 1
+            'weight' => 1,
         ]);
         $result = $this->Criteria->save($criterion);
         $this->assertInstanceOf('App\Model\Entity\Criterion', $result);

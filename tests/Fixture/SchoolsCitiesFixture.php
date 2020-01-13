@@ -39,7 +39,7 @@ class SchoolsCitiesFixture extends TestFixture
         [
             'id' => 1,
             'school_id' => 1,
-            'city_id' => 1
+            'city_id' => 1,
         ],
     ];
 }

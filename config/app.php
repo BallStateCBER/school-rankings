@@ -124,8 +124,8 @@ return [
             'prefix' => '',
             'path' => CACHE . 'api/metrics/',
             'serialize' => true,
-            'duration' => '+1 years'
-        ]
+            'duration' => '+1 years',
+        ],
     ],
 
     /**
@@ -293,7 +293,7 @@ return [
             'className' => 'Cake\ElasticSearch\Datasource\Connection',
             'driver' => 'Cake\ElasticSearch\Datasource\Connection',
             'host' => '127.0.0.1',
-            'port' => 9200
+            'port' => 9200,
         ],
     ],
 
@@ -385,11 +385,11 @@ return [
         'sleeptime' => 2, // 2 seconds
         'workermaxruntime' => 300, // 5 minutes
         'workertimeout' => 3000, // 50 minutes
-        'maxworkers' => 3
+        'maxworkers' => 3,
     ],
 
     'adminEmail' => 'admin@indianaschoolrankings.com',
     'Elasticsearch' => [
-        'statisticsIndex' => 'statistics'
-    ]
+        'statisticsIndex' => 'statistics',
+    ],
 ];

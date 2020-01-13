@@ -119,7 +119,7 @@ class FixPercentValuesCommand extends Command
                     'name',
                     'is_percent',
                     'parent_id',
-                    'type'
+                    'type',
                 ])
                 ->where(['context' => $context])
                 ->toArray();
@@ -388,7 +388,7 @@ class FixPercentValuesCommand extends Command
                 ->select(['id', 'value', 'school_id', 'school_district_id', 'metric_id'])
                 ->where([
                     'metric_id' => $metric->id,
-                    $this->getMisformattedCondition($metric->is_percent)
+                    $this->getMisformattedCondition($metric->is_percent),
                 ])
                 ->all();
 

@@ -30,6 +30,6 @@ class SchoolType extends Entity
         'name' => true,
         'created' => true,
         'rankings' => true,
-        'schools' => true
+        'schools' => true,
     ];
 }

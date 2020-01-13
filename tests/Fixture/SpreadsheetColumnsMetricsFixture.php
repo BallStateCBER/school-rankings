@@ -51,7 +51,7 @@ class SpreadsheetColumnsMetricsFixture extends TestFixture
             'group_name' => 'Lorem ipsum dolor sit amet',
             'column_name' => 'Lorem ipsum dolor sit amet',
             'metric_id' => 1,
-            'created' => '2018-04-02 23:48:24'
+            'created' => '2018-04-02 23:48:24',
         ],
     ];
 }

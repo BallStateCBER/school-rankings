@@ -12,6 +12,7 @@ use Cake\ORM\ResultSet;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
+use Exception;
 
 /**
  * Class FixDistrictAssociationsCommand
@@ -37,7 +38,7 @@ class FixDistrictAssociationsCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -103,7 +104,7 @@ class FixDistrictAssociationsCommand extends Command
                 },
                 'States' => function (Query $q) {
                     return $q->select(['id', 'name']);
-                }
+                },
             ])
             ->all();
     }
@@ -171,7 +172,7 @@ class FixDistrictAssociationsCommand extends Command
                         $needsLinked[$association][] = [
                             'id' => $geography->id,
                             'name' => $geography->name,
-                            'schoolName' => $school->name
+                            'schoolName' => $school->name,
                         ];
                     }
                 }
@@ -182,7 +183,7 @@ class FixDistrictAssociationsCommand extends Command
                 $this->districtsTable->patchEntity(
                     $district,
                     [$association => [
-                        '_ids' => array_unique($ids)
+                        '_ids' => array_unique($ids),
                     ]]
                 );
             }

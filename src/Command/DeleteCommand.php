@@ -34,7 +34,7 @@ class DeleteCommand extends Command
     private $tableName;
     private $choices = [
         1 => 'Schools',
-        2 => 'SchoolDistricts'
+        2 => 'SchoolDistricts',
     ];
     private $subjectRecord;
     private $subjectTable;
@@ -124,7 +124,7 @@ class DeleteCommand extends Command
             'Cities',
             'Counties',
             'States',
-            'Statistics'
+            'Statistics',
         ];
         $schoolsContain = [
             'Grades',
@@ -178,7 +178,7 @@ class DeleteCommand extends Command
     {
         $belongsToAssociations = [
             'SchoolDistricts' => 'school_district',
-            'SchoolTypes' => 'school_type'
+            'SchoolTypes' => 'school_type',
         ];
         $counts = [['Association', 'Count', 'Associated records will be deleted?']];
         foreach ($this->associations as $association) {
@@ -190,7 +190,7 @@ class DeleteCommand extends Command
             $counts[] = [
                 $association,
                 $count,
-                $count ? $willBeDeleted : ''
+                $count ? $willBeDeleted : '',
             ];
         }
 

@@ -13,7 +13,7 @@ class MetricsTableTest extends TestCase
     /**
      * Metrics table
      *
-     * @var \App\Model\Table\MetricsTable
+     * @var MetricsTable
      */
     public $Metrics;
 
@@ -24,7 +24,7 @@ class MetricsTableTest extends TestCase
      */
     public $fixtures = [
         'app.Metrics',
-        'app.Statistics'
+        'app.Statistics',
     ];
 
     /**
@@ -64,7 +64,7 @@ class MetricsTableTest extends TestCase
         $newParentId = 999;
         $metric = $this->Metrics->get($metricId);
         $this->Metrics->patchEntity($metric, [
-            'parent_id' => $newParentId
+            'parent_id' => $newParentId,
         ]);
         $result = $this->Metrics->save($metric);
         $this->assertFalse($result);
@@ -82,7 +82,7 @@ class MetricsTableTest extends TestCase
             'context' => 'school',
             'parent_id' => 999,
             'type' => 'numeric',
-            'selectable' => true
+            'selectable' => true,
         ]);
         $result = $this->Metrics->save($metric);
         $this->assertFalse($result);
@@ -99,7 +99,7 @@ class MetricsTableTest extends TestCase
         $newParentId = 1;
         $metric = $this->Metrics->get($metricId);
         $this->Metrics->patchEntity($metric, [
-            'parent_id' => $newParentId
+            'parent_id' => $newParentId,
         ]);
         $result = $this->Metrics->save($metric);
         $this->assertFalse($result);
@@ -117,7 +117,7 @@ class MetricsTableTest extends TestCase
             'context' => 'school',
             'parent_id' => 1,
             'type' => 'numeric',
-            'selectable' => true
+            'selectable' => true,
         ]);
         $result = $this->Metrics->save($metric);
         $this->assertFalse($result);

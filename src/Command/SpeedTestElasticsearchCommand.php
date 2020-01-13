@@ -5,10 +5,16 @@ use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
 use Cake\Datasource\ConnectionManager;
+use Cake\ElasticSearch\Datasource\Connection;
+use Cake\ElasticSearch\Index as ElasticsearchIndex;
+use Cake\ElasticSearch\IndexRegistry;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
 use Cake\Utility\Hash;
+use Elastica\Client;
+use Elastica\Index;
+use Exception;
 
 /**
  * Class SpeedTestElasticsearchCommand
@@ -25,16 +31,16 @@ class SpeedTestElasticsearchCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $indexName = 'statistics';
 
-        /** @var \Cake\ElasticSearch\Datasource\Connection|\Elastica\Client $connection */
+        /** @var Connection|Client $connection */
         $connection = ConnectionManager::get('elastic');
 
-        /** @var \Elastica\Index $statisticsIndexRegistry */
+        /** @var Index $statisticsIndexRegistry */
         $statisticsIndexRegistry = $connection->getIndex($indexName);
 
         if (!$statisticsIndexRegistry->exists()) {
@@ -47,8 +53,8 @@ class SpeedTestElasticsearchCommand extends Command
         $totalStatsCount = $statisticsTable->find()->count();
         $io->out("Total stats in MySQL table: " . number_format($totalStatsCount));
 
-        /** @var \Cake\ElasticSearch\Index $statisticsIndex */
-        $statisticsIndex = \Cake\ElasticSearch\IndexRegistry::get($indexName);
+        /** @var ElasticsearchIndex $statisticsIndex */
+        $statisticsIndex = IndexRegistry::get($indexName);
         $totalCopiedStats = $statisticsIndex->find()->count();
         $io->out("Total stats in elasticsearch index: " . number_format($totalCopiedStats));
 
@@ -83,7 +89,7 @@ class SpeedTestElasticsearchCommand extends Command
                     ->select(['id', 'metric_id', 'value', 'year'])
                     ->where([
                         'metric_id' => $metricId,
-                        'school_id' => $schoolId
+                        'school_id' => $schoolId,
                     ])
                     ->orderDesc('year')
                     ->first();
@@ -109,7 +115,7 @@ class SpeedTestElasticsearchCommand extends Command
                 ->select(['id', 'metric_id', 'school_id', 'value', 'year'])
                 ->where([
                     'metric_id' => $metricId,
-                    'school_id' => $schoolId
+                    'school_id' => $schoolId,
                 ])
                 ->order(['year' => 'DESC'])
                 ->first();
@@ -137,7 +143,7 @@ class SpeedTestElasticsearchCommand extends Command
                     ->select(['id', 'metric_id', 'school_id', 'value', 'year'])
                     ->where([
                         'metric_id' => $metricId,
-                        'school_id' => $schoolId
+                        'school_id' => $schoolId,
                     ])
                     ->order(['year' => 'DESC'])
                     ->first();

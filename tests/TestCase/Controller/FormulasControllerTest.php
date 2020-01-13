@@ -19,7 +19,7 @@ class FormulasControllerTest extends IntegrationTestCase
         'app.Users',
         'app.Rankings',
         'app.SharedFormulas',
-        'app.Criteria'
+        'app.Criteria',
     ];
 
     /**

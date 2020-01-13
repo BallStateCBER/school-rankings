@@ -55,7 +55,7 @@ class SchoolsFixture extends TestFixture
             'code' => 'Lorem ipsum dolor sit amet',
             'closed' => false,
             'created' => '2018-04-05 20:00:04',
-            'modified' => '2018-04-05 20:00:04'
+            'modified' => '2018-04-05 20:00:04',
         ],
     ];
 }

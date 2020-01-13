@@ -51,10 +51,10 @@ class RankingsFixture extends TestFixture
                 'for_school_districts' => 1,
                 'results' => serialize([
                     1 => [1, 2, 3],
-                    2 => [4, 5, 6]
+                    2 => [4, 5, 6],
                 ]),
                 'hash' => 'Lorem ipsum dolor sit amet',
-                'created' => '2018-07-27 20:43:37'
+                'created' => '2018-07-27 20:43:37',
             ],
         ];
         parent::init();

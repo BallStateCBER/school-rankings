@@ -11,6 +11,7 @@ use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
+use Exception;
 
 class MetricsController extends AppController
 {
@@ -18,7 +19,7 @@ class MetricsController extends AppController
      * Initialization hook method.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize()
     {
@@ -31,7 +32,7 @@ class MetricsController extends AppController
      * Returns a tree-structured list of school metrics
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function schools()
     {
@@ -40,7 +41,7 @@ class MetricsController extends AppController
 
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => array_values($metrics)
+            'metrics' => array_values($metrics),
         ]);
     }
 
@@ -48,7 +49,7 @@ class MetricsController extends AppController
      * Returns a tree-structured list of school district metrics
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function districts()
     {
@@ -57,7 +58,7 @@ class MetricsController extends AppController
 
         $this->set([
             '_serialize' => ['metrics'],
-            'metrics' => array_values($metrics)
+            'metrics' => array_values($metrics),
         ]);
     }
 
@@ -85,7 +86,7 @@ class MetricsController extends AppController
                     'type',
                     'parent_id',
                     'selectable',
-                    'visible'
+                    'visible',
                 ])
                 ->where(['context' => $context])
                 ->toArray();
@@ -162,7 +163,7 @@ class MetricsController extends AppController
      * Adds a metric
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function add()
     {
@@ -183,7 +184,7 @@ class MetricsController extends AppController
             'type' => $this->request->getData('type'),
             'selectable' => $selectable,
             'visible' => $visible,
-            'is_percent' => null
+            'is_percent' => null,
         ]);
         $result = (bool)$metricsTable->save($metric);
 
@@ -197,7 +198,7 @@ class MetricsController extends AppController
                 implode("\n", Hash::flatten($metric->getErrors())) :
                 'Success',
             'result' => $result,
-            'metricId' => $metric->id
+            'metricId' => $metric->id,
         ]);
     }
 
@@ -257,7 +258,7 @@ class MetricsController extends AppController
             $value = $this->request->getData($field);
             if (isset($value)) {
                 $metricsTable->patchEntity($metric, [
-                    $field => ($value == 'false') ? false : (bool)$value
+                    $field => ($value == 'false') ? false : (bool)$value,
                 ]);
             }
         }
@@ -288,7 +289,7 @@ class MetricsController extends AppController
      * the same year and location (and thus would need one or the other to take precedence when merging)
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function metricsHaveStatConflict()
     {
@@ -311,7 +312,7 @@ class MetricsController extends AppController
 
         $this->set([
             '_serialize' => ['result'],
-            'result' => $hasStatConflict
+            'result' => $hasStatConflict,
         ]);
     }
 
@@ -320,7 +321,7 @@ class MetricsController extends AppController
      *
      * @return string|null
      * @throws BadRequestException
-     * @throws \Exception
+     * @throws Exception
      */
     private function getContext()
     {

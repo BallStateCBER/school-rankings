@@ -4,6 +4,7 @@ namespace App\Test\TestCase\Controller\Admin;
 use App\Model\Context\Context;
 use App\Test\TestCase\ApplicationTest;
 use Cake\Routing\Router;
+use Exception;
 
 /**
  * MetricsControllerTest class
@@ -18,7 +19,7 @@ class MetricsControllerTest extends ApplicationTest
     public $fixtures = [
         'app.Metrics',
         'app.Statistics',
-        'app.Users'
+        'app.Users',
     ];
 
     /**
@@ -36,7 +37,7 @@ class MetricsControllerTest extends ApplicationTest
      *
      * @return void
      * @throws \PHPUnit\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function testIndexFailNotLoggedIn()
     {
@@ -45,7 +46,7 @@ class MetricsControllerTest extends ApplicationTest
                 'prefix' => 'admin',
                 'controller' => 'Metrics',
                 'action' => 'index',
-                $context
+                $context,
             ]);
 
             $this->get($url);
@@ -58,7 +59,7 @@ class MetricsControllerTest extends ApplicationTest
      *
      * @return void
      * @throws \PHPUnit\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function testIndexFailNotAuthorized()
     {
@@ -68,7 +69,7 @@ class MetricsControllerTest extends ApplicationTest
                 'prefix' => 'admin',
                 'controller' => 'Metrics',
                 'action' => 'index',
-                $context
+                $context,
             ]);
 
             $this->get($url);
@@ -81,7 +82,7 @@ class MetricsControllerTest extends ApplicationTest
      *
      * @return void
      * @throws \PHPUnit\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function testIndexSucceed()
     {
@@ -91,7 +92,7 @@ class MetricsControllerTest extends ApplicationTest
                 'prefix' => 'admin',
                 'controller' => 'Metrics',
                 'action' => 'index',
-                $context
+                $context,
             ]);
 
             $this->get($url);

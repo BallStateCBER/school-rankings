@@ -184,7 +184,7 @@ class CheckStatsCommand extends Command
                 if ($errors || $ruleViolation) {
                     $allErrors[$stat->id] = [
                         'errors' => $errors,
-                        'ruleViolation' => $ruleViolation
+                        'ruleViolation' => $ruleViolation,
                     ];
                     if ($pauseOnError) {
                         $this->io->error('Error with stat #' . $stat->id);
@@ -276,7 +276,7 @@ class CheckStatsCommand extends Command
                     'metric_id' => $metric['id'],
                     function (QueryExpression $exp) {
                         return $exp->like('value', '%\\%');
-                    }
+                    },
                 ])
             ->enableHydration(false)
             ->toArray();

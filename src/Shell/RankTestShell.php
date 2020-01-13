@@ -25,7 +25,7 @@ class RankTestShell extends Shell
         $parser = parent::getOptionParser();
         $parser->addArgument('ranking id', [
             'help' => 'The ID of the ranking record',
-            'required' => true
+            'required' => true,
         ]);
 
         return $parser;

@@ -41,7 +41,7 @@ class CountiesFixture extends TestFixture
             'id' => 1,
             'name' => 'Lorem ipsum dolor sit amet',
             'state_id' => 1,
-            'created' => '2018-04-05 20:52:36'
+            'created' => '2018-04-05 20:52:36',
         ],
     ];
 }

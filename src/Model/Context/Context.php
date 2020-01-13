@@ -2,6 +2,7 @@
 namespace App\Model\Context;
 
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Exception;
 
@@ -61,7 +62,7 @@ class Context
     {
         $locationFields = [
             'school' => 'school_id',
-            'district' => 'school_district_id'
+            'district' => 'school_district_id',
         ];
 
         if (array_key_exists($context, $locationFields)) {
@@ -75,7 +76,7 @@ class Context
      * @param string $context Either 'school' or 'district'
      *
      * @throws Exception
-     * @return \Cake\ORM\Table|bool
+     * @return Table|bool
      */
     public static function getTable($context)
     {

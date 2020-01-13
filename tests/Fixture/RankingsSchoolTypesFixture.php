@@ -43,7 +43,7 @@ class RankingsSchoolTypesFixture extends TestFixture
                 'id' => 1,
                 'ranking_id' => 1,
                 'school_type_id' => 1,
-                'created' => '2018-09-26 20:12:34'
+                'created' => '2018-09-26 20:12:34',
             ],
         ];
         parent::init();

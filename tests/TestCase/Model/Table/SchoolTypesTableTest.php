@@ -14,7 +14,7 @@ class SchoolTypesTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\SchoolTypesTable
+     * @var SchoolTypesTable
      */
     public $SchoolTypes;
 
@@ -40,7 +40,7 @@ class SchoolTypesTableTest extends TestCase
         'app.SchoolsCounties',
         'app.Grades',
         'app.SchoolsGrades',
-        'app.SchoolsStates'
+        'app.SchoolsStates',
     ];
 
     /**

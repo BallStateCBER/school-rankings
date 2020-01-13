@@ -41,7 +41,7 @@ class RankingsCitiesFixture extends TestFixture
             'id' => 1,
             'ranking_id' => 1,
             'city_id' => 1,
-            'created' => '2018-05-02 20:39:10'
+            'created' => '2018-05-02 20:39:10',
         ],
     ];
 }

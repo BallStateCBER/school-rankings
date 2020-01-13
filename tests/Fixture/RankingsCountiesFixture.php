@@ -41,7 +41,7 @@ class RankingsCountiesFixture extends TestFixture
             'id' => 1,
             'ranking_id' => 1,
             'county_id' => 1,
-            'created' => '2018-05-02 20:39:22'
+            'created' => '2018-05-02 20:39:22',
         ],
     ];
 }

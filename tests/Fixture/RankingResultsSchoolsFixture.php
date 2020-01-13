@@ -45,7 +45,7 @@ class RankingResultsSchoolsFixture extends TestFixture
                 'ranking_id' => 1,
                 'school_id' => 1,
                 'rank' => 1,
-                'data_completeness' => 'Lorem ip'
+                'data_completeness' => 'Lorem ip',
             ],
         ];
         parent::init();

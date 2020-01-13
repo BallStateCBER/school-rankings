@@ -6,7 +6,7 @@ return [
             'role' => 'admin',
             'controller' => '*',
             'action' => '*',
-            'allowed' => true
+            'allowed' => true,
         ],
 
         // Allow everyone access to any non-prefixed actions
@@ -15,14 +15,14 @@ return [
             'plugin' => false,
             'controller' => '*',
             'action' => '*',
-            'allowed' => true
+            'allowed' => true,
         ],
 
         [
             'plugin' => 'CakeDC/Users',
             'controller' => 'Users',
             'action' => 'logout',
-            'allowed' => true
-        ]
+            'allowed' => true,
+        ],
     ],
 ];

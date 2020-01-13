@@ -60,7 +60,7 @@ class School extends Entity
         'counties' => true,
         'grades' => true,
         'states' => true,
-        'school_codes' => true
+        'school_codes' => true,
     ];
 
     /**
@@ -84,7 +84,7 @@ class School extends Entity
             'counties',
             'grades',
             'states',
-            'school_codes'
+            'school_codes',
         ];
     }
 }

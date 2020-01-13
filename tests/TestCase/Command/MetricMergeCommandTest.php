@@ -18,7 +18,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         'app.Formulas',
         'app.Metrics',
         'app.SpreadsheetColumnsMetrics',
-        'app.Statistics'
+        'app.Statistics',
     ];
 
     /**
@@ -88,7 +88,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
 
         $this->exec("metric-merge $metricA $metricB", [
             'y', // Acknowledge metric name mismatch
-            'y' // Confirm merge
+            'y', // Confirm merge
         ]);
 
         $this->assertEquals(
@@ -131,7 +131,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         try {
             $this->exec("metric-merge $metricA $metricB", [
                 'y', // Acknowledge metric name mismatch
-                'y' // Confirm merge
+                'y', // Confirm merge
             ]);
         } catch (StopException $e) {
             print_r($e->getCode());
@@ -167,7 +167,7 @@ class MetricMergeCommandTest extends ConsoleIntegrationTestCase
         $this->assertTrue($metricsTable->exists(['id' => $metricA]));
         $this->exec("metric-merge $metricA $metricB", [
             'y', // Acknowledge metric name mismatch
-            'y' // Confirm merge
+            'y', // Confirm merge
         ]);
         $this->assertFalse($metricsTable->exists(['id' => $metricA]));
     }

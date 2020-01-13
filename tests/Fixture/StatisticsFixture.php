@@ -47,7 +47,7 @@ class StatisticsFixture extends TestFixture
         'contiguous' => 1,
         'file' => 'import_file.xlsx',
         'created' => '2018-04-05 20:53:25',
-        'modified' => '2018-04-05 20:53:25'
+        'modified' => '2018-04-05 20:53:25',
     ];
 
     /**
@@ -58,23 +58,23 @@ class StatisticsFixture extends TestFixture
     public $records = [
         [
             'id' => 1,
-            'school_id' => 1
+            'school_id' => 1,
         ],
         [
             'id' => 2,
             'metric_id' => 2,
             'school_id' => 1,
-            'year' => 2017
+            'year' => 2017,
         ],
         [
             'id' => 3,
             'metric_id' => 2,
-            'school_id' => 1
+            'school_id' => 1,
         ],
         [
             'id' => 4,
             'metric_id' => 3,
-            'school_id' => 1
+            'school_id' => 1,
         ],
     ];
 

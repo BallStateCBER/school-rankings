@@ -14,7 +14,7 @@ class RankingsTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\RankingsTable
+     * @var RankingsTable
      */
     public $Rankings;
 
@@ -47,7 +47,7 @@ class RankingsTableTest extends TestCase
         'app.SchoolsStates',
         'app.States',
         'app.Statistics',
-        'app.Users'
+        'app.Users',
     ];
 
     /**

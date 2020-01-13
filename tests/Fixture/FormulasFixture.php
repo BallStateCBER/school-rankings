@@ -44,7 +44,7 @@ class FormulasFixture extends TestFixture
         'context' => 'school',
         'hash' => 'hashstring',
         'created' => '2018-04-05 21:03:47',
-        'modified' => '2018-04-05 21:03:47'
+        'modified' => '2018-04-05 21:03:47',
     ];
 
     /**
@@ -56,23 +56,23 @@ class FormulasFixture extends TestFixture
         [
             'id' => 1,
             'title' => 'School ranking formula',
-            'context' => 'school'
+            'context' => 'school',
         ],
         [
             'id' => 2,
             'title' => 'School district ranking formula',
-            'context' => 'district'
+            'context' => 'district',
         ],
         [
             'id' => 3,
             'title' => 'Another school ranking formula',
-            'context' => 'school'
+            'context' => 'school',
         ],
         [
             'id' => 4,
             'title' => 'Another school district ranking formula',
-            'context' => 'district'
-        ]
+            'context' => 'district',
+        ],
     ];
 
     /**

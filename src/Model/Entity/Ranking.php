@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use App\Model\Table\MetricsTable;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
@@ -26,8 +27,8 @@ use Cake\ORM\TableRegistry;
  * @property SchoolDistrict[] $school_districts
  * @property SchoolType[] $school_types
  * @property State[] $states
- * @property RankingResultsSchool[] $ResultsSchools
- * @property RankingResultsSchoolDistrict[] $ResultsDistricts
+ * @property RankingResultsSchool[] $results_schools
+ * @property RankingResultsSchoolDistrict[] $results_districts
  */
 class Ranking extends Entity
 {
@@ -58,7 +59,7 @@ class Ranking extends Entity
         'school_types' => true,
         'states' => true,
         'results_districts' => true,
-        'results_schools' => true
+        'results_schools' => true,
     ];
 
     /**
@@ -91,6 +92,7 @@ class Ranking extends Entity
     {
         $metricIsPercent = [];
         $resultsFields = ['results_districts', 'results_schools'];
+        /** @var MetricsTable $metricsTable */
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         foreach ($resultsFields as $results) {
             foreach ($this->$results as &$subject) {

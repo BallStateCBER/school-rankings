@@ -39,7 +39,7 @@ class SchoolTypesFixture extends TestFixture
         [
             'id' => 1,
             'name' => 'Lorem ipsum dolor sit amet',
-            'created' => '2018-04-05 19:55:25'
+            'created' => '2018-04-05 19:55:25',
         ],
     ];
 }

@@ -41,7 +41,7 @@ class AppView extends View
         $this->loadHelper('CakeDC/Users.User');
 
         $this->loadHelper('Form', [
-            'templates' => 'bootstrap_form'
+            'templates' => 'bootstrap_form',
         ]);
     }
 }

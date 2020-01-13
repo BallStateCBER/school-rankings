@@ -10,6 +10,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\ORM\TableRegistry;
+use Exception;
 
 /**
  * Class MetricReparentCommand
@@ -46,18 +47,18 @@ class MetricReparentCommand extends Command
      * Display help for this console.
      *
      * @param ConsoleOptionParser $parser Console options parser object
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
             'childMetrics' => [
                 'help' => 'One or more metric IDs (comma separated) or ranges (with dashes); e.g. "1,3-5,7-10"',
-                'required' => true
+                'required' => true,
             ],
             'newParent' => [
                 'help' => 'The ID of the new parent metric or "root"',
-                'required' => true
+                'required' => true,
             ],
         ]);
 
@@ -70,8 +71,7 @@ class MetricReparentCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Aura\Intl\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -118,7 +118,7 @@ class MetricReparentCommand extends Command
      * @param Arguments $args Command arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function getChildren(Arguments $args, ConsoleIo $io)
     {
@@ -144,7 +144,6 @@ class MetricReparentCommand extends Command
      * Outputs details about the forthcoming operation and prompts for confirmation
      *
      * @param ConsoleIo $io Console IO object
-     * @throws \Aura\Intl\Exception
      * @return bool
      */
     private function getConfirmation(ConsoleIo $io)

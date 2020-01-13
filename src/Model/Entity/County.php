@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -9,13 +10,13 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property string $name
  * @property int $state_id
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  *
- * @property \App\Model\Entity\State $state
- * @property \App\Model\Entity\City[] $cities
- * @property \App\Model\Entity\Ranking[] $rankings
- * @property \App\Model\Entity\SchoolDistrict[] $school_districts
- * @property \App\Model\Entity\School[] $schools
+ * @property State $state
+ * @property City[] $cities
+ * @property Ranking[] $rankings
+ * @property SchoolDistrict[] $school_districts
+ * @property School[] $schools
  */
 class County extends Entity
 {
@@ -37,6 +38,6 @@ class County extends Entity
         'cities' => true,
         'rankings' => true,
         'school_districts' => true,
-        'schools' => true
+        'schools' => true,
     ];
 }

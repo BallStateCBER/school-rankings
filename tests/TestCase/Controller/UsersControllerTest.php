@@ -19,7 +19,7 @@ class UsersControllerTest extends IntegrationTestCase
         'app.SocialAccounts',
         'app.Formulas',
         'app.Rankings',
-        'app.SharedFormulas'
+        'app.SharedFormulas',
     ];
 
     /**

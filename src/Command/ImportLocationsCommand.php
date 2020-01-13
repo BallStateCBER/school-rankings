@@ -61,7 +61,7 @@ class ImportLocationsCommand extends Command
         'districts' => [],
         'cities' => [],
         'counties' => [],
-        'states' => []
+        'states' => [],
     ];
     private $nameChanges = [];
     private $schools = [];
@@ -255,7 +255,7 @@ class ImportLocationsCommand extends Command
             'CITY' => 'city',
             'STATE' => 'state',
             'COUNTY NAME' => 'county',
-            'PHONE' => 'phone'
+            'PHONE' => 'phone',
         ];
 
         $progress = Utility::makeProgressBar($lastRow - $firstRow + 1, $this->io);
@@ -293,14 +293,14 @@ class ImportLocationsCommand extends Command
                 'phone' => $data['phone'],
                 'origin_file' => $this->filename,
                 'cities' => [
-                    '_ids' => [$city->id]
+                    '_ids' => [$city->id],
                 ],
                 'counties' => [
-                    '_ids' => [$county->id]
+                    '_ids' => [$county->id],
                 ],
                 'states' => [
-                    '_ids' => [$state->id]
-                ]
+                    '_ids' => [$state->id],
+                ],
             ]);
             $errors = $district->getErrors();
             $passesRules = $this->districtsTable->checkRules($district, 'update');
@@ -347,7 +347,7 @@ class ImportLocationsCommand extends Command
             'LOW GRADE 1' => 'low grade',
             'LOW_GRADE' => 'low grade',
             'HIGH GRADE 1' => 'high grade',
-            'HIGH_GRADE' => 'high grade'
+            'HIGH_GRADE' => 'high grade',
         ];
 
         $progress = Utility::makeProgressBar($lastRow - $firstRow + 1, $this->io);
@@ -405,17 +405,17 @@ class ImportLocationsCommand extends Command
                 'phone' => $data['phone'],
                 'origin_file' => $this->filename,
                 'cities' => [
-                    '_ids' => [$city->id]
+                    '_ids' => [$city->id],
                 ],
                 'counties' => [
-                    '_ids' => [$county->id]
+                    '_ids' => [$county->id],
                 ],
                 'states' => [
-                    '_ids' => [$state->id]
+                    '_ids' => [$state->id],
                 ],
                 'grades' => [
-                    '_ids' => $this->getGradeIdsInRange($data)
-                ]
+                    '_ids' => $this->getGradeIdsInRange($data),
+                ],
             ]);
             $errors = $school->getErrors();
             $passesRules = $this->schoolsTable->checkRules($school, 'update');
@@ -500,7 +500,7 @@ class ImportLocationsCommand extends Command
         $fullName = StatesTable::unabbreviateName($name);
         $state = $this->statesTable->newEntity([
             'name' => $fullName,
-            'abbreviation' => $abbreviation
+            'abbreviation' => $abbreviation,
         ]);
         if ($this->statesTable->save($state)) {
             $this->locationsAdded['states'][] = $fullName;
@@ -524,7 +524,7 @@ class ImportLocationsCommand extends Command
     {
         $conditions = [
             'name' => $name,
-            'state_id' => $stateId
+            'state_id' => $stateId,
         ];
         /** @var County $county */
         $county = $this->countiesTable->find()
@@ -558,7 +558,7 @@ class ImportLocationsCommand extends Command
     {
         $conditions = [
             'name' => $name,
-            'state_id' => $stateId
+            'state_id' => $stateId,
         ];
         /** @var City $city */
         $city = $this->citiesTable->find()
@@ -666,7 +666,7 @@ class ImportLocationsCommand extends Command
         $grades = $this->gradesTable->getGradesInRange(
             [
                 'low' => $data['low grade'],
-                'high' => $data['high grade']
+                'high' => $data['high grade'],
             ],
             $this->allGrades
         );
@@ -710,7 +710,7 @@ class ImportLocationsCommand extends Command
 
             if (!$changeName) {
                 $record = $table->patchEntity($record, [
-                    'name' => $record->getOriginal('name')
+                    'name' => $record->getOriginal('name'),
                 ]);
             }
         }

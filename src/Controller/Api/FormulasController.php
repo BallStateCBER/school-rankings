@@ -10,6 +10,7 @@ use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
+use Exception;
 
 /**
  * @property CriteriaTable $criteriaTable
@@ -24,7 +25,7 @@ class FormulasController extends AppController
      * Initialization method
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize()
     {
@@ -38,7 +39,7 @@ class FormulasController extends AppController
      * Generates and returns a ranking according to provided formula parameters
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      * @throws BadRequestException
      */
     public function add()
@@ -55,7 +56,7 @@ class FormulasController extends AppController
                 'is_example' => false,
                 'title' => '',
                 'context' => $context,
-                'hash' => FormulasTable::generateHash()
+                'hash' => FormulasTable::generateHash(),
             ]);
             $formula->criteria = $criteria;
             $success = (bool)$this->formulasTable->save($formula);
@@ -69,7 +70,7 @@ class FormulasController extends AppController
         $this->set([
             '_serialize' => ['success', 'id'],
             'success' => $success,
-            'id' => $id
+            'id' => $id,
         ]);
     }
 
@@ -92,7 +93,7 @@ class FormulasController extends AppController
             $criterion = $this->criteriaTable->newEntity([
                 'metric_id' => $criterionData['metric']['metricId'],
                 'weight' => 100,
-                'preference' => 'high'
+                'preference' => 'high',
             ]);
             $errors = $criterion->getErrors();
             $passesRules = $this->formulasTable->checkRules($criterion, 'create');

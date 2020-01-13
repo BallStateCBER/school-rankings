@@ -6,6 +6,7 @@ use App\Model\Table\MetricsTable;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase;
 use Exception;
+use PHPUnit\Exception as PhpUnitException;
 
 /**
  * MetricsControllerTest class
@@ -23,7 +24,7 @@ class MetricsControllerTest extends IntegrationTestCase
      */
     public $fixtures = [
         'app.Metrics',
-        'app.Statistics'
+        'app.Statistics',
     ];
 
     /**
@@ -35,7 +36,7 @@ class MetricsControllerTest extends IntegrationTestCase
         'prefix' => 'api',
         'controller' => 'Metrics',
         'action' => 'reparent',
-        '_ext' => 'json'
+        '_ext' => 'json',
     ];
 
     /**
@@ -47,7 +48,7 @@ class MetricsControllerTest extends IntegrationTestCase
         'prefix' => 'api',
         'controller' => 'Metrics',
         'action' => 'add',
-        '_ext' => 'json'
+        '_ext' => 'json',
     ];
 
     /**
@@ -68,12 +69,12 @@ class MetricsControllerTest extends IntegrationTestCase
      * @param int $newParentId ID of new parent metric
      * @return void
      * @throws Exception
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     private function _testReparentSuccess($metricId, $newParentId)
     {
         $this->configRequest([
-            'headers' => ['Accept' => 'application/json']
+            'headers' => ['Accept' => 'application/json'],
         ]);
         $metric = $this->Metrics->get($metricId);
         if ($newParentId == $metric->parent_id) {
@@ -92,7 +93,7 @@ class MetricsControllerTest extends IntegrationTestCase
 
         $expected = json_encode([
             'message' => 'Success',
-            'result' => true
+            'result' => true,
         ]);
 
         // Normalize whitespace in response JSON
@@ -106,8 +107,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests that a metric can be moved TO the root of the metrics tree
      *
      * @return void
-     * @throws Exception
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testReparentToRootSuccess()
     {
@@ -120,8 +120,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests that a metric can be moved FROM the root of the metrics tree
      *
      * @return void
-     * @throws Exception
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testReparentFromRootSuccess()
     {
@@ -133,9 +132,9 @@ class MetricsControllerTest extends IntegrationTestCase
     /**
      * Tests that moving a metric in a way that creates two siblings with the same name fails
      *
-     * @throws Exception
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws Exception
+     * @throws PhpUnitException
      */
     public function testReparentFailNonunique()
     {
@@ -167,7 +166,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests moving a metric under a nonexistent parent
      *
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testReparentFailUnknownParent()
     {
@@ -185,7 +184,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests successful deleting of a metric
      *
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testDeleteSuccess()
     {
@@ -195,7 +194,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'controller' => 'Metrics',
             'action' => 'delete',
             $metricId,
-            '_ext' => 'json'
+            '_ext' => 'json',
         ];
         $this->delete($url);
         $this->assertResponseOk();
@@ -205,7 +204,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests prevention of deleting parent metrics
      *
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testDeleteFailHasChildren()
     {
@@ -215,7 +214,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'controller' => 'Metrics',
             'action' => 'delete',
             $metricId,
-            '_ext' => 'json'
+            '_ext' => 'json',
         ];
         $this->delete($url);
         $this->assertResponseError();
@@ -225,8 +224,8 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests successful creation of a metric
      *
      * @return void
-     * @throws \Exception
-     * @throws \PHPUnit\Exception
+     * @throws Exception
+     * @throws PhpUnitException
      */
     public function testCreateSuccess()
     {
@@ -238,7 +237,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'selectable' => 'true',
             'visible' => 'true',
             'parentId' => 1,
-            'type' => 'numeric'
+            'type' => 'numeric',
         ];
         $this->post($this->addUrl, $data);
         $this->assertResponseSuccess();
@@ -261,8 +260,8 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests successful creation of a hidden and unselectable metric
      *
      * @return void
-     * @throws \Exception
-     * @throws \PHPUnit\Exception
+     * @throws Exception
+     * @throws PhpUnitException
      */
     public function testCreateHiddenSuccess()
     {
@@ -274,7 +273,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'selectable' => 'false',
             'visible' => 'false',
             'parentId' => 1,
-            'type' => 'numeric'
+            'type' => 'numeric',
         ];
         $this->post($this->addUrl, $data);
         $this->assertResponseSuccess();
@@ -293,7 +292,7 @@ class MetricsControllerTest extends IntegrationTestCase
      *
      * @return void
      * @throws Exception
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testCreateFailInvalidParent()
     {
@@ -304,7 +303,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'selectable' => true,
             'visible' => true,
             'parentId' => 999,
-            'type' => 'numeric'
+            'type' => 'numeric',
         ];
         $this->post($this->addUrl, $data);
         $this->assertResponseError();
@@ -314,7 +313,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests failing to create a metric with missing required data
      *
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testCreateFailMissingData()
     {
@@ -325,12 +324,12 @@ class MetricsControllerTest extends IntegrationTestCase
             'selectable' => true,
             'visible' => true,
             'parentId' => 1,
-            'type' => 'numeric'
+            'type' => 'numeric',
         ];
         $requiredData = [
             'name',
             'type',
-            'context'
+            'context',
         ];
         foreach ($requiredData as $dataKey) {
             $dataSubset = $data;
@@ -344,7 +343,7 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests failing to create a metric with a name conflict
      *
      * @return void
-     * @throws \PHPUnit\Exception
+     * @throws PhpUnitException
      */
     public function testCreateFailNameConflict()
     {
@@ -354,7 +353,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'description' => 'Metric description',
             'selectable' => true,
             'parentId' => 1,
-            'type' => 'numeric'
+            'type' => 'numeric',
         ];
         $this->post($this->addUrl, $data);
         $this->assertResponseError();
@@ -373,7 +372,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'controller' => 'Metrics',
             'action' => 'edit',
             $metricId,
-            '_ext' => 'json'
+            '_ext' => 'json',
         ];
     }
 
@@ -381,8 +380,8 @@ class MetricsControllerTest extends IntegrationTestCase
      * Tests successfully editing a metric
      *
      * @return void
-     * @throws \PHPUnit\Exception
-     * @throws \Exception
+     * @throws PhpUnitException
+     * @throws Exception
      */
     public function testEditSuccess()
     {
@@ -392,7 +391,7 @@ class MetricsControllerTest extends IntegrationTestCase
             'description' => 'New description',
             'type' => 'boolean',
             'selectable' => false,
-            'visible' => false
+            'visible' => false,
         ];
 
         // Ensure that fixture data is different from $data
@@ -407,9 +406,7 @@ class MetricsControllerTest extends IntegrationTestCase
         // Assert success response
         $this->put(
             $this->getEditUrl($metricId),
-            $data + [
-                'metricId' => $metricId
-            ]
+            $data + ['metricId' => $metricId]
         );
         $this->assertResponseSuccess();
 

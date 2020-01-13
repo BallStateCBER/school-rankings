@@ -1,15 +1,21 @@
 <?php
 namespace App\Controller;
 
+use App\Model\Entity\Formula;
+use App\Model\Table\FormulasTable;
+use App\Model\Table\GradesTable;
+use Cake\Datasource\ResultSetInterface;
+use Cake\Http\Response;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
+use Exception;
 
 /**
  * Formulas Controller
  *
- * @property \App\Model\Table\FormulasTable $Formulas
+ * @property FormulasTable $Formulas
  *
- * @method \App\Model\Entity\Formula[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
+ * @method Formula[]|ResultSetInterface paginate($object = null, array $settings = [])
  */
 class FormulasController extends AppController
 {
@@ -17,7 +23,7 @@ class FormulasController extends AppController
      * Initialization hook method.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize()
     {
@@ -29,13 +35,14 @@ class FormulasController extends AppController
     /**
      * The form for adding or editing a formula
      *
-     * @return \Cake\Http\Response|void
+     * @return Response|void
      */
     public function form()
     {
+        /** @var GradesTable $gradesTable */
+        $gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
         $schoolTypesTable = TableRegistry::getTableLocator()->get('SchoolTypes');
-        $gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $this->set([
             'counties' => $countiesTable->find()
                 ->select(['Counties.id', 'Counties.name'])
@@ -49,7 +56,7 @@ class FormulasController extends AppController
                 ->select(['id', 'name'])
                 ->all()
                 ->toArray(),
-            'titleForLayout' => 'Create a Ranking Formula'
+            'titleForLayout' => 'Create a Ranking Formula',
         ]);
     }
 }

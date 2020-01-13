@@ -14,7 +14,7 @@ class RankingResultsSchoolDistrictsTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\RankingResultsSchoolDistrictsTable
+     * @var RankingResultsSchoolDistrictsTable
      */
     public $RankingResultsSchoolDistricts;
 
@@ -26,7 +26,7 @@ class RankingResultsSchoolDistrictsTableTest extends TestCase
     public $fixtures = [
         'app.RankingResultsSchoolDistricts',
         'app.Rankings',
-        'app.SchoolDistricts'
+        'app.SchoolDistricts',
     ];
 
     /**

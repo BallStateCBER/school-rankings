@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -9,10 +10,10 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int $ranking_id
  * @property int $school_type_id
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  *
- * @property \App\Model\Entity\Ranking $ranking
- * @property \App\Model\Entity\SchoolType $school_type
+ * @property Ranking $ranking
+ * @property SchoolType $school_type
  */
 class RankingsSchoolType extends Entity
 {
@@ -31,6 +32,6 @@ class RankingsSchoolType extends Entity
         'school_type_id' => true,
         'created' => true,
         'ranking' => true,
-        'school_type' => true
+        'school_type' => true,
     ];
 }

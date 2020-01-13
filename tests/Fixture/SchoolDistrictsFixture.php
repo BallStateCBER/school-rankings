@@ -49,7 +49,7 @@ class SchoolDistrictsFixture extends TestFixture
             'closed' => false,
             'phone' => '(000) 000-0000',
             'created' => '2018-04-05 19:45:53',
-            'modified' => '2018-04-05 19:45:53'
+            'modified' => '2018-04-05 19:45:53',
         ],
     ];
 }

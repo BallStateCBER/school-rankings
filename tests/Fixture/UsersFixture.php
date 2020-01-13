@@ -84,7 +84,7 @@ class UsersFixture extends TestFixture
             'is_superuser' => 0,
             'role' => 'user',
             'created' => '2018-10-22 20:09:38',
-            'modified' => '2018-10-22 20:09:38'
+            'modified' => '2018-10-22 20:09:38',
         ];
 
         foreach ($this->records as &$record) {

@@ -2,6 +2,7 @@
 namespace App\Import;
 
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Exception as PhpOfficeException;
 
 class Datum
 {
@@ -11,7 +12,7 @@ class Datum
      * @param mixed $value Value to check
      * @param Cell $cell PhpSpreadsheet cell object
      * @return bool
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws PhpOfficeException
      */
     public function isValid($value, $cell)
     {
@@ -92,7 +93,7 @@ class Datum
             '#N/A',
             'NA',
             'NULL',
-            '#VALUE!'
+            '#VALUE!',
         ];
 
         return in_array($value, $ignorableValues, true);

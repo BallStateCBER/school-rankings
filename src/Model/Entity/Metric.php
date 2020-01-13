@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -17,10 +18,10 @@ use Cake\ORM\Entity;
  * @property bool $selectable
  * @property bool $visible
  * @property bool|null $is_percent
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  *
- * @property \App\Model\Entity\Metric $parent_metric
- * @property \App\Model\Entity\Metric[] $children
+ * @property Metric $parent_metric
+ * @property Metric[] $children
  */
 class Metric extends Entity
 {
@@ -35,7 +36,7 @@ class Metric extends Entity
      * @var array
      */
     protected $_accessible = [
-        '*' => true
+        '*' => true,
     ];
 
     /**

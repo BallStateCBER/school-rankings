@@ -14,7 +14,7 @@ class SharedFormulasTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\SharedFormulasTable
+     * @var SharedFormulasTable
      */
     public $SharedFormulas;
 
@@ -51,7 +51,7 @@ class SharedFormulasTableTest extends TestCase
         'app.SharedFormulas',
         'app.States',
         'app.Statistics',
-        'app.Users'
+        'app.Users',
     ];
 
     /**

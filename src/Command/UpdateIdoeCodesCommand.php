@@ -220,7 +220,7 @@ class UpdateIdoeCodesCommand extends Command
     {
         return $this->table->getAssociation($this->codeAssociationName)->exists([
             $this->foreignKey => $this->record->id,
-            'code' => $this->newCode
+            'code' => $this->newCode,
         ]);
     }
 
@@ -255,7 +255,7 @@ class UpdateIdoeCodesCommand extends Command
         $newRecord = $association->newEntity([
             'code' => $this->newCode,
             $this->foreignKey => $this->record->id,
-            'year' => $this->year
+            'year' => $this->year,
         ]);
 
         if ($association->save($newRecord)) {

@@ -41,7 +41,7 @@ class RankingsStatesFixture extends TestFixture
             'id' => 1,
             'ranking_id' => 1,
             'state_id' => 1,
-            'created' => '2018-05-02 20:39:45'
+            'created' => '2018-05-02 20:39:45',
         ],
     ];
 }

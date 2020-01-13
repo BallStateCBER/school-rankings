@@ -11,7 +11,7 @@ use Cake\ORM\Entity;
  * @property int $school_district_id
  * @property string $year
  *
- * @property \App\Model\Entity\SchoolDistrict $school_district
+ * @property SchoolDistrict $school_district
  */
 class SchoolDistrictCode extends Entity
 {
@@ -29,6 +29,6 @@ class SchoolDistrictCode extends Entity
         'code' => true,
         'school_district_id' => true,
         'year' => true,
-        'school_district' => true
+        'school_district' => true,
     ];
 }

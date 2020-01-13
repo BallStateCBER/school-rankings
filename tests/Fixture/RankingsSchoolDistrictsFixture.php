@@ -41,7 +41,7 @@ class RankingsSchoolDistrictsFixture extends TestFixture
             'id' => 1,
             'ranking_id' => 1,
             'school_district_id' => 1,
-            'created' => '2018-05-02 20:36:36'
+            'created' => '2018-05-02 20:36:36',
         ],
     ];
 }

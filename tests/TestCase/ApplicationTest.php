@@ -42,13 +42,13 @@ class ApplicationTest extends IntegrationTestCase
         $usersFixture = new UsersFixture();
         $this->normalUser = [
             'Auth' => [
-                'User' => $usersFixture->records[0]
-            ]
+                'User' => $usersFixture->records[0],
+            ],
         ];
         $this->adminUser = [
             'Auth' => [
-                'User' => $usersFixture->records[1]
-            ]
+                'User' => $usersFixture->records[1],
+            ],
         ];
     }
 
@@ -74,7 +74,6 @@ class ApplicationTest extends IntegrationTestCase
      *
      * @param string $message Failure message
      * @return void
-     * @throws \PHPUnit\Exception
      */
     protected function assertRedirectToLogin($message = '')
     {
@@ -82,7 +81,7 @@ class ApplicationTest extends IntegrationTestCase
             'plugin' => false,
             'prefix' => false,
             'controller' => 'Users',
-            'action' => 'login'
+            'action' => 'login',
         ]), $message);
     }
 }

@@ -14,7 +14,7 @@ class SpreadsheetColumnsMetricsTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\SpreadsheetColumnsMetricsTable
+     * @var SpreadsheetColumnsMetricsTable
      */
     public $SpreadsheetColumnsMetrics;
 
@@ -25,7 +25,7 @@ class SpreadsheetColumnsMetricsTableTest extends TestCase
      */
     public $fixtures = [
         'app.SpreadsheetColumnsMetrics',
-        'app.Metrics'
+        'app.Metrics',
     ];
 
     /**

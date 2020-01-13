@@ -12,6 +12,7 @@ use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\ORM\Exception\PersistenceFailedException;
 use Cake\ORM\TableRegistry;
 use Cake\Shell\Helper\ProgressHelper;
+use Exception;
 
 /**
  * Class MetricTreeCleanCommand
@@ -42,7 +43,7 @@ class MetricTreeCleanCommand extends Command
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -135,8 +136,10 @@ class MetricTreeCleanCommand extends Command
                     $io->error('Cannot delete metric #' . $metricId . '. Delete operation failed. Details:');
                     $io->nl();
                     print_r($e->getMessage());
-                    $io->nl();
-                    print_r($metric->getErrors());
+                    if (isset($metric)) {
+                        $io->nl();
+                        print_r($metric->getErrors());
+                    }
                     $this->abort();
                 }
                 $this->progress->increment(1);
@@ -185,7 +188,7 @@ class MetricTreeCleanCommand extends Command
 
         return [
             'removableMetrics' => $removableMetrics,
-            'hasUnremovable' => $hasUnremovable
+            'hasUnremovable' => $hasUnremovable,
         ];
     }
 
@@ -209,6 +212,7 @@ class MetricTreeCleanCommand extends Command
      *
      * @param ConsoleIo $io Console IO object
      * @return void
+     * @throws Exception
      */
     private function showDetails($io)
     {

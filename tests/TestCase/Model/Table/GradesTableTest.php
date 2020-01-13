@@ -14,7 +14,7 @@ class GradesTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\GradesTable
+     * @var GradesTable
      */
     public $Grades;
 
@@ -49,7 +49,7 @@ class GradesTableTest extends TestCase
         'app.SchoolsStates',
         'app.States',
         'app.Statistics',
-        'app.Users'
+        'app.Users',
     ];
 
     /**

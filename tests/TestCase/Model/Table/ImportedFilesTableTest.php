@@ -14,7 +14,7 @@ class ImportedFilesTableTest extends TestCase
     /**
      * Test subject
      *
-     * @var \App\Model\Table\ImportedFilesTable
+     * @var ImportedFilesTable
      */
     public $ImportedFiles;
 
@@ -24,7 +24,7 @@ class ImportedFilesTableTest extends TestCase
      * @var array
      */
     public $fixtures = [
-        'app.ImportedFiles'
+        'app.ImportedFiles',
     ];
 
     /**

@@ -108,7 +108,7 @@ class PopulateCodeTablesCommand extends Command
                 $newRecord = $destTable->newEntity([
                     'code' => $record->code,
                     $foreignKey => $record->id,
-                    'year' => $year
+                    'year' => $year,
                 ]);
                 if (!$destTable->save($newRecord)) {
                     $io->err('Error saving this record:');
@@ -136,7 +136,7 @@ class PopulateCodeTablesCommand extends Command
      * @param string $foreignKey Either the string 'school_id' or 'school_district_id'
      * @return void
      */
-    private function outputMismatchError($existingRecord, School $record, $key, $foreignKey)
+    private function outputMismatchError($existingRecord, $record, $key, $foreignKey)
     {
         $this->io->out();
         $this->io->err(sprintf(
@@ -194,13 +194,13 @@ class PopulateCodeTablesCommand extends Command
             'school' => [
                 'source_table' => $tableLocator->get('Schools'),
                 'destination_table' => $tableLocator->get('SchoolCodes'),
-                'foreign_key' => 'school_id'
+                'foreign_key' => 'school_id',
             ],
             'district' => [
                 'source_table' => $tableLocator->get('SchoolDistricts'),
                 'destination_table' => $tableLocator->get('SchoolDistrictCodes'),
-                'foreign_key' => 'school_district_id'
-            ]
+                'foreign_key' => 'school_district_id',
+            ],
         ];
     }
 }

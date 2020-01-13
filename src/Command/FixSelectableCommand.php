@@ -170,7 +170,7 @@ class FixSelectableCommand extends CommonCommand
                     $metric['context'],
                     str_replace("\n", ' - ', $combinedPathNames),
                     $metric['id'],
-                    $mode
+                    $mode,
                 ];
                 $this->progress->increment(1)->draw();
                 unset(
@@ -229,7 +229,7 @@ class FixSelectableCommand extends CommonCommand
             foreach ($metrics as $metricData) {
                 $metric = $this->metricsTable->get($metricData['id']);
                 $this->metricsTable->patchEntity($metric, [
-                    'selectable' => ($mode == 'selectable')
+                    'selectable' => ($mode == 'selectable'),
                 ]);
                 if (!$this->metricsTable->save($metric)) {
                     $this->io->error('Error updating metric #' . $metric->id . '. Details:');

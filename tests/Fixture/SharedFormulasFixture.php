@@ -41,7 +41,7 @@ class SharedFormulasFixture extends TestFixture
             'id' => 1,
             'formula_id' => 1,
             'user_id' => 1,
-            'created' => '2018-04-05 21:10:47'
+            'created' => '2018-04-05 21:10:47',
         ],
     ];
 }

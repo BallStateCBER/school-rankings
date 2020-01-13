@@ -41,7 +41,7 @@ class CitiesFixture extends TestFixture
             'id' => 1,
             'name' => 'Lorem ipsum dolor sit amet',
             'state_id' => 1,
-            'created' => '2018-04-05 20:52:18'
+            'created' => '2018-04-05 20:52:18',
         ],
     ];
 }

@@ -31,6 +31,6 @@ class Grade extends Entity
         'slug' => true,
         'idoe_abbreviation' => true,
         'rankings' => true,
-        'schools' => true
+        'schools' => true,
     ];
 }

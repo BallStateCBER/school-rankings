@@ -126,7 +126,7 @@ class ImportFile
                     'firstDataRow' => $this->getFirstDataRow(),
                     'firstDataCol' => $this->getFirstDataCol(),
                     'totalRows' => $worksheet['totalRows'],
-                    'totalCols' => $worksheet['totalColumns']
+                    'totalCols' => $worksheet['totalColumns'],
                 ];
 
                 // The following methods depend on the values in the above array and must be handled separately
@@ -532,7 +532,7 @@ class ImportFile
             $dataColumns[$col] = [
                 'name' => $colName,
                 'group' => $colGroup,
-                'metricId' => $metricId
+                'metricId' => $metricId,
             ];
 
             // Check if non-null metric ID is invalid
@@ -572,7 +572,7 @@ class ImportFile
             'context' => $this->getActiveWorksheetProperty('context'),
             'worksheet' => $this->activeWorksheet,
             'group_name' => $colGroup,
-            'column_name' => $colName
+            'column_name' => $colName,
         ]);
     }
 
@@ -906,12 +906,12 @@ class ImportFile
         $log = [
             'district' => [
                 'identifiedList' => [],
-                'addedList' => []
+                'addedList' => [],
             ],
             'school' => [
                 'identifiedList' => [],
-                'addedList' => []
-            ]
+                'addedList' => [],
+            ],
         ];
         foreach ($locations as $rowNum => $location) {
             // Identify district
@@ -928,8 +928,8 @@ class ImportFile
                     $district->school_district_codes = [
                         $districtCodesTable->newEntity([
                             'code' => $location['districtCode'],
-                            'year' => $this->year
-                        ])
+                            'year' => $this->year,
+                        ]),
                     ];
                     $schoolDistrictsTable->saveOrFail($district);
                     $log['district']['addedList'][] = "#{$location['districtCode']}: $district->name";
@@ -960,13 +960,13 @@ class ImportFile
                     $this->checkNewSchoolName($location['schoolName']);
                     $school = $schoolsTable->newEntity([
                         'name' => $location['schoolName'],
-                        'school_district_id' => $districtId
+                        'school_district_id' => $districtId,
                     ]);
                     $school->school_codes = [
                         $schoolCodesTable->newEntity([
                             'code' => $location['schoolCode'],
-                            'year' => $this->year
-                        ])
+                            'year' => $this->year,
+                        ]),
                     ];
                     $schoolsTable->saveOrFail($school);
                     $log['school']['addedList'][] = "#{$location['schoolCode']}: $school->name";
@@ -1125,7 +1125,7 @@ class ImportFile
         // Get existing
         $conditions = [
             'context' => $context,
-            'name' => $metricName
+            'name' => $metricName,
         ];
         if ($parentId) {
             $conditions['parent_id'] = $parentId;
@@ -1176,7 +1176,7 @@ class ImportFile
             'parent_id' => $parentId,
             'selectable' => $selectable,
             'visible' => true,
-            'is_percent' => null
+            'is_percent' => null,
         ]);
         if (!$this->metricsTable->save($metric)) {
             $msg = 'Cannot add metric ' . $metricName . "\nDetails: " . print_r($metric->getErrors(), true);
@@ -1283,7 +1283,7 @@ class ImportFile
             'added' => 0,
             'updated' => 0,
             'ignored' => 0,
-            'deleted' => 0
+            'deleted' => 0,
         ];
         $statsToDelete = [];
         for ($row = $ws['firstDataRow']; $row <= $ws['totalRows']; $row++) {
@@ -1316,7 +1316,7 @@ class ImportFile
                     if ($existingStat) {
                         $statsToDelete[] = [
                             'record' => $existingStat,
-                            'cellContents' => $value === null ? 'null' : "\"$value\""
+                            'cellContents' => $value === null ? 'null' : "\"$value\"",
                         ];
                     // Ignore this value
                     } else {
@@ -1335,7 +1335,7 @@ class ImportFile
                         'value' => $value,
                         'year' => $this->year,
                         'file' => $this->filename,
-                        'contiguous' => true
+                        'contiguous' => true,
                     ]);
                     unset($existingStat, $value);
                     continue;
@@ -1353,7 +1353,7 @@ class ImportFile
                 if ($this->getOverwrite()) {
                     $this->statisticsTable->patchEntity($existingStat, [
                         'value' => $value,
-                        'file' => $this->filename
+                        'file' => $this->filename,
                     ]);
                     if ($existingStat->getErrors() || !$this->statisticsTable->save($existingStat)) {
                         $errors = print_r($existingStat->getErrors(), true);
@@ -1569,7 +1569,7 @@ class ImportFile
         $districtKeywords = [
             ' Schools',
             ' Schs',
-            ' Corp'
+            ' Corp',
         ];
         foreach ($districtKeywords as $districtKeyword) {
             if (stripos($schoolName, $districtKeyword) === false) {

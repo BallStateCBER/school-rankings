@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 
 /**
@@ -14,7 +15,7 @@ use Cake\ORM\Entity;
  * @property string $group_name
  * @property string $column_name
  * @property int $metric_id
- * @property \Cake\I18n\FrozenTime $created
+ * @property FrozenTime $created
  */
 class SpreadsheetColumnsMetric extends Entity
 {
@@ -37,6 +38,6 @@ class SpreadsheetColumnsMetric extends Entity
         'column_name' => true,
         'metric_id' => true,
         'created' => true,
-        'metric' => true
+        'metric' => true,
     ];
 }

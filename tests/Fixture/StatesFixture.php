@@ -39,7 +39,7 @@ class StatesFixture extends TestFixture
         [
             'id' => 1,
             'name' => 'Lorem ipsum dolor sit amet',
-            'abbreviation' => 'Lorem ipsum dolor sit amet'
+            'abbreviation' => 'Lorem ipsum dolor sit amet',
         ],
     ];
 }

@@ -12,7 +12,7 @@ class MetricTreeCleanCommandTest extends ConsoleIntegrationTestCase
      */
     public $fixtures = [
         'app.Metrics',
-        'app.Statistics'
+        'app.Statistics',
     ];
 
     /**

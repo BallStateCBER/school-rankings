@@ -12,8 +12,8 @@ use Cake\ORM\Entity;
  * @property int $rank
  * @property string $data_completeness
  *
- * @property \App\Model\Entity\Ranking $ranking
- * @property \App\Model\Entity\School $school
+ * @property Ranking $ranking
+ * @property School $school
  */
 class RankingResultsSchool extends Entity
 {
@@ -34,6 +34,6 @@ class RankingResultsSchool extends Entity
         'data_completeness' => true,
         'ranking' => true,
         'school' => true,
-        'statistics' => true
+        'statistics' => true,
     ];
 }

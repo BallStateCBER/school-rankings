@@ -15,6 +15,7 @@ use Cake\Log\Log;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
+use Exception;
 use Queue\Model\Entity\QueuedJob;
 use Queue\Model\Table\QueuedJobsTable;
 
@@ -43,7 +44,7 @@ class RankingsController extends AppController
      * Initialization method
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize()
     {
@@ -62,7 +63,7 @@ class RankingsController extends AppController
      * Adds a ranking record to be processed by a background task
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      * @throws BadRequestException
      */
     public function add()
@@ -76,7 +77,7 @@ class RankingsController extends AppController
             'user_id' => null,
             'formula_id' => $formulaId,
             'for_school_districts' => $context == 'district',
-            'hash' => RankingsTable::generateHash()
+            'hash' => RankingsTable::generateHash(),
         ]);
 
         // Add associations
@@ -85,7 +86,7 @@ class RankingsController extends AppController
             ->where([
                 function (QueryExpression $exp) use ($countyIds) {
                     return $exp->in('id', $countyIds);
-                }
+                },
             ])
             ->toArray();
         if ($context == 'school') {
@@ -109,11 +110,11 @@ class RankingsController extends AppController
             '_serialize' => [
                 'jobId',
                 'rankingId',
-                'success'
+                'success',
             ],
             'jobId' => $jobId,
             'rankingId' => $rankingId,
-            'success' => (bool)$rankingId && (bool)$jobId
+            'success' => (bool)$rankingId && (bool)$jobId,
         ]);
     }
 
@@ -145,7 +146,7 @@ class RankingsController extends AppController
      * Creates a queued job for generating ranking output for the provided ranking record
      *
      * @param int $rankingId ID of unprocessed ranking record
-     * @throws \Exception
+     * @throws Exception
      * @return bool|QueuedJob
      */
     private function createRankingJob($rankingId)
@@ -169,10 +170,10 @@ class RankingsController extends AppController
         $this->set([
             '_serialize' => [
                 'progress',
-                'status'
+                'status',
             ],
             'progress' => $job->progress,
-            'status' => $job->status
+            'status' => $job->status,
         ]);
     }
 
@@ -180,7 +181,7 @@ class RankingsController extends AppController
      * Fetches the results of a ranking
      *
      * @param int $rankingId ID of ranking record
-     * @throws \Exception
+     * @throws Exception
      * @return void
      */
     public function get($rankingId)
@@ -192,7 +193,7 @@ class RankingsController extends AppController
             ->contain([
                 'Formulas' => $containQueries['formulas'],
                 'ResultsSchools' => $containQueries['resultsSchools'],
-                'ResultsDistricts' => $containQueries['resultsDistricts']
+                'ResultsDistricts' => $containQueries['resultsDistricts'],
             ])
             ->first();
 
@@ -240,14 +241,14 @@ class RankingsController extends AppController
         foreach ($groupedResults as $rank => $resultsInRank) {
             $indexedResults[] = [
                 'rank' => $rank,
-                'subjects' => $resultsInRank
+                'subjects' => $resultsInRank,
             ];
         }
 
         $this->set([
             '_serialize' => ['noDataResults', 'results'],
             'results' => $indexedResults,
-            'noDataResults' => $resultsWithoutData
+            'noDataResults' => $resultsWithoutData,
         ]);
     }
 
@@ -306,7 +307,7 @@ class RankingsController extends AppController
                 'value',
                 'metric_id',
                 'school_id',
-                'school_district_id'
+                'school_district_id',
             ]);
         };
         $containCriteria = function (Query $q) {
@@ -315,7 +316,7 @@ class RankingsController extends AppController
                 ->contain([
                     'Metrics' => function (Query $q) {
                         return $q->select(['id', 'name']);
-                    }
+                    },
                 ]);
         };
         $containSchools = function (Query $q) {
@@ -325,7 +326,7 @@ class RankingsController extends AppController
                     'name',
                     'address',
                     'url',
-                    'phone'
+                    'phone',
                 ])
                 ->contain([
                     'Grades' => function (Query $q) {
@@ -335,7 +336,7 @@ class RankingsController extends AppController
                     },
                     'SchoolTypes' => function (Query $q) {
                         return $q->select(['id', 'name']);
-                    }
+                    },
                 ]);
         };
         $containDistricts = function (Query $q) {
@@ -344,33 +345,33 @@ class RankingsController extends AppController
                     'id',
                     'name',
                     'url',
-                    'phone'
+                    'phone',
                 ]);
         };
         $containFormulas = function (Query $q) use ($containCriteria) {
             return $q
                 ->select(['id'])
                 ->contain([
-                    'Criteria' => $containCriteria
+                    'Criteria' => $containCriteria,
                 ]);
         };
         $containResultsSchools = function (Query $q) use ($containSchools, $containStatistics) {
             return $q->contain([
                 'Schools' => $containSchools,
-                'Statistics' => $containStatistics
+                'Statistics' => $containStatistics,
             ]);
         };
         $containResultsDistricts = function (Query $q) use ($containDistricts, $containStatistics) {
             return $q->contain([
                 'SchoolDistricts' => $containDistricts,
-                'Statistics' => $containStatistics
+                'Statistics' => $containStatistics,
             ]);
         };
 
         return [
             'formulas' => $containFormulas,
             'resultsSchools' => $containResultsSchools,
-            'resultsDistricts' => $containResultsDistricts
+            'resultsDistricts' => $containResultsDistricts,
         ];
     }
 }

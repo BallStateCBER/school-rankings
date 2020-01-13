@@ -7,6 +7,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\ORM\TableRegistry;
+use Exception;
 
 /**
  * Class MetricParentMergeCommand
@@ -42,18 +43,18 @@ class MetricParentMergeCommand extends CommonCommand
      * Display help for this console.
      *
      * @param ConsoleOptionParser $parser Console options parser object
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
             'parentMetricIdToDelete' => [
                 'help' => 'The ID of a metric that has one level of children that need to be merged and deleted',
-                'required' => true
+                'required' => true,
             ],
             'parentMetricIdToRetain' => [
                 'help' => 'The ID of a metric that has one level of children to merge the first group of metrics into',
-                'required' => true
+                'required' => true,
             ],
         ]);
 
@@ -66,8 +67,7 @@ class MetricParentMergeCommand extends CommonCommand
      * @param Arguments $args Arguments
      * @param ConsoleIo $io Console IO object
      * @return int|null|void
-     * @throws \Aura\Intl\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
@@ -91,7 +91,7 @@ class MetricParentMergeCommand extends CommonCommand
      * Checks that the specified metrics exist
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function verifyMetrics()
     {
@@ -107,7 +107,7 @@ class MetricParentMergeCommand extends CommonCommand
                 ->find()
                 ->where(['id' => $this->parentMetricIdToRetain])
                 ->contain(['ChildMetrics'])
-                ->firstOrFail()
+                ->firstOrFail(),
         ];
         foreach ($this->parentMetrics as $action => $parentMetric) {
             if (!$parentMetric->child_metrics) {
@@ -168,7 +168,7 @@ class MetricParentMergeCommand extends CommonCommand
         foreach ($this->parentMetrics['delete']->child_metrics as $childMetric) {
             $normalizedName = $this->normalizeMetricName($childMetric->name);
             $this->mergeOperations[$normalizedName] = [
-                'delete' => $childMetric->id
+                'delete' => $childMetric->id,
             ];
         }
         foreach ($this->parentMetrics['retain']->child_metrics as $childMetric) {
@@ -207,7 +207,7 @@ class MetricParentMergeCommand extends CommonCommand
      * Populates $this->context and sets the scope for MetricsTable tree operations
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     private function getContext()
     {
@@ -224,8 +224,8 @@ class MetricParentMergeCommand extends CommonCommand
     /**
      * Executes metric-merge for each pair of metric IDs
      *
-     * @throws \Aura\Intl\Exception
      * @return void
+     * @throws Exception
      */
     private function runMergeOperations()
     {

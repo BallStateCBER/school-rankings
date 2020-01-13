@@ -30,7 +30,7 @@ class PopulateLocationOriginCommand extends Command
 {
     private $processedCodes = [
         'district' => [],
-        'school' => []
+        'school' => [],
     ];
     private $currentFile;
     private $files;

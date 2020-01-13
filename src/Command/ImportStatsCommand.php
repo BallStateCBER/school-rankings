@@ -43,24 +43,24 @@ class ImportStatsCommand extends Command
      * Display help for this console.
      *
      * @param ConsoleOptionParser $parser Console options parser object
-     * @return \Cake\Console\ConsoleOptionParser
+     * @return ConsoleOptionParser
      */
     public function buildOptionParser(ConsoleOptionParser $parser)
     {
         $parser->addArguments([
             'year' => ['help' => 'The specific year to look up or "all"'],
-            'fileKey' => ['help' => 'The numeric key for the specific file to process, "all", or "new"']
+            'fileKey' => ['help' => 'The numeric key for the specific file to process, "all", or "new"'],
         ])->addOption(
             'auto-metrics',
             [
                 'help' => 'Automatically accept all suggested metric names',
-                'boolean' => true
+                'boolean' => true,
             ]
         )->addOption(
             'overwrite',
             [
                 'help' => 'Automatically overwrite existing statistics',
-                'boolean' => true
+                'boolean' => true,
             ]
         )->setEpilog(
             'Run "import-run all all --auto-metrics --overwrite" to process all files, accept all suggested ' .
@@ -284,7 +284,7 @@ class ImportStatsCommand extends Command
 
         $record = $importedFiles->newEntity([
             'year' => (int)$year,
-            'file' => $filename
+            'file' => $filename,
         ]);
         if ($importedFiles->save($record)) {
             return;
@@ -342,7 +342,7 @@ class ImportStatsCommand extends Command
             foreach ($files as $file) {
                 $retval[$year][] = [
                     'filename' => $file,
-                    'imported' => $importedFilesTable->getImportDate($year, $file)
+                    'imported' => $importedFilesTable->getImportDate($year, $file),
                 ];
             }
         }

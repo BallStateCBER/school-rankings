@@ -43,7 +43,7 @@ class SchoolDistrictCodesFixture extends TestFixture
                 'id' => 1,
                 'code' => 'Lorem ipsum dolor sit amet',
                 'school_district_id' => 1,
-                'year' => 'Lo'
+                'year' => 'Lo',
             ],
         ];
         parent::init();

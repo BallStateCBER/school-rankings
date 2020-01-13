@@ -43,7 +43,7 @@ class ImportedFilesFixture extends TestFixture
                 'id' => 1,
                 'year' => 1,
                 'file' => 'Lorem ipsum dolor sit amet',
-                'created' => '2018-06-28 18:13:39'
+                'created' => '2018-06-28 18:13:39',
             ],
         ];
         parent::init();
