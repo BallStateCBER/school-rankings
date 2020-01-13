@@ -24,7 +24,7 @@ matrix:
 
 install:
   - if [[ $PHPUNIT = 1 ]]; then composer install; fi
-  - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:*; fi
+  - if [[ $PHPCS = 1 ]]; then composer require cakephp/cakephp-codesniffer:^3.0; fi
   - if [[ $JSLINT = 1 || $WEBPACK_BUILD = 1 ]]; then npm install; fi
 
 before_script:
