@@ -90,7 +90,7 @@ class MetricsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->scalar('context')
@@ -105,7 +105,7 @@ class MetricsTable extends Table
 
         $validator
             ->integer('parent_id')
-            ->allowEmpty('parent_id')
+            ->allowEmptyString('parent_id')
             ->add('parent_id', 'isValidParent', [
                 'rule' => 'validateParent',
                 'message' => 'Another metric with the same parent has the same name',
@@ -125,7 +125,7 @@ class MetricsTable extends Table
 
         $validator
             ->scalar('description')
-            ->allowEmpty('description');
+            ->allowEmptyString('description');
 
         $validator
             ->scalar('type')
@@ -147,7 +147,7 @@ class MetricsTable extends Table
         $validator
             ->boolean('is_percent')
             ->requirePresence('is_percent', 'create')
-            ->allowEmpty('is_percent');
+            ->allowEmptyString('is_percent');
 
         return $validator;
     }

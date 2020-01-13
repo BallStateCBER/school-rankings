@@ -69,7 +69,7 @@ class UsersTable extends \CakeDC\Users\Model\Table\UsersTable
 
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->email('email')

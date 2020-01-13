@@ -1,6 +1,9 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\RankingsSchoolType;
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -8,17 +11,17 @@ use Cake\Validation\Validator;
 /**
  * RankingsSchoolTypes Model
  *
- * @property \App\Model\Table\RankingsTable|\Cake\ORM\Association\BelongsTo $Rankings
- * @property \App\Model\Table\SchoolTypesTable|\Cake\ORM\Association\BelongsTo $SchoolTypes
+ * @property RankingsTable|BelongsTo $Rankings
+ * @property SchoolTypesTable|BelongsTo $SchoolTypes
  *
- * @method \App\Model\Entity\RankingsSchoolType get($primaryKey, $options = [])
- * @method \App\Model\Entity\RankingsSchoolType newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\RankingsSchoolType[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\RankingsSchoolType|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingsSchoolType|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingsSchoolType patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\RankingsSchoolType[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\RankingsSchoolType findOrCreate($search, callable $callback = null, $options = [])
+ * @method RankingsSchoolType get($primaryKey, $options = [])
+ * @method RankingsSchoolType newEntity($data = null, array $options = [])
+ * @method RankingsSchoolType[] newEntities(array $data, array $options = [])
+ * @method RankingsSchoolType|bool save(EntityInterface $entity, $options = [])
+ * @method RankingsSchoolType|bool saveOrFail(EntityInterface $entity, $options = [])
+ * @method RankingsSchoolType patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method RankingsSchoolType[] patchEntities($entities, array $data, array $options = [])
+ * @method RankingsSchoolType findOrCreate($search, callable $callback = null, $options = [])
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
@@ -61,7 +64,7 @@ class RankingsSchoolTypesTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         return $validator;
     }

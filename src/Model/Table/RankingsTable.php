@@ -120,7 +120,7 @@ class RankingsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->boolean('for_school_districts')

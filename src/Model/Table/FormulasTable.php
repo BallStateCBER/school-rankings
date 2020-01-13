@@ -74,7 +74,7 @@ class FormulasTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->boolean('is_example')
@@ -84,11 +84,11 @@ class FormulasTable extends Table
         $validator
             ->scalar('title')
             ->maxLength('title', 255)
-            ->allowEmpty('title');
+            ->allowEmptyString('title');
 
         $validator
             ->scalar('notes')
-            ->allowEmpty('notes');
+            ->allowEmptyString('notes');
 
         $validator
             ->scalar('context')

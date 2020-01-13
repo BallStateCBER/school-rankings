@@ -46,7 +46,8 @@ class StatisticsTable extends Table
     public function validationDefault(Validator $validator)
     {
         $validator
-            ->integer('id');
+            ->integer('id')
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->integer('metric_id')
@@ -55,11 +56,11 @@ class StatisticsTable extends Table
 
         $validator
             ->integer('school_id')
-            ->allowEmpty('school_id');
+            ->allowEmptyString('school_id');
 
         $validator
             ->integer('school_district_id')
-            ->allowEmpty('school_district_id');
+            ->allowEmptyString('school_district_id');
 
         $validator
             ->scalar('value')

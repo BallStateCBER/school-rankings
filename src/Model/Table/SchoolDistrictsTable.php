@@ -95,7 +95,7 @@ class SchoolDistrictsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->scalar('name')
@@ -106,12 +106,12 @@ class SchoolDistrictsTable extends Table
         $validator
             ->scalar('url')
             ->maxLength('url', 255)
-            ->allowEmpty('url');
+            ->allowEmptyString('url');
 
         $validator
             ->scalar('phone')
             ->maxLength('phone', 30)
-            ->allowEmpty('phone');
+            ->allowEmptyString('phone');
 
         return $validator;
     }

@@ -6,6 +6,7 @@ use App\Model\Entity\SpreadsheetColumnsMetric;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -22,7 +23,7 @@ use Exception;
  * @method SpreadsheetColumnsMetric[] patchEntities($entities, array $data, array $options = [])
  * @method SpreadsheetColumnsMetric findOrCreate($search, callable $callback = null, $options = [])
  *
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @mixin TimestampBehavior
  */
 class SpreadsheetColumnsMetricsTable extends Table
 {
@@ -59,7 +60,7 @@ class SpreadsheetColumnsMetricsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->scalar('year')
@@ -88,7 +89,7 @@ class SpreadsheetColumnsMetricsTable extends Table
         $validator
             ->scalar('group_name')
             ->maxLength('group_name', 255)
-            ->allowEmpty('group_name');
+            ->allowEmptyString('group_name');
 
         $validator
             ->scalar('column_name')

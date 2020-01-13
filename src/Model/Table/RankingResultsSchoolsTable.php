@@ -1,6 +1,9 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\RankingResultsSchool;
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -8,17 +11,17 @@ use Cake\Validation\Validator;
 /**
  * RankingResultsSchools Model
  *
- * @property \App\Model\Table\RankingsTable|\Cake\ORM\Association\BelongsTo $Rankings
- * @property \App\Model\Table\SchoolsTable|\Cake\ORM\Association\BelongsTo $Schools
+ * @property RankingsTable|BelongsTo $Rankings
+ * @property SchoolsTable|BelongsTo $Schools
  *
- * @method \App\Model\Entity\RankingResultsSchool get($primaryKey, $options = [])
- * @method \App\Model\Entity\RankingResultsSchool newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchool[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchool|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingResultsSchool|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingResultsSchool patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchool[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchool findOrCreate($search, callable $callback = null, $options = [])
+ * @method RankingResultsSchool get($primaryKey, $options = [])
+ * @method RankingResultsSchool newEntity($data = null, array $options = [])
+ * @method RankingResultsSchool[] newEntities(array $data, array $options = [])
+ * @method RankingResultsSchool|bool save(EntityInterface $entity, $options = [])
+ * @method RankingResultsSchool|bool saveOrFail(EntityInterface $entity, $options = [])
+ * @method RankingResultsSchool patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method RankingResultsSchool[] patchEntities($entities, array $data, array $options = [])
+ * @method RankingResultsSchool findOrCreate($search, callable $callback = null, $options = [])
  */
 class RankingResultsSchoolsTable extends Table
 {
@@ -62,7 +65,7 @@ class RankingResultsSchoolsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->integer('rank')

@@ -1,6 +1,9 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Entity\RankingResultsSchoolDistrict;
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -8,17 +11,17 @@ use Cake\Validation\Validator;
 /**
  * RankingResultsSchoolDistricts Model
  *
- * @property \App\Model\Table\RankingsTable|\Cake\ORM\Association\BelongsTo $Rankings
- * @property \App\Model\Table\SchoolDistrictsTable|\Cake\ORM\Association\BelongsTo $SchoolDistricts
+ * @property RankingsTable|BelongsTo $Rankings
+ * @property SchoolDistrictsTable|BelongsTo $SchoolDistricts
  *
- * @method \App\Model\Entity\RankingResultsSchoolDistrict get($primaryKey, $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\RankingResultsSchoolDistrict findOrCreate($search, callable $callback = null, $options = [])
+ * @method RankingResultsSchoolDistrict get($primaryKey, $options = [])
+ * @method RankingResultsSchoolDistrict newEntity($data = null, array $options = [])
+ * @method RankingResultsSchoolDistrict[] newEntities(array $data, array $options = [])
+ * @method RankingResultsSchoolDistrict|bool save(EntityInterface $entity, $options = [])
+ * @method RankingResultsSchoolDistrict|bool saveOrFail(EntityInterface $entity, $options = [])
+ * @method RankingResultsSchoolDistrict patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method RankingResultsSchoolDistrict[] patchEntities($entities, array $data, array $options = [])
+ * @method RankingResultsSchoolDistrict findOrCreate($search, callable $callback = null, $options = [])
  */
 class RankingResultsSchoolDistrictsTable extends Table
 {
@@ -62,7 +65,7 @@ class RankingResultsSchoolDistrictsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->integer('rank')

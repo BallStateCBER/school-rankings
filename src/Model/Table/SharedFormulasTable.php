@@ -1,7 +1,10 @@
 <?php
 namespace App\Model\Table;
 
-use Cake\ORM\Query;
+use App\Model\Entity\SharedFormula;
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Association\BelongsTo;
+use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -9,18 +12,18 @@ use Cake\Validation\Validator;
 /**
  * SharedFormulas Model
  *
- * @property \App\Model\Table\FormulasTable|\Cake\ORM\Association\BelongsTo $Formulas
- * @property \App\Model\Table\UsersTable|\Cake\ORM\Association\BelongsTo $Users
+ * @property FormulasTable|BelongsTo $Formulas
+ * @property UsersTable|BelongsTo $Users
  *
- * @method \App\Model\Entity\SharedFormula get($primaryKey, $options = [])
- * @method \App\Model\Entity\SharedFormula newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\SharedFormula[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\SharedFormula|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\SharedFormula patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\SharedFormula[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\SharedFormula findOrCreate($search, callable $callback = null, $options = [])
+ * @method SharedFormula get($primaryKey, $options = [])
+ * @method SharedFormula newEntity($data = null, array $options = [])
+ * @method SharedFormula[] newEntities(array $data, array $options = [])
+ * @method SharedFormula|bool save(EntityInterface $entity, $options = [])
+ * @method SharedFormula patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method SharedFormula[] patchEntities($entities, array $data, array $options = [])
+ * @method SharedFormula findOrCreate($search, callable $callback = null, $options = [])
  *
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @mixin TimestampBehavior
  */
 class SharedFormulasTable extends Table
 {
@@ -61,7 +64,7 @@ class SharedFormulasTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmptyString('id', null, 'create');
 
         return $validator;
     }

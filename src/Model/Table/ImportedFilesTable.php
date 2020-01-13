@@ -2,21 +2,22 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\ImportedFile;
+use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
  * ImportedFiles Model
  *
- * @method \App\Model\Entity\ImportedFile get($primaryKey, $options = [])
- * @method \App\Model\Entity\ImportedFile newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\ImportedFile[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\ImportedFile|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\ImportedFile patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\ImportedFile[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\ImportedFile findOrCreate($search, callable $callback = null, $options = [])
+ * @method ImportedFile get($primaryKey, $options = [])
+ * @method ImportedFile newEntity($data = null, array $options = [])
+ * @method ImportedFile[] newEntities(array $data, array $options = [])
+ * @method ImportedFile|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method ImportedFile patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method ImportedFile[] patchEntities($entities, array $data, array $options = [])
+ * @method ImportedFile findOrCreate($search, callable $callback = null, $options = [])
  *
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @mixin TimestampBehavior
  */
 class ImportedFilesTable extends Table
 {
