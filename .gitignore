@@ -6,6 +6,7 @@
 /logs/*
 /tmp/*
 /vendor/*
+/src/Controller/TestController.php
 
 # OS generated files #
 ######################
