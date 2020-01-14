@@ -2,6 +2,7 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Statistic;
+use App\Model\StatSearcher;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\RulesChecker;
@@ -313,5 +314,18 @@ class StatisticsTable extends Table
         }
 
         return true;
+    }
+
+    /**
+     * A convenience wrapper for StatSearcher::getMostRecentYear()
+     *
+     * @param array $options Options array
+     * @return int|null
+     */
+    public function getMostRecentYear($options = [])
+    {
+        $statSearcher = new StatSearcher($this);
+
+        return $statSearcher->getMostRecentYear($options);
     }
 }
