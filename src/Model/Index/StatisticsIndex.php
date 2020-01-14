@@ -17,6 +17,5 @@ class StatisticsIndex extends Index
         parent::initialize($config);
 
         $this->_name = Configure::read('Elasticsearch.statisticsIndex');
-        $this->_type = '_doc';
     }
 }
