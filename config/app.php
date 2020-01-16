@@ -390,6 +390,6 @@ return [
 
     'adminEmail' => 'admin@indianaschoolrankings.com',
     'Elasticsearch' => [
-        'statisticsIndex' => 'statistics',
+        'statisticsIndex' => 'statistics-nohidden-recent-2020-01-08',
     ],
 ];
