@@ -612,7 +612,7 @@ class FormulaForm extends React.Component {
             {this.state.context &&
               <section className="col-sm-6">
                 <h3>
-                  {this.state.context === 'school' ? 'Schools' : 'School corporations'} in what county?
+                  {this.state.context === 'school' ? 'Schools' : 'School corporations'} in which county?
                 </h3>
                 <div className="form-group">
                   <label htmlFor="county" className="sr-only">
@@ -641,7 +641,7 @@ class FormulaForm extends React.Component {
               </section>
               <section id="grade-level" className="form-group col-sm-6">
                 <h3>
-                  Schools teaching what grades?
+                  Schools teaching which grades?
                 </h3>
                 <GradeLevelSelector gradeLevels={this.state.gradeLevels}
                                     allGradeLevels={this.state.allGradeLevels}
