@@ -2,7 +2,10 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\Criterion;
+use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\Association\BelongsTo;
+use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
@@ -11,14 +14,14 @@ use Cake\Validation\Validator;
 /**
  * Criteria Model
  *
- * @property \App\Model\Table\MetricsTable|\Cake\ORM\Association\BelongsTo $Metrics
- * @property \App\Model\Table\FormulasTable|\Cake\ORM\Association\BelongsToMany $Formulas
+ * @property MetricsTable|BelongsTo $Metrics
+ * @property FormulasTable|BelongsToMany $Formulas
  *
  * @method Criterion get($primaryKey, $options = [])
  * @method Criterion newEntity($data = null, array $options = [])
  * @method Criterion[] newEntities(array $data, array $options = [])
- * @method Criterion|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method Criterion patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method Criterion|bool save(EntityInterface $entity, $options = [])
+ * @method Criterion patchEntity(EntityInterface $entity, array $data, array $options = [])
  * @method Criterion[] patchEntities($entities, array $data, array $options = [])
  * @method Criterion findOrCreate($search, callable $callback = null, $options = [])
  */
@@ -52,8 +55,8 @@ class CriteriaTable extends Table
     /**
      * Default validation rules.
      *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * @param Validator $validator Validator instance.
+     * @return Validator
      */
     public function validationDefault(Validator $validator)
     {
@@ -89,8 +92,8 @@ class CriteriaTable extends Table
      * Returns a rules checker object that will be used for validating
      * application integrity.
      *
-     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
-     * @return \Cake\ORM\RulesChecker
+     * @param RulesChecker $rules The rules object to be modified.
+     * @return RulesChecker
      */
     public function buildRules(RulesChecker $rules)
     {

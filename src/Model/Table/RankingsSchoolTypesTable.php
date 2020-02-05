@@ -4,6 +4,7 @@ namespace App\Model\Table;
 use App\Model\Entity\RankingsSchoolType;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsTo;
+use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -23,7 +24,7 @@ use Cake\Validation\Validator;
  * @method RankingsSchoolType[] patchEntities($entities, array $data, array $options = [])
  * @method RankingsSchoolType findOrCreate($search, callable $callback = null, $options = [])
  *
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @mixin TimestampBehavior
  */
 class RankingsSchoolTypesTable extends Table
 {
@@ -57,8 +58,8 @@ class RankingsSchoolTypesTable extends Table
     /**
      * Default validation rules.
      *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * @param Validator $validator Validator instance.
+     * @return Validator
      */
     public function validationDefault(Validator $validator)
     {
@@ -73,8 +74,8 @@ class RankingsSchoolTypesTable extends Table
      * Returns a rules checker object that will be used for validating
      * application integrity.
      *
-     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
-     * @return \Cake\ORM\RulesChecker
+     * @param RulesChecker $rules The rules object to be modified.
+     * @return RulesChecker
      */
     public function buildRules(RulesChecker $rules)
     {

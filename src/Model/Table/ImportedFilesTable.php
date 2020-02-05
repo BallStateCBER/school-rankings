@@ -2,6 +2,8 @@
 namespace App\Model\Table;
 
 use App\Model\Entity\ImportedFile;
+use Cake\Datasource\EntityInterface;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -12,8 +14,8 @@ use Cake\Validation\Validator;
  * @method ImportedFile get($primaryKey, $options = [])
  * @method ImportedFile newEntity($data = null, array $options = [])
  * @method ImportedFile[] newEntities(array $data, array $options = [])
- * @method ImportedFile|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method ImportedFile patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method ImportedFile|bool save(EntityInterface $entity, $options = [])
+ * @method ImportedFile patchEntity(EntityInterface $entity, array $data, array $options = [])
  * @method ImportedFile[] patchEntities($entities, array $data, array $options = [])
  * @method ImportedFile findOrCreate($search, callable $callback = null, $options = [])
  *
@@ -40,8 +42,8 @@ class ImportedFilesTable extends Table
     /**
      * Default validation rules.
      *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * @param Validator $validator Validator instance.
+     * @return Validator
      */
     public function validationDefault(Validator $validator)
     {
@@ -64,7 +66,7 @@ class ImportedFilesTable extends Table
      *
      * @param int|string $year Four-digit year
      * @param string $file File path, starting with $year . DS
-     * @return \Cake\I18n\FrozenTime|null
+     * @return FrozenTime|null
      */
     public function getImportDate($year, $file)
     {
