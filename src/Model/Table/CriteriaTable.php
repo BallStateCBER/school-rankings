@@ -80,7 +80,7 @@ class CriteriaTable extends Table
 
         $validator
             ->integer('formula_id')
-            ->allowEmptyString('formula_id', 'create');
+            ->allowEmptyString('formula_id', null, 'create');
 
         return $validator;
     }
