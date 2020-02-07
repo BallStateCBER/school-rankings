@@ -1,9 +1,14 @@
 <?php
 /**
- * @var \Cake\View\View $this
+ * @var View $this
+ * @var string $containerClass
+ * @var string $containerId
  * @var string $titleForLayout
  */
-?>
+$containerClass = $containerClass ?? 'container';
+$containerId = $containerId ?? '';
+
+use Cake\View\View; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +32,7 @@
 <body>
     <?= $this->element('nav_header') ?>
     <?= $this->Flash->render() ?>
-    <div class="container clearfix">
+    <div class="<?= $containerClass ?> clearfix" id="<?= $containerId ?>">
         <?php if ($titleForLayout): ?>
             <h1>
                 <?= $titleForLayout ?>

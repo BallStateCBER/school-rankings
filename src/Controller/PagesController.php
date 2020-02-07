@@ -23,7 +23,11 @@ class PagesController extends AppController
      */
     public function home()
     {
-        $this->set('title_for_layout', null);
+        $this->set([
+            'title_for_layout' => null,
+            'containerClass' => 'container-fluid',
+            'containerId' => 'welcome',
+        ]);
     }
 
     /**

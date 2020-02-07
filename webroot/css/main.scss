@@ -24,6 +24,9 @@ section.terms {
 }
 
 #welcome {
+  padding-left: 0;
+  padding-right: 0;
+
   > div:nth-child(1) {
     background-image: url('/img/pencils.jpg');
     background-position: bottom;
@@ -77,14 +80,16 @@ section.terms {
   }
   > div:nth-child(5) {
     background-image: url('/img/supplies.jpg');
+    background-size: cover;
+    background-position: center;
 
-    > div {
-      padding-bottom: 30px;
-      padding-top: 30px;
-    }
-    > div:first-child {
-      background-color: #fff;
-      border: 1px solid #000;
+    div.col-4 {
+      padding-bottom: 50px;
+      padding-top: 50px;
     }
   }
+}
+#welcome-contact {
+  background-color: #fff;
+  border: 1px solid #000;
 }
