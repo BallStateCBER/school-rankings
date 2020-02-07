@@ -22,3 +22,69 @@ footer {
 section.terms {
   margin: 2em 0;
 }
+
+#welcome {
+  > div:nth-child(1) {
+    background-image: url('/img/pencils.jpg');
+    background-position: bottom;
+    background-size: cover;
+    box-shadow: 0px -90px 50px -50px rgba(0, 0, 0, 0.3) inset;
+    max-height: 700px;
+    min-height: 500px;
+    padding: 30px;
+    text-align: center;
+
+    .btn {
+      margin-top: 30px;
+    }
+    h1 {
+      font-weight: bold;
+    }
+  }
+  > div:nth-child(2) {
+    background-color: #e9e7ea;
+
+    > div {
+      padding-bottom: 10px;
+      padding-top: 30px;
+      text-align: center;
+    }
+  }
+  > div:nth-child(3) {
+    background-color: #e9e7ea;
+
+    > div {
+      padding-bottom: 30px;
+      text-align: center;
+    }
+    img {
+      height: 100px;
+    }
+  }
+  > div:nth-child(4) {
+    background-color: #ba0c2f;
+    color: #fff;
+    padding-bottom: 30px;
+    padding-top: 30px;
+
+    p.link {
+      text-align: center;
+    }
+    h2 {
+      font-size: 2em;
+      text-align: center;
+    }
+  }
+  > div:nth-child(5) {
+    background-image: url('/img/supplies.jpg');
+
+    > div {
+      padding-bottom: 30px;
+      padding-top: 30px;
+    }
+    > div:first-child {
+      background-color: #fff;
+      border: 1px solid #000;
+    }
+  }
+}
