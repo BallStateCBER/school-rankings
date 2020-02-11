@@ -1,5 +1,6 @@
 @import "../bootstrap/css/bootstrap.min.css";
 @import "~bootstrap/scss/bootstrap";
+@import "variables";
 
 #formula-form {
   padding-bottom: 200px;
@@ -188,3 +189,15 @@ table.statistics {
     }
   }
 }
+
+.formula-form-group {
+  border: 1px solid transparent;
+  margin: 10px;
+  padding: 10px;
+}
+
+#formula-section-what {
+  border: 1px solid $primary;
+  border-radius: 10px;
+}
+

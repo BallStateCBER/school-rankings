@@ -595,64 +595,68 @@ class FormulaForm extends React.Component {
   render() {
     return (
       <div>
-        <Survey handleRadioChange={this.handleDemoRadioChange} handleFillInFocus={this.handleDemoFillInFocus}
-                handleFillInChange={this.handleDemoFillInChange} choice={this.state.demoChoice}
-                fillIn={this.state.demoFillIn} />
+        <div className="formula-form-group">
+          <Survey handleRadioChange={this.handleDemoRadioChange} handleFillInFocus={this.handleDemoFillInFocus}
+                  handleFillInChange={this.handleDemoFillInChange} choice={this.state.demoChoice}
+                  fillIn={this.state.demoFillIn} />
+        </div>
         <form onSubmit={this.handleSubmit}>
-          <div className="row">
-            <section className="form-group col-sm-6">
-              <h3>
-                <label>
-                  What would you like to rank?
-                </label>
-              </h3>
-              <ContextSelector context={this.state.context}
-                               handleChange={this.handleChangeContext} />
-            </section>
-            {this.state.context &&
-              <section className="col-sm-6">
+          <div id="formula-section-what" className="formula-form-group">
+            <div className="row">
+              <section className="form-group col-sm-6">
                 <h3>
-                  {this.state.context === 'school' ? 'Schools' : 'School corporations'} in which county?
-                </h3>
-                <div className="form-group">
-                  <label htmlFor="county" className="sr-only">
-                    County
+                  <label>
+                    What would you like to rank?
                   </label>
-                  <Select name="county" id="county"
-                          value={this.state.county}
-                          onChange={this.handleSelectCounty}
-                          options={FormulaForm.getCountyOptions()} clearable={false}
-                          required={true} />
-                </div>
+                </h3>
+                <ContextSelector context={this.state.context}
+                                 handleChange={this.handleChangeContext} />
               </section>
+              {this.state.context &&
+                <section className="col-sm-6">
+                  <h3>
+                    {this.state.context === 'school' ? 'Schools' : 'School corporations'} in which county?
+                  </h3>
+                  <div className="form-group">
+                    <label htmlFor="county" className="sr-only">
+                      County
+                    </label>
+                    <Select name="county" id="county"
+                            value={this.state.county}
+                            onChange={this.handleSelectCounty}
+                            options={FormulaForm.getCountyOptions()} clearable={false}
+                            required={true} />
+                  </div>
+                </section>
+              }
+            </div>
+            {this.state.context === 'school' &&
+              <div className="row">
+                <section id="school-type" className="col-sm-6">
+                  <h3>
+                    What types of schools?
+                  </h3>
+                  <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
+                                      onlyPublic={this.state.onlyPublic}
+                                      handleSelect={this.handleSelectSchoolTypes}
+                                      handleChangeOnlyPublic={this.handleChangeOnlyPublic}
+                                      handleToggleAll={this.handleToggleAllSchoolTypes}/>
+                </section>
+                <section id="grade-level" className="form-group col-sm-6">
+                  <h3>
+                    Schools teaching which grades?
+                  </h3>
+                  <GradeLevelSelector gradeLevels={this.state.gradeLevels}
+                                      allGradeLevels={this.state.allGradeLevels}
+                                      handleSelect={this.handleSelectGradeLevels}
+                                      handleChangeAllGradeLevels={this.handleChangeAllGradeLevelsOption}
+                                      handleToggleAll={this.handleToggleAllGradeLevels}/>
+                </section>
+              </div>
             }
           </div>
-          {this.state.context === 'school' &&
-            <div className="row">
-              <section id="school-type" className="col-sm-6">
-                <h3>
-                  What types of schools?
-                </h3>
-                <SchoolTypeSelector schoolTypes={this.state.schoolTypes}
-                                    onlyPublic={this.state.onlyPublic}
-                                    handleSelect={this.handleSelectSchoolTypes}
-                                    handleChangeOnlyPublic={this.handleChangeOnlyPublic}
-                                    handleToggleAll={this.handleToggleAllSchoolTypes}/>
-              </section>
-              <section id="grade-level" className="form-group col-sm-6">
-                <h3>
-                  Schools teaching which grades?
-                </h3>
-                <GradeLevelSelector gradeLevels={this.state.gradeLevels}
-                                    allGradeLevels={this.state.allGradeLevels}
-                                    handleSelect={this.handleSelectGradeLevels}
-                                    handleChangeAllGradeLevels={this.handleChangeAllGradeLevelsOption}
-                                    handleToggleAll={this.handleToggleAllGradeLevels}/>
-              </section>
-            </div>
-          }
           {this.state.context &&
-            <section>
+            <section className="formula-form-group">
               <h3>
                 How would you like the results to be ranked?
               </h3>
@@ -663,7 +667,7 @@ class FormulaForm extends React.Component {
             </section>
           }
           {this.state.criteria.length > 0 &&
-            <section id="criteria">
+            <section id="criteria" className="formula-form-group">
               <h3>
                 Selected criteria
               </h3>
@@ -686,10 +690,12 @@ class FormulaForm extends React.Component {
               </table>
             </section>
           }
-          <Button color="primary" onClick={this.handleSubmit}
-                  disabled={this.state.loadingRankings}>
-            Submit
-          </Button>
+          <div className="formula-form-group">
+            <Button color="primary" onClick={this.handleSubmit}
+                    disabled={this.state.loadingRankings}>
+              Submit
+            </Button>
+          </div>
           {this.state.loadingRankings &&
             <span>
               <img src="/jstree/themes/default/throbber.gif" alt="Loading..."
