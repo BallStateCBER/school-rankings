@@ -5,10 +5,15 @@
  * @var string $containerId
  * @var string $titleForLayout
  */
+
+use Cake\View\View;
+
 $containerClass = $containerClass ?? 'container';
 $containerId = $containerId ?? '';
-
-use Cake\View\View; ?>
+$pathParts = explode('/', $this->getRequest()->getPath());
+$pathParts = array_filter($pathParts, 'strlen');
+$pageId = 'page-' . implode('-', $pathParts);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +34,7 @@ use Cake\View\View; ?>
     <?= $this->Html->script('/dist/js/main.js') ?>
     <?= $this->fetch('script') ?>
 </head>
-<body>
+<body id="<?= $pageId ?>">
     <?= $this->element('nav_header') ?>
     <?= $this->Flash->render() ?>
     <div class="<?= $containerClass ?> clearfix" id="<?= $containerId ?>">

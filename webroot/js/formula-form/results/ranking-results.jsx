@@ -48,6 +48,9 @@ class RankingResults extends React.Component {
 
       return (
         <section>
+          <h1>
+            Ranking Results
+          </h1>
           <h3>
             No Results
           </h3>
@@ -86,6 +89,9 @@ class RankingResults extends React.Component {
 
     return (
       <section>
+        <h1>
+          Ranking Results
+        </h1>
         <h3>
           {header}
         </h3>

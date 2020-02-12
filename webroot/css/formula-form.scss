@@ -201,3 +201,11 @@ table.statistics {
   border-radius: 10px;
 }
 
+#page-rank {
+  > div.container {
+    h1 {
+      border-bottom: 1px solid $primary;
+      padding-bottom: 5px;
+    }
+  }
+}
