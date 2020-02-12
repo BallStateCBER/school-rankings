@@ -230,10 +230,12 @@ class ResultSubject extends React.Component {
   }
 
   render() {
+    const colClassName = this.props.dataCompleteness === 'empty' ? 'col-lg-12' : 'col-lg-6';
+
     return (
       <td key={this.props.subjectData.id}>
         <div className="row">
-          <div className="col-lg-6 school-info">
+          <div className={colClassName + ' school-info'}>
             <h3 className="school-name">
               {this.props.subjectData.name}
             </h3>
