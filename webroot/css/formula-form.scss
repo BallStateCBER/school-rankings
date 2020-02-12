@@ -135,14 +135,26 @@ ul.stats-ranked {
 
 li.stat-ranked {
   list-style-type: none;
+  padding-left: 30px;
 
   i, svg {
-    margin-right: 0.5em;
+    float: left;
+    margin-left: -30px;
+    margin-top: 5px;
+  }
+  > span {
+    display: block;
+    font-size: 90%;
+  }
+  > span:first-of-type {
+    font-size: 120%;
   }
 }
 
 .stat-ranked-1 {
-  font-weight: bold;
+  > span:first-of-type {
+    font-weight: bold;
+  }
 
   i, svg {
     color: #C9B037;

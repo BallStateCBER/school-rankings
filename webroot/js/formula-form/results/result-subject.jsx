@@ -122,18 +122,18 @@ class ResultSubject extends React.Component {
       switch (statistic.rank) {
         case 1:
           displayedRank = statistic.rankTied ?
-            <span>Tied for highest score for {metricName}</span> :
-            <span>Highest score for {metricName}</span>;
+            <span>Tied for highest score for</span> :
+            <span>Highest score</span>;
           break;
         case 2:
           displayedRank = statistic.rankTied ?
-            <span>Tied for 2<sup>nd</sup> highest score for {metricName}</span> :
-            <span>2<sup>nd</sup> highest score for {metricName}</span>;
+            <span>Tied for 2<sup>nd</sup> highest score</span> :
+            <span>2<sup>nd</sup> highest score</span>;
           break;
         case 3:
           displayedRank = statistic.rankTied ?
-            <span>Tied for 3<sup>rd</sup> highest score for {metricName}</span> :
-            <span>3<sup>rd</sup> highest score for {metricName}</span>;
+            <span>Tied for 3<sup>rd</sup> highest score</span> :
+            <span>3<sup>rd</sup> highest score</span>;
           break;
         default:
           continue;
@@ -143,6 +143,9 @@ class ResultSubject extends React.Component {
         <li key={key} className={'stat-ranked stat-ranked-' + statistic.rank}>
           <i className="fas fa-trophy"></i>
           {displayedRank}
+          <span className="metric-name">
+            {metricName}
+          </span>
         </li>
       );
     }
