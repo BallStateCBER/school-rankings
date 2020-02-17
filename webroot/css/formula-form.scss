@@ -221,3 +221,18 @@ table.statistics {
     }
   }
 }
+
+#steps-header {
+  font-weight: bold;
+  margin-bottom: 30px;
+
+  img {
+    height: 65px;
+  }
+  div.col-1 {
+    text-align: right;
+  }
+  div.col-3 {
+    vertical-align: middle;
+  }
+}

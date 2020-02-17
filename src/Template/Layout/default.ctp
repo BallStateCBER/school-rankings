@@ -38,6 +38,7 @@ $pageId = 'page-' . implode('-', $pathParts);
     <?= $this->element('nav_header') ?>
     <?= $this->Flash->render() ?>
     <div class="<?= $containerClass ?> clearfix" id="<?= $containerId ?>">
+        <?= $this->fetch('top') ?>
         <?php if ($titleForLayout): ?>
             <h1>
                 <?= $titleForLayout ?>
