@@ -89,18 +89,21 @@ section.terms {
       text-align: center;
     }
   }
-  > div:nth-child(5) {
-    background-image: url('/img/supplies.jpg');
-    background-size: cover;
-    background-position: center;
-
-    div.col-4 {
-      padding-bottom: 50px;
-      padding-top: 50px;
-    }
-  }
 }
+
 #welcome-contact {
   background-color: #fff;
   border: 1px solid #000;
+}
+
+footer {
+  background-image: url('/img/supplies.jpg');
+  background-size: cover;
+  background-position: center;
+
+
+  div.col-4 {
+    padding-bottom: 30px;
+    padding-top: 30px;
+  }
 }

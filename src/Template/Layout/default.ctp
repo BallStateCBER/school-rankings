@@ -45,33 +45,12 @@ $pageId = 'page-' . implode('-', $pathParts);
         <?php endif; ?>
         <?= $this->fetch('content') ?>
     </div>
-    <footer class="d-flex">
-        <ul class="list-unstyled list-inline mx-auto justify-content-center">
-            <li class="list-inline-item">
-                <?= $this->Html->link(
-                    'Terms of Use',
-                    [
-                        'controller' => 'Pages',
-                        'action' => 'terms'
-                    ]
-                ) ?>
-            </li>
-            <li class="list-inline-item">
-                <?= $this->Html->link(
-                    'Privacy Policy',
-                    [
-                        'controller' => 'Pages',
-                        'action' => 'privacy'
-                    ]
-                ) ?>
-            </li>
-        </ul>
-    </footer>
     <script>
         $(document).ready(function () {
             <?= $this->fetch('buffered'); ?>
         });
     </script>
     <?= $this->fetch('bottom') ?>
+    <?= $this->element('footer') ?>
 </body>
 </html>
