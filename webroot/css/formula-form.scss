@@ -108,9 +108,40 @@ table.ranking-results {
     margin-top: 2px;
     padding: 5px;
   }
-
+  .col-2 {
+    text-align: right;
+    top: -5px;
+  }
   .metric-name {
     font-weight: bold;
+  }
+  .weight-input {
+    margin-top: 2rem;
+  }
+  .input-range__label--value {
+    top: -2.5rem;
+
+    .input-range__label-container {
+      color: #000;
+      font-size: 1rem;
+    }
+  }
+  .input-range__label {
+    font-family: $font-family-sans-serif;
+  }
+  .input-range__track--active,
+  .input-range__slider {
+    background-color: $primary;
+    border: none;
+  }
+  .input-range__label--min,
+  .input-range__label--max, {
+    display: none;
+  }
+  .input-range__slider {
+    height: 1.5rem;
+    margin-top: -0.85rem;
+    width: 1.5rem;
   }
 }
 
