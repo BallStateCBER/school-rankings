@@ -65,7 +65,7 @@ class ResultSubject extends React.Component {
     this.props.criteria.forEach((criterion, metricId) => {
       const metricName = criterion.metric.name;
       const statistic = ResultSubject.getStatistic(statistics, metricId);
-      const key = this.props.subjectData.id + '-stat-' + i;
+      const key = this.props.subjectData.id + '-stat-' + metricId;
 
       rows.push(
         <tr key={key}>
@@ -113,7 +113,7 @@ class ResultSubject extends React.Component {
       if (!statistic.rank) {
         return;
       }
-      const key = this.props.subjectData.id + '-stat-rank-' + i;
+      const key = this.props.subjectData.id + '-stat-rank-' + metricId;
       let displayedRank = null;
       switch (statistic.rank) {
         case 1:
