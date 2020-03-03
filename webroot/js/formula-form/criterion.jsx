@@ -24,6 +24,11 @@ class Criterion extends React.Component {
     }
   }
 
+  handleChangeWeight(weight) {
+    this.setState({value: weight});
+    this.props.handleChangeWeight(this.props.metricId, weight);
+  }
+
   render() {
     return (
       <tr>
@@ -41,7 +46,7 @@ class Criterion extends React.Component {
             <div className="col-10">
               <InputRange minValue={1} maxValue={200} value={this.state.value}
                           formatLabel={(value) => this.getWeightLabel(value)}
-                          onChange={(value) => this.setState({value})} />
+                          onChange={(value) => this.handleChangeWeight(value)} />
             </div>
           </div>
           <input type="hidden" name={'criteria[' + this.props.metricId + '][metricId]'} data-field="metricId"
@@ -56,6 +61,7 @@ Criterion.propTypes = {
   metricId: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   onRemove: PropTypes.func.isRequired,
+  handleChangeWeight: PropTypes.func.isRequired,
 };
 
 export {Criterion};

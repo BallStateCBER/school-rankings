@@ -62,9 +62,7 @@ class ResultSubject extends React.Component {
 
     const rows = [];
 
-    for (let i = 0; i < this.props.criteria.length; i++) {
-      const criterion = this.props.criteria[i];
-      const metricId = criterion.metric.metricId;
+    this.props.criteria.forEach((criterion, metricId) => {
       const metricName = criterion.metric.name;
       const statistic = ResultSubject.getStatistic(statistics, metricId);
       const key = this.props.subjectData.id + '-stat-' + i;
@@ -91,7 +89,7 @@ class ResultSubject extends React.Component {
           }
         </tr>
       );
-    }
+    });
 
     return (
       <table className="statistics">
@@ -109,13 +107,11 @@ class ResultSubject extends React.Component {
 
     const rows = [];
 
-    for (let i = 0; i < this.props.criteria.length; i++) {
-      const criterion = this.props.criteria[i];
-      const metricId = criterion.metric.metricId;
+    this.props.criteria.forEach((criterion, metricId) => {
       const metricName = criterion.metric.name;
       const statistic = ResultSubject.getStatistic(statistics, metricId);
       if (!statistic.rank) {
-        continue;
+        return;
       }
       const key = this.props.subjectData.id + '-stat-rank-' + i;
       let displayedRank = null;
@@ -136,7 +132,7 @@ class ResultSubject extends React.Component {
             <span>3<sup>rd</sup> highest score</span>;
           break;
         default:
-          continue;
+          return;
       }
 
       rows.push(
@@ -148,7 +144,7 @@ class ResultSubject extends React.Component {
           </span>
         </li>
       );
-    }
+    });
 
     if (rows.length === 0) {
       return null;
@@ -305,7 +301,7 @@ class ResultSubject extends React.Component {
 
 ResultSubject.propTypes = {
   context: PropTypes.string.isRequired,
-  criteria: PropTypes.array.isRequired,
+  criteria: PropTypes.object.isRequired,
   dataCompleteness: PropTypes.string.isRequired,
   showStatistics: PropTypes.bool.isRequired,
   statistics: PropTypes.array.isRequired,

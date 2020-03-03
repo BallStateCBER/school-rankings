@@ -27,7 +27,7 @@ class FormulaForm extends React.Component {
       allGradeLevels: true,
       context: null,
       county: null,
-      criteria: [],
+      criteria: new Map(),
       demoChoice: null,
       demoFillIn: '',
       gradeLevels: new Map(),
@@ -44,13 +44,14 @@ class FormulaForm extends React.Component {
     };
     this.submittedData = {
       context: null,
-      criteria: [],
+      criteria: new Map(),
     };
     this.debug = false;
     this.cookies = new Cookies();
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
+    this.handleChangeCriterionWeight = this.handleChangeCriterionWeight.bind(this);
     this.handleChangeOnlyPublic = this.handleChangeOnlyPublic.bind(this);
     this.handleClearMetrics = this.handleClearMetrics.bind(this);
     this.handleDemoFillInChange = this.handleDemoFillInChange.bind(this);
@@ -183,7 +184,7 @@ class FormulaForm extends React.Component {
       dataType: 'json',
       data: {
         context: this.submittedData.context,
-        criteria: this.submittedData.criteria,
+        criteria: Array.from(this.submittedData.criteria.values()),
       },
     }).done((data) => {
       if (
@@ -347,7 +348,7 @@ class FormulaForm extends React.Component {
       alert('Please select a county');
       return false;
     }
-    if (!criteria.length) {
+    if (criteria.size === 0) {
       alert('Please select one or more metrics');
       return false;
     }
@@ -394,21 +395,19 @@ class FormulaForm extends React.Component {
       weight: 100,
     };
     const criteria = this.state.criteria;
-    criteria.push(criterion);
+    criteria.set(metric.metricId, criterion);
     this.setState({criteria: criteria});
   }
 
   handleUnselectMetric(node, selected) {
     const criteria = this.state.criteria;
     const unselectedMetricId = selected.node.data.metricId;
-    const filteredCriteria = criteria.filter(
-      (criterion) => criterion.metric.metricId !== unselectedMetricId
-    );
-    this.setState({criteria: filteredCriteria});
+    criteria.delete(unselectedMetricId);
+    this.setState({criteria: criteria});
   }
 
   handleClearMetrics() {
-    this.setState({criteria: []});
+    this.setState({criteria: new Map()});
     $('#jstree').jstree(true).deselect_all();
   }
 
@@ -497,8 +496,9 @@ class FormulaForm extends React.Component {
   }
 
   handleRemoveCriterion(metricId) {
-    const filteredCriteria = this.state.criteria.filter((i) => i.metric.metricId !== metricId);
-    this.setState({criteria: filteredCriteria});
+    const criteria = this.state.criteria;
+    criteria.delete(metricId);
+    this.setState({criteria: criteria});
     const jstree = $('#jstree').jstree(true);
     jstree.deselect_node('li[data-metric-id=' + metricId + ']');
   }
@@ -556,7 +556,7 @@ class FormulaForm extends React.Component {
   handleChangeContext(event) {
     this.setState({
       context: event.target.value,
-      criteria: [],
+      criteria: new Map(),
     });
   }
 
@@ -590,6 +590,17 @@ class FormulaForm extends React.Component {
       return;
     }
     this.setState({demoFillIn: savedDemoFillIn});
+  }
+
+  handleChangeCriterionWeight(metricId, newWeight) {
+    const criteria = this.state.criteria;
+    criteria.forEach((criterion, key) => {
+      if (key === metricId) {
+        criterion.weight = newWeight;
+        criteria.set(metricId, criterion);
+      }
+    });
+    this.setState({criteria: criteria});
   }
 
   render() {
@@ -666,23 +677,19 @@ class FormulaForm extends React.Component {
                               handleClearMetrics={this.handleClearMetrics} />
             </section>
           }
-          {this.state.criteria.length > 0 &&
+          {this.state.criteria.size > 0 &&
             <section id="criteria" className="formula-form-group">
               <h3>
                 Selected criteria
               </h3>
               <table className="table table-striped">
                 <tbody>
-                  {this.state.criteria.map((criterion) => {
+                  {Array.from(this.state.criteria.values()).map((criterion) => {
+                    const metricId = criterion.metric.metricId;
                     return (
-                      <Criterion key={criterion.metric.metricId}
-                                 name={criterion.metric.name}
-                                 metricId={criterion.metric.metricId}
-                                 onRemove={() => {
-                                   return this.handleRemoveCriterion(
-                                       criterion.metric.metricId
-                                   );
-                                 }}>
+                      <Criterion key={metricId} name={criterion.metric.name} metricId={metricId}
+                                 handleChangeWeight={this.handleChangeCriterionWeight}
+                                 onRemove={() => this.handleRemoveCriterion(metricId)}>
                       </Criterion>
                     );
                   })}
@@ -724,7 +731,7 @@ class FormulaForm extends React.Component {
           <NoDataResults results={this.state.noDataResults}
                          context={this.submittedData.context}
                          hasResultsWithData={this.state.results && this.state.results.length > 0}
-                         criteriaCount={this.submittedData.criteria.length} />
+                         criteriaCount={this.submittedData.criteria.size} />
         }
       </div>
     );

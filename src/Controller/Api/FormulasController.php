@@ -92,7 +92,7 @@ class FormulasController extends AppController
             /** @var Criterion $criterion */
             $criterion = $this->criteriaTable->newEntity([
                 'metric_id' => $criterionData['metric']['metricId'],
-                'weight' => 100,
+                'weight' => $criterionData['weight'],
                 'preference' => 'high',
             ]);
             $errors = $criterion->getErrors();
