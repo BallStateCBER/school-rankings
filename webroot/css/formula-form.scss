@@ -246,6 +246,8 @@ table.statistics {
 
 #page-rank {
   > div.container {
+    overflow: visible;
+
     h1 {
       border-bottom: 1px solid $primary;
       padding-bottom: 5px;
