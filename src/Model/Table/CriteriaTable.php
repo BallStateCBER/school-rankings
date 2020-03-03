@@ -68,7 +68,7 @@ class CriteriaTable extends Table
             ->integer('weight')
             ->requirePresence('weight', 'create')
             ->notEmpty('weight')
-            ->range('weight', [1, 100]);
+            ->range('weight', [1, 200]);
 
         $validator
             ->scalar('preference')
