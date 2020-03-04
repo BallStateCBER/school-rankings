@@ -10,10 +10,10 @@ matrix:
 
   include:
     - language: php
-      php: 7.1
+      php: 7.2
       env: PHPUNIT=1 DB_USERNAME=root
     - language: php
-      php: 7.1
+      php: 7.2
       env: PHPCS=1
     - language: node_js
       node_js: '12'
