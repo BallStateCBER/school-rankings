@@ -43,6 +43,11 @@ class RankingResults extends React.Component {
     this.setState({showAllStatistics: !this.state.showAllStatistics});
   }
 
+  /**
+   * Returns TRUE if the currently selected context is 'school' instead of 'school corporations'
+   *
+   * @return {boolean}
+   */
   contextIsSchool() {
     return this.props.submittedData.context === 'school';
   }
@@ -163,7 +168,7 @@ class RankingResults extends React.Component {
   render() {
     const resultsCount = this.props.results.length;
     if (resultsCount === 0) {
-      const subjectsNotFound = this.props.submittedData.context === 'school' ?
+      const subjectsNotFound = this.contextIsSchool() ?
         'schools' :
         'school corporations';
 
@@ -204,7 +209,7 @@ class RankingResults extends React.Component {
     }
 
     const countHeader = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
-    const subjectHeader = this.props.submittedData.context === 'school' ?
+    const subjectHeader = this.contextIsSchool() ?
       'School' :
       'School Corporation';
 
