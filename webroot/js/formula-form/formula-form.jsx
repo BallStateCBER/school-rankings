@@ -519,11 +519,10 @@ class FormulaForm extends React.Component {
     }
 
     if (this.state.onlyPublic) {
-      this.state.schoolTypes.forEach(function(schoolType) {
-        if (schoolType.name === 'public') {
-          return schoolType.id;
-        }
-      });
+      const schoolTypesArray = window.formulaForm.schoolTypes;
+      const schoolTypesMap = new Map(schoolTypesArray.map((schoolTypes) => [schoolTypes.name, schoolTypes]));
+      const publicSchoolType = schoolTypesMap.get('public');
+      return [publicSchoolType.id];
     }
 
     const selectedSchoolTypes = [];
