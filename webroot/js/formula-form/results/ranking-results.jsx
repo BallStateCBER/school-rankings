@@ -58,9 +58,13 @@ class RankingResults extends React.Component {
    * @return {string}
    */
   getSchoolTypesString() {
+    if (this.props.submittedData.onlyPublic) {
+      return 'public';
+    }
+
     const selectedSchoolTypeIds = this.props.submittedData.schoolTypeIds.map(Number);
     if (selectedSchoolTypeIds.length === 0) {
-      return 'public';
+      return '';
     }
 
     const allSchoolTypes = window.formulaForm.schoolTypes;

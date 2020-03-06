@@ -47,6 +47,7 @@ class FormulaForm extends React.Component {
       countyId: null,
       criteria: new Map(),
       gradeIds: [],
+      onlyPublic: null,
       schoolTypeIds: [],
     };
     this.debug = false;
@@ -177,6 +178,7 @@ class FormulaForm extends React.Component {
     this.submittedData.countyId = this.state.county.value;
     this.submittedData.criteria = this.state.criteria;
     this.submittedData.gradeIds = this.getSelectedGradeIds();
+    this.submittedData.onlyPublic = this.state.onlyPublic;
     this.submittedData.schoolTypeIds = this.getSelectedSchoolTypes();
   }
 
