@@ -58,7 +58,7 @@ class RankingResults extends React.Component {
    * @return {string}
    */
   getSchoolTypesString() {
-    const selectedSchoolTypeIds = this.props.submittedData.schoolTypeIds;
+    const selectedSchoolTypeIds = this.props.submittedData.schoolTypeIds.map(Number);
     if (selectedSchoolTypeIds.length === 0) {
       return 'public';
     }
