@@ -44,7 +44,10 @@ class FormulaForm extends React.Component {
     };
     this.submittedData = {
       context: null,
+      countyId: null,
       criteria: new Map(),
+      gradeIds: [],
+      schoolTypeIds: [],
     };
     this.debug = false;
     this.cookies = new Cookies();
@@ -173,6 +176,8 @@ class FormulaForm extends React.Component {
     this.submittedData.context = this.state.context;
     this.submittedData.countyId = this.state.county.value;
     this.submittedData.criteria = this.state.criteria;
+    this.submittedData.gradeIds = this.getSelectedGradeIds();
+    this.submittedData.schoolTypeIds = this.getSelectedSchoolTypes();
   }
 
   processForm() {
@@ -724,8 +729,7 @@ class FormulaForm extends React.Component {
         }
         {this.state.results &&
           <RankingResults results={this.state.results}
-                          criteria={this.submittedData.criteria}
-                          context={this.submittedData.context} />
+                          submittedData={this.submittedData} />
         }
         {this.state.results && this.state.noDataResults && this.state.noDataResults.length > 0 &&
           <NoDataResults results={this.state.noDataResults}

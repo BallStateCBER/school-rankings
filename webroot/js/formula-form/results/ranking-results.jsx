@@ -9,6 +9,10 @@ class RankingResults extends React.Component {
     this.state = {
       showAllStatistics: false,
     };
+    this.contextIsSchool = this.contextIsSchool.bind(this);
+    this.getInputSummary = this.getInputSummary.bind(this);
+    this.getSchoolTypesString = this.getSchoolTypesString.bind(this);
+    this.getSelectedGradesString = this.getSelectedGradesString.bind(this);
     this.toggleShowAllStatistics = this.toggleShowAllStatistics.bind(this);
   }
 
@@ -30,7 +34,7 @@ class RankingResults extends React.Component {
     return <ResultSubject subjectData={subjectData}
                           dataCompleteness={subject.data_completeness}
                           statistics={subject.statistics}
-                          criteria={this.props.criteria}
+                          criteria={this.props.submittedData.criteria}
                           context={context}
                           showStatistics={this.state.showAllStatistics} />;
   }
@@ -39,10 +43,127 @@ class RankingResults extends React.Component {
     this.setState({showAllStatistics: !this.state.showAllStatistics});
   }
 
+  contextIsSchool() {
+    return this.props.submittedData.context === 'school';
+  }
+
+  /**
+   * Returns a single lowercase string describing all of the selected school types
+   *
+   * @return {string}
+   */
+  getSchoolTypesString() {
+    const selectedSchoolTypeIds = this.props.submittedData.schoolTypeIds;
+    if (selectedSchoolTypeIds.length === 0) {
+      return 'public';
+    }
+
+    const allSchoolTypes = window.formulaForm.schoolTypes;
+    const selectedSchoolTypeNames = [];
+    for (let i = 0; i < allSchoolTypes.length; i++) {
+      const schoolType = allSchoolTypes[i];
+      if (selectedSchoolTypeIds.indexOf(schoolType.id) !== -1) {
+        selectedSchoolTypeNames.push(schoolType.name);
+      }
+    }
+
+    if (selectedSchoolTypeNames.length > 1) {
+      const lastKey = selectedSchoolTypeNames.length - 1;
+      selectedSchoolTypeNames[lastKey] = 'and ' + selectedSchoolTypeNames[lastKey];
+    }
+
+    const delimiter = selectedSchoolTypeNames.length > 2 ? ', ' : ' ';
+
+    return selectedSchoolTypeNames.join(delimiter);
+  }
+
+  /**
+   * Returns a Map of all grade levels
+   *
+   * @return {Map<Number, Object>}
+   */
+  getAllGrades() {
+    const gradeLevels = window.formulaForm.gradeLevels;
+    return new Map(gradeLevels.map((grade) => [grade.id, grade]));
+  }
+
+  /**
+   * Returns a string describing what grade levels have been selected
+   *
+   * @return {String}
+   */
+  getSelectedGradesString() {
+    const allGrades = this.getAllGrades();
+    const selectedGradeIds = this.props.submittedData.gradeIds.map(Number);
+    if (selectedGradeIds.length === 0 || selectedGradeIds.length === allGrades.size) {
+      return 'all grade levels';
+    }
+
+    selectedGradeIds.sort((a, b) => a - b);
+    const namedGradeLevels = [];
+    const numberedGradeLevels = [];
+    for (let i = 0; i < selectedGradeIds.length; i++) {
+      const gradeId = selectedGradeIds[i];
+      const selectedGrade = allGrades.get(gradeId);
+      const name = selectedGrade.name.toLowerCase();
+      if (name.search('grade') === -1) {
+        namedGradeLevels.push(name);
+        continue;
+      }
+      const gradeNumber = Number(name.replace('grade ', ''));
+      numberedGradeLevels.push(gradeNumber);
+    }
+
+    // Shorten contiguous groups of grades (9, 10, 11, 12) into ranges (9-12)
+    const retval = namedGradeLevels;
+    let rangeStart = null;
+    let rangeEnd = null;
+    for (let i = 0; i < numberedGradeLevels.length; i++) {
+      rangeStart = numberedGradeLevels[i];
+      rangeEnd = rangeStart;
+      while (numberedGradeLevels[i + 1] - numberedGradeLevels[i] === 1) {
+        rangeEnd = numberedGradeLevels[i + 1];
+        i++;
+      }
+      const range = rangeStart === rangeEnd ? 'grade ' + rangeStart : 'grades ' + rangeStart + '-' + rangeEnd;
+      retval.push(range);
+    }
+
+    if (retval.length > 1) {
+      const lastIndex = retval.length - 1;
+      retval[lastIndex] = 'and ' + retval[lastIndex];
+    }
+    const delimiter = retval.length > 2 ? ', ' : ' ';
+
+    return retval.join(delimiter);
+  }
+
+  /**
+   * Returns an element with content that describes the selections that the user has made
+   *
+   * @return {*}
+   */
+  getInputSummary() {
+    let subjectString;
+    if (this.contextIsSchool()) {
+      const schoolTypes = this.getSchoolTypesString();
+      subjectString = schoolTypes ? schoolTypes + ' schools' : 'schools';
+      subjectString += ' teaching ' + this.getSelectedGradesString();
+    } else {
+      subjectString = 'school corporations';
+    }
+
+    return (
+      <p>
+        Ranking {subjectString}
+      </p>
+    );
+  }
+
   render() {
     const resultsCount = this.props.results.length;
     if (resultsCount === 0) {
-      const subjectsNotFound = this.props.context === 'school' ?
+      const subjectsNotFound = this.props.submittedData.context === 'school' ?
         'schools' :
         'school corporations';
 
@@ -82,8 +203,8 @@ class RankingResults extends React.Component {
       }
     }
 
-    const header = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
-    const subjectHeader = this.props.context === 'school' ?
+    const countHeader = resultsCount + ' Result' + (resultsCount > 1 ? 's' : '');
+    const subjectHeader = this.props.submittedData.context === 'school' ?
       'School' :
       'School Corporation';
 
@@ -92,8 +213,9 @@ class RankingResults extends React.Component {
         <h1>
           Ranking Results
         </h1>
+        {this.getInputSummary()}
         <h3>
-          {header}
+          {countHeader}
         </h3>
         <table className="table ranking-results">
           <thead>
@@ -126,9 +248,8 @@ class RankingResults extends React.Component {
 }
 
 RankingResults.propTypes = {
-  criteria: PropTypes.array.isRequired,
   results: PropTypes.array.isRequired,
-  context: PropTypes.string.isRequired,
+  submittedData: PropTypes.object.isRequired,
 };
 
 export {RankingResults};
