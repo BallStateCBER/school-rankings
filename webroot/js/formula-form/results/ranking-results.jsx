@@ -169,16 +169,33 @@ class RankingResults extends React.Component {
         <p>
           Ranking {subjectString} according to:
         </p>
-        <ul>
-          {Array.from(criteria.values()).map(function(result) {
-            key++;
-            return (
-              <li key={'input-summary-criterion-' + key}>
-                {result.metric.name}
-              </li>
-            );
-          })}
-        </ul>
+        <table className="table table-sm">
+          <thead>
+            <tr>
+              <th>
+                Metric
+              </th>
+              <th>
+                Importance
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from(criteria.values()).map(function(result) {
+              key++;
+              return (
+                <tr key={'input-summary-criterion-' + key}>
+                  <td>
+                    {result.metric.name}
+                  </td>
+                  <td>
+                    {result.weight}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   }
