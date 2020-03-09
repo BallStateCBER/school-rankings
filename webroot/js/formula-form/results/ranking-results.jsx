@@ -162,10 +162,24 @@ class RankingResults extends React.Component {
       subjectString = 'school corporations';
     }
 
+    const criteria = this.props.submittedData.criteria;
+    let key = 0;
     return (
-      <p>
-        Ranking {subjectString}
-      </p>
+      <div>
+        <p>
+          Ranking {subjectString} according to:
+        </p>
+        <ul>
+          {Array.from(criteria.values()).map(function(result) {
+            key++;
+            return (
+              <li key={'input-summary-criterion-' + key}>
+                {result.metric.name}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     );
   }
 
