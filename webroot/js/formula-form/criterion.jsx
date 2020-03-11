@@ -25,11 +25,17 @@ class Criterion extends React.Component {
   }
 
   handleChangeWeight(weight) {
+    // Enforce upper and lower bounds
+    weight = Math.max(1, weight);
+    weight = Math.min(200, weight);
+
     this.setState({value: weight});
     this.props.handleChangeWeight(this.props.metricId, weight);
   }
 
   render() {
+    const numericInputElementId = 'numeric-weight-input-' + this.props.metricId;
+
     return (
       <tr>
         <td>
@@ -40,10 +46,24 @@ class Criterion extends React.Component {
             {this.props.name}
           </p>
           <div className="row weight-input">
-            <div className="col-2">
-              Importance:
+            <div className="col numeric-input text-right">
+              <div className="form-inline">
+                <div className="input-group">
+                  <label htmlFor={numericInputElementId}>
+                    Importance:
+                  </label>
+                  <input className="form-control" aria-label="Importance (from 1 to 200 percent)" type="number" min="1"
+                         max="200" id={numericInputElementId} value={this.state.value}
+                         onChange={
+                           (element) => this.handleChangeWeight(element.target.value)
+                         } />
+                  <div className="input-group-append">
+                    <span className="input-group-text">%</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="col-10">
+            <div className="col-8">
               <InputRange minValue={1} maxValue={200} value={this.state.value}
                           formatLabel={(value) => this.getWeightLabel(value)}
                           onChange={(value) => this.handleChangeWeight(value)} />

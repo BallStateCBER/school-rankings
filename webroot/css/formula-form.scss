@@ -148,6 +148,18 @@ table.ranking-results {
     margin-top: -0.85rem;
     width: 1.5rem;
   }
+  table {
+    label {
+      margin-right: 0.5em;
+    }
+  }
+  .numeric-input {
+    margin-top: -1rem;
+
+    > .form-inline {
+      display: inline-block;
+    }
+  }
 }
 
 .options-breakdown {
