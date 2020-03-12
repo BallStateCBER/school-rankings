@@ -41,6 +41,7 @@ class FormulaForm extends React.Component {
       resultsError: false,
       schoolTypes: new Map(),
       uuid: FormulaForm.getUuid(),
+      weightInterfaceIsOpen: false,
     };
     this.submittedData = {
       context: null,
@@ -71,6 +72,7 @@ class FormulaForm extends React.Component {
     this.handleToggleAllGradeLevels = this.handleToggleAllGradeLevels.bind(this);
     this.handleToggleAllSchoolTypes = this.handleToggleAllSchoolTypes.bind(this);
     this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
+    this.handleToggleWeightInterface = this.handleToggleWeightInterface.bind(this);
   }
 
   componentDidMount() {
@@ -631,6 +633,14 @@ class FormulaForm extends React.Component {
     );
   }
 
+  /**
+   * Toggles the visibility of the part of the form for changing criteria weights
+   */
+  handleToggleWeightInterface() {
+    const weightInterfaceIsOpen = this.state.weightInterfaceIsOpen;
+    this.setState({weightInterfaceIsOpen: !weightInterfaceIsOpen});
+  }
+
   render() {
     return (
       <div>
@@ -708,19 +718,25 @@ class FormulaForm extends React.Component {
           {this.state.criteria.size > 0 &&
             <section id="criteria" className="formula-form-group">
               {this.getSelectedCriteriaHeader(this.state.criteria.size)}
-              <table className="table table-striped">
-                <tbody>
-                  {Array.from(this.state.criteria.values()).map((criterion) => {
-                    const metricId = criterion.metric.metricId;
-                    return (
-                      <Criterion key={metricId} name={criterion.metric.name} metricId={metricId}
-                                 handleChangeWeight={this.handleChangeCriterionWeight}
-                                 onRemove={() => this.handleRemoveCriterion(metricId)}>
-                      </Criterion>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <Button id="toggle-weight-table" color="secondary"
+                      onClick={this.handleToggleWeightInterface}>
+                {this.state.weightInterfaceIsOpen ? 'Hide' : 'Edit'} advanced settings
+              </Button>
+              {this.state.weightInterfaceIsOpen &&
+                <table className="table table-striped">
+                  <tbody>
+                    {Array.from(this.state.criteria.values()).map((criterion) => {
+                      const metricId = criterion.metric.metricId;
+                      return (
+                        <Criterion key={metricId} name={criterion.metric.name} metricId={metricId}
+                                   handleChangeWeight={this.handleChangeCriterionWeight}
+                                   onRemove={() => this.handleRemoveCriterion(metricId)}>
+                        </Criterion>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              }
             </section>
           }
           <div className="formula-form-group">

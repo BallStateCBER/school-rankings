@@ -162,6 +162,14 @@ table.ranking-results {
       display: inline-block;
     }
   }
+  > h3 {
+    display: inline-block;
+    margin-right: 1em;
+  }
+}
+
+#toggle-weight-table {
+  margin-top: -0.5em;
 }
 
 .options-breakdown {
