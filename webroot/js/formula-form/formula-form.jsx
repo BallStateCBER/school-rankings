@@ -729,6 +729,7 @@ class FormulaForm extends React.Component {
                       const metricId = criterion.metric.metricId;
                       return (
                         <Criterion key={metricId} name={criterion.metric.name} metricId={metricId}
+                                   weight={criterion.weight}
                                    handleChangeWeight={this.handleChangeCriterionWeight}
                                    onRemove={() => this.handleRemoveCriterion(metricId)}>
                         </Criterion>

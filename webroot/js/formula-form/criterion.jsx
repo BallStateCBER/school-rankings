@@ -8,7 +8,7 @@ class Criterion extends React.Component {
     super(props);
 
     this.state = {
-      value: 100,
+      value: this.props.weight,
     };
   }
 
@@ -78,10 +78,11 @@ class Criterion extends React.Component {
 }
 
 Criterion.propTypes = {
+  handleChangeWeight: PropTypes.func.isRequired,
   metricId: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   onRemove: PropTypes.func.isRequired,
-  handleChangeWeight: PropTypes.func.isRequired,
+  weight: PropTypes.number.isRequired,
 };
 
 export {Criterion};
