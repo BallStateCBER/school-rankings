@@ -52,6 +52,7 @@ class FormulaForm extends React.Component {
     };
     this.debug = false;
     this.cookies = new Cookies();
+    this.getSelectedCriteriaHeader = this.getSelectedCriteriaHeader.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
     this.handleChangeContext = this.handleChangeContext.bind(this);
@@ -609,6 +610,27 @@ class FormulaForm extends React.Component {
     this.setState({criteria: criteria});
   }
 
+  /**
+   * Returns a header element for the "N criteria selected" section (#criteria)
+   *
+   * @param {int} criteriaCount
+   * @return {*}
+   */
+  getSelectedCriteriaHeader(criteriaCount) {
+    let headerText;
+    if (criteriaCount === 0) {
+      headerText = 'No criteria selected';
+    } else {
+      headerText = criteriaCount + (criteriaCount === 1 ? ' criterion selected' : ' criteria selected');
+    }
+
+    return (
+      <h3>
+        {headerText}
+      </h3>
+    );
+  }
+
   render() {
     return (
       <div>
@@ -685,9 +707,7 @@ class FormulaForm extends React.Component {
           }
           {this.state.criteria.size > 0 &&
             <section id="criteria" className="formula-form-group">
-              <h3>
-                Selected criteria
-              </h3>
+              {this.getSelectedCriteriaHeader(this.state.criteria.size)}
               <table className="table table-striped">
                 <tbody>
                   {Array.from(this.state.criteria.values()).map((criterion) => {
