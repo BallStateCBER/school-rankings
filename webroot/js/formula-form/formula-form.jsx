@@ -9,6 +9,7 @@ import {Button} from 'reactstrap';
 import {ContextSelector} from './selectors/context-selector.jsx';
 import {Criterion} from './criterion.jsx';
 import {GradeLevelSelector} from './selectors/grade-level-selector.jsx';
+import {InputSummary} from './results/input-summary.jsx';
 import {MetricSelector} from './selectors/metric-selector.jsx';
 import {NoDataResults} from './results/no-data-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
@@ -766,14 +767,20 @@ class FormulaForm extends React.Component {
           <ProgressBar percent={this.state.progressPercent} />
         }
         {this.state.results &&
-          <RankingResults results={this.state.results}
-                          submittedData={this.submittedData} />
-        }
-        {this.state.results && this.state.noDataResults && this.state.noDataResults.length > 0 &&
-          <NoDataResults results={this.state.noDataResults}
-                         context={this.submittedData.context}
-                         hasResultsWithData={this.state.results && this.state.results.length > 0}
-                         criteriaCount={this.submittedData.criteria.size} />
+          <section>
+            <h1>
+              Ranking Results
+            </h1>
+            <InputSummary submittedData={this.submittedData} />
+            <RankingResults results={this.state.results}
+                            submittedData={this.submittedData} />
+            {this.state.noDataResults && this.state.noDataResults.length > 0 &&
+              <NoDataResults results={this.state.noDataResults}
+                             context={this.submittedData.context}
+                             hasResultsWithData={this.state.results && this.state.results.length > 0}
+                             criteriaCount={this.submittedData.criteria.size} />
+            }
+          </section>
         }
       </div>
     );
