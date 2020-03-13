@@ -301,7 +301,7 @@ class ResultSubject extends React.Component {
 
 ResultSubject.propTypes = {
   context: PropTypes.string.isRequired,
-  criteria: PropTypes.object.isRequired,
+  criteria: PropTypes.instanceOf(Map).isRequired,
   dataCompleteness: PropTypes.string.isRequired,
   showStatistics: PropTypes.bool.isRequired,
   statistics: PropTypes.array.isRequired,
