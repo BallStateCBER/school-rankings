@@ -188,13 +188,17 @@ class RankingsController extends AppController
     public function get($rankingHash)
     {
         $containQueries = $this->getContainQueries();
+        /** @var Ranking $ranking */
         $ranking = $this->rankingsTable->find()
             ->where(['Rankings.hash' => $rankingHash])
             ->select(['id'])
             ->contain([
+                'Counties',
                 'Formulas' => $containQueries['formulas'],
-                'ResultsSchools' => $containQueries['resultsSchools'],
+                'Grades',
                 'ResultsDistricts' => $containQueries['resultsDistricts'],
+                'ResultsSchools' => $containQueries['resultsSchools'],
+                'SchoolTypes',
             ])
             ->first();
 
@@ -246,8 +250,19 @@ class RankingsController extends AppController
             ];
         }
 
+        $schoolTypeIds = Hash::extract($ranking->school_types, '{n}.id');
+        $inputSummary = [
+            'context' => $ranking->for_school_districts ? 'district' : 'school',
+            'countyId' => $ranking->counties,
+            'criteria' => $ranking->formula->criteria,
+            'gradeIds' => Hash::extract($ranking->grades, '{n}.id'),
+            'onlyPublic' => $schoolTypeIds === [SchoolTypesTable::SCHOOL_TYPE_PUBLIC],
+            'schoolTypeIds' => $schoolTypeIds,
+        ];
+
         $this->set([
-            '_serialize' => ['noDataResults', 'results', 'rankingUrl'],
+            '_serialize' => ['inputSummary', 'noDataResults', 'results', 'rankingUrl'],
+            'inputSummary' => $inputSummary,
             'noDataResults' => $resultsWithoutData,
             'results' => $indexedResults,
             'rankingUrl' => Router::url(
