@@ -109,11 +109,11 @@ class RankingsController extends AppController
         $this->set([
             '_serialize' => [
                 'jobId',
-                'rankingId',
+                'rankingHash',
                 'success',
             ],
             'jobId' => $jobId,
-            'rankingId' => $rankingId,
+            'rankingHash' => $ranking->hash,
             'success' => (bool)$rankingId && (bool)$jobId,
         ]);
     }
@@ -180,15 +180,15 @@ class RankingsController extends AppController
     /**
      * Fetches the results of a ranking
      *
-     * @param int $rankingId ID of ranking record
+     * @param string $rankingHash Hash associated with ranking record
      * @throws Exception
      * @return void
      */
-    public function get($rankingId)
+    public function get($rankingHash)
     {
         $containQueries = $this->getContainQueries();
         $ranking = $this->rankingsTable->find()
-            ->where(['Rankings.id' => $rankingId])
+            ->where(['Rankings.hash' => $rankingHash])
             ->select(['id'])
             ->contain([
                 'Formulas' => $containQueries['formulas'],

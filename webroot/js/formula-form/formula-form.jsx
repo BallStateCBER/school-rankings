@@ -22,7 +22,7 @@ class FormulaForm extends React.Component {
     super(props);
     this.adminEmail = 'admin@indianaschoolrankings.com';
     this.formulaId = null;
-    this.rankingId = null;
+    this.rankingHash = null;
     this.jobId = null;
     this.state = {
       allGradeLevels: true,
@@ -260,7 +260,7 @@ class FormulaForm extends React.Component {
           'Processing school corporation parameters',
       });
 
-      this.rankingId = data.rankingId;
+      this.rankingHash = data.rankingHash;
       this.jobId = data.jobId;
       this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
@@ -275,10 +275,10 @@ class FormulaForm extends React.Component {
   static hasErrorCreatingJob(data) {
     return !data ||
       !data.hasOwnProperty('success') ||
-      !data.hasOwnProperty('rankingId') ||
+      !data.hasOwnProperty('rankingHash') ||
       !data.hasOwnProperty('jobId') ||
       !data.success ||
-      !data.rankingId ||
+      !data.rankingHash ||
       !data.jobId;
   }
 
@@ -478,7 +478,7 @@ class FormulaForm extends React.Component {
   loadResults() {
     $.ajax({
       method: 'GET',
-      url: '/api/rankings/get/' + this.rankingId + '.json',
+      url: '/api/rankings/get/' + this.rankingHash + '.json',
       dataType: 'json',
     }).done((data) => {
       if (data && !data.hasOwnProperty('results')) {
