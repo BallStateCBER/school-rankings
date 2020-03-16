@@ -5,6 +5,7 @@ use App\Model\Table\MetricsTable;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
+use Cake\Routing\Router;
 
 /**
  * Ranking Entity
@@ -16,6 +17,7 @@ use Cake\ORM\TableRegistry;
  * @property array $results
  * @property string $hash
  * @property FrozenTime $created
+ * @property string $url
  *
  * @property User $user
  * @property Formula $formula
@@ -183,5 +185,24 @@ class Ranking extends Entity
                 $statistic->rankTied = count($rankedStatistics[$metricId][$statistic->rank]) > 1;
             }
         }
+    }
+
+    /**
+     * A virtual field that generates the full URL to view a set of ranking results
+     *
+     * @return string
+     */
+    protected function _getUrl()
+    {
+        return Router::url(
+            [
+                'plugin' => false,
+                'prefix' => false,
+                'controller' => 'Rankings',
+                'action' => 'view',
+                'hash' => $this->hash,
+            ],
+            true
+        );
     }
 }
