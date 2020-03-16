@@ -53,7 +53,7 @@ class RankingsFixture extends TestFixture
                     1 => [1, 2, 3],
                     2 => [4, 5, 6],
                 ]),
-                'hash' => 'Lorem ipsum dolor sit amet',
+                'hash' => 'abc123',
                 'created' => '2018-07-27 20:43:37',
             ],
         ];
