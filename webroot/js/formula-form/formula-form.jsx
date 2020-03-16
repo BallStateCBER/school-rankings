@@ -38,6 +38,7 @@ class FormulaForm extends React.Component {
       passesValidation: false,
       progressPercent: null,
       progressStatus: null,
+      rankingUrl: null,
       results: null,
       resultsError: false,
       schoolTypes: new Map(),
@@ -490,6 +491,7 @@ class FormulaForm extends React.Component {
       this.setState({
         results: data.results,
         noDataResults: data.noDataResults,
+        rankingUrl: data.rankingUrl,
       });
       this.submitAnalyticsEvents();
     }).fail((jqXHR) => {
@@ -771,6 +773,9 @@ class FormulaForm extends React.Component {
             <h1>
               Ranking Results
             </h1>
+            <p>
+              Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
+            </p>
             <InputSummary submittedData={this.submittedData} />
             <RankingResults results={this.state.results}
                             submittedData={this.submittedData} />

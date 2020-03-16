@@ -56,6 +56,10 @@ Router::scope('/', function (RouteBuilder $routes) {
     // Formulas
     $routes->connect('/rank', ['controller' => 'Formulas', 'action' => 'form']);
 
+    // Rankings
+    $routes->connect('/ranking/:hash', ['controller' => 'Rankings', 'action' => 'view'])
+        ->setPass(['hash']);
+
     /**
      * Connect catchall routes for all controllers.
      *

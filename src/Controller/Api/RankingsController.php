@@ -14,6 +14,7 @@ use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
+use Cake\Routing\Router;
 use Cake\Utility\Hash;
 use Exception;
 use Queue\Model\Entity\QueuedJob;
@@ -246,9 +247,18 @@ class RankingsController extends AppController
         }
 
         $this->set([
-            '_serialize' => ['noDataResults', 'results'],
-            'results' => $indexedResults,
+            '_serialize' => ['noDataResults', 'results', 'rankingUrl'],
             'noDataResults' => $resultsWithoutData,
+            'results' => $indexedResults,
+            'rankingUrl' => Router::url(
+                [
+                    'prefix' => false,
+                    'controller' => 'Rankings',
+                    'action' => 'view',
+                    'hash' => $rankingHash,
+                ],
+                true
+            ),
         ]);
     }
 
