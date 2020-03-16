@@ -10,6 +10,7 @@ module.exports = {
     'main': './webroot/js/main.js',
     'metric-manager': './webroot/js/metric-manager/metric-manager.jsx',
     'formula-form': './webroot/js/formula-form/formula-form.jsx',
+    'ranking-results': './webroot/js/ranking-results/ranking-results.jsx',
   },
   output: {
     filename: 'js/[name].js',
