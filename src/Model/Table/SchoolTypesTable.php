@@ -27,6 +27,7 @@ use Cake\Validation\Validator;
  */
 class SchoolTypesTable extends Table
 {
+    public const SCHOOL_TYPE_PUBLIC = 1;
 
     /**
      * Initialize method
