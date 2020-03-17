@@ -53,7 +53,7 @@ class RankingsControllerTest extends TestCase
         $this->get([
             'controller' => 'Rankings',
             'action' => 'view',
-            'hash' => $ranking->hash,
+            'hash' => $ranking['hash'],
         ]);
         $this->assertResponseOk();
         $this->assertResponseContains('<html lang="en">');
