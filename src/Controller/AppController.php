@@ -40,6 +40,17 @@ class AppController extends Controller
      */
     public function beforeRender(Event $event)
     {
-        $this->set('authUser', $this->Auth->user());
+        $pathParts = [
+            $this->getRequest()->getParam('controller'),
+            $this->getRequest()->getParam('action'),
+        ];
+        $pathParts = array_filter($pathParts, 'strlen');
+        $pathParts = array_map('strtolower', $pathParts);
+        $pageId = 'page-' . implode('-', $pathParts);
+
+        $this->set([
+            'authUser' => $this->Auth->user(),
+            'pageId' => $pageId,
+        ]);
     }
 }

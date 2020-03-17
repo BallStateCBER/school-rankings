@@ -3,6 +3,7 @@
  * @var View $this
  * @var string $containerClass
  * @var string $containerId
+ * @var string $pageId
  * @var string $titleForLayout
  */
 
@@ -10,13 +11,6 @@ use Cake\View\View;
 
 $containerClass = $containerClass ?? 'container';
 $containerId = $containerId ?? '';
-$pathParts = [
-    $this->getRequest()->getParam('controller'),
-    $this->getRequest()->getParam('action')
-];
-$pathParts = array_filter($pathParts, 'strlen');
-$pathParts = array_map('strtolower', $pathParts);
-$pageId = 'page-' . implode('-', $pathParts);
 ?>
 <!DOCTYPE html>
 <html lang="en">
