@@ -466,6 +466,7 @@ class FormulaForm extends React.Component {
       }
 
       // Job complete
+      this.submitAnalyticsEvents();
       this.loadResults();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
@@ -493,7 +494,6 @@ class FormulaForm extends React.Component {
         noDataResults: data.noDataResults,
         rankingUrl: data.rankingUrl,
       });
-      this.submitAnalyticsEvents();
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
       this.setState({resultsError: true});
