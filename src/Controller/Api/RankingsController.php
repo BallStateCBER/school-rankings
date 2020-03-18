@@ -338,7 +338,7 @@ class RankingsController extends AppController
         };
         $containCriteria = function (Query $q) {
             return $q
-                ->select(['id', 'formula_id'])
+                ->select(['id', 'formula_id', 'weight'])
                 ->contain([
                     'Metrics' => function (Query $q) {
                         return $q->select(['id', 'name']);
