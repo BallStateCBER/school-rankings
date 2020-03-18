@@ -167,13 +167,23 @@ class RankingsController extends AppController
     {
         $jobId = $this->request->getQuery('jobId');
         $job = $this->jobsTable->get($jobId);
+
+        if ($job->progress == 1) {
+            $ranking = $this->rankingsTable->get($job->reference);
+            $url = $ranking->url;
+        } else {
+            $url = null;
+        }
+
         $this->set([
             '_serialize' => [
                 'progress',
                 'status',
+                'rankingUrl',
             ],
             'progress' => $job->progress,
             'status' => $job->status,
+            'rankingUrl' => $url,
         ]);
     }
 

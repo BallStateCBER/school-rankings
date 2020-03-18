@@ -467,7 +467,14 @@ class FormulaForm extends React.Component {
 
       // Job complete
       this.submitAnalyticsEvents();
-      this.loadResults();
+      if (data.hasOwnProperty('rankingUrl') && data.rankingUrl) {
+        location.href = data.rankingUrl;
+      } else {
+        this.setState({
+          loadingRankings: false,
+          resultsError: true,
+        });
+      }
     }).fail((jqXHR) => {
       FormulaForm.logApiError(jqXHR);
       this.setState({
