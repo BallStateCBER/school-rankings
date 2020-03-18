@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 
@@ -33,6 +34,10 @@ class RankingsController extends AppController
      */
     public function view($hash)
     {
+        if (!$this->Rankings->exists(['hash' => $hash])) {
+            throw new RecordNotFoundException('Sorry, but that set of school rankings was not found.');
+        }
+
         /** @var \App\Model\Table\GradesTable $gradesTable */
         $gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
