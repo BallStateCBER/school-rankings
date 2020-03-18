@@ -9,11 +9,8 @@ import {Button} from 'reactstrap';
 import {ContextSelector} from './selectors/context-selector.jsx';
 import {Criterion} from './criterion.jsx';
 import {GradeLevelSelector} from './selectors/grade-level-selector.jsx';
-import {InputSummary} from './results/input-summary.jsx';
 import {MetricSelector} from './selectors/metric-selector.jsx';
-import {NoDataResults} from './results/no-data-results.jsx';
 import {ProgressBar} from './progress-bar.jsx';
-import {RankingResults} from './results/ranking-results.jsx';
 import {SchoolTypeSelector} from './selectors/school-type-selector.jsx';
 import {Survey} from './survey.jsx';
 
@@ -39,7 +36,6 @@ class FormulaForm extends React.Component {
       progressPercent: null,
       progressStatus: null,
       rankingUrl: null,
-      results: null,
       resultsError: false,
       schoolTypes: new Map(),
       uuid: FormulaForm.getUuid(),
@@ -168,7 +164,6 @@ class FormulaForm extends React.Component {
       loadingRankings: true,
       progressPercent: 0,
       progressStatus: null,
-      results: null,
       resultsError: false,
     });
 
@@ -484,31 +479,6 @@ class FormulaForm extends React.Component {
     });
   }
 
-  loadResults() {
-    $.ajax({
-      method: 'GET',
-      url: '/api/rankings/get/' + this.rankingHash + '.json',
-      dataType: 'json',
-    }).done((data) => {
-      if (data && !data.hasOwnProperty('results')) {
-        console.log('Error retrieving ranking results');
-        console.log(data);
-        return;
-      }
-
-      this.setState({
-        results: data.results,
-        noDataResults: data.noDataResults,
-        rankingUrl: data.rankingUrl,
-      });
-    }).fail((jqXHR) => {
-      FormulaForm.logApiError(jqXHR);
-      this.setState({resultsError: true});
-    }).always(() => {
-      this.setState({loadingRankings: false});
-    });
-  }
-
   submitAnalyticsEvents() {
     const analytics = new Analytics(this);
     analytics.sendRankingPoolAnalyticsEvent();
@@ -774,25 +744,6 @@ class FormulaForm extends React.Component {
         </form>
         {this.state.loadingRankings &&
           <ProgressBar percent={this.state.progressPercent} />
-        }
-        {this.state.results &&
-          <section>
-            <h1>
-              Ranking Results
-            </h1>
-            <p>
-              Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
-            </p>
-            <InputSummary submittedData={this.submittedData} />
-            <RankingResults results={this.state.results}
-                            submittedData={this.submittedData} />
-            {this.state.noDataResults && this.state.noDataResults.length > 0 &&
-              <NoDataResults results={this.state.noDataResults}
-                             context={this.submittedData.context}
-                             hasResultsWithData={this.state.results && this.state.results.length > 0}
-                             criteriaCount={this.submittedData.criteria.size} />
-            }
-          </section>
         }
       </div>
     );
