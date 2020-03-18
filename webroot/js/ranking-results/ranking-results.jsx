@@ -1,6 +1,7 @@
 import ReactDom from 'react-dom';
 import React from 'react';
 import {Button} from 'reactstrap';
+import {InputSummary} from './input-summary.jsx';
 import {ResultSubject} from './result-subject.jsx';
 
 class RankingResults extends React.Component {
@@ -185,6 +186,10 @@ class RankingResults extends React.Component {
 
     return (
       <div>
+        <p>
+          Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
+        </p>
+        <InputSummary submittedData={this.state.inputSummary} />
         <h3>
           {countHeader}
         </h3>

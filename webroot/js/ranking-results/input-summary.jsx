@@ -133,15 +133,15 @@ class InputSummary extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {Array.from(criteria.values()).map(function(result) {
+            {Array.from(criteria.values()).map(function(criterion) {
               key++;
               return (
                 <tr key={'input-summary-criterion-' + key}>
                   <td>
-                    {result.metric.name}
+                    {criterion.metric.name}
                   </td>
                   <td>
-                    {result.weight}%
+                    {criterion.weight}%
                   </td>
                 </tr>
               );
