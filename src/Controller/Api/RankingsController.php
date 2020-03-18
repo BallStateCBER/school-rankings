@@ -200,7 +200,7 @@ class RankingsController extends AppController
         /** @var Ranking $ranking */
         $ranking = $this->rankingsTable->find()
             ->where(['Rankings.hash' => $rankingHash])
-            ->select(['id'])
+            ->select(['id', 'hash'])
             ->contain([
                 'Counties',
                 'Formulas' => $containQueries['formulas'],
