@@ -77,6 +77,7 @@ class FormulaForm extends React.Component {
     this.setSchoolTypes();
     this.setGradeLevels();
     this.autoFillDemoForm();
+    this.autoFillForm();
     if (document.getElementById('formula-form').getAttribute('data-debug')) {
       this.debug = true;
     }
@@ -619,6 +620,82 @@ class FormulaForm extends React.Component {
   handleToggleWeightInterface() {
     const weightInterfaceIsOpen = this.state.weightInterfaceIsOpen;
     this.setState({weightInterfaceIsOpen: !weightInterfaceIsOpen});
+  }
+
+  /**
+   * Returns the ID of the "public" school type
+   *
+   * @return {number}
+   */
+  getPublicSchoolTypeId() {
+    return 1;
+  }
+
+  autoFillForm() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const rankingHash = urlParams.get('r');
+    if (!rankingHash) {
+      return;
+    }
+
+    $.ajax({
+      method: 'GET',
+      url: '/api/rankings/get/' + rankingHash + '.json',
+      dataType: 'json',
+    }).done((data) => {
+      if (data && !data.hasOwnProperty('results')) {
+        console.log('Error retrieving ranking results');
+        console.log(data);
+        return;
+      }
+
+      const input = data.inputSummary;
+      console.log('input:');
+      console.log(input);
+
+      const gradeLevels = this.state.gradeLevels;
+      gradeLevels.forEach((gradeLevel, gradeLevelId) => {
+        gradeLevel.checked = input.gradeIds.indexOf(parseInt(gradeLevelId)) !== -1;
+      });
+
+      const schoolTypes = this.state.schoolTypes;
+      schoolTypes.forEach((schoolType, schoolTypeId) => {
+        schoolType.checked = input.schoolTypeIds.indexOf(parseInt(schoolTypeId)) !== -1;
+      });
+
+      const totalGradeLevelCount = window.formulaForm.gradeLevels.length;
+      const selectedGradeLevelCount = input.gradeIds.length;
+
+      this.setState({
+        allGradeLevels: selectedGradeLevelCount === 0 || selectedGradeLevelCount === totalGradeLevelCount,
+        context: input.context,
+        county: {
+          label: input.countyId[0].name,
+          value: input.countyId[0].id,
+        },
+        criteria: new Map(input.criteria.map((criterion) => [criterion.metric.id, criterion])),
+        gradeLevels: gradeLevels,
+        onlyPublic: input.schoolTypeIds.length === 1 && input.schoolTypeIds[0] === this.getPublicSchoolTypeId(),
+        schoolTypes: schoolTypes,
+      });
+
+      function selectJsTreeNodes() {
+        setTimeout(() => {
+          const jstree = $('#jstree').jstree(true);
+          if (jstree) {
+            input.criteria.map((criterion) => {
+              jstree.select_node('li[data-metric-id=' + criterion.metric.id + ']');
+            });
+
+            return;
+          }
+          selectJsTreeNodes();
+        }, 100);
+      }
+
+      selectJsTreeNodes();
+    });
   }
 
   render() {
