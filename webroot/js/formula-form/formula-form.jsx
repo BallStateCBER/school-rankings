@@ -677,27 +677,21 @@ class FormulaForm extends React.Component {
         schoolTypes: schoolTypes,
       });
 
-      function selectJsTreeNodes() {
-        setTimeout(() => {
-          const jstree = $('#jstree').jstree(true);
-          if (jstree) {
-            input.criteria.map((criterion) => {
-              if (criterion.metric.path.length > 1) {
-                for (let i = 0; i < criterion.metric.path.length - 1; i++) {
-                  const parentMetricId = criterion.metric.path[i].id;
-                  jstree.open_node('li[data-metric-id=' + parentMetricId + ']');
-                }
-              }
-              jstree.select_node('li[data-metric-id=' + criterion.metric.id + ']');
-            });
-
-            return;
+      $('#jstree').on('ready.jstree', () => {
+        const jstree = $('#jstree').jstree(true);
+        input.criteria.map((criterion) => {
+          // Open metric groups
+          if (criterion.metric.path.length > 1) {
+            for (let i = 0; i < criterion.metric.path.length - 1; i++) {
+              const parentMetricId = criterion.metric.path[i].id;
+              jstree.open_node('li[data-metric-id=' + parentMetricId + ']');
+            }
           }
-          selectJsTreeNodes();
-        }, 100);
-      }
 
-      selectJsTreeNodes();
+          // Select nodes
+          jstree.select_node('li[data-metric-id=' + criterion.metric.id + ']');
+        });
+      });
     });
   }
 
