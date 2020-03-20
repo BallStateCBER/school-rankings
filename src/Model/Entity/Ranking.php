@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity;
 
+use App\Model\Context\Context;
 use App\Model\Table\MetricsTable;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
@@ -63,6 +64,30 @@ class Ranking extends Entity
         'results_districts' => true,
         'results_schools' => true,
     ];
+
+    /**
+     * Adds the "path" property to each metric
+     *
+     * "Path" is an array of Metric entities that start with the topmost parent metric and end with the final metric
+     * that the user selected. This is returned via the /api/rankings/get API so that JsTree parent node groups can be
+     * opened before their children are selected
+     *
+     * @throws \Exception
+     * @return void
+     */
+    public function addMetricPaths()
+    {
+        /** @var \App\Model\Table\MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $context = $this->for_school_districts ? Context::DISTRICT_CONTEXT : Context::SCHOOL_CONTEXT;
+        $metricsTable->setScope($context);
+        foreach ($this->formula->criteria as &$criterion) {
+            $path = $metricsTable
+                ->find('path', ['for' => $criterion->metric->id])
+                ->select(['id']);
+            $criterion->metric->path = $path;
+        }
+    }
 
     /**
      * Allows 'results' to be used to access whichever is populated between results_schools and results_school_districts

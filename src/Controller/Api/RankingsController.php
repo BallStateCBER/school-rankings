@@ -213,6 +213,7 @@ class RankingsController extends AppController
 
         $ranking->rankStatistics();
         $ranking->formatNumericValues();
+        $ranking->addMetricPaths();
 
         // Separate out and sort no-data results
         $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
