@@ -651,9 +651,6 @@ class FormulaForm extends React.Component {
       }
 
       const input = data.inputSummary;
-      console.log('input:');
-      console.log(input);
-
       const gradeLevels = this.state.gradeLevels;
       gradeLevels.forEach((gradeLevel, gradeLevelId) => {
         gradeLevel.checked = input.gradeIds.indexOf(parseInt(gradeLevelId)) !== -1;
