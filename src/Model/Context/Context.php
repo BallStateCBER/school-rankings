@@ -15,6 +15,9 @@ use Exception;
  */
 class Context
 {
+    public const SCHOOL_CONTEXT = 'school';
+    public const DISTRICT_CONTEXT = 'district';
+
     /**
      * Returns an array of all valid data contexts
      *
@@ -22,7 +25,7 @@ class Context
      */
     public static function getContexts()
     {
-        return ['school', 'district'];
+        return [self::SCHOOL_CONTEXT, self::DISTRICT_CONTEXT];
     }
 
     /**
@@ -84,7 +87,7 @@ class Context
             return false;
         }
 
-        if ($context == 'school') {
+        if ($context == self::SCHOOL_CONTEXT) {
             return TableRegistry::getTableLocator()->get('Schools');
         }
 
