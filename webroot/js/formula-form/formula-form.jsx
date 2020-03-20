@@ -682,6 +682,12 @@ class FormulaForm extends React.Component {
           const jstree = $('#jstree').jstree(true);
           if (jstree) {
             input.criteria.map((criterion) => {
+              if (criterion.metric.path.length > 1) {
+                for (let i = 0; i < criterion.metric.path.length - 1; i++) {
+                  const parentMetricId = criterion.metric.path[i].id;
+                  jstree.open_node('li[data-metric-id=' + parentMetricId + ']');
+                }
+              }
               jstree.select_node('li[data-metric-id=' + criterion.metric.id + ']');
             });
 
