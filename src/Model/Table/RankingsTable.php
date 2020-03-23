@@ -265,8 +265,7 @@ class RankingsTable extends Table
                 'ResultsDistricts' => $containQueries['resultsDistricts'],
                 'ResultsSchools' => $containQueries['resultsSchools'],
                 'SchoolTypes',
-            ])
-            ->first();
+            ]);
 
         return $query;
     }

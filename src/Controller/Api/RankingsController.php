@@ -199,7 +199,8 @@ class RankingsController extends AppController
         /** @var Ranking $ranking */
         $ranking = $this->rankingsTable
             ->find('forApiGetEndpoint')
-            ->where(['Rankings.hash' => $rankingHash]);
+            ->where(['Rankings.hash' => $rankingHash])
+            ->first();
 
         $ranking->rankStatistics();
         $ranking->formatNumericValues();
