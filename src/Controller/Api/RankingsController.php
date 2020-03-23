@@ -207,19 +207,9 @@ class RankingsController extends AppController
         $resultsWithoutData = $ranking->getResultsWithoutData();
         $resultsWithData = $ranking->getRankedResultsWithData();
 
-        $schoolTypeIds = Hash::extract($ranking->school_types, '{n}.id');
-        $inputSummary = [
-            'context' => $ranking->for_school_districts ? 'district' : 'school',
-            'countyId' => $ranking->counties,
-            'criteria' => $ranking->formula->criteria,
-            'gradeIds' => Hash::extract($ranking->grades, '{n}.id'),
-            'onlyPublic' => $schoolTypeIds === [SchoolTypesTable::SCHOOL_TYPE_PUBLIC],
-            'schoolTypeIds' => $schoolTypeIds,
-        ];
-
         $this->set([
             '_serialize' => ['inputSummary', 'noDataResults', 'results', 'rankingUrl'],
-            'inputSummary' => $inputSummary,
+            'inputSummary' => $ranking->input_summary,
             'noDataResults' => $resultsWithoutData,
             'results' => $resultsWithData,
             'rankingUrl' => $ranking->url,

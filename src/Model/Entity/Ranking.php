@@ -3,10 +3,12 @@ namespace App\Model\Entity;
 
 use App\Model\Context\Context;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\SchoolTypesTable;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\Router;
+use Cake\Utility\Hash;
 
 /**
  * Ranking Entity
@@ -19,6 +21,7 @@ use Cake\Routing\Router;
  * @property string $hash
  * @property FrozenTime $created
  * @property string $url
+ * @property array $input_summary
  *
  * @property User $user
  * @property Formula $formula
@@ -169,6 +172,27 @@ class Ranking extends Entity
         }
 
         return $indexedResults;
+    }
+
+    /**
+     * Virtual field that returns an array describing the form inputs that resulted in this ranking record being created
+     *
+     * Used to automatically populate the ranking formula form
+     *
+     * @return array
+     */
+    public function _getInputSummary()
+    {
+        $schoolTypeIds = Hash::extract($this->school_types, '{n}.id');
+
+        return [
+            'context' => $this->for_school_districts ? 'district' : 'school',
+            'countyId' => $this->counties,
+            'criteria' => $this->formula->criteria,
+            'gradeIds' => Hash::extract($this->grades, '{n}.id'),
+            'onlyPublic' => $schoolTypeIds === [SchoolTypesTable::SCHOOL_TYPE_PUBLIC],
+            'schoolTypeIds' => $schoolTypeIds,
+        ];
     }
 
     /**
