@@ -90,7 +90,7 @@ class Ranking extends Entity
     }
 
     /**
-     * Allows 'results' to be used to access whichever is populated between results_schools and results_school_districts
+     * Allows 'results' to be used to access whichever is populated between results_schools and results_districts
      *
      * @return array
      */
@@ -100,8 +100,8 @@ class Ranking extends Entity
             return $this->_properties['results_schools'];
         }
 
-        if ($this->_properties['results_school_districts']) {
-            return $this->_properties['results_school_districts'];
+        if ($this->_properties['results_districts']) {
+            return $this->_properties['results_districts'];
         }
 
         return [];
