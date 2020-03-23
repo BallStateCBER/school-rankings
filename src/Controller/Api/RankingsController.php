@@ -205,35 +205,7 @@ class RankingsController extends AppController
         $ranking->formatNumericValues();
         $ranking->addMetricPaths();
         $resultsWithoutData = $ranking->getResultsWithoutData();
-        $resultsWithData = $ranking->getResultsWithData();
-
-        // Group results by rank
-        $groupedResults = [];
-        foreach ($resultsWithData as $result) {
-            $groupedResults[$result['rank']][] = $result;
-        }
-
-        // Alphabetize results in each rank
-        foreach ($groupedResults as $rank => $resultsInRank) {
-            $sortedResults = [];
-            foreach ($resultsInRank as $resultInRank) {
-                $context = isset($resultInRank['school']) ? 'school' : 'school_district';
-                // Combine name and ID in case any two subjects (somehow) have identical names
-                $key = $resultInRank[$context]['name'] . $resultInRank[$context]['id'];
-                $sortedResults[$key] = $resultInRank;
-            }
-            ksort($sortedResults);
-            $groupedResults[$rank] = array_values($sortedResults);
-        }
-
-        // Convert into numerically-indexed array so it can be passed to a React component
-        $indexedResults = [];
-        foreach ($groupedResults as $rank => $resultsInRank) {
-            $indexedResults[] = [
-                'rank' => $rank,
-                'subjects' => $resultsInRank,
-            ];
-        }
+        $resultsWithData = $ranking->getRankedResultsWithData();
 
         $schoolTypeIds = Hash::extract($ranking->school_types, '{n}.id');
         $inputSummary = [
@@ -249,7 +221,7 @@ class RankingsController extends AppController
             '_serialize' => ['inputSummary', 'noDataResults', 'results', 'rankingUrl'],
             'inputSummary' => $inputSummary,
             'noDataResults' => $resultsWithoutData,
-            'results' => $indexedResults,
+            'results' => $resultsWithData,
             'rankingUrl' => $ranking->url,
         ]);
     }

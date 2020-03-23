@@ -132,6 +132,46 @@ class Ranking extends Entity
     }
 
     /**
+     * Returns results (ignoring those without statistical data), grouped into ranks
+     *
+     * @return array
+     */
+    public function getRankedResultsWithData()
+    {
+        $resultsWithData = $this->getResultsWithData();
+
+        // Group results by rank
+        $groupedResults = [];
+        foreach ($resultsWithData as $result) {
+            $groupedResults[$result->rank][] = $result;
+        }
+
+        // Alphabetize results in each rank
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            $sortedResults = [];
+            foreach ($resultsInRank as $resultInRank) {
+                $context = isset($resultInRank->school) ? 'school' : 'school_district';
+                // Combine name and ID in case any two subjects (somehow) have identical names
+                $key = $resultInRank->$context->name . $resultInRank->$context->id;
+                $sortedResults[$key] = $resultInRank;
+            }
+            ksort($sortedResults);
+            $groupedResults[$rank] = array_values($sortedResults);
+        }
+
+        // Convert into numerically-indexed array so it can be passed to a React component
+        $indexedResults = [];
+        foreach ($groupedResults as $rank => $resultsInRank) {
+            $indexedResults[] = [
+                'rank' => $rank,
+                'subjects' => $resultsInRank,
+            ];
+        }
+
+        return $indexedResults;
+    }
+
+    /**
      * Allows 'results' to be used to access whichever is populated between results_schools and results_districts
      *
      * @return array
