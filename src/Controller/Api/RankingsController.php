@@ -12,7 +12,6 @@ use App\Model\Table\SchoolTypesTable;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
-use Cake\ORM\Query;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 use Exception;
@@ -205,23 +204,8 @@ class RankingsController extends AppController
         $ranking->rankStatistics();
         $ranking->formatNumericValues();
         $ranking->addMetricPaths();
-
-        // Separate out and sort no-data results
-        $allResults = $ranking['results_schools'] ? $ranking['results_schools'] : $ranking['results_districts'];
-        $resultsWithoutData = [];
-        $resultsWithData = [];
-        foreach ($allResults as $i => $result) {
-            if ($result['data_completeness'] === 'empty') {
-                $context = isset($result['school']) ? 'school' : 'school_district';
-                // Combine name and ID in case any two subjects (somehow) have identical names
-                $key = $result[$context]['name'] . $result[$context]['id'];
-                $resultsWithoutData[$key] = $result;
-            } else {
-                $resultsWithData[] = $result;
-            }
-        }
-        ksort($resultsWithoutData);
-        $resultsWithoutData = array_values($resultsWithoutData);
+        $resultsWithoutData = $ranking->getResultsWithoutData();
+        $resultsWithData = $ranking->getResultsWithData();
 
         // Group results by rank
         $groupedResults = [];

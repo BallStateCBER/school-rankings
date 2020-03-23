@@ -90,6 +90,48 @@ class Ranking extends Entity
     }
 
     /**
+     * Separates out and sorts results that have no statistical data
+     *
+     * @return \App\Model\Entity\RankingResultsSchool[]|\App\Model\Entity\RankingResultsSchoolDistrict[]
+     */
+    public function getResultsWithoutData()
+    {
+        $resultsWithoutData = [];
+        foreach ($this->results as $i => $result) {
+            if ($result->data_completeness !== 'empty') {
+                continue;
+            }
+
+            /* The array's keys need to be each subject's name so that the array can be sorted, but each key also needs
+             * to be unique so that two identically-named subjects don't result in one member of the array overwriting
+             * the other. To solve this problem, the subject's ID is appended to the end of their name. */
+            $context = isset($result->school) ? 'school' : 'school_district';
+            $key = $result->$context->name . $result->$context->id;
+            $resultsWithoutData[$key] = $result;
+        }
+        ksort($resultsWithoutData);
+
+        return array_values($resultsWithoutData);
+    }
+
+    /**
+     * Separates out and returns results that have non-empty statistical data
+     *
+     * @return \App\Model\Entity\RankingResultsSchool[]|\App\Model\Entity\RankingResultsSchoolDistrict[]
+     */
+    public function getResultsWithData()
+    {
+        $resultsWithData = [];
+        foreach ($this->results as $i => $result) {
+            if ($result->data_completeness != 'empty') {
+                $resultsWithData[] = $result;
+            }
+        }
+
+        return $resultsWithData;
+    }
+
+    /**
      * Allows 'results' to be used to access whichever is populated between results_schools and results_districts
      *
      * @return array
