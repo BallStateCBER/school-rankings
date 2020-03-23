@@ -6,6 +6,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Behavior\TimestampBehavior;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Utility\Security;
@@ -160,5 +161,113 @@ class RankingsTable extends Table
     public static function generateHash()
     {
         return Security::randomString(8);
+    }
+
+    /**
+     * Returns an array of contain queries for use in RankingsController::get()
+     *
+     * @return array
+     */
+    private function getContainQueries()
+    {
+        $containStatistics = function (Query $q) {
+            return $q->select([
+                'id',
+                'year',
+                'value',
+                'metric_id',
+                'school_id',
+                'school_district_id',
+            ]);
+        };
+        $containCriteria = function (Query $q) {
+            return $q
+                ->select(['id', 'formula_id', 'weight'])
+                ->contain([
+                    'Metrics' => function (Query $q) {
+                        return $q->select(['id', 'name']);
+                    },
+                ]);
+        };
+        $containSchools = function (Query $q) {
+            return $q
+                ->select([
+                    'id',
+                    'name',
+                    'address',
+                    'url',
+                    'phone',
+                ])
+                ->contain([
+                    'Grades' => function (Query $q) {
+                        return $q
+                            ->select(['id', 'name'])
+                            ->orderAsc('Grades.id');
+                    },
+                    'SchoolTypes' => function (Query $q) {
+                        return $q->select(['id', 'name']);
+                    },
+                ]);
+        };
+        $containDistricts = function (Query $q) {
+            return $q
+                ->select([
+                    'id',
+                    'name',
+                    'url',
+                    'phone',
+                ]);
+        };
+        $containFormulas = function (Query $q) use ($containCriteria) {
+            return $q
+                ->select(['id'])
+                ->contain([
+                    'Criteria' => $containCriteria,
+                ]);
+        };
+        $containResultsSchools = function (Query $q) use ($containSchools, $containStatistics) {
+            return $q->contain([
+                'Schools' => $containSchools,
+                'Statistics' => $containStatistics,
+            ]);
+        };
+        $containResultsDistricts = function (Query $q) use ($containDistricts, $containStatistics) {
+            return $q->contain([
+                'SchoolDistricts' => $containDistricts,
+                'Statistics' => $containStatistics,
+            ]);
+        };
+
+        return [
+            'formulas' => $containFormulas,
+            'resultsSchools' => $containResultsSchools,
+            'resultsDistricts' => $containResultsDistricts,
+        ];
+    }
+
+    /**
+     * Custom finder for ->find('forApiGetEndpoint')
+     *
+     * @param \Cake\ORM\Query $query Query object
+     * @param array $options Finder options
+     * @return \Cake\ORM\Query
+     */
+    public function findForApiGetEndpoint(Query $query, $options)
+    {
+        $containQueries = $this->getContainQueries();
+
+        $query
+            ->select(['id', 'hash'])
+            ->contain([
+                'Counties',
+                'Formulas' => $containQueries['formulas'],
+                'Grades',
+                'ResultsDistricts' => $containQueries['resultsDistricts'],
+                'ResultsSchools' => $containQueries['resultsSchools'],
+                'SchoolTypes',
+            ])
+            ->first();
+
+        return $query;
     }
 }
