@@ -257,7 +257,7 @@ class RankingsTable extends Table
         $containQueries = $this->getContainQueries();
 
         $query
-            ->select(['id', 'hash'])
+            ->select(['id', 'hash', 'for_school_districts'])
             ->contain([
                 'Counties',
                 'Formulas' => $containQueries['formulas'],
