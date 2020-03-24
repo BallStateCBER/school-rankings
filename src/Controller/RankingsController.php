@@ -38,6 +38,12 @@ class RankingsController extends AppController
             throw new RecordNotFoundException('Sorry, but that set of school rankings was not found.');
         }
 
+        /** @var \App\Model\Entity\Ranking $ranking */
+        $ranking = $this->Rankings->find()
+            ->select('for_school_districts')
+            ->where(['hash' => $hash])
+            ->first();
+
         /** @var \App\Model\Table\GradesTable $gradesTable */
         $gradesTable = TableRegistry::getTableLocator()->get('Grades');
         $countiesTable = TableRegistry::getTableLocator()->get('Counties');
@@ -55,7 +61,9 @@ class RankingsController extends AppController
                 ->select(['id', 'name'])
                 ->all()
                 ->toArray(),
-            'titleForLayout' => '',
+            'titleForLayout' => $ranking->for_school_districts ?
+                'School District Ranking Results' :
+                'School Ranking Results',
         ]);
     }
 }
