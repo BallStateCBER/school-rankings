@@ -150,9 +150,9 @@ class ImportLocationsCommand extends Command
             }
 
             $io->out('Preparing updates...');
-            if ($context == 'district') {
+            if ($context == Context::DISTRICT_CONTEXT) {
                 $this->prepareDistricts();
-            } elseif ($context == 'school') {
+            } elseif ($context == Context::SCHOOL_CONTEXT) {
                 $this->prepareSchools();
             }
             $this->confirmNameChanges($context);
@@ -213,7 +213,7 @@ class ImportLocationsCommand extends Command
      */
     private function getLocation($context, $code)
     {
-        $table = ($context == 'district') ? $this->districtsTable : $this->schoolsTable;
+        $table = ($context == Context::DISTRICT_CONTEXT) ? $this->districtsTable : $this->schoolsTable;
 
         return $table
             ->find('byCode', ['code' => Utility::removeLeadingZeros($code)])
@@ -243,7 +243,7 @@ class ImportLocationsCommand extends Command
      */
     private function prepareDistricts()
     {
-        $context = 'district';
+        $context = Context::DISTRICT_CONTEXT;
         $districts = [];
         $ignoredDistrictCodes = SchoolDistrictsTable::getIgnoredDistrictCodes();
         $columnNames = $this->importFile->getColumnNames();
@@ -324,7 +324,7 @@ class ImportLocationsCommand extends Command
      */
     private function prepareSchools()
     {
-        $context = 'school';
+        $context = Context::SCHOOL_CONTEXT;
         $schools = [];
         $columnNames = $this->importFile->getColumnNames();
         list($firstRow, $lastRow, $firstCol, $lastCol) = $this->getLoopParams();
@@ -632,7 +632,7 @@ class ImportLocationsCommand extends Command
     private function updateRecords()
     {
         foreach (Context::getContexts() as $context) {
-            $entities = $context == 'school' ? $this->schools : $this->districts;
+            $entities = $context == Context::SCHOOL_CONTEXT ? $this->schools : $this->districts;
             if (!$entities) {
                 continue;
             }
@@ -640,7 +640,7 @@ class ImportLocationsCommand extends Command
             $this->io->out("Updating {$context}s...");
 
             $progress = Utility::makeProgressBar(count($entities), $this->io);
-            $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+            $table = $context == Context::SCHOOL_CONTEXT ? $this->schoolsTable : $this->districtsTable;
             foreach ($entities as $entity) {
                 if (!$table->save($entity)) {
                     throw new InternalErrorException(
@@ -699,8 +699,8 @@ class ImportLocationsCommand extends Command
      */
     private function confirmNameChanges($context)
     {
-        $records = $context == 'school' ? $this->schools : $this->districts;
-        $table = $context == 'school' ? $this->schoolsTable : $this->districtsTable;
+        $records = $context == Context::SCHOOL_CONTEXT ? $this->schools : $this->districts;
+        $table = $context == Context::SCHOOL_CONTEXT ? $this->schoolsTable : $this->districtsTable;
         foreach ($records as &$record) {
             if (!$record->isDirty('name')) {
                 continue;
@@ -714,7 +714,7 @@ class ImportLocationsCommand extends Command
                 ]);
             }
         }
-        if ($context == 'school') {
+        if ($context == Context::SCHOOL_CONTEXT) {
             $this->schools = $records;
         } else {
             $this->districts = $records;

@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\Context\Context;
 use App\Model\Entity\Statistic;
 use App\Model\StatSearcher;
 use Cake\Datasource\Exception\RecordNotFoundException;
@@ -252,9 +253,9 @@ class StatisticsTable extends Table
     public static function getLocationFieldName($context)
     {
         switch ($context) {
-            case 'school':
+            case Context::SCHOOL_CONTEXT:
                 return 'school_id';
-            case 'district':
+            case Context::DISTRICT_CONTEXT:
                 return 'school_district_id';
             default:
                 throw new InternalErrorException('Statistics context "' . $context . '" not recognized');

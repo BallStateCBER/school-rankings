@@ -23,13 +23,13 @@ class MetricsController extends AppController
      */
     public function index($context)
     {
-        if (!in_array($context, ['school', 'district'])) {
+        if (!Context::isValid($context)) {
             throw new BadRequestException('Unrecognized metric context: ' . $context);
         }
 
         $this->set([
             'context' => $context,
-            'titleForLayout' => $context == 'school' ? 'School Metrics' : 'School District Metrics',
+            'titleForLayout' => $context == Context::SCHOOL_CONTEXT ? 'School Metrics' : 'School District Metrics',
         ]);
     }
 

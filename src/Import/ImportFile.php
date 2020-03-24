@@ -2,6 +2,7 @@
 namespace App\Import;
 
 use App\Command\Utility;
+use App\Model\Context\Context;
 use App\Model\Entity\Metric;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
@@ -324,9 +325,9 @@ class ImportFile
         // Context can be determined from the worksheet name
         switch ($this->activeWorksheet) {
             case 'Schools':
-                return 'school';
+                return Context::SCHOOL_CONTEXT;
             case 'Corporations':
-                return 'district';
+                return Context::DISTRICT_CONTEXT;
         }
 
         // Context can be determined from the column headers
@@ -341,7 +342,7 @@ class ImportFile
                     && $this->isSchoolNameHeader(4, $row)
                 );
             if ($isSchoolContext) {
-                return 'school';
+                return Context::SCHOOL_CONTEXT;
             }
 
             $isDistrictContext = $this->isDistrictCodeHeader(1, $row)
@@ -349,7 +350,7 @@ class ImportFile
                 && !$this->isSchoolCodeHeader(3, $row)
                 && !$this->isSchoolNameHeader(4, $row);
             if ($isDistrictContext) {
-                return 'district';
+                return Context::DISTRICT_CONTEXT;
             }
         }
 
@@ -883,7 +884,7 @@ class ImportFile
         // Note that both districts and schools will be identified if present, regardless of the current context
         $this->shell_io->out(sprintf(
             'Identifying %s...',
-            ($context == 'district') ? 'districts' : 'schools'
+            ($context == Context::DISTRICT_CONTEXT) ? 'districts' : 'schools'
         ));
 
         /** @var ProgressHelper $progress */
@@ -904,11 +905,11 @@ class ImportFile
         $progress->draw();
 
         $log = [
-            'district' => [
+            Context::DISTRICT_CONTEXT => [
                 'identifiedList' => [],
                 'addedList' => [],
             ],
-            'school' => [
+            Context::SCHOOL_CONTEXT => [
                 'identifiedList' => [],
                 'addedList' => [],
             ],
@@ -922,7 +923,7 @@ class ImportFile
                     ->select(['id', 'name'])
                     ->first();
                 if ($district) {
-                    $log['district']['identifiedList'][$district->id] = true;
+                    $log[Context::DISTRICT_CONTEXT]['identifiedList'][$district->id] = true;
                 } else {
                     $district = $schoolDistrictsTable->newEntity(['name' => $location['districtName']]);
                     $district->school_district_codes = [
@@ -932,7 +933,7 @@ class ImportFile
                         ]),
                     ];
                     $schoolDistrictsTable->saveOrFail($district);
-                    $log['district']['addedList'][] = "#{$location['districtCode']}: $district->name";
+                    $log[Context::DISTRICT_CONTEXT]['addedList'][] = "#{$location['districtCode']}: $district->name";
                 }
                 $districtId = $district->id;
                 $this->setLocationInfo($rowNum, 'districtId', $district->id);
@@ -949,7 +950,7 @@ class ImportFile
                     ->select(['id', 'name', 'school_district_id'])
                     ->first();
                 if ($school) {
-                    $log['school']['identifiedList'][$school->id] = true;
+                    $log[Context::SCHOOL_CONTEXT]['identifiedList'][$school->id] = true;
 
                     // Add missing school district ID
                     if (!$school->school_district_id) {
@@ -969,7 +970,7 @@ class ImportFile
                         ]),
                     ];
                     $schoolsTable->saveOrFail($school);
-                    $log['school']['addedList'][] = "#{$location['schoolCode']}: $school->name";
+                    $log[Context::SCHOOL_CONTEXT]['addedList'][] = "#{$location['schoolCode']}: $school->name";
                 }
                 $this->setLocationInfo($rowNum, 'schoolId', $school->id);
             } elseif (isset($location['schoolCode']) || isset($location['schoolName'])) {
@@ -1293,7 +1294,7 @@ class ImportFile
             }
 
             $location = $this->worksheets[$this->activeWorksheet]['locations'][$row];
-            $locationIdKey = ($context == 'school') ? 'schoolId' : 'districtId';
+            $locationIdKey = ($context == Context::SCHOOL_CONTEXT) ? 'schoolId' : 'districtId';
 
             /* Skip rows with data but no location ID (like the non-district called "Independent Non-Public Schools"
              * that sometimes gets included in lists of districts) */
@@ -1328,7 +1329,7 @@ class ImportFile
 
                 // Add
                 if (!$existingStat) {
-                    $locationIdField = ($context == 'school') ? 'school_id' : 'school_district_id';
+                    $locationIdField = ($context == Context::SCHOOL_CONTEXT) ? 'school_id' : 'school_district_id';
                     $this->addNewStatistic([
                         'metric_id' => $metricId,
                         $locationIdField => $locationId,
@@ -1788,7 +1789,7 @@ class ImportFile
     private function checkForStatConflicts()
     {
         $context = $this->getContext();
-        $codeKey = $context == 'school' ? 'schoolCode' : 'districtCode';
+        $codeKey = $context == Context::SCHOOL_CONTEXT ? 'schoolCode' : 'districtCode';
         $locations = $this->worksheets[$this->activeWorksheet]['locations'];
 
         // Check for duplicate locations

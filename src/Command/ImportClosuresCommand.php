@@ -2,6 +2,7 @@
 namespace App\Command;
 
 use App\Import\ImportFile;
+use App\Model\Context\Context;
 use App\Model\Table\SchoolDistrictsTable;
 use App\Model\Table\SchoolsTable;
 use Cake\Console\Arguments;
@@ -118,7 +119,7 @@ class ImportClosuresCommand extends Command
 
             // Prepare updates
             $locations = [];
-            $table = ($context == 'district') ? $this->districtsTable : $this->schoolsTable;
+            $table = ($context == Context::DISTRICT_CONTEXT) ? $this->districtsTable : $this->schoolsTable;
             $locationCells = $this->importFile->getActiveWorksheetProperty('locations');
             foreach ($locationCells as $locationCell) {
                 $locationId = $locationCell[$context . 'Id'];

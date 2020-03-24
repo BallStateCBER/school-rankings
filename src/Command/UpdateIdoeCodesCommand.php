@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Model\Context\Context;
 use App\Model\Entity\School;
 use App\Model\Entity\SchoolDistrict;
 use App\Model\Table\SchoolDistrictsTable;
@@ -120,11 +121,11 @@ class UpdateIdoeCodesCommand extends Command
         $this->io->out('1: A school');
         $this->io->out('2: A school district');
         $response = $this->io->askChoice('Choose one', [1, 2]);
-        $this->context = $response == 1 ? 'school' : 'district';
+        $this->context = $response == 1 ? Context::SCHOOL_CONTEXT : Context::DISTRICT_CONTEXT;
         $this->tableName = $response == 1 ? 'Schools' : 'SchoolDistricts';
         $this->table = TableRegistry::getTableLocator()->get($this->tableName);
-        $this->codeAssociationName = $this->context == 'school' ? 'SchoolCodes' : 'SchoolDistrictCodes';
-        $this->foreignKey = $this->context == 'school' ? 'school_id' : 'school_district_id';
+        $this->codeAssociationName = $this->context == Context::SCHOOL_CONTEXT ? 'SchoolCodes' : 'SchoolDistrictCodes';
+        $this->foreignKey = $this->context == Context::SCHOOL_CONTEXT ? 'school_id' : 'school_district_id';
     }
 
     /**

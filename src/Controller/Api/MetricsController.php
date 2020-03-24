@@ -37,7 +37,7 @@ class MetricsController extends AppController
     public function schools()
     {
         $noHidden = (bool)$this->request->getQuery('no-hidden');
-        $metrics = $this->getMetrics('school', $noHidden);
+        $metrics = $this->getMetrics(Context::SCHOOL_CONTEXT, $noHidden);
 
         $this->set([
             '_serialize' => ['metrics'],
@@ -54,7 +54,7 @@ class MetricsController extends AppController
     public function districts()
     {
         $noHidden = (bool)$this->request->getQuery('no-hidden');
-        $metrics = $this->getMetrics('district', $noHidden);
+        $metrics = $this->getMetrics(Context::DISTRICT_CONTEXT, $noHidden);
 
         $this->set([
             '_serialize' => ['metrics'],

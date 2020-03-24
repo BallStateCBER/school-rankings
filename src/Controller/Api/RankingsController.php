@@ -2,6 +2,7 @@
 namespace App\Controller\Api;
 
 use App\Controller\AppController;
+use App\Model\Context\Context;
 use App\Model\Entity\Ranking;
 use App\Model\Table\CountiesTable;
 use App\Model\Table\FormulasTable;
@@ -75,7 +76,7 @@ class RankingsController extends AppController
         $ranking = $this->rankingsTable->newEntity([
             'user_id' => null,
             'formula_id' => $formulaId,
-            'for_school_districts' => $context == 'district',
+            'for_school_districts' => $context == Context::DISTRICT_CONTEXT,
             'hash' => RankingsTable::generateHash(),
         ]);
 
@@ -88,7 +89,7 @@ class RankingsController extends AppController
                 },
             ])
             ->toArray();
-        if ($context == 'school') {
+        if ($context == Context::SCHOOL_CONTEXT) {
             $ranking->school_types = $this->getSchoolTypes();
             $ranking->grades = $this->getGradeLevels();
         }

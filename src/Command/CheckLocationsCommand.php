@@ -81,12 +81,12 @@ class CheckLocationsCommand extends Command
             'Note: Schools or districts belonging to multiple cities, counties, etc. is not necessarily ' .
             'indicative of an error.'
         );
-        $this->checkForMultipleGeographies('school', 'cities');
-        $this->checkForMultipleGeographies('school', 'counties');
-        $this->checkForMultipleGeographies('school', 'states');
-        $this->checkForMultipleGeographies('district', 'cities');
-        $this->checkForMultipleGeographies('district', 'counties');
-        $this->checkForMultipleGeographies('district', 'states');
+        $this->checkForMultipleGeographies(Context::SCHOOL_CONTEXT, 'cities');
+        $this->checkForMultipleGeographies(Context::SCHOOL_CONTEXT, 'counties');
+        $this->checkForMultipleGeographies(Context::SCHOOL_CONTEXT, 'states');
+        $this->checkForMultipleGeographies(Context::DISTRICT_CONTEXT, 'cities');
+        $this->checkForMultipleGeographies(Context::DISTRICT_CONTEXT, 'counties');
+        $this->checkForMultipleGeographies(Context::DISTRICT_CONTEXT, 'states');
 
         $runFixDistrictAssociations = $this->io->askChoice(
             'Check for and fix districts with missing cities, counties, etc.?',
@@ -507,7 +507,7 @@ class CheckLocationsCommand extends Command
     private function checkForNoStats($context)
     {
         $this->io->out("Checking for open {$context}s without stats...");
-        $records = ($context == 'school') ? $this->schools : $this->districts;
+        $records = ($context == Context::SCHOOL_CONTEXT) ? $this->schools : $this->districts;
         $progress = $this->makeProgressBar(count($records));
         $results = [];
         foreach ($records as $record) {
@@ -546,7 +546,7 @@ class CheckLocationsCommand extends Command
             return;
         }
 
-        $this->checkForNoStats('school');
+        $this->checkForNoStats(Context::SCHOOL_CONTEXT);
     }
 
     /**
@@ -560,7 +560,7 @@ class CheckLocationsCommand extends Command
             return;
         }
 
-        $this->checkForNoStats('district');
+        $this->checkForNoStats(Context::DISTRICT_CONTEXT);
     }
 
     /**
@@ -577,7 +577,7 @@ class CheckLocationsCommand extends Command
         }
 
         $this->io->out("Checking for open {$context}s associated with multiple $field...");
-        $records = ($context == 'school') ? $this->schools : $this->districts;
+        $records = ($context == Context::SCHOOL_CONTEXT) ? $this->schools : $this->districts;
         $progress = $this->makeProgressBar(count($records));
         $results = [];
         foreach ($records as $record) {

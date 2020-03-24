@@ -163,7 +163,7 @@ class RankTask extends Shell
                 ->where(['closed' => false]);
 
             // Limit school types
-            if ($this->context == 'school') {
+            if ($this->context == Context::SCHOOL_CONTEXT) {
                 $query->where(function (QueryExpression $exp) use ($schoolTypeIds) {
                     return $exp->in('school_type_id', $schoolTypeIds);
                 });
@@ -577,8 +577,8 @@ class RankTask extends Shell
                 ];
             }
         }
-        $resultsField = $this->context == 'school' ? 'results_schools' : 'results_districts';
-        $resultsAssociation = $this->context == 'school' ? 'ResultsSchools' : 'ResultsDistricts';
+        $resultsField = $this->context == Context::SCHOOL_CONTEXT ? 'results_schools' : 'results_districts';
+        $resultsAssociation = $this->context == Context::SCHOOL_CONTEXT ? 'ResultsSchools' : 'ResultsDistricts';
         $this->rankingsTable->patchEntity(
             $this->ranking,
             [$resultsField => $results],

@@ -186,7 +186,7 @@ class Ranking extends Entity
         $schoolTypeIds = Hash::extract($this->school_types, '{n}.id');
 
         return [
-            'context' => $this->for_school_districts ? 'district' : 'school',
+            'context' => $this->for_school_districts ? Context::DISTRICT_CONTEXT : Context::SCHOOL_CONTEXT,
             'countyId' => $this->counties,
             'criteria' => $this->formula->criteria,
             'gradeIds' => Hash::extract($this->grades, '{n}.id'),
