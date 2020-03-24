@@ -108,8 +108,8 @@ class Ranking extends Entity
             /* The array's keys need to be each subject's name so that the array can be sorted, but each key also needs
              * to be unique so that two identically-named subjects don't result in one member of the array overwriting
              * the other. To solve this problem, the subject's ID is appended to the end of their name. */
-            $context = isset($result->school) ? 'school' : 'school_district';
-            $key = $result->$context->name . $result->$context->id;
+            $subject = isset($result->school) ? 'school' : 'school_district';
+            $key = $result->$subject->name . $result->$subject->id;
             $resultsWithoutData[$key] = $result;
         }
         ksort($resultsWithoutData);
@@ -153,9 +153,9 @@ class Ranking extends Entity
         foreach ($groupedResults as $rank => $resultsInRank) {
             $sortedResults = [];
             foreach ($resultsInRank as $resultInRank) {
-                $context = isset($resultInRank->school) ? 'school' : 'school_district';
+                $subject = isset($resultInRank->school) ? 'school' : 'school_district';
                 // Combine name and ID in case any two subjects (somehow) have identical names
-                $key = $resultInRank->$context->name . $resultInRank->$context->id;
+                $key = $resultInRank->$subject->name . $resultInRank->$subject->id;
                 $sortedResults[$key] = $resultInRank;
             }
             ksort($sortedResults);
