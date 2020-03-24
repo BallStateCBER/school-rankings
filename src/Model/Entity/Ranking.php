@@ -181,7 +181,7 @@ class Ranking extends Entity
      *
      * @return array
      */
-    public function _getInputSummary()
+    protected function _getInputSummary()
     {
         $schoolTypeIds = Hash::extract($this->school_types, '{n}.id');
 
