@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {ResultSubject} from '../formula-form/results/result-subject.jsx';
+import {ResultSubject} from './result-subject.jsx';
 
 class NoDataResults extends React.Component {
   constructor(props) {
