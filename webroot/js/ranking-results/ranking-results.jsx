@@ -9,6 +9,7 @@ class RankingResults extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      formUrl: null,
       inputSummary: null,
       loading: true,
       noDataResults: null,
@@ -47,6 +48,7 @@ class RankingResults extends React.Component {
       }
 
       this.setState({
+        formUrl: data.formUrl,
         inputSummary: data.inputSummary,
         noDataResults: data.noDataResults,
         rankingUrl: data.rankingUrl,
@@ -193,6 +195,9 @@ class RankingResults extends React.Component {
         <p>
           Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
         </p>
+        <a className="btn btn-primary btn-sm float-right" href={this.state.formUrl}>
+          Edit Ranking Settings
+        </a>
         <InputSummary submittedData={this.state.inputSummary} />
         <h3>
           {countHeader}

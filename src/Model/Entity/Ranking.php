@@ -22,6 +22,7 @@ use Cake\Utility\Hash;
  * @property FrozenTime $created
  * @property string $url
  * @property array $input_summary
+ * @property string $form_url
  *
  * @property User $user
  * @property Formula $formula
@@ -332,6 +333,25 @@ class Ranking extends Entity
                 'controller' => 'Rankings',
                 'action' => 'view',
                 'hash' => $this->hash,
+            ],
+            true
+        );
+    }
+
+    /**
+     * A virtual field to generate a full URL to a formula form auto-populated with the inputs to produce this ranking
+     *
+     * @return string
+     */
+    protected function _getFormUrl()
+    {
+        return Router::url(
+            [
+                'plugin' => false,
+                'prefix' => false,
+                'controller' => 'Formulas',
+                'action' => 'form',
+                '?' => ['r' => $this->hash],
             ],
             true
         );
