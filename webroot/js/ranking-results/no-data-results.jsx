@@ -64,11 +64,10 @@ class NoDataResults extends React.Component {
         <p>
           {resultsCount + ' '}
           {this.props.hasResultsWithData && 'more '}
-          {subject}
-          {isPlural ? ' were ' : ' was '}
-          found in this location that cannot be ranked because
+          {subject + ' '}
+          in this county cannot be ranked because
           {isPlural ? ' they have ' : ' it has '}
-          no data available for the criteria that you selected.
+          no data available for the selected criteria.
         </p>
         <button id="show-results-without-data"
                 className="btn btn-outline-primary"
