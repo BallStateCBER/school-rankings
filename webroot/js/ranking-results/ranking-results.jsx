@@ -2,6 +2,7 @@ import ReactDom from 'react-dom';
 import React from 'react';
 import {Button} from 'reactstrap';
 import {InputSummary} from './input-summary.jsx';
+import {NoDataResults} from './no-data-results.jsx';
 import {ResultSubject} from './result-subject.jsx';
 
 class RankingResults extends React.Component {
@@ -19,6 +20,7 @@ class RankingResults extends React.Component {
 
     this.contextIsSchool = this.contextIsSchool.bind(this);
     this.loadResults = this.loadResults.bind(this);
+    this.renderNoDataResults = this.renderNoDataResults.bind(this);
     this.renderNoResults = this.renderNoResults.bind(this);
     this.renderResults = this.renderResults.bind(this);
     this.toggleShowAllStatistics = this.toggleShowAllStatistics.bind(this);
@@ -225,6 +227,19 @@ class RankingResults extends React.Component {
   }
 
   /**
+   * Returns the content to render when there are results for this ranking request
+   *
+   * @return {*}
+   */
+  renderNoDataResults() {
+    return (
+      <NoDataResults context={this.contextIsSchool() ? 'school' : 'district'}
+                     hasResultsWithData={(this.state.results && this.state.results.length > 0)}
+                     results={this.state.noDataResults} />
+    );
+  }
+
+  /**
    * Render method
    *
    * @return {*}
@@ -242,6 +257,9 @@ class RankingResults extends React.Component {
         }
         {!this.state.loading && resultsCount > 0 &&
           this.renderResults()
+        }
+        {!this.state.loading && this.state.noDataResults && this.state.noDataResults.length > 0 &&
+          this.renderNoDataResults()
         }
       </div>
     );

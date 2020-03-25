@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {FormulaForm} from '../formula-form.jsx';
-import {ResultSubject} from './result-subject.jsx';
+import {ResultSubject} from '../formula-form/results/result-subject.jsx';
 
 class NoDataResults extends React.Component {
   constructor(props) {
@@ -14,6 +13,16 @@ class NoDataResults extends React.Component {
 
   handleShowResults() {
     this.setState({showResults: !this.state.showResults});
+  }
+
+  /**
+   * Capitalizes the provided string
+   *
+   * @param {string} str
+   * @return {string}
+   */
+  static capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   render() {
@@ -50,7 +59,7 @@ class NoDataResults extends React.Component {
         <h3>
           {resultsCount}
           {' Hidden '}
-          {FormulaForm.capitalize(subject)}
+          {NoDataResults.capitalize(subject)}
         </h3>
         <p>
           {resultsCount + ' '}
@@ -80,7 +89,6 @@ class NoDataResults extends React.Component {
 
 NoDataResults.propTypes = {
   context: PropTypes.string.isRequired,
-  criteriaCount: PropTypes.number.isRequired,
   hasResultsWithData: PropTypes.bool.isRequired,
   results: PropTypes.array.isRequired,
 };
