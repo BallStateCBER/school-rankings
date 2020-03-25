@@ -77,7 +77,7 @@ class RankingResults extends React.Component {
    * Returns a <ResultSubject> element
    *
    * @param {object} subject
-   * @return {ResultSubject}
+   * @return {ResultSubject|null}
    */
   getResultCell(subject) {
     let context = null;
@@ -90,8 +90,10 @@ class RankingResults extends React.Component {
       subjectData = subject.school_district;
     } else {
       console.log('Error: Neither school nor school district found in result');
-      return;
+
+      return null;
     }
+
     return <ResultSubject subjectData={subjectData}
                           dataCompleteness={subject.data_completeness}
                           statistics={subject.statistics}
