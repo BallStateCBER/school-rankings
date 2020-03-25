@@ -172,7 +172,7 @@ class FormulaForm extends React.Component {
   }
 
   /**
-   * Updates this.submittedData, used to pass properties to RankingResults that are independent of state changes
+   * Updates this.submittedData, used to keep track of submitted data separately from the form's current state
    */
   updateSubmittedData() {
     this.submittedData.context = this.state.context;
