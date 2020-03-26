@@ -51,6 +51,7 @@ class FormulaForm extends React.Component {
     };
     this.debug = false;
     this.cookies = new Cookies();
+    this.addRankingHashToCurrentUrl = this.addRankingHashToCurrentUrl.bind(this);
     this.getSelectedCriteriaHeader = this.getSelectedCriteriaHeader.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeAllGradeLevelsOption = this.handleChangeAllGradeLevelsOption.bind(this);
@@ -69,8 +70,8 @@ class FormulaForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleToggleAllGradeLevels = this.handleToggleAllGradeLevels.bind(this);
     this.handleToggleAllSchoolTypes = this.handleToggleAllSchoolTypes.bind(this);
-    this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
     this.handleToggleWeightInterface = this.handleToggleWeightInterface.bind(this);
+    this.handleUnselectMetric = this.handleUnselectMetric.bind(this);
   }
 
   componentDidMount() {
@@ -258,6 +259,7 @@ class FormulaForm extends React.Component {
       });
 
       this.rankingHash = data.rankingHash;
+      this.addRankingHashToCurrentUrl();
       this.jobId = data.jobId;
       this.checkJobProgress(this.jobId);
     }).fail((jqXHR) => {
@@ -464,7 +466,7 @@ class FormulaForm extends React.Component {
       // Job complete
       this.submitAnalyticsEvents();
       if (data.hasOwnProperty('rankingUrl') && data.rankingUrl) {
-        location.href = data.rankingUrl;
+        window.location.href = data.rankingUrl;
       } else {
         this.setState({
           loadingRankings: false,
@@ -631,10 +633,20 @@ class FormulaForm extends React.Component {
     return 1;
   }
 
-  autoFillForm() {
+  /**
+   * Returns the value of the 'r' query string variable, which is expected to be the ranking string hash is it exists
+   *
+   * @return {string}
+   */
+  getRankingHashFromQueryString() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const rankingHash = urlParams.get('r');
+
+    return urlParams.get('r');
+  }
+
+  autoFillForm() {
+    const rankingHash = this.getRankingHashFromQueryString();
     if (!rankingHash) {
       return;
     }
@@ -693,6 +705,15 @@ class FormulaForm extends React.Component {
         });
       });
     });
+  }
+
+  /**
+   * Adds ?r={rankingHash} to the current URL
+   */
+  addRankingHashToCurrentUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.append('r', this.rankingHash);
+    window.history.replaceState(null, '', url.toString());
   }
 
   render() {
