@@ -77,7 +77,7 @@ class RankingsController extends AppController
             'user_id' => null,
             'formula_id' => $formulaId,
             'for_school_districts' => $context == Context::DISTRICT_CONTEXT,
-            'hash' => RankingsTable::generateHash(),
+            'hash' => $this->rankingsTable->generateHash(),
         ]);
 
         // Add associations
