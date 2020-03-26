@@ -117,17 +117,22 @@ class FormulasTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'));
+        $rules->add($rules->isUnique(['hash']));
 
         return $rules;
     }
 
     /**
-     * Returns a random string to be used as an identifier for a formula
+     * Returns a random string to be used as a unique identifier for a formula
      *
      * @return string
      */
-    public static function generateHash()
+    public function generateHash()
     {
-        return Security::randomString(8);
+        do {
+            $hash = Security::randomString(8);
+        } while ($this->exists(['hash' => $hash]));
+
+        return $hash;
     }
 }

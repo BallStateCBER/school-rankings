@@ -56,7 +56,7 @@ class FormulasController extends AppController
                 'is_example' => false,
                 'title' => '',
                 'context' => $context,
-                'hash' => FormulasTable::generateHash(),
+                'hash' => $this->formulasTable->generateHash(),
             ]);
             $formula->criteria = $criteria;
             $success = (bool)$this->formulasTable->save($formula);
