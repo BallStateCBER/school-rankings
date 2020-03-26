@@ -70,13 +70,13 @@ class RankingResultsSchoolsTable extends Table
         $validator
             ->integer('rank')
             ->requirePresence('rank', 'create')
-            ->notEmpty('rank');
+            ->greaterThan('rank', 0);
 
         $validator
             ->scalar('data_completeness')
             ->maxLength('data_completeness', 10)
             ->requirePresence('data_completeness', 'create')
-            ->notEmpty('data_completeness');
+            ->notEmptyString('data_completeness');
 
         return $validator;
     }

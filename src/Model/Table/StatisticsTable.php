@@ -53,8 +53,7 @@ class StatisticsTable extends Table
 
         $validator
             ->integer('metric_id')
-            ->requirePresence('metric_id', 'create')
-            ->notEmpty('metric_id');
+            ->requirePresence('metric_id', 'create');
 
         $validator
             ->integer('school_id')

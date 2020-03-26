@@ -125,14 +125,13 @@ class RankingsTable extends Table
 
         $validator
             ->boolean('for_school_districts')
-            ->requirePresence('for_school_districts', 'create')
-            ->notEmpty('for_school_districts');
+            ->requirePresence('for_school_districts', 'create');
 
         $validator
             ->scalar('hash')
             ->maxLength('hash', 255)
             ->requirePresence('hash', 'create')
-            ->notEmpty('hash');
+            ->notEmptyString('hash');
 
         return $validator;
     }

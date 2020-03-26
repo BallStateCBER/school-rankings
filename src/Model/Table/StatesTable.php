@@ -81,13 +81,13 @@ class StatesTable extends Table
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
-            ->notEmpty('name');
+            ->notEmptyString('name');
 
         $validator
             ->scalar('abbreviation')
             ->maxLength('abbreviation', 255)
             ->requirePresence('abbreviation', 'create')
-            ->notEmpty('abbreviation');
+            ->notEmptyString('abbreviation');
 
         return $validator;
     }

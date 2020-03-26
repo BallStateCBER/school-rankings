@@ -61,13 +61,13 @@ class SchoolDistrictCodesTable extends Table
             ->scalar('code')
             ->maxLength('code', 255)
             ->requirePresence('code', 'create')
-            ->notEmpty('code');
+            ->notEmptyString('code');
 
         $validator
             ->scalar('year')
             ->maxLength('year', 4)
             ->requirePresence('year', 'create')
-            ->notEmpty('year');
+            ->notEmptyString('year');
 
         return $validator;
     }

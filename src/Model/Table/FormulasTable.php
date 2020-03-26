@@ -78,8 +78,7 @@ class FormulasTable extends Table
 
         $validator
             ->boolean('is_example')
-            ->requirePresence('is_example', 'create')
-            ->notEmpty('is_example');
+            ->requirePresence('is_example', 'create');
 
         $validator
             ->scalar('title')
@@ -94,7 +93,7 @@ class FormulasTable extends Table
             ->scalar('context')
             ->maxLength('context', 255)
             ->requirePresence('context', 'create')
-            ->notEmpty('context')
+            ->notEmptyString('context')
             ->inList('context', Context::getContexts());
 
         $validator
@@ -102,7 +101,7 @@ class FormulasTable extends Table
             ->minLength('has', 8)
             ->maxLength('hash', 8)
             ->requirePresence('hash', 'create')
-            ->notEmpty('hash');
+            ->notEmptyString('hash');
 
         return $validator;
     }

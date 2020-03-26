@@ -67,19 +67,17 @@ class CriteriaTable extends Table
         $validator
             ->integer('weight')
             ->requirePresence('weight', 'create')
-            ->notEmpty('weight')
             ->range('weight', [1, 200]);
 
         $validator
             ->scalar('preference')
             ->inList('preference', ['high', 'low'])
             ->requirePresence('preference', 'create')
-            ->notEmpty('preference');
+            ->notEmptyString('preference');
 
         $validator
             ->integer('metric_id')
-            ->requirePresence('metric_id', 'create')
-            ->notEmpty('metric_id');
+            ->requirePresence('metric_id', 'create');
 
         $validator
             ->integer('formula_id')

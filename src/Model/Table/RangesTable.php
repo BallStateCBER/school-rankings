@@ -60,12 +60,12 @@ class RangesTable extends Table
             ->scalar('center')
             ->maxLength('center', 255)
             ->requirePresence('center', 'create')
-            ->notEmpty('center');
+            ->notEmptyString('center');
 
         $validator
             ->integer('distance')
             ->requirePresence('distance', 'create')
-            ->notEmpty('distance');
+            ->greaterThan('distance', 0);
 
         return $validator;
     }

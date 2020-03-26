@@ -95,7 +95,7 @@ class MetricsTable extends Table
         $validator
             ->scalar('context')
             ->requirePresence('context', 'create')
-            ->notEmpty('context')
+            ->notEmptyString('context')
             ->add('context', 'isValidContext', [
                 'rule' => function ($value) {
                     return Context::isValid($value);
@@ -116,7 +116,7 @@ class MetricsTable extends Table
             ->scalar('name')
             ->maxLength('name', 255)
             ->requirePresence('name', 'create')
-            ->notEmpty('name')
+            ->notEmptyString('name')
             ->add('name', 'unique', [
                 'rule' => 'validateName',
                 'message' => 'Another metric with the same parent has the same name',
@@ -131,18 +131,16 @@ class MetricsTable extends Table
             ->scalar('type')
             ->maxLength('type', 255)
             ->requirePresence('type', 'create')
-            ->notEmpty('type')
+            ->notEmptyString('type')
             ->inList('type', $this->getMetricTypes());
 
         $validator
             ->boolean('selectable')
-            ->requirePresence('selectable', 'create')
-            ->notEmpty('selectable');
+            ->requirePresence('selectable', 'create');
 
         $validator
             ->boolean('visible')
-            ->requirePresence('visible', 'create')
-            ->notEmpty('visible');
+            ->requirePresence('visible', 'create');
 
         $validator
             ->boolean('is_percent')

@@ -49,14 +49,13 @@ class ImportedFilesTable extends Table
     {
         $validator
             ->integer('year')
-            ->requirePresence('year', 'create')
-            ->notEmpty('year');
+            ->requirePresence('year', 'create');
 
         $validator
             ->scalar('file')
             ->maxLength('file', 255)
             ->requirePresence('file', 'create')
-            ->notEmpty('file');
+            ->notEmptyString('file');
 
         return $validator;
     }

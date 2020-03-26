@@ -66,25 +66,25 @@ class SpreadsheetColumnsMetricsTable extends Table
             ->scalar('year')
             ->maxLength('year', 255)
             ->requirePresence('year', 'create')
-            ->notEmpty('year');
+            ->notEmptyString('year');
 
         $validator
             ->scalar('filename')
             ->maxLength('filename', 255)
             ->requirePresence('filename', 'create')
-            ->notEmpty('filename');
+            ->notEmptyString('filename');
 
         $validator
             ->scalar('context')
             ->maxLength('context', 255)
             ->requirePresence('context', 'create')
-            ->notEmpty('context');
+            ->notEmptyString('context');
 
         $validator
             ->scalar('worksheet')
             ->maxLength('worksheet', 255)
             ->requirePresence('worksheet', 'create')
-            ->notEmpty('worksheet');
+            ->notEmptyString('worksheet');
 
         $validator
             ->scalar('group_name')
@@ -95,7 +95,7 @@ class SpreadsheetColumnsMetricsTable extends Table
             ->scalar('column_name')
             ->maxLength('column_name', 255)
             ->requirePresence('column_name', 'create')
-            ->notEmpty('column_name');
+            ->notEmptyString('column_name');
 
         return $validator;
     }
