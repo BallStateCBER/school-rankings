@@ -107,3 +107,9 @@ footer {
     padding-top: 30px;
   }
 }
+
+nav {
+  > .container {
+    overflow: visible;
+  }
+}
