@@ -1,13 +1,40 @@
 <footer class="flex-row">
     <div class="container">
         <div class="row">
-            <div class="col-4" id="welcome-contact">
+            <section class="col-4" id="welcome-contact">
+                <h3>Center for Business and Economic Research</h3>
+                <address>
+                    Ball State University<br />
+                    Whitinger Business Building, room 149<br />
+                    2000 W. University Ave.<br />
+                    Muncie, IN 47306-0360
+                </address>
+            </section>
+            <section class="col-3 offset-1">
                 <h2>
-                    Info / Contact
+                    Contact
                 </h2>
-                <p>
-                    Fortiss unda, tanquam castus abaculus.
-                </p>
+                <dl>
+                    <dt>Phone:</dt>
+                    <dd>765-285-5926</dd>
+
+                    <dt>Email:</dt>
+                    <dd><a href="mailto:cber@bsu.edu">cber@bsu.edu</a></dd>
+
+                    <dt>Website:</dt>
+                    <dd><a href="https://www.bsu.edu/cber">bsu.edu/cber</a></dd>
+
+                    <dt>Facebook:</dt>
+                    <dd><a href="https://www.facebook.com/BallStateCBER">/BallStateCBER</a></dd>
+
+                    <dt>Twitter:</dt>
+                    <dd><a href="https://www.twitter.com/BallStateCBER">/BallStateCBER</a></dd>
+                </dl>
+            </section>
+            <section class="col-3 offset-1">
+                <h2>
+                    Legal
+                </h2>
                 <ul class="list-unstyled">
                     <li>
                         <?= $this->Html->link(
@@ -28,23 +55,7 @@
                         ) ?>
                     </li>
                 </ul>
-            </div>
-            <div class="col-4">
-                <h2>
-                    Credits
-                </h2>
-                <p>
-                    Sunt domuses fallere castus, mirabilis fugaes.
-                </p>
-            </div>
-            <div class="col-4">
-                <h2>
-                    Sponsors
-                </h2>
-                <p>
-                    Magnum parma recte contactuss lumen est.
-                </p>
-            </div>
+            </section>
         </div>
     </div>
 </footer>

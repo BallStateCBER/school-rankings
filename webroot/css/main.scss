@@ -91,20 +91,28 @@ section.terms {
   }
 }
 
-#welcome-contact {
-  background-color: #fff;
-  border: 1px solid #000;
-}
-
 footer {
   background-image: url('/img/supplies.jpg');
   background-size: cover;
   background-position: center;
-
+  padding-bottom: 2em;
+  padding-top: 2em;
 
   div.col-4 {
     padding-bottom: 30px;
     padding-top: 30px;
+  }
+
+  section {
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: .25rem;
+
+    li,
+    dl,
+    address {
+      padding-left: 2em;
+    }
   }
 }
 
