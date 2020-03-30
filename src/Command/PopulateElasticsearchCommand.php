@@ -303,7 +303,7 @@ class PopulateElasticsearchCommand extends Command
     }
 
     /**
-     * Displays how much time the previous import process took to compelete
+     * Displays how much time the previous import process took to complete
      *
      * @return void
      */

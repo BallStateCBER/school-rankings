@@ -30,7 +30,7 @@ class MetricTreeCleanCommand extends Command
     private $statsTable;
 
     /**
-     * A flag used to prevent metrics from being deleted if they're associated with spreadshet columns via the
+     * A flag used to prevent metrics from being deleted if they're associated with spreadsheet columns via the
      * spreadsheet_columns_metrics table
      *
      * @var bool
