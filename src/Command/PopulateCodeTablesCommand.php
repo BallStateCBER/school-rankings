@@ -176,6 +176,7 @@ class PopulateCodeTablesCommand extends Command
      */
     private function getDefaultYear()
     {
+        /** @var \App\Model\Table\StatisticsTable $statisticsTable */
         $statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
 
         return $statisticsTable->getMostRecentYear();
