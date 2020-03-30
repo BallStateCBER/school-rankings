@@ -22,6 +22,7 @@ use Cake\ORM\Entity;
  *
  * @property Metric $parent_metric
  * @property Metric[] $children
+ * @property Metric[] $path
  */
 class Metric extends Entity
 {
