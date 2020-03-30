@@ -160,7 +160,6 @@ class CheckStatsCommand extends Command
      * Iterates through statistics and checks for validation or application rule violation
      *
      * @return void
-     * @throws \Aura\Intl\Exception
      */
     private function checkValidation()
     {
@@ -228,7 +227,6 @@ class CheckStatsCommand extends Command
      * Checks for percentage-type metrics with values not in the range from 0 to 1
      *
      * @return void
-     * @throws \Aura\Intl\Exception
      */
     private function checkOutOfBoundsPercentages()
     {
