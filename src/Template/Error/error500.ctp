@@ -2,8 +2,6 @@
 use Cake\Core\Configure;
 use Cake\Error\Debugger;
 
-$this->layout = 'error';
-
 if (Configure::read('debug')) :
     $this->layout = 'dev_error';
 
@@ -40,4 +38,14 @@ endif;
 <p class="alert alert-danger">
     <strong><?= __d('cake', 'Error') ?>: </strong>
     <?= h($message) ?>
+</p>
+<p>
+    <?= $this->Html->link(
+        'Back',
+        'javascript:history.back()',
+        [
+            'class' => 'btn btn-primary float-right',
+            'escape' => false
+        ]
+    ) ?>
 </p>
