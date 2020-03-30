@@ -389,13 +389,10 @@ class MetricsTable extends Table
             ->first();
         $this->setScope($metric->context);
 
-        $options = ['for' => $metricId];
-        $results = $this->find('path', $options)
+        return $this->find('path', ['for' => $metricId])
             ->select(['id', 'name'])
             ->enableHydration(false)
             ->toArray();
-
-        return $results;
     }
 
     /**
