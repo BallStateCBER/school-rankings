@@ -16,7 +16,7 @@ namespace App\Test\TestCase\Controller;
 
 use Cake\Core\Configure;
 use Cake\TestSuite\IntegrationTestTrait;
-use React\Promise\TestCase;
+use Cake\TestSuite\TestCase;
 
 /**
  * PagesControllerTest class
