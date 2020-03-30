@@ -15,13 +15,16 @@
 namespace App\Test\TestCase\Controller;
 
 use Cake\Core\Configure;
-use Cake\TestSuite\IntegrationTestCase;
+use Cake\TestSuite\IntegrationTestTrait;
+use React\Promise\TestCase;
 
 /**
  * PagesControllerTest class
  */
-class PagesControllerTest extends IntegrationTestCase
+class PagesControllerTest extends TestCase
 {
+    use IntegrationTestTrait;
+
     /**
      * testMultipleGet method
      *

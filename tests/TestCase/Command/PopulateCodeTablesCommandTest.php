@@ -1,13 +1,15 @@
 <?php
 namespace App\Test\TestCase\Command;
 
-use Cake\TestSuite\ConsoleIntegrationTestCase;
+use Cake\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\TestSuite\TestCase;
 
 /**
  * App\Command\PopulateCodeTablesCommand Test Case
  */
-class PopulateCodeTablesCommandTest extends ConsoleIntegrationTestCase
+class PopulateCodeTablesCommandTest extends TestCase
 {
+    use ConsoleIntegrationTestTrait;
 
     /**
      * setUp method

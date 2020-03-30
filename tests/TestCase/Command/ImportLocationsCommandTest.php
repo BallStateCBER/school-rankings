@@ -1,10 +1,13 @@
 <?php
 namespace App\Test\TestCase\Command;
 
-use Cake\TestSuite\ConsoleIntegrationTestCase;
+use Cake\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\TestSuite\TestCase;
 
-class ImportLocationsCommandTest extends ConsoleIntegrationTestCase
+class ImportLocationsCommandTest extends TestCase
 {
+    use ConsoleIntegrationTestTrait;
+
     /**
      * Fixtures
      *

@@ -4,7 +4,8 @@ namespace App\Test\TestCase\Controller\Api;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use Cake\ORM\TableRegistry;
-use Cake\TestSuite\IntegrationTestCase;
+use Cake\TestSuite\IntegrationTestTrait;
+use Cake\TestSuite\TestCase;
 use Exception;
 use PHPUnit\Exception as PhpUnitException;
 
@@ -13,8 +14,10 @@ use PHPUnit\Exception as PhpUnitException;
  *
  * @property MetricsTable $Metrics
  */
-class MetricsControllerTest extends IntegrationTestCase
+class MetricsControllerTest extends TestCase
 {
+    use IntegrationTestTrait;
+
     private $Metrics;
 
     /**

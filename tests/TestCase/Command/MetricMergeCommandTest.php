@@ -4,10 +4,13 @@ namespace App\Test\TestCase\Command;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Exception\StopException;
 use Cake\ORM\TableRegistry;
-use Cake\TestSuite\ConsoleIntegrationTestCase;
+use Cake\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\TestSuite\TestCase;
 
-class MetricMergeCommandTest extends ConsoleIntegrationTestCase
+class MetricMergeCommandTest extends TestCase
 {
+    use ConsoleIntegrationTestTrait;
+
     /**
      * Fixtures
      *
