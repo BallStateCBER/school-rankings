@@ -383,7 +383,7 @@ class FormulaForm extends React.Component {
     }
 
     const metric = {
-      metricId: selected.node.data.metricId,
+      id: selected.node.data.metricId,
       dataType: selected.node.data.type,
       name: selected.node.data.name,
     };
@@ -405,7 +405,7 @@ class FormulaForm extends React.Component {
       weight: 100,
     };
     const criteria = this.state.criteria;
-    criteria.set(metric.metricId, criterion);
+    criteria.set(metric.id, criterion);
     this.setState({criteria: criteria});
   }
 
@@ -801,7 +801,7 @@ class FormulaForm extends React.Component {
                 <table className="table table-striped">
                   <tbody>
                     {Array.from(this.state.criteria.values()).map((criterion) => {
-                      const metricId = criterion.metric.metricId;
+                      const metricId = criterion.metric.id;
                       return (
                         <Criterion key={metricId} name={criterion.metric.name} metricId={metricId}
                                    weight={criterion.weight}

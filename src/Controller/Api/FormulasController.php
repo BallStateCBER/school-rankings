@@ -91,7 +91,7 @@ class FormulasController extends AppController
         foreach ($criteriaData as $criterionData) {
             /** @var Criterion $criterion */
             $criterion = $this->criteriaTable->newEntity([
-                'metric_id' => $criterionData['metric']['metricId'],
+                'metric_id' => $criterionData['metric']['id'],
                 'weight' => $criterionData['weight'],
                 'preference' => 'high',
             ]);

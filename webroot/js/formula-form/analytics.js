@@ -274,7 +274,7 @@ class Analytics {
    * @return {string}
    */
   getSafeMetricName(metric) {
-    const postfix = ' (#' + metric.metricId + ')';
+    const postfix = ' (#' + metric.id + ')';
     let fullMetricPath = metric.name + postfix;
     if (this.fits(fullMetricPath)) {
       return fullMetricPath;
