@@ -9,10 +9,13 @@ use Cake\TestSuite\TestCase;
  * Class FormulasControllerTest
  *
  * @package App\Test\TestCase\Controller\Api
+ * @property \App\Model\Table\FormulasTable $Formulas
  */
 class FormulasControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+
+    private $Formulas;
 
     /**
      * Fixtures
@@ -60,6 +63,7 @@ class FormulasControllerTest extends TestCase
     public function setUp()
     {
         parent::setUp();
+        $this->Formulas = TableRegistry::getTableLocator()->get('Formulas');
     }
 
     /**
@@ -70,20 +74,48 @@ class FormulasControllerTest extends TestCase
      */
     public function testAddSuccess()
     {
-        $formulasTable = TableRegistry::getTableLocator()->get('Formulas');
-        $originalCount = $formulasTable->find()->count();
+        $originalCount = $this->Formulas->find()->count();
 
         $this->post($this->addUrl, $this->formulaData);
         $this->assertResponseOk();
 
-        $newCount = $formulasTable->find()->count();
-        $this->assertEquals($originalCount + 1, $newCount, 'New formula record was not created.');
+        $newCount = $this->Formulas->find()->count();
+        $this->assertEquals($originalCount + 1, $newCount, 'New formula record was not created');
 
         $responseBody = $this->_response->getBody();
         $this->assertJson((string)$responseBody, 'Response is not valid JSON');
 
         $this->assertJsonStringEqualsJsonString(
             json_encode(['success' => true, 'id' => $newCount]),
+            (string)$responseBody,
+            'Unexpected API response'
+        );
+    }
+
+    /**
+     * Tests that the add endpoint fails for an invalid context
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidContext()
+    {
+        $originalCount = $this->Formulas->find()->count();
+
+        $invalidData = $this->formulaData;
+        $invalidData['context'] = 'invalid';
+
+        $this->post($this->addUrl, $invalidData);
+        $this->assertResponseError('Response was not in the 4xx range');
+
+        $newCount = $this->Formulas->find()->count();
+        $this->assertEquals($originalCount, $newCount, 'New formula record was created, but shouldn\'t have been');
+
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+
+        $this->assertJsonStringEqualsJsonString(
+            json_encode(['success' => false, 'id' => null]),
             (string)$responseBody,
             'Unexpected API response'
         );
