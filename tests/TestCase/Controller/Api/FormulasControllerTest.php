@@ -78,16 +78,14 @@ class FormulasControllerTest extends TestCase
 
         $this->post($this->addUrl, $this->formulaData);
         $this->assertResponseOk();
+        $this->assertBodyIsJson();
 
         $newCount = $this->Formulas->find()->count();
         $this->assertEquals($originalCount + 1, $newCount, 'New formula record was not created');
 
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
         $this->assertJsonStringEqualsJsonString(
             json_encode(['success' => true, 'id' => $newCount]),
-            (string)$responseBody,
+            (string)$this->_response->getBody(),
             'Unexpected API response'
         );
     }
@@ -103,10 +101,7 @@ class FormulasControllerTest extends TestCase
         $invalidData = $this->formulaData;
         $invalidData['context'] = 'invalid';
         $this->post($this->addUrl, $invalidData);
-
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
+        $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
 
@@ -121,10 +116,7 @@ class FormulasControllerTest extends TestCase
         $invalidData = $this->formulaData;
         $invalidData['criteria'] = [];
         $this->post($this->addUrl, $invalidData);
-
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
+        $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
 
@@ -139,10 +131,7 @@ class FormulasControllerTest extends TestCase
         $invalidData = $this->formulaData;
         $invalidData['criteria'][0]['metric']['id'] = 999;
         $this->post($this->addUrl, $invalidData);
-
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
+        $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
 
@@ -157,10 +146,7 @@ class FormulasControllerTest extends TestCase
         $invalidData = $this->formulaData;
         $invalidData['criteria'][0]['weight'] = 201;
         $this->post($this->addUrl, $invalidData);
-
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
+        $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
 
@@ -175,10 +161,7 @@ class FormulasControllerTest extends TestCase
         $invalidData = $this->formulaData;
         $invalidData['criteria'][0]['weight'] = 0;
         $this->post($this->addUrl, $invalidData);
-
-        $responseBody = $this->_response->getBody();
-        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
-
+        $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
 
@@ -201,5 +184,16 @@ class FormulasControllerTest extends TestCase
             (string)$responseBody,
             'Unexpected API response'
         );
+    }
+
+    /**
+     * Asserts that the body of the response is valid JSON
+     *
+     * @return void
+     */
+    private function assertBodyIsJson()
+    {
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
     }
 }
