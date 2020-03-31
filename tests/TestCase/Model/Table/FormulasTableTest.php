@@ -146,4 +146,18 @@ class FormulasTableTest extends TestCase
         $formula = $this->Formulas->newEntity($this->validData);
         $this->assertFalse($formula->hasErrors());
     }
+
+    /**
+     * Tests that validation fails if a hash is not unique
+     *
+     * @return void
+     */
+    public function testValidationFailHashNotUnique()
+    {
+        $existingFormula = $this->Formulas->get(1);
+        $invalidData = $this->validData;
+        $invalidData['hash'] = $existingFormula->hash;
+        $newFormula = $this->Formulas->newEntity($invalidData);
+        $this->assertFalse($this->Formulas->checkRules($newFormula));
+    }
 }
