@@ -100,20 +100,48 @@ class FormulasControllerTest extends TestCase
      */
     public function testAddFailInvalidContext()
     {
-        $originalCount = $this->Formulas->find()->count();
-
         $invalidData = $this->formulaData;
         $invalidData['context'] = 'invalid';
-
         $this->post($this->addUrl, $invalidData);
-        $this->assertResponseError('Response was not in the 4xx range');
-
-        $newCount = $this->Formulas->find()->count();
-        $this->assertEquals($originalCount, $newCount, 'New formula record was created, but shouldn\'t have been');
 
         $responseBody = $this->_response->getBody();
         $this->assertJson((string)$responseBody, 'Response is not valid JSON');
 
+        $this->runAddFailureAssertions();
+    }
+
+    /**
+     * Tests that the add endpoint fails if no criteria are provided
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailNoCriteria()
+    {
+        $invalidData = $this->formulaData;
+        $invalidData['criteria'] = [];
+        $this->post($this->addUrl, $invalidData);
+
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+
+        $this->runAddFailureAssertions();
+    }
+
+    /**
+     * Runs assertions related to failure to add a new formula due to invalid data being provided
+     *
+     * @return void
+     */
+    private function runAddFailureAssertions()
+    {
+        $this->assertResponseError('Response was not in the 4xx range');
+
+        $originalCount = $this->Formulas->find()->count();
+        $newCount = $this->Formulas->find()->count();
+        $this->assertEquals($originalCount, $newCount, 'New formula record was created, but shouldn\'t have been');
+
+        $responseBody = $this->_response->getBody();
         $this->assertJsonStringEqualsJsonString(
             json_encode(['success' => false, 'id' => null]),
             (string)$responseBody,
