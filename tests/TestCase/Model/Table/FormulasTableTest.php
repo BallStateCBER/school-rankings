@@ -160,4 +160,17 @@ class FormulasTableTest extends TestCase
         $newFormula = $this->Formulas->newEntity($invalidData);
         $this->assertFalse($this->Formulas->checkRules($newFormula));
     }
+
+    /**
+     * Tests that validation fails if a formula's context is invalid
+     *
+     * @return void
+     */
+    public function testValidationFailInvalidContext()
+    {
+        $invalidData = $this->validData;
+        $invalidData['context'] = 'invalid';
+        $newFormula = $this->Formulas->newEntity($invalidData);
+        $this->assertTrue($newFormula->hasErrors());
+    }
 }
