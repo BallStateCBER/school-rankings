@@ -107,4 +107,16 @@ class FormulasTableTest extends TestCase
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
+
+    /**
+     * Tests hashes for uniqueness
+     *
+     * @return void
+     */
+    public function testHashUniqueness()
+    {
+        $hash1 = $this->Formulas->generateHash();
+        $hash2 = $this->Formulas->generateHash();
+        $this->assertNotEquals($hash1, $hash2, 'Hashes are not unique');
+    }
 }
