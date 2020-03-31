@@ -46,11 +46,11 @@ class FormulasControllerTest extends TestCase
         'criteria' => [
             [
                 'metric' => ['id' => 1],
-                'weight' => 100,
+                'weight' => 1,
             ],
             [
                 'metric' => ['id' => 2],
-                'weight' => 100,
+                'weight' => 200,
             ],
         ],
     ];
@@ -120,6 +120,60 @@ class FormulasControllerTest extends TestCase
     {
         $invalidData = $this->formulaData;
         $invalidData['criteria'] = [];
+        $this->post($this->addUrl, $invalidData);
+
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+
+        $this->runAddFailureAssertions();
+    }
+
+    /**
+     * Tests that the add endpoint fails if an invalid metric ID is selected
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidMetric()
+    {
+        $invalidData = $this->formulaData;
+        $invalidData['criteria'][0]['metric']['id'] = 999;
+        $this->post($this->addUrl, $invalidData);
+
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+
+        $this->runAddFailureAssertions();
+    }
+
+    /**
+     * Tests that the add endpoint fails if an invalid metric ID is selected
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidWeightHigh()
+    {
+        $invalidData = $this->formulaData;
+        $invalidData['criteria'][0]['weight'] = 201;
+        $this->post($this->addUrl, $invalidData);
+
+        $responseBody = $this->_response->getBody();
+        $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+
+        $this->runAddFailureAssertions();
+    }
+
+    /**
+     * Tests that the add endpoint fails if an invalid metric ID is selected
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidWeightLow()
+    {
+        $invalidData = $this->formulaData;
+        $invalidData['criteria'][0]['weight'] = 0;
         $this->post($this->addUrl, $invalidData);
 
         $responseBody = $this->_response->getBody();
