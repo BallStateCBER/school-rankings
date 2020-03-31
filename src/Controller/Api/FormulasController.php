@@ -67,6 +67,10 @@ class FormulasController extends AppController
             }
         }
 
+        if (!$success) {
+            $this->response = $this->response->withStatus(400);
+        }
+
         $this->set([
             '_serialize' => ['success', 'id'],
             'success' => $success,
