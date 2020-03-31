@@ -136,7 +136,7 @@ class FormulasControllerTest extends TestCase
     }
 
     /**
-     * Tests that the add endpoint fails if an invalid metric ID is selected
+     * Tests that the add endpoint fails if a weight is above the valid range
      *
      * @throws \PHPUnit\Exception
      * @return void
@@ -151,7 +151,7 @@ class FormulasControllerTest extends TestCase
     }
 
     /**
-     * Tests that the add endpoint fails if an invalid metric ID is selected
+     * Tests that the add endpoint fails if a weight is below the valid range
      *
      * @throws \PHPUnit\Exception
      * @return void
@@ -195,5 +195,20 @@ class FormulasControllerTest extends TestCase
     {
         $responseBody = $this->_response->getBody();
         $this->assertJson((string)$responseBody, 'Response is not valid JSON');
+    }
+
+    /**
+     * Tests that the add endpoint fails if a criterion weight is missing
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailMissingWeight()
+    {
+        $invalidData = $this->formulaData;
+        unset($invalidData['criteria'][0]['weight']);
+        $this->post($this->addUrl, $invalidData);
+        $this->assertBodyIsJson();
+        $this->runAddFailureAssertions();
     }
 }
