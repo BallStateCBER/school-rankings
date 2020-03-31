@@ -54,6 +54,22 @@ class FormulasTableTest extends TestCase
         'app.Users',
     ];
 
+    private $validData = [
+        'user_id' => null,
+        'is_example' => false,
+        'title' => '',
+        'context' => 'school',
+        'hash' => 'hashhash',
+        'notes' => '',
+        'criteria' => [
+            [
+                'metric_id' => 1,
+                'weight' => 100,
+                'preference' => 'high',
+            ],
+        ],
+    ];
+
     /**
      * setUp method
      *
@@ -118,5 +134,16 @@ class FormulasTableTest extends TestCase
         $hash1 = $this->Formulas->generateHash();
         $hash2 = $this->Formulas->generateHash();
         $this->assertNotEquals($hash1, $hash2, 'Hashes are not unique');
+    }
+
+    /**
+     * Tests that valid data passes validation rules
+     *
+     * @return void
+     */
+    public function testValidationSuccess()
+    {
+        $formula = $this->Formulas->newEntity($this->validData);
+        $this->assertFalse($formula->hasErrors());
     }
 }
