@@ -42,7 +42,7 @@ class FormulasFixture extends TestFixture
         'title' => '',
         'notes' => 'Lorem ipsum dolor sit amet, aliquet feugiat.',
         'context' => 'school',
-        'hash' => 'hashstring',
+        'hash' => 'hashhash',
         'created' => '2018-04-05 21:03:47',
         'modified' => '2018-04-05 21:03:47',
     ];
