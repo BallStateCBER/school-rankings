@@ -211,4 +211,20 @@ class FormulasControllerTest extends TestCase
         $this->assertBodyIsJson();
         $this->runAddFailureAssertions();
     }
+
+    /**
+     * Tests that the add endpoint fails if a criterion metric and/or metric ID is missing
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailMissingMetric()
+    {
+        $invalidData = $this->formulaData;
+        unset($invalidData['criteria'][0]['metric']['id']);
+        unset($invalidData['criteria'][1]['metric']);
+        $this->post($this->addUrl, $invalidData);
+        $this->assertBodyIsJson();
+        $this->runAddFailureAssertions();
+    }
 }
