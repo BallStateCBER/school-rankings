@@ -65,5 +65,21 @@ class RankingsControllerTest extends TestCase
 
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount + 1, $newCount, 'New ranking was not created');
+
+        /** @var \App\Model\Entity\Ranking $newRanking */
+        $newRanking = $this->Rankings
+            ->find()
+            ->orderDesc('id')
+            ->first();
+        $expectedJsonResponse = [
+            'jobId' => 2,
+            'rankingHash' => $newRanking->hash,
+            'success' => true,
+        ];
+        $this->assertJsonStringEqualsJsonString(
+            json_encode($expectedJsonResponse),
+            (string)$this->_response->getBody(),
+            'Unexpected API response'
+        );
     }
 }
