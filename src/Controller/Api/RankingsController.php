@@ -71,6 +71,7 @@ class RankingsController extends AppController
         $formulaId = $this->request->getData('formulaId');
         $formula = $this->formulasTable->get($formulaId);
         $context = $formula->context;
+        $success = false;
 
         // Create new ranking
         $ranking = $this->rankingsTable->newEntity([
@@ -79,8 +80,6 @@ class RankingsController extends AppController
             'for_school_districts' => $context == Context::DISTRICT_CONTEXT,
             'hash' => $this->rankingsTable->generateHash(),
         ]);
-
-        // Add associations
         $countyIds = [$this->request->getData('countyId')];
         $ranking->counties = $this->countiesTable->find()
             ->where([
@@ -94,16 +93,21 @@ class RankingsController extends AppController
             $ranking->grades = $this->getGradeLevels();
         }
 
-        // Save ranking
-        $this->rankingsTable->save($ranking);
-        if ($ranking->id) {
-            $rankingId = $ranking->id;
-            $job = $this->createRankingJob($rankingId);
+        // Attempt to save it and create a ranking job
+        if ($ranking->hasErrors()) {
+            $this->response = $this->response->withStatus(400);
+        } elseif ($this->rankingsTable->save($ranking)) {
+            $success = true;
+            $rankingHash = $ranking->hash;
+            $job = $this->createRankingJob($ranking->id);
             $jobId = $job ? $job->id : null;
-        } else {
+            if (!$job) {
+                $this->response = $this->response->withStatus(500);
+            }
+        }
+
+        if (!$success) {
             $this->logRankingError($ranking);
-            $rankingId = null;
-            $jobId = null;
         }
 
         $this->set([
@@ -112,9 +116,9 @@ class RankingsController extends AppController
                 'rankingHash',
                 'success',
             ],
-            'jobId' => $jobId,
-            'rankingHash' => $ranking->hash,
-            'success' => (bool)$rankingId && (bool)$jobId,
+            'jobId' => $jobId ?? null,
+            'rankingHash' => $rankingHash ?? null,
+            'success' => $success,
         ]);
     }
 
