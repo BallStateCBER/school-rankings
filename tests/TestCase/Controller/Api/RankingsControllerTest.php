@@ -84,7 +84,7 @@ class RankingsControllerTest extends TestCase
     }
 
     /**
-     * Tests that the add endpoint fails if the provided county is invalid
+     * Tests that the add endpoint fails if the provided county ID is invalid
      *
      * @throws \PHPUnit\Exception
      * @return void
@@ -101,5 +101,25 @@ class RankingsControllerTest extends TestCase
         $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
 
         $this->assertResponseContains('Invalid county selected');
+    }
+
+    /**
+     * Tests that the add endpoint fails if the provided formula ID is invalid
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidFormula()
+    {
+        $invalidData = $this->validData;
+        $invalidData['formulaId'] = 999;
+        $this->post($this->addUrl, $invalidData);
+        $this->assertResponseError('Response was not in the 4xx range');
+
+        $originalCount = $this->Rankings->find()->count();
+        $newCount = $this->Rankings->find()->count();
+        $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
+
+        $this->assertResponseContains('Invalid formula selected');
     }
 }
