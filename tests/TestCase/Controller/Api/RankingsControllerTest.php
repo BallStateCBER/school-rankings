@@ -127,4 +127,21 @@ class RankingsControllerTest extends TestCase
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
     }
+
+    /**
+     * Tests that the add endpoint fails for the school context if no school types are provided
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddForSchoolFailNoSchoolTypes()
+    {
+        $originalCount = $this->Rankings->find()->count();
+        $invalidData = $this->validData;
+        $invalidData['schoolTypes'] = [];
+        $this->post($this->addUrl, $invalidData);
+        $this->assertResponseError('Response was not in the 4xx range');
+        $this->assertNoNewRecordsCreated($originalCount);
+        $this->assertResponseContains('Please specify at least one type of school');
+    }
 }
