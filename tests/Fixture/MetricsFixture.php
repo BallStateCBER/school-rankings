@@ -9,6 +9,8 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class MetricsFixture extends TestFixture
 {
+    public const HIDDEN_SCHOOL_METRIC = 11;
+    public const HIDDEN_DISTRICT_METRIC = 12;
 
     /**
      * Fields
@@ -131,14 +133,14 @@ class MetricsFixture extends TestFixture
 
         // Hidden
         [
-            'id' => 11,
+            'id' => self::HIDDEN_SCHOOL_METRIC,
             'visible' => 0,
             'name' => 'Hidden school metric',
             'lft' => 19,
             'rght' => 20
         ],
         [
-            'id' => 12,
+            'id' => self::HIDDEN_DISTRICT_METRIC,
             'context' => 'district',
             'visible' => 0,
             'name' => 'Hidden district metric',
