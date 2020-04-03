@@ -70,7 +70,11 @@ class RankingsController extends AppController
     public function add()
     {
         $formulaId = $this->request->getData('formulaId');
-        $formula = $this->formulasTable->get($formulaId);
+        try {
+            $formula = $this->formulasTable->get($formulaId);
+        } catch (RecordNotFoundException $e) {
+            throw new BadRequestException('Invalid formula selected (#' . $formulaId . ')');
+        }
         $context = $formula->context;
         $success = false;
 
