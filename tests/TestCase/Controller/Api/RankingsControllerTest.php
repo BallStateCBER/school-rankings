@@ -95,10 +95,7 @@ class RankingsControllerTest extends TestCase
         $invalidData['countyId'] = 999;
         $this->post($this->addUrl, $invalidData);
         $this->assertResponseError('Response was not in the 4xx range');
-
-        $newCount = $this->Rankings->find()->count();
-        $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
-
+        $this->assertNoNewRecordsCreated($originalCount);
         $this->assertResponseContains('Invalid county selected');
     }
 
@@ -115,10 +112,19 @@ class RankingsControllerTest extends TestCase
         $invalidData['formulaId'] = 999;
         $this->post($this->addUrl, $invalidData);
         $this->assertResponseError('Response was not in the 4xx range');
+        $this->assertNoNewRecordsCreated($originalCount);
+        $this->assertResponseContains('Invalid formula selected');
+    }
 
+    /**
+     * Asserts that the current count of records is the same as the count of records before any requests were made
+     *
+     * @param int $originalCount Original count of records
+     * @return void
+     */
+    private function assertNoNewRecordsCreated($originalCount)
+    {
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
-
-        $this->assertResponseContains('Invalid formula selected');
     }
 }
