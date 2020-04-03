@@ -55,6 +55,8 @@ class MetricsFixture extends TestFixture
      * @var array
      */
     public $records = [
+
+        // School
         [
             'id' => 1,
             'name' => 'Root-level metric 1',
@@ -86,6 +88,62 @@ class MetricsFixture extends TestFixture
             'name' => 'Identical name',
             'lft' => 9,
             'rght' => 10
+        ],
+
+        // District
+        [
+            'id' => 6,
+            'context' => 'district',
+            'name' => 'Root-level metric 1',
+            'lft' => 11,
+            'rght' => 16
+        ],
+            [
+                'id' => 7,
+                'context' => 'district',
+                'name' => 'Child metric',
+                'parent_id' => 1,
+                'lft' => 12,
+                'rght' => 13
+            ],
+            [
+                'id' => 8,
+                'context' => 'district',
+                'name' => 'Identical name',
+                'parent_id' => 1,
+                'lft' => 14,
+                'rght' => 15
+            ],
+        [
+            'id' => 9,
+            'context' => 'district',
+            'name' => 'Root-level metric 3',
+            'lft' => 17,
+            'rght' => 18
+        ],
+        [
+            'id' => 10,
+            'context' => 'district',
+            'name' => 'Identical name',
+            'lft' => 19,
+            'rght' => 20
+        ],
+
+        // Hidden
+        [
+            'id' => 11,
+            'visible' => 0,
+            'name' => 'Hidden school metric',
+            'lft' => 19,
+            'rght' => 20
+        ],
+        [
+            'id' => 12,
+            'context' => 'district',
+            'visible' => 0,
+            'name' => 'Hidden district metric',
+            'lft' => 21,
+            'rght' => 22
         ],
     ];
     // @codingStandardsIgnoreEnd
