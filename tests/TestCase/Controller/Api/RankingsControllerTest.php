@@ -59,7 +59,6 @@ class RankingsControllerTest extends TestCase
     public function testAddSuccess()
     {
         $originalCount = $this->Rankings->find()->count();
-
         $this->post($this->addUrl, $this->validData);
         $this->assertResponseOk();
 
@@ -91,12 +90,12 @@ class RankingsControllerTest extends TestCase
      */
     public function testAddFailInvalidCounty()
     {
+        $originalCount = $this->Rankings->find()->count();
         $invalidData = $this->validData;
         $invalidData['countyId'] = 999;
         $this->post($this->addUrl, $invalidData);
         $this->assertResponseError('Response was not in the 4xx range');
 
-        $originalCount = $this->Rankings->find()->count();
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
 
@@ -111,12 +110,12 @@ class RankingsControllerTest extends TestCase
      */
     public function testAddFailInvalidFormula()
     {
+        $originalCount = $this->Rankings->find()->count();
         $invalidData = $this->validData;
         $invalidData['formulaId'] = 999;
         $this->post($this->addUrl, $invalidData);
         $this->assertResponseError('Response was not in the 4xx range');
 
-        $originalCount = $this->Rankings->find()->count();
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
 
