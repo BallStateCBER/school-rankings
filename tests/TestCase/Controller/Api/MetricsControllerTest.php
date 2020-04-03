@@ -3,6 +3,7 @@ namespace App\Test\TestCase\Controller\Api;
 
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
+use App\Test\Fixture\MetricsFixture;
 use Cake\Cache\Cache;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
@@ -443,11 +444,28 @@ class MetricsControllerTest extends TestCase
         $this->assertJson($responseString);
         $responseObject = json_decode($responseString);
         $this->assertObjectHasAttribute('metrics', $responseObject);
+        $this->assertResponseNotContains(sprintf('"id":%s', MetricsFixture::HIDDEN_DISTRICT_METRIC));
+    }
 
-        // Confirm that none of the metric IDs returned from the database correspond to hidden metrics
-        foreach ($responseObject->metrics as $metric) {
-            $metric = $this->Metrics->get($metric->id);
-            $this->assertTrue($metric->visible, 'Hidden metric returned despite no-hidden flag');
-        }
+    /**
+     * Tests the successful response from the /api/metrics/districts.json endpoint without the no-hidden flag
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testDistrictsGetIncludingHidden()
+    {
+        Cache::disable();
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'districts',
+            '_ext' => 'json',
+        ]);
+        Cache::enable();
+        $this->assertResponseOk();
+        $responseString = (string)$this->_response->getBody();
+        $this->assertJson($responseString);
+        $this->assertResponseContains(sprintf('"id":%s', MetricsFixture::HIDDEN_DISTRICT_METRIC));
     }
 }
