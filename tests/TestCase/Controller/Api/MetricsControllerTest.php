@@ -3,6 +3,7 @@ namespace App\Test\TestCase\Controller\Api;
 
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
+use Cake\Cache\Cache;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -417,6 +418,36 @@ class MetricsControllerTest extends TestCase
         $updatedMetric = $this->Metrics->get($metricId);
         foreach ($data as $field => $value) {
             $this->assertEquals($value, $updatedMetric->$field);
+        }
+    }
+
+    /**
+     * Tests the successful response from the /api/metrics/districts.json?no-hidden=1 endpoint
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testDistrictsGetNoHidden()
+    {
+        Cache::disable();
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'districts',
+            '_ext' => 'json',
+            '?' => ['no-hidden' => 1],
+        ]);
+        Cache::enable();
+        $this->assertResponseOk();
+        $responseString = (string)$this->_response->getBody();
+        $this->assertJson($responseString);
+        $responseObject = json_decode($responseString);
+        $this->assertObjectHasAttribute('metrics', $responseObject);
+
+        // Confirm that none of the metric IDs returned from the database correspond to hidden metrics
+        foreach ($responseObject->metrics as $metric) {
+            $metric = $this->Metrics->get($metric->id);
+            $this->assertTrue($metric->visible, 'Hidden metric returned despite no-hidden flag');
         }
     }
 }
