@@ -11,6 +11,7 @@ use App\Model\Table\MetricsTable;
 use App\Model\Table\RankingsTable;
 use App\Model\Table\SchoolTypesTable;
 use Cake\Database\Expression\QueryExpression;
+use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Log\Log;
 use Cake\ORM\TableRegistry;
@@ -80,14 +81,14 @@ class RankingsController extends AppController
             'for_school_districts' => $context == Context::DISTRICT_CONTEXT,
             'hash' => $this->rankingsTable->generateHash(),
         ]);
-        $countyIds = [$this->request->getData('countyId')];
-        $ranking->counties = $this->countiesTable->find()
-            ->where([
-                function (QueryExpression $exp) use ($countyIds) {
-                    return $exp->in('id', $countyIds);
-                },
-            ])
-            ->toArray();
+        $countyId = $this->request->getData('countyId');
+        try {
+            $county = $this->countiesTable->get($countyId);
+        } catch (RecordNotFoundException $e) {
+            throw new BadRequestException('Invalid county selected (#' . $countyId . ')');
+        }
+
+        $ranking->counties = [$county];
         if ($context == Context::SCHOOL_CONTEXT) {
             $ranking->school_types = $this->getSchoolTypes();
             $ranking->grades = $this->getGradeLevels();
