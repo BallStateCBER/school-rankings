@@ -82,4 +82,24 @@ class RankingsControllerTest extends TestCase
             'Unexpected API response'
         );
     }
+
+    /**
+     * Tests that the add endpoint fails if the provided county is invalid
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddFailInvalidCounty()
+    {
+        $invalidData = $this->validData;
+        $invalidData['countyId'] = 999;
+        $this->post($this->addUrl, $invalidData);
+        $this->assertResponseError('Response was not in the 4xx range');
+
+        $originalCount = $this->Rankings->find()->count();
+        $newCount = $this->Rankings->find()->count();
+        $this->assertEquals($originalCount, $newCount, 'New ranking record was created, but shouldn\'t have been');
+
+        $this->assertResponseContains('Invalid county selected');
+    }
 }
