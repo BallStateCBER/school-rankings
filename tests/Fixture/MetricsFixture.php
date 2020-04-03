@@ -104,7 +104,7 @@ class MetricsFixture extends TestFixture
                 'id' => 7,
                 'context' => 'district',
                 'name' => 'Child metric',
-                'parent_id' => 1,
+                'parent_id' => 6,
                 'lft' => 12,
                 'rght' => 13
             ],
@@ -112,7 +112,7 @@ class MetricsFixture extends TestFixture
                 'id' => 8,
                 'context' => 'district',
                 'name' => 'Identical name',
-                'parent_id' => 1,
+                'parent_id' => 6,
                 'lft' => 14,
                 'rght' => 15
             ],
