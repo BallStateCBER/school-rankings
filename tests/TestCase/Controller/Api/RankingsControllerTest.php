@@ -144,4 +144,23 @@ class RankingsControllerTest extends TestCase
         $this->assertNoNewRecordsCreated($originalCount);
         $this->assertResponseContains('Please specify at least one type of school');
     }
+
+    /**
+     * Tests that the add endpoint succeeds for the school context if no grade levels are provided
+     *
+     * If 'gradeLevels' is empty, that is interpreted as meaning "all grades"
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testAddForSchoolSuccessNoGrades()
+    {
+        $originalCount = $this->Rankings->find()->count();
+        $data = $this->validData;
+        $data['gradeLevels'] = [];
+        $this->post($this->addUrl, $data);
+        $this->assertResponseOk('Response was not in the 4xx range');
+        $newCount = $this->Rankings->find()->count();
+        $this->assertEquals($originalCount + 1, $newCount, 'New ranking was not created');
+    }
 }
