@@ -468,4 +468,51 @@ class MetricsControllerTest extends TestCase
         $this->assertJson($responseString);
         $this->assertResponseContains(sprintf('"id":%s', MetricsFixture::HIDDEN_DISTRICT_METRIC));
     }
+
+    /**
+     * Tests the successful response from the /api/metrics/schools.json?no-hidden=1 endpoint
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testSchoolsGetNoHidden()
+    {
+        Cache::disable();
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'schools',
+            '_ext' => 'json',
+            '?' => ['no-hidden' => 1],
+        ]);
+        Cache::enable();
+        $this->assertResponseOk();
+        $responseString = (string)$this->_response->getBody();
+        $this->assertJson($responseString);
+        $responseObject = json_decode($responseString);
+        $this->assertObjectHasAttribute('metrics', $responseObject);
+        $this->assertResponseNotContains(sprintf('"id":%s', MetricsFixture::HIDDEN_SCHOOL_METRIC));
+    }
+
+    /**
+     * Tests the successful response from the /api/metrics/schools.json endpoint without the no-hidden flag
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testSchoolsGetIncludingHidden()
+    {
+        Cache::disable();
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Metrics',
+            'action' => 'schools',
+            '_ext' => 'json',
+        ]);
+        Cache::enable();
+        $this->assertResponseOk();
+        $responseString = (string)$this->_response->getBody();
+        $this->assertJson($responseString);
+        $this->assertResponseContains(sprintf('"id":%s', MetricsFixture::HIDDEN_SCHOOL_METRIC));
+    }
 }
