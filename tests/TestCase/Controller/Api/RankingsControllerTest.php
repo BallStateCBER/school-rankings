@@ -180,5 +180,8 @@ class RankingsControllerTest extends TestCase
             '_ext' => 'json',
         ]);
         $this->assertResponseOk();
+        $this->assertResponseContains('"progress":');
+        $this->assertResponseContains('"status":');
+        $this->assertResponseContains('"rankingUrl":"https:');
     }
 }
