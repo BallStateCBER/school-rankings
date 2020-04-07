@@ -163,4 +163,22 @@ class RankingsControllerTest extends TestCase
         $newCount = $this->Rankings->find()->count();
         $this->assertEquals($originalCount + 1, $newCount, 'New ranking was not created');
     }
+
+    /**
+     * Tests a successful response from the /rankings/status?jobId=1 endpoint
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testGetStatusSuccess()
+    {
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Rankings',
+            'action' => 'status',
+            '?' => ['jobId' => 1],
+            '_ext' => 'json',
+        ]);
+        $this->assertResponseOk();
+    }
 }
