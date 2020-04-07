@@ -184,4 +184,22 @@ class RankingsControllerTest extends TestCase
         $this->assertResponseContains('"status":');
         $this->assertResponseContains('"rankingUrl":"https:');
     }
+
+    /**
+     * Tests that an error response is returned from the /rankings/status endpoint if an invalid job ID is provided
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testGetStatusFailInvalidJob()
+    {
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Rankings',
+            'action' => 'status',
+            '?' => ['jobId' => 999],
+            '_ext' => 'json',
+        ]);
+        $this->assertResponseError();
+    }
 }
