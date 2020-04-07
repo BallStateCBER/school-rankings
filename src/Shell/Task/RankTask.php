@@ -209,14 +209,10 @@ class RankTask extends Shell
         $step = 1;
         foreach ($this->subjects as $subject) {
             $subjectStatCount = count($subject->statistics);
-            if ($subjectStatCount == $metricCount) {
-                $subject->setDataCompleteness('full');
-            } elseif ($subjectStatCount > 0) {
-                $subject->setDataCompleteness('partial');
-            } else {
-                $subject->setDataCompleteness('empty');
-            }
-
+            $dataCompleteness = ($subjectStatCount == 0) ? 'empty' : (
+                ($subjectStatCount == $metricCount) ? 'full' : 'partial'
+            );
+            $subject->setDataCompleteness($dataCompleteness);
             $overallProgress = $this->getOverallProgress($step, count($this->subjects));
             $this->updateJobProgress($overallProgress);
             $step++;
