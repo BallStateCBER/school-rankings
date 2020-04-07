@@ -243,6 +243,9 @@ class RankTask extends Shell
         // Sort by score, creating an array of all subjects with each score
         $sortedSubjects = [];
         foreach ($this->subjects as $subject) {
+            /* The float score is multiplied by 1,000 and cast to int so that subjects with unequal scores that are very
+             * close to each other will have equal keys, and consequently will share the same rank. For example, two
+             * districts with scores of 28.1231 and 28.1233 will both have the same sorting key: 28,123. */
             $key = (int)($subject->score * 1000);
             $sortedSubjects[$key][] = $subject;
         }
