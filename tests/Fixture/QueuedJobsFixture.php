@@ -49,9 +49,9 @@ class QueuedJobsFixture extends TestFixture
         $this->records = [
             [
                 'id' => 1,
-                'job_type' => 'Lorem ipsum dolor sit amet',
-                'data' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
-                'job_group' => 'Lorem ipsum dolor sit amet',
+                'job_type' => 'Rank',
+                'data' => 'a:1:{s:9:"rankingId";i:1;}',
+                'job_group' => null,
                 'reference' => '1', // Ranking ID
                 'created' => '2020-04-01 19:55:09',
                 'notbefore' => '2020-04-01 19:55:09',
@@ -59,9 +59,9 @@ class QueuedJobsFixture extends TestFixture
                 'completed' => '2020-04-01 19:55:09',
                 'progress' => 1,
                 'failed' => 1,
-                'failure_message' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
-                'workerkey' => 'Lorem ipsum dolor sit amet',
-                'status' => 'Lorem ipsum dolor sit amet',
+                'failure_message' => '',
+                'workerkey' => '05307f12f7205b5b77d34370c948a1ba46325ea5',
+                'status' => 'Done',
                 'priority' => 1,
             ],
         ];
