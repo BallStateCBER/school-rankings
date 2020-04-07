@@ -52,7 +52,7 @@ class QueuedJobsFixture extends TestFixture
                 'job_type' => 'Lorem ipsum dolor sit amet',
                 'data' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
                 'job_group' => 'Lorem ipsum dolor sit amet',
-                'reference' => 'Lorem ipsum dolor sit amet',
+                'reference' => '1', // Ranking ID
                 'created' => '2020-04-01 19:55:09',
                 'notbefore' => '2020-04-01 19:55:09',
                 'fetched' => '2020-04-01 19:55:09',
