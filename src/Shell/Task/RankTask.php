@@ -142,9 +142,7 @@ class RankTask extends Shell
      */
     private function loadSubjects()
     {
-        $msg = "Finding {$this->context}s";
-        $this->getIo()->out("$msg...");
-        $this->updateJobStatus($msg);
+        $this->updateJobStatus("Finding {$this->context}s", true);
 
         $subjectTable = Context::getTable($this->context);
         $locations = $this->getLocations();
@@ -204,9 +202,7 @@ class RankTask extends Shell
      */
     private function markDataCompleteness()
     {
-        $msg = "Analyzing {$this->context}s for data availability";
-        $this->getIo()->out("$msg...");
-        $this->updateJobStatus($msg);
+        $this->updateJobStatus("Analyzing {$this->context}s for data availability", true);
         $criteria = $this->ranking->formula->criteria;
         $metricCount = count($criteria);
 
@@ -236,9 +232,7 @@ class RankTask extends Shell
      */
     private function rankSubjects()
     {
-        $msg = "Ranking {$this->context}s";
-        $this->getIo()->out("$msg...");
-        $this->updateJobStatus($msg);
+        $this->updateJobStatus("Ranking {$this->context}s", true);
 
         // Sort by score, creating an array of all subjects with each score
         $sortedSubjects = [];
@@ -307,9 +301,7 @@ class RankTask extends Shell
     {
         $this->loadYears();
 
-        $msg = 'Analyzing statistical data';
-        $this->getIo()->out("$msg...");
-        $this->updateJobStatus($msg);
+        $this->updateJobStatus('Analyzing statistical data', true);
         $subjectCount = count($this->subjects);
         if (!$subjectCount) {
             $this->getIo()->out(' - Done');
@@ -349,9 +341,7 @@ class RankTask extends Shell
      */
     private function scoreSubjects()
     {
-        $msg = "Scoring {$this->context}s";
-        $this->getIo()->out("$msg...");
-        $this->updateJobStatus($msg);
+        $this->updateJobStatus("Scoring {$this->context}s", true);
         $outputMsgs = [];
 
         $subjectCount = count($this->subjects);
@@ -503,10 +493,16 @@ class RankTask extends Shell
      * Updates the current queued job's status
      *
      * @param string $status Status message
+     * @param bool $outputToConsole Set to TRUE to also output message to ConsoleIo with an appended ellipsis
+     * @param string $append String that gets automatically appended to console output
      * @return void
      */
-    private function updateJobStatus($status)
+    private function updateJobStatus($status, $outputToConsole = false, $append = '...')
     {
+        if ($outputToConsole) {
+            $this->getIo()->out($status . $append);
+        }
+
         if (!$this->jobId) {
             return;
         }
@@ -560,7 +556,7 @@ class RankTask extends Shell
      */
     private function saveResults()
     {
-        $this->getIo()->out("Saving results...");
+        $this->getIo()->out('Saving results...');
         $this->updateJobStatus('Finalizing');
 
         // Add school/district info
