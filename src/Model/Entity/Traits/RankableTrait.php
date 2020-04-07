@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Entity\Traits;
 
+use App\Shell\Task\RankTask;
 use Cake\Http\Exception\InternalErrorException;
 
 /**
@@ -30,7 +31,12 @@ trait RankableTrait
      */
     public function setDataCompleteness($dataCompleteness)
     {
-        if (in_array($dataCompleteness, ['full', 'partial', 'empty'])) {
+        $validStrings = [
+            RankTask::DATA_COMPLETENESS_FULL,
+            RankTask::DATA_COMPLETENESS_PARTIAL,
+            RankTask::DATA_COMPLETENESS_EMPTY,
+        ];
+        if (in_array($dataCompleteness, $validStrings)) {
             $this->dataCompleteness = $dataCompleteness;
 
             return;

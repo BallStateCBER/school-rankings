@@ -67,6 +67,9 @@ class RankTask extends Shell
     private $rankingsTable;
     private $statsTable;
     private $subjects = [];
+    public const DATA_COMPLETENESS_FULL = 'full';
+    public const DATA_COMPLETENESS_PARTIAL = 'partial';
+    public const DATA_COMPLETENESS_EMPTY = 'empty';
 
     /**
      * Elasticsearch index for statistics
@@ -209,8 +212,8 @@ class RankTask extends Shell
         $step = 1;
         foreach ($this->subjects as $subject) {
             $subjectStatCount = count($subject->statistics);
-            $dataCompleteness = ($subjectStatCount == 0) ? 'empty' : (
-                ($subjectStatCount == $metricCount) ? 'full' : 'partial'
+            $dataCompleteness = ($subjectStatCount == 0) ? self::DATA_COMPLETENESS_EMPTY : (
+                ($subjectStatCount == $metricCount) ? self::DATA_COMPLETENESS_FULL : self::DATA_COMPLETENESS_PARTIAL
             );
             $subject->setDataCompleteness($dataCompleteness);
             $overallProgress = $this->getOverallProgress($step, count($this->subjects));
