@@ -89,4 +89,9 @@ Router::prefix('admin', function (RouteBuilder $routes) {
 
 Router::prefix('api', function (RouteBuilder $routes) {
     $routes->fallbacks(DashedRoute::class);
+
+    // Rankings
+    $routes->connect('/rankings/get/:hash', ['controller' => 'Rankings', 'action' => 'get'])
+        ->setPass(['hash'])
+        ->setExtensions(['json']);
 });
