@@ -1,6 +1,7 @@
 <?php
 namespace App\Test\TestCase\Controller\Api;
 
+use App\Test\Fixture\RankingsFixture;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -16,15 +17,25 @@ class RankingsControllerTest extends TestCase
 
     private $Rankings;
     public $fixtures = [
-        'app.Rankings',
-        'app.Formulas',
         'app.Counties',
-        'app.SchoolTypes',
+        'app.Criteria',
+        'app.Formulas',
         'app.Grades',
-        'app.RankingsGrades',
-        'app.RankingsCounties',
-        'app.RankingsSchoolTypes',
+        'app.Metrics',
         'app.QueuedJobs',
+        'app.RankingResultsSchoolDistricts',
+        'app.RankingResultsSchoolDistrictsStatistics',
+        'app.RankingResultsSchools',
+        'app.RankingResultsSchoolsStatistics',
+        'app.Rankings',
+        'app.RankingsCounties',
+        'app.RankingsGrades',
+        'app.RankingsSchoolTypes',
+        'app.SchoolDistricts',
+        'app.Schools',
+        'app.SchoolsGrades',
+        'app.SchoolTypes',
+        'app.Statistics',
     ];
     private $addUrl = [
         'prefix' => 'api',
@@ -201,5 +212,28 @@ class RankingsControllerTest extends TestCase
             '_ext' => 'json',
         ]);
         $this->assertResponseError();
+    }
+
+    /**
+     * Tests a successful response from the /rankings/get/{rankingHash}.json endpoint
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testGetRankingSuccess()
+    {
+        $rankingsFixture = new RankingsFixture();
+        $ranking = $rankingsFixture->records[0];
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Rankings',
+            'action' => 'get',
+            'hash' => $ranking['hash'],
+            '_ext' => 'json',
+        ]);
+        $this->assertResponseOk();
+        $this->assertResponseContains('"formUrl":');
+        $this->assertResponseContains('"inputSummary":');
+        $this->assertResponseContains('"rankingUrl":"https:');
     }
 }
