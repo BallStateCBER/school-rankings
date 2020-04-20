@@ -1,10 +1,17 @@
 <?php
 namespace App\Test\TestCase\Controller\Api;
 
+use App\Model\Context\Context;
+use App\Model\Table\SchoolTypesTable;
+use App\Test\Fixture\CriteriaFixture;
 use App\Test\Fixture\RankingsFixture;
+use App\Test\Fixture\RankingsGradesFixture;
+use App\Test\Fixture\RankingsSchoolTypesFixture;
+use Cake\Core\Configure;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\Utility\Hash;
 
 /**
  * Class RankingsControllerTest
@@ -231,9 +238,85 @@ class RankingsControllerTest extends TestCase
             'hash' => $ranking['hash'],
             '_ext' => 'json',
         ]);
+
         $this->assertResponseOk();
-        $this->assertResponseContains('"formUrl":');
+
+        $fullBaseUrl = Configure::read('App.fullBaseUrl');
+        $expectedFormUrl = "$fullBaseUrl/rank?r={$ranking['hash']}";
+        $this->assertResponseContains(sprintf(
+            '"formUrl":"%s"',
+            str_replace('/', '\/', $expectedFormUrl)
+        ));
+
         $this->assertResponseContains('"inputSummary":');
-        $this->assertResponseContains('"rankingUrl":"https:');
+
+        $this->assertResponseContains(sprintf(
+            '"context":"%s"',
+            $ranking['for_school_districts'] ? Context::DISTRICT_CONTEXT : Context::SCHOOL_CONTEXT
+        ));
+
+        $expectedRankingUrl = "$fullBaseUrl/ranking/{$ranking['hash']}";
+        $this->assertResponseContains(sprintf(
+            '"rankingUrl":"%s"',
+            str_replace('/', '\/', $expectedRankingUrl)
+        ));
+
+        $rankingsSchoolTypesFixture = new RankingsSchoolTypesFixture();
+        $expectedSchoolTypes = array_filter($rankingsSchoolTypesFixture->records, function ($record) use ($ranking) {
+            return $record['ranking_id'] == $ranking['id'];
+        });
+        $expectedSchoolTypeIds = Hash::extract($expectedSchoolTypes, '{n}.school_type_id');
+        $this->assertResponseContains(sprintf(
+            '"schoolTypeIds":[%s]',
+            implode(',', $expectedSchoolTypeIds)
+        ));
+
+        if ($expectedSchoolTypeIds == [SchoolTypesTable::SCHOOL_TYPE_PUBLIC]) {
+            $this->assertResponseContains('"onlyPublic":true');
+        } else {
+            $this->assertResponseContains('"onlyPublic":false');
+        }
+
+        $this->assertResponseContains('"countyId":');
+
+        $criteriaFixture = new CriteriaFixture();
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $formulaId = $ranking['formula_id'];
+        $criteria = array_filter($criteriaFixture->records, function ($criterion) use ($formulaId) {
+            return $criterion['formula_id'] == $formulaId;
+        });
+
+        $criteria = array_map(function ($criterion) use ($metricsTable) {
+            /** @var \App\Model\Entity\Metric $metric */
+            $metricId = $criterion['metric_id'];
+            $metric = $metricsTable->get($metricId);
+
+            return [
+                'id' => $criterion['id'],
+                'formula_id' => $criterion['formula_id'],
+                'weight' => $criterion['weight'],
+                'metric' => [
+                    'id' => $metric->id,
+                    'name' => $metric->name,
+                    'path' => $metricsTable
+                        ->find('path', ['for' => $metricId])
+                        ->select(['id'])
+                        ->toArray(),
+                ],
+            ];
+        }, $criteria);
+        $expectedCriteria = json_encode(array_values($criteria));
+        $this->assertResponseContains('"criteria":' . $expectedCriteria);
+
+        $rankingsGradesFixture = new RankingsGradesFixture();
+        $expectedGradeLevels = array_filter($rankingsGradesFixture->records, function ($record) use ($ranking) {
+            return $record['ranking_id'] == $ranking['id'];
+        });
+        $this->assertResponseContains(sprintf(
+            '"gradeIds":[%s]',
+            implode(Hash::extract($expectedGradeLevels, '{n}.grade_id'))
+        ));
+
+        $this->assertResponseContains('"noDataResults":[]');
     }
 }
