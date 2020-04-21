@@ -317,6 +317,11 @@ class RankingsControllerTest extends TestCase
             implode(Hash::extract($expectedGradeLevels, '{n}.grade_id'))
         ));
 
-        $this->assertResponseContains('"noDataResults":[]');
+        $this->assertResponseContains('"noDataResults":[]', '"noDataResults" not returned');
+
+        $this->assertResponseContains('"results":[', 'No results returned');
+        $this->assertResponseContains('"rank":1', 'Results had no ranks');
+        $this->assertResponseContains('"statistics":[{"id":', 'Results were missing statistics');
+        $this->assertResponseContains('"school":{"id":', 'Results were missing schools');
     }
 }
