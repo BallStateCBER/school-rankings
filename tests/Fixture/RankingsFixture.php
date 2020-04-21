@@ -48,7 +48,7 @@ class RankingsFixture extends TestFixture
                 'user_id' => 1,
                 'formula_id' => 1,
                 'school_type_id' => 1,
-                'for_school_districts' => 1,
+                'for_school_districts' => 0,
                 'results' => serialize([
                     1 => [1, 2, 3],
                     2 => [4, 5, 6],
