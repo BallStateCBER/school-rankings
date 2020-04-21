@@ -188,7 +188,7 @@ class Ranking extends Entity
 
         return [
             'context' => $this->for_school_districts ? Context::DISTRICT_CONTEXT : Context::SCHOOL_CONTEXT,
-            'countyId' => array_map(function (County $county) {
+            'counties' => array_map(function (County $county) {
                 return [
                     'id' => $county->id,
                     'name' => $county->name,

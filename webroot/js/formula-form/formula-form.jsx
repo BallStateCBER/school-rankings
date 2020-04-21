@@ -680,8 +680,8 @@ class FormulaForm extends React.Component {
         allGradeLevels: selectedGradeLevelCount === 0 || selectedGradeLevelCount === totalGradeLevelCount,
         context: input.context,
         county: {
-          label: input.countyId[0].name,
-          value: input.countyId[0].id,
+          label: input.counties[0].name,
+          value: input.counties[0].id,
         },
         criteria: new Map(input.criteria.map((criterion) => [criterion.metric.id, criterion])),
         gradeLevels: gradeLevels,

@@ -277,7 +277,7 @@ class RankingsControllerTest extends TestCase
             $this->assertResponseContains('"onlyPublic":false');
         }
 
-        $this->assertResponseContains('"countyId":');
+        $this->assertResponseContains('"counties":');
 
         $criteriaFixture = new CriteriaFixture();
         $metricsTable = TableRegistry::getTableLocator()->get('Metrics');

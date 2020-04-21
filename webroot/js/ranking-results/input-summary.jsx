@@ -108,7 +108,7 @@ class InputSummary extends React.Component {
     let subjectString;
     if (this.props.submittedData.context === 'school') {
       const schoolTypes = this.getSchoolTypesString();
-      const countyName = this.props.submittedData.countyId[0].name;
+      const countyName = this.props.submittedData.counties[0].name;
       subjectString = schoolTypes ? schoolTypes + ' schools' : 'schools';
       subjectString += ' in ' + countyName + ' County';
       subjectString += ' teaching ' + this.getSelectedGradesString();
