@@ -17,12 +17,14 @@ use Cake\Utility\Hash;
  * @property int $user_id
  * @property int $formula_id
  * @property bool $for_school_districts
- * @property array $results
  * @property string $hash
  * @property FrozenTime $created
- * @property string $url
- * @property array $input_summary
- * @property string $form_url
+ *
+ * Virtual properties
+ * @property array $results Virtual property used to access results_schools or results_districts
+ * @property string $url Virtual property for the full URL to view this set of ranking results
+ * @property array $input_summary Virtual property for a summary of the inputs that generated this ranking
+ * @property string $form_url Virtual property for the URL of an auto-populated formula form
  *
  * @property User $user
  * @property Formula $formula
@@ -202,7 +204,7 @@ class Ranking extends Entity
     }
 
     /**
-     * Allows 'results' to be used to access whichever is populated between results_schools and results_districts
+     * A virtual property that allows 'results' to return whichever is populated between *_schools and *_districts
      *
      * @return array
      */
