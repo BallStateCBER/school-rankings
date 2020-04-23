@@ -147,7 +147,6 @@ class RankingsTable extends Table
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'));
         $rules->add($rules->existsIn(['formula_id'], 'Formulas'));
-        $rules->add($rules->existsIn(['school_type_id'], 'SchoolTypes'));
         $rules->add($rules->isUnique(['hash']));
 
         return $rules;
