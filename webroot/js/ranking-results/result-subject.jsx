@@ -79,7 +79,8 @@ class ResultSubject extends React.Component {
 
     const rows = [];
 
-    this.props.criteria.forEach((criterion, metricId) => {
+    this.props.criteria.forEach((criterion) => {
+      const metricId = criterion.metric.id;
       const metricName = criterion.metric.name;
       const statistic = ResultSubject.getStatistic(statistics, metricId);
       const key = this.props.subjectData.id + '-stat-' + metricId;
