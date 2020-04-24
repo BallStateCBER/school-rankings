@@ -119,11 +119,14 @@ class InputSummary extends React.Component {
     const criteria = this.props.submittedData.criteria;
     let key = 0;
     return (
-      <div>
+      <div id="input-summary-container">
         <p>
+          <a className="btn btn-primary btn-sm float-right" href={this.props.editUrl}>
+            Edit Ranking Settings
+          </a>
           Ranking {subjectString} according to:
         </p>
-        <table className="table table-sm">
+        <table className="table table-sm" id="input-summary-metrics">
           <thead>
             <tr>
               <th>
@@ -157,6 +160,7 @@ class InputSummary extends React.Component {
 
 InputSummary.propTypes = {
   submittedData: PropTypes.object.isRequired,
+  editUrl: PropTypes.string.isRequired,
 };
 
 export {InputSummary};

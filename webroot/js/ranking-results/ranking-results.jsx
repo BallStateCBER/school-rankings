@@ -195,10 +195,7 @@ class RankingResults extends React.Component {
         <p>
           Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
         </p>
-        <a className="btn btn-primary btn-sm float-right" href={this.state.formUrl}>
-          Edit Ranking Settings
-        </a>
-        <InputSummary submittedData={this.state.inputSummary} />
+        <InputSummary submittedData={this.state.inputSummary} editUrl={this.state.formUrl} />
         <h3>
           {countHeader}
         </h3>

@@ -296,3 +296,16 @@ table.statistics {
     vertical-align: middle;
   }
 }
+
+#input-summary-container {
+  @extend .card;
+  padding: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#input-summary-metrics {
+  td:first-child {
+    padding-right: 1rem;
+  }
+}
