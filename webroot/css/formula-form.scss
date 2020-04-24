@@ -89,7 +89,8 @@ table.ranking-results {
   .year {
     color: #666;
     font-size: 80%;
-    margin-left: 10px;
+    padding-left: 0.25em;
+    text-align: left;
 
     &::before {
       content: '(';
@@ -98,6 +99,11 @@ table.ranking-results {
     &::after {
       content: ')';
     }
+  }
+
+  .value {
+    padding-right: .25em;
+    text-align: right;
   }
 
   .col-sm-6:first-child {

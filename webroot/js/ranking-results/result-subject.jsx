@@ -90,14 +90,14 @@ class ResultSubject extends React.Component {
           <th>
             <span className="metric-name">
               {metricName}
-            </span>
-          </th>
-          {statistic !== false &&
-            <td>
-              {statistic.value}
               <span className="year">
                 {statistic.year}
               </span>
+            </span>
+          </th>
+          {statistic !== false &&
+            <td className="value">
+              {statistic.value}
             </td>
           }
           {statistic === false &&
