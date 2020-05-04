@@ -192,7 +192,7 @@ class RankingResults extends React.Component {
 
     return (
       <div>
-        <p>
+        <p id="share-ranking-results">
           Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
         </p>
         <InputSummary submittedData={this.state.inputSummary} editUrl={this.state.formUrl} />
