@@ -1,6 +1,6 @@
 import ReactDom from 'react-dom';
 import React from 'react';
-import {Button} from 'reactstrap';
+import {Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
 import {InputSummary} from './input-summary.jsx';
 import {NoDataResults} from './no-data-results.jsx';
 import {ResultSubject} from './result-subject.jsx';
@@ -17,13 +17,16 @@ class RankingResults extends React.Component {
       results: null,
       resultsError: false,
       showAllStatistics: false,
+      showShareModal: false,
     };
 
     this.contextIsSchool = this.contextIsSchool.bind(this);
+    this.getShareModal = this.getShareModal.bind(this);
     this.loadResults = this.loadResults.bind(this);
     this.renderNoDataResults = this.renderNoDataResults.bind(this);
     this.renderNoResults = this.renderNoResults.bind(this);
     this.renderResults = this.renderResults.bind(this);
+    this.toggleShareModal = this.toggleShareModal.bind(this);
     this.toggleShowAllStatistics = this.toggleShowAllStatistics.bind(this);
 
     this.loadResults();
@@ -192,12 +195,12 @@ class RankingResults extends React.Component {
 
     return (
       <div>
-        <p id="share-ranking-results">
-          Save or share these results: <a href={this.state.rankingUrl}>{this.state.rankingUrl}</a>
-        </p>
         <InputSummary submittedData={this.state.inputSummary} editUrl={this.state.formUrl} />
         <h3>
           {countHeader}
+          <Button color="primary" size="sm" onClick={this.toggleShareModal} id="share-ranking-results-btn">
+            Save or share these results
+          </Button>
         </h3>
         <table className="table ranking-results">
           <thead>
@@ -224,7 +227,26 @@ class RankingResults extends React.Component {
             {rankRows}
           </tbody>
         </table>
+        {this.getShareModal()}
       </div>
+    );
+  }
+
+  toggleShareModal() {
+    const showShareModal = this.state.showShareModal;
+    this.setState({showShareModal: !showShareModal});
+  }
+
+  getShareModal() {
+    return (
+      <Modal isOpen={this.state.showShareModal} toggle={this.toggleShareModal}>
+        <ModalHeader>
+          Save or share the link to these rankings
+        </ModalHeader>
+        <ModalBody>
+          <input type="text" value={this.state.rankingUrl} className="form-control" readOnly={true} />
+        </ModalBody>
+      </Modal>
     );
   }
 
