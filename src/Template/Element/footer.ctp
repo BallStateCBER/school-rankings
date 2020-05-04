@@ -1,7 +1,7 @@
 <footer class="flex-row">
     <div class="container">
         <div class="row">
-            <section class="col-4" id="welcome-contact">
+            <section class="mt-2 col-md-4" id="welcome-contact">
                 <h3>Center for Business and Economic Research</h3>
                 <address>
                     Ball State University<br />
@@ -10,7 +10,7 @@
                     Muncie, IN 47306-0360
                 </address>
             </section>
-            <section class="col-3 offset-1">
+            <section class="mt-2 col-md-3 offset-md-1">
                 <h2>
                     Contact
                 </h2>
@@ -31,7 +31,7 @@
                     <dd><a href="https://www.twitter.com/BallStateCBER">/BallStateCBER</a></dd>
                 </dl>
             </section>
-            <section class="col-3 offset-1">
+            <section class="mt-2 col-md-3 offset-md-1">
                 <h2>
                     Legal
                 </h2>
