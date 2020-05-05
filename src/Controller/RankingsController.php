@@ -43,7 +43,6 @@ class RankingsController extends AppController
             ->select(['for_school_districts', 'created'])
             ->where(['hash' => $hash])
             ->first();
-        $createdDate = $ranking->created;
 
         /** @var \App\Model\Table\GradesTable $gradesTable */
         $gradesTable = TableRegistry::getTableLocator()->get('Grades');
@@ -65,7 +64,6 @@ class RankingsController extends AppController
             'titleForLayout' => $ranking->for_school_districts ?
                 'School District Ranking Results' :
                 'School Ranking Results',
-            'createdDate' => $createdDate,
         ]);
     }
 }

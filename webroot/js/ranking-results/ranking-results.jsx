@@ -9,6 +9,7 @@ class RankingResults extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      createdDate: null,
       formUrl: null,
       inputSummary: null,
       loading: true,
@@ -53,6 +54,7 @@ class RankingResults extends React.Component {
       }
 
       this.setState({
+        createdDate: data.createdDate,
         formUrl: data.formUrl,
         inputSummary: data.inputSummary,
         noDataResults: data.noDataResults,
@@ -197,6 +199,9 @@ class RankingResults extends React.Component {
 
     return (
       <div>
+        <p>
+          Generated on {this.state.createdDate}
+        </p>
         <InputSummary submittedData={this.state.inputSummary} editUrl={this.state.formUrl} />
         <h3>
           {countHeader}

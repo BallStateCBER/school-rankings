@@ -216,7 +216,8 @@ class RankingsController extends AppController
         $ranking->addMetricPaths();
 
         $this->set([
-            '_serialize' => ['formUrl', 'inputSummary', 'noDataResults', 'results', 'rankingUrl'],
+            '_serialize' => ['createdDate', 'formUrl', 'inputSummary', 'noDataResults', 'results', 'rankingUrl'],
+            'createdDate' => $ranking->formatted_date,
             'formUrl' => $ranking->form_url,
             'inputSummary' => $ranking->input_summary,
             'noDataResults' => $ranking->getResultsWithoutData(),
