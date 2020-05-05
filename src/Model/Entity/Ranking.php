@@ -5,6 +5,7 @@ use App\Model\Context\Context;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\SchoolTypesTable;
 use Cake\I18n\FrozenTime;
+use Cake\I18n\Time;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\Router;
@@ -25,6 +26,7 @@ use Cake\Utility\Hash;
  * @property string $url Virtual property for the full URL to view this set of ranking results
  * @property array $input_summary Virtual property for a summary of the inputs that generated this ranking
  * @property string $form_url Virtual property for the URL of an auto-populated formula form
+ * @property string $formatted_date Virtual property for the formatted date the ranking was created
  *
  * @property User $user
  * @property Formula $formula
@@ -78,8 +80,8 @@ class Ranking extends Entity
      * that the user selected. This is returned via the /api/rankings/get API so that JsTree parent node groups can be
      * opened before their children are selected
      *
-     * @throws \Exception
      * @return void
+     * @throws \Exception
      */
     public function addMetricPaths()
     {
@@ -362,5 +364,17 @@ class Ranking extends Entity
             ],
             true
         );
+    }
+
+    /**
+     * A virtual field that returns the formatted and timezone-corrected date that this ranking record was created
+     *
+     * @return string
+     */
+    protected function _getFormattedDate()
+    {
+        $Time = new Time($this->created);
+
+        return $Time->i18nFormat('MMMM d, Y', 'America/New_York');
     }
 }
