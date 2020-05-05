@@ -14,6 +14,7 @@ class RankingResults extends React.Component {
       loading: true,
       noDataResults: null,
       rankingUrl: null,
+      rankingUrlCopied: null,
       results: null,
       resultsError: false,
       showAllStatistics: false,
@@ -21,6 +22,7 @@ class RankingResults extends React.Component {
     };
 
     this.contextIsSchool = this.contextIsSchool.bind(this);
+    this.copyShareUrl = this.copyShareUrl.bind(this);
     this.getShareModal = this.getShareModal.bind(this);
     this.loadResults = this.loadResults.bind(this);
     this.renderNoDataResults = this.renderNoDataResults.bind(this);
@@ -244,10 +246,45 @@ class RankingResults extends React.Component {
           Save or share the link to these rankings
         </ModalHeader>
         <ModalBody>
-          <input type="text" value={this.state.rankingUrl} className="form-control" readOnly={true} />
+          <div className="input-group">
+            <input type="text" value={this.state.rankingUrl} className="form-control" id="share-ranking-results-url"
+                   readOnly={true} />
+            <div className="input-group-append" title="Copy to clipboard" onClick={this.copyShareUrl}>
+              <span className="input-group-text">
+                <i className="fas fa-copy"></i>
+              </span>
+            </div>
+          </div>
+          {this.state.rankingUrlCopied === true &&
+            <p className="text-success">
+              URL copied to clipboard
+            </p>
+          }
+          {this.state.rankingUrlCopied === false &&
+            <p className="text-danger">
+              Error copying URL to clipboard
+            </p>
+          }
         </ModalBody>
       </Modal>
     );
+  }
+
+  /**
+   * Copies the ranking results URL to the clipboard
+   */
+  copyShareUrl() {
+    const element = document.getElementById('share-ranking-results-url');
+    element.focus();
+    element.select();
+    element.blur();
+    let result;
+    try {
+      result = document.execCommand('copy');
+    } catch (err) {
+      result = false;
+    }
+    this.setState({rankingUrlCopied: result});
   }
 
   /**
