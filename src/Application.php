@@ -36,7 +36,7 @@ use App\Command\PopulateElasticsearchCommand;
 use App\Command\PopulateLocationOriginCommand;
 use App\Command\SpeedTestElasticsearchCommand;
 use App\Command\UpdateIdoeCodesCommand;
-use App\Shell\RankTestShell;
+use App\Shell\RankProcessShell;
 use Cake\Console\CommandCollection;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
@@ -154,7 +154,7 @@ class Application extends BaseApplication
         $commands->add('populate-code-tables', PopulateCodeTablesCommand::class);
         $commands->add('populate-es', PopulateElasticsearchCommand::class);
         $commands->add('populate-location-origin', PopulateLocationOriginCommand::class);
-        $commands->add('rank-test', RankTestShell::class);
+        $commands->add('rank-process', RankProcessShell::class);
         $commands->add('speed-test-es', SpeedTestElasticsearchCommand::class);
         $commands->add('update-idoe-codes', UpdateIdoeCodesCommand::class);
 

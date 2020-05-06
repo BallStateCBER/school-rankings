@@ -7,11 +7,14 @@ use Cake\Console\Shell;
 use Exception;
 
 /**
- * Class RankTestShell
+ * Class RankProcessShell
+ *
+ * This script (re)processes the ranking job specified by the provided ranking ID
+ *
  * @package App\Shell
  * @property RankTask $Rank
  */
-class RankTestShell extends Shell
+class RankProcessShell extends Shell
 {
     public $tasks = ['Rank'];
 
@@ -39,6 +42,7 @@ class RankTestShell extends Shell
      */
     public function main()
     {
+        $this->getIo()->info('This script (re)processes the ranking job specified by the provided ranking ID.');
         $rankingId = $this->args[0];
         $this->Rank->process($rankingId);
     }
