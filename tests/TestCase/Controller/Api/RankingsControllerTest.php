@@ -9,7 +9,6 @@ use App\Test\Fixture\RankingsFixture;
 use App\Test\Fixture\RankingsGradesFixture;
 use App\Test\Fixture\RankingsSchoolTypesFixture;
 use Cake\Core\Configure;
-use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
