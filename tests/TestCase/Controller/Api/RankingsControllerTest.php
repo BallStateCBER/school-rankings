@@ -4,10 +4,12 @@ namespace App\Test\TestCase\Controller\Api;
 use App\Model\Context\Context;
 use App\Model\Table\SchoolTypesTable;
 use App\Test\Fixture\CriteriaFixture;
+use App\Test\Fixture\QueuedJobsFixture;
 use App\Test\Fixture\RankingsFixture;
 use App\Test\Fixture\RankingsGradesFixture;
 use App\Test\Fixture\RankingsSchoolTypesFixture;
 use Cake\Core\Configure;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -323,5 +325,27 @@ class RankingsControllerTest extends TestCase
         $this->assertResponseContains('"rank":1', 'Results had no ranks');
         $this->assertResponseContains('"statistics":[{"id":', 'Results were missing statistics');
         $this->assertResponseContains('"school":{"id":', 'Results were missing schools');
+    }
+
+    /**
+     * Tests a successful response from the /rankings/status.json?jobId=1 endpoint
+     *
+     * @throws \PHPUnit\Exception
+     * @return void
+     */
+    public function testGetStatus()
+    {
+        $queuedJobsFixture = new QueuedJobsFixture();
+        $job = $queuedJobsFixture->records[0];
+        $this->get([
+            'prefix' => 'api',
+            'controller' => 'Rankings',
+            'action' => 'status',
+            '_ext' => 'json',
+            '?' => ['jobId' => $job['id']],
+        ]);
+        $this->assertResponseOk();
+        $this->assertResponseContains(sprintf('"status": "%s"', $job['status']));
+        $this->assertResponseContains('"progress": ');
     }
 }
